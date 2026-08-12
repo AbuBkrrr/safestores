@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SAFE Stores — Inventory, POS &amp; Marketplace for Retail Stores</title>
+<meta name="description" content="SAFE Stores runs your shop from arrival to sale — products, stock, checkout, replenishment, and a public storefront. Works offline. Available for Web, Desktop, and Android." />
+<link rel="icon" type="image/png" href="icon-192.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --teal: #0f7180;
+    --teal-deep: #0a2e33;
+    --paper: #fbf7f0;
+    --paper-line: #e8ddc9;
+    --ink: #16262a;
+    --ink-soft: #4b5c5e;
+    --amber: #e8a33d;
+    --amber-deep: #c17f1f;
+    --ok: #2f8f5b;
+    --radius: 3px;
+    --display: 'Space Grotesk', sans-serif;
+    --body: 'Inter', sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  }
+  body {
+    margin: 0;
+    font-family: var(--body);
+    color: var(--ink);
+    background: var(--paper);
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--amber-deep); outline-offset: 3px; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 22px 0;
+  }
+  .brand { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 700; font-size: 19px; letter-spacing: -0.01em; }
+  .brand-mark {
+    width: 30px; height: 30px; border-radius: 7px; background: var(--teal);
+    color: #fff; display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 12px; font-weight: 500;
+  }
+  nav .links { display: flex; gap: 28px; font-size: 14px; font-weight: 500; }
+  nav .links a { text-decoration: none; color: var(--ink-soft); }
+  nav .links a:hover { color: var(--teal); }
+
+  .hero { padding: 56px 0 72px; display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 56px; align-items: center; }
+  .eyebrow {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--teal); display: flex; align-items: center; gap: 8px; margin-bottom: 18px;
+  }
+  .eyebrow::before { content: ''; width: 20px; height: 1px; background: var(--teal); display: inline-block; }
+  h1 {
+    font-family: var(--display); font-weight: 700; font-size: 52px; line-height: 1.04;
+    letter-spacing: -0.02em; margin: 0 0 22px;
+  }
+  h1 em { font-style: normal; color: var(--teal); }
+  .lede { font-size: 18px; line-height: 1.6; color: var(--ink-soft); max-width: 46ch; margin: 0 0 30px; }
+  .cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn {
+    font-family: var(--body); font-weight: 600; font-size: 15px; padding: 13px 22px;
+    border-radius: var(--radius); text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+    border: 1.5px solid transparent; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-primary { background: var(--teal); color: #fff; box-shadow: 0 2px 0 var(--teal-deep); }
+  .btn-primary:hover { box-shadow: 0 4px 0 var(--teal-deep); }
+  .btn-ghost { background: transparent; border-color: var(--paper-line); color: var(--ink); }
+  .btn-ghost:hover { border-color: var(--teal); }
+
+  .receipt {
+    background: #fff; border: 1px solid var(--paper-line); border-radius: var(--radius);
+    box-shadow: 0 24px 48px -20px rgba(10, 46, 51, 0.25);
+    font-family: var(--mono); font-size: 13px; color: var(--ink);
+    position: relative; transform: rotate(1.2deg);
+  }
+  .receipt::before, .receipt::after {
+    content: ''; position: absolute; left: 0; right: 0; height: 10px;
+    background: repeating-linear-gradient(-45deg, var(--paper) 0 6px, transparent 6px 12px);
+  }
+  .receipt::before { top: -5px; }
+  .receipt::after { bottom: -5px; }
+  .receipt-inner { padding: 28px 24px; }
+  .receipt-head { text-align: center; margin-bottom: 16px; }
+  .receipt-head .store { font-family: var(--display); font-weight: 700; font-size: 16px; letter-spacing: 0.02em; }
+  .receipt-head .sub { color: var(--ink-soft); font-size: 11px; margin-top: 3px; }
+  .receipt hr { border: none; border-top: 1px dashed var(--paper-line); margin: 14px 0; }
+  .receipt-item { display: flex; justify-content: space-between; padding: 9px 0; align-items: baseline; }
+  .receipt-item .name { font-weight: 500; }
+  .receipt-item .name small { display: block; color: var(--ink-soft); font-size: 10.5px; margin-top: 2px; font-family: var(--body); }
+  .receipt-item .status {
+    font-size: 10px; padding: 2px 7px; border-radius: 20px; white-space: nowrap; font-family: var(--body); font-weight: 600;
+  }
+  .status.live { background: #e4f3ea; color: var(--ok); }
+  .status.wait { background: #fdefdc; color: var(--amber-deep); }
+  .receipt-total { display: flex; justify-content: space-between; padding-top: 14px; font-weight: 600; font-size: 14px; }
+  .barcode { height: 34px; margin-top: 18px; background: repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 3px, var(--ink) 3px 4px, transparent 4px 7px); opacity: 0.85; }
+  .barcode-label { text-align: center; font-size: 10px; letter-spacing: 0.15em; color: var(--ink-soft); margin-top: 6px; }
+
+  .features { padding: 64px 0; border-top: 1px solid var(--paper-line); }
+  .section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 36px; flex-wrap: wrap; gap: 12px; }
+  h2 { font-family: var(--display); font-size: 28px; font-weight: 600; letter-spacing: -0.01em; margin: 0; }
+  .section-note { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--paper-line); border: 1px solid var(--paper-line); }
+  .card { background: var(--paper); padding: 26px 24px; }
+  .card .num { font-family: var(--mono); font-size: 12px; color: var(--teal); margin-bottom: 14px; }
+  .card h3 { font-family: var(--display); font-size: 17px; font-weight: 600; margin: 0 0 8px; }
+  .card p { font-size: 14px; line-height: 1.55; color: var(--ink-soft); margin: 0; }
+
+  .editions { padding: 64px 0 76px; border-top: 1px solid var(--paper-line); }
+  .ed-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+  .ed-card { background: #fff; border: 1px solid var(--paper-line); border-radius: var(--radius); padding: 26px; display: flex; flex-direction: column; }
+  .ed-card .tag { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 14px; padding: 3px 8px; border-radius: 20px; width: fit-content; }
+  .tag.live { background: #e4f3ea; color: var(--ok); }
+  .tag.wait { background: #fdefdc; color: var(--amber-deep); }
+  .ed-card h3 { font-family: var(--display); font-size: 20px; margin: 0 0 8px; }
+  .ed-card p { font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; margin: 0 0 22px; flex-grow: 1; }
+  .ed-card .btn { justify-content: center; width: 100%; }
+  .ed-card .btn-disabled { background: var(--paper); border: 1.5px solid var(--paper-line); color: var(--ink-soft); cursor: not-allowed; }
+  .ed-card .btn-disabled:hover { transform: none; }
+
+  footer { border-top: 1px solid var(--paper-line); padding: 32px 0 40px; }
+  .foot-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+  .foot-row, .foot-row a { font-size: 13px; color: var(--ink-soft); text-decoration: none; }
+  .foot-links { display: flex; gap: 20px; }
+  .foot-links a:hover { color: var(--teal); }
+
+  @media (max-width: 860px) {
+    .hero { grid-template-columns: 1fr; padding-top: 32px; }
+    h1 { font-size: 38px; }
+    .grid, .ed-grid { grid-template-columns: 1fr; }
+    .receipt { transform: none; max-width: 340px; margin: 0 auto; }
+    nav .links { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav>
+    <div class="brand"><span class="brand-mark">SS</span> SAFE Stores</div>
+    <div class="links">
+      <a href="#features">What it does</a>
+      <a href="#download">Download</a>
+      <a href="#contact">Contact</a>
+    </div>
+  </nav>
+</div>
+
+<header class="wrap hero">
+  <div>
+    <div class="eyebrow">Inventory · POS · Marketplace</div>
+    <h1>Run your shop from<br><em>arrival to sale.</em></h1>
+    <p class="lede">Stock, checkout, replenishment, and a public storefront — in one system that keeps working even when the internet doesn't.</p>
+    <div class="cta-row">
+      <a href="#download" class="btn btn-primary">Get SAFE Stores →</a>
+      <a href="#features" class="btn btn-ghost">See what it does</a>
+    </div>
+  </div>
+
+  <div class="receipt" aria-hidden="true">
+    <div class="receipt-inner">
+      <div class="receipt-head">
+        <div class="store">SAFE STORES</div>
+        <div class="sub">safestores.name.ng</div>
+      </div>
+      <hr>
+      <div class="receipt-item">
+        <span class="name">Web Edition<small>Any device, browser only</small></span>
+        <span class="status live">Live</span>
+      </div>
+      <div class="receipt-item">
+        <span class="name">Desktop Edition<small>Windows · Mac · Linux</small></span>
+        <span class="status live">Live</span>
+      </div>
+      <div class="receipt-item">
+        <span class="name">Android App<small>Camera scan · offline · push</small></span>
+        <span class="status wait">Coming Soon</span>
+      </div>
+      <hr>
+      <div class="receipt-total"><span>One store, every edition</span><span>₦ —</span></div>
+      <div class="barcode"></div>
+      <div class="barcode-label">THANK YOU FOR CHOOSING SAFE STORES</div>
+    </div>
+  </div>
+</header>
+
+<section class="features wrap" id="features">
+  <div class="section-head">
+    <h2>What it actually does</h2>
+    <div class="section-note">no fluff — this is the whole job</div>
+  </div>
+  <div class="grid">
+    <div class="card">
+      <div class="num">01</div>
+      <h3>Stock, start to finish</h3>
+      <p>Record arrivals, move stock to the shelf, count it, and track batches by expiry — with FIFO markdowns as dates approach.</p>
+    </div>
+    <div class="card">
+      <div class="num">02</div>
+      <h3>POS checkout</h3>
+      <p>Scan or add items, take payment, print a receipt. Split checkout mode lets one person scan while another handles cash.</p>
+    </div>
+    <div class="card">
+      <div class="num">03</div>
+      <h3>Smart replenishment</h3>
+      <p>Reorder suggestions from real sales velocity, not guesswork. Turns into a purchase order in one click.</p>
+    </div>
+    <div class="card">
+      <div class="num">04</div>
+      <h3>Works with no signal</h3>
+      <p>Every write queues locally and replays once you're back online. Reads fall back to the last successful load.</p>
+    </div>
+    <div class="card">
+      <div class="num">05</div>
+      <h3>Public storefront</h3>
+      <p>Opt in and shoppers can browse and order — guest checkout included. Orders land straight in your dashboard.</p>
+    </div>
+    <div class="card">
+      <div class="num">06</div>
+      <h3>Built for your whole team</h3>
+      <p>Admin, manager, cashier, stock staff, and external auditors — each sees exactly what their role needs.</p>
+    </div>
+  </div>
+</section>
+
+<section class="editions wrap" id="download">
+  <div class="section-head">
+    <h2>Choose your edition</h2>
+    <div class="section-note">same features, different device</div>
+  </div>
+  <div class="ed-grid">
+    <div class="ed-card">
+      <span class="tag live">Live</span>
+      <h3>Web</h3>
+      <p>No install. Works in any modern browser, on any device your staff already have. Best for multiple tills on one Wi-Fi network, or a store admin managing things remotely.</p>
+      <!-- Point this at your deployed frontend URL once hosted — see DEPLOYMENT.md -->
+      <a class="btn btn-primary" href="https://safestores.name.ng/app">Open Web App →</a>
+    </div>
+    <div class="ed-card">
+      <span class="tag live">Live</span>
+      <h3>Desktop</h3>
+      <p>One installer, works fully offline with its own local database. Ideal for a single till or a small shop that doesn't need a shared server.</p>
+      <!-- Point this at your hosted installer file(s) — see desktop/README.md for how to build one -->
+      <a class="btn btn-primary" href="#contact">Request Installer →</a>
+    </div>
+    <div class="ed-card">
+      <span class="tag wait">Coming Soon</span>
+      <h3>Android</h3>
+      <p>Camera barcode scanning, offline photo capture, and push notifications for new orders — built and ready, pending Google Play submission.</p>
+      <a class="btn btn-disabled" aria-disabled="true">Not Yet Published</a>
+    </div>
+  </div>
+</section>
+
+<footer class="wrap" id="contact">
+  <div class="foot-row">
+    <span>A product of A I Brains Ventures</span>
+    <div class="foot-links">
+      <a href="mailto:support@safestores.name.ng">support@safestores.name.ng</a>
+      <a href="#features">What it does</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
