@@ -106,7 +106,16 @@
     "settings": "Store Settings",
     "insights": "Insights",
     "labels": "Labels & Barcodes",
-    "transfers": "Branch Transfers"
+    "transfers": "Branch Transfers",
+    "help": "Help",
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "skipToContent": "Skip to main content",
+    "theme": "Theme",
+    "themeSystem": "Auto",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "textSize": "Text size"
   },
   "login": {
     "welcomeBack": "Welcome Back",
@@ -1094,7 +1103,9 @@
     "tierMegaLabel": "Mega Store",
     "tierMegaDesc": "Unlimited products and users — best for large or multi-location stores",
     "heading": "Register Your Store",
-    "confirmPasswordLabel": "Confirm Password"
+    "confirmPasswordLabel": "Confirm Password",
+    "agreePrefix": "I agree to the",
+    "agreeAnd": "and"
   },
   "setupPage": {
     "title": "👋 Welcome to SAFE Stores",
@@ -1326,7 +1337,8 @@
     "pointValue": "Value of 1 point (in your currency)",
     "pointsExpiry": "Points expire after (months)",
     "pointsExpiryHelp": "0 = never expire.",
-    "loyaltyExample": "Example: spending {{spend}} earns {{points}} points, worth {{worth}}."
+    "loyaltyExample": "Example: spending {{spend}} earns {{points}} points, worth {{worth}}.",
+    "dailySummary": "Email admins a summary of the day's sales at 9 pm"
   },
   "importPage": {
     "title": "Import Products",
@@ -1431,5 +1443,135 @@
       "fulfilled": "Ready / delivered"
     },
     "questions": "Questions? Call the store:"
+  },
+  "onboarding": {
+    "title": "Get your store ready",
+    "hide": "Hide",
+    "go": "Start",
+    "samplesHint": "Just exploring? Add a dozen sample products to try the till straight away.",
+    "loadSamples": "Add sample products",
+    "steps": {
+      "settings": {
+        "title": "Set up your store",
+        "hint": "Currency, time zone, tax and receipt details."
+      },
+      "products": {
+        "title": "Add your products",
+        "hint": "Import a spreadsheet, or add them one by one."
+      },
+      "shelf": {
+        "title": "Put stock on the shelf",
+        "hint": "Move stock from the backroom so it can be sold."
+      },
+      "staff": {
+        "title": "Invite your team",
+        "hint": "Send cashiers and staff an invite code by WhatsApp or SMS."
+      },
+      "sale": {
+        "title": "Make your first sale",
+        "hint": "Open Checkout, scan or tap items, take payment."
+      }
+    }
+  },
+  "help": {
+    "title": "Help",
+    "subtitle": "Quick answers for everyday tasks.",
+    "searchPlaceholder": "What do you want to do?",
+    "noMatch": "No answer matched.",
+    "askSupport": "Ask our support team →",
+    "goThere": "Go there",
+    "shortcutsTitle": "Till keyboard shortcuts",
+    "firstSteps": {
+      "q": "How do I get started?",
+      "a": "Follow the checklist on the Dashboard: set up the store, add products, put stock on the shelf, invite staff, then make a test sale."
+    },
+    "importProducts": {
+      "q": "How do I add many products at once?",
+      "a": "Products → Import. Download the template or use your own spreadsheet (CSV or Excel). We check every row before anything is saved."
+    },
+    "receiveStock": {
+      "q": "How do I record a delivery?",
+      "a": "Stock Arrival → choose the product and quantity. If the product comes in cartons, enter the number of cartons and we work out the units. Add batch and expiry dates for perishables."
+    },
+    "moveToShelf": {
+      "q": "Why can't I sell an item I just received?",
+      "a": "New stock goes to the backroom. Use Stock Movements → Transfer to shelf to make it available at the till."
+    },
+    "sell": {
+      "q": "How do I make a sale?",
+      "a": "Checkout → Start New Order. Scan barcodes with a scanner or the camera, tap a best seller, or search. Then choose how the customer pays and confirm."
+    },
+    "shift": {
+      "q": "What is a shift?",
+      "a": "A cashier's time on the till. Start a shift with the cash in the drawer, and end it by counting the cash. The Z-report shows any over or short."
+    },
+    "discount": {
+      "q": "How do I give a discount?",
+      "a": "In an open order, tap Discount and enter a % or an amount. Cashiers can give up to the store's limit; bigger discounts need a manager's email and password."
+    },
+    "splitPay": {
+      "q": "Customer wants to pay part cash, part card?",
+      "a": "Tap Split payment, add each payment method and amount. Cash can be more than what's due — we show the change."
+    },
+    "refund": {
+      "q": "How do I refund or take back an item?",
+      "a": "Sales & Refunds → find the receipt → View → Refund / return items. Choose quantities; untick Restock for damaged goods. Only managers and admins can refund."
+    },
+    "receipts": {
+      "q": "How do I reprint or send a receipt?",
+      "a": "Sales & Refunds → View. Print, save as PDF, send on WhatsApp, or share the link. Every receipt also has a QR code to a digital copy."
+    },
+    "thermal": {
+      "q": "Can I print to a receipt printer?",
+      "a": "Yes, in Chrome or Edge. On a receipt, choose the printer connection (USB, Serial or Bluetooth), then Print to receipt printer. Your browser remembers the printer."
+    },
+    "labels": {
+      "q": "How do I print price labels and barcodes?",
+      "a": "Labels & Barcodes → set how many copies of each product, choose a label size, Print. Products without a barcode can get an in-store barcode in one click."
+    },
+    "credit": {
+      "q": "How do I sell on credit (pay later)?",
+      "a": "Add the customer under Customers, then choose Credit at checkout. Their balance updates automatically; record payments and send WhatsApp reminders from the Customers page."
+    },
+    "loyalty": {
+      "q": "How do loyalty points work?",
+      "a": "Turn them on in Store Settings. Pick the customer as a Loyalty member at checkout so they earn points; use Use points to spend them as a discount."
+    },
+    "tax": {
+      "q": "How do I set up VAT or sales tax?",
+      "a": "Store Settings → Tax. Enter the rate and whether your shelf prices already include tax. Receipts and reports then show the tax."
+    },
+    "staff": {
+      "q": "How do I add a cashier?",
+      "a": "Invites → create an invite with their role and share the code by WhatsApp, SMS or email. Admins can set or reset a staff password from Users."
+    },
+    "offline": {
+      "q": "What happens when the internet goes down?",
+      "a": "Keep selling. Sales and stock changes are saved on the device and sent automatically when the connection returns. The top bar shows how many are waiting."
+    },
+    "endOfDay": {
+      "q": "Where do I see today's takings?",
+      "a": "End of Day shows sales, payment methods, refunds, top items and busiest hours for any date, in your store's time zone."
+    },
+    "insights": {
+      "q": "Which products make me the most money?",
+      "a": "Insights → Profit & margin, ABC analysis and Dead stock show what earns, what's slow, and what is tying up cash."
+    },
+    "reorder": {
+      "q": "What should I reorder?",
+      "a": "Replenishment suggests quantities from your sales. Create a purchase order and send it to the supplier as a PDF or on WhatsApp."
+    },
+    "security": {
+      "q": "How do I keep my account safe?",
+      "a": "My Account → turn on Two-factor sign-in with an authenticator app. If a phone is lost, use Sign out all other devices and change your password."
+    },
+    "export": {
+      "q": "How do I download my data?",
+      "a": "Admins can export store data (CSV/JSON) from Export. Anyone can download their personal data from My Account."
+    },
+    "support": {
+      "q": "How do I contact support?",
+      "a": "Support → New ticket. Our team replies in the app."
+    }
   }
 }

@@ -150,6 +150,9 @@ router.post('/invites', requireRole('admin', 'manager'), usersCtrl.createInvite)
 router.post('/invites/bulk', requireRole('admin', 'manager'), usersCtrl.createBulkInvites);
 router.patch('/invites/:inviteId/revoke', requireRole('admin', 'manager'), usersCtrl.revokeInvite);
 
+const onboardingCtrl = require('../controllers/onboardingController');
+router.get('/onboarding', requireRole('admin', 'manager'), onboardingCtrl.status);
+router.post('/onboarding/sample-data', requireRole('admin'), onboardingCtrl.loadSamples);
 router.get('/products', productsCtrl.listProducts);
 const stockToolsCtrl = require('../controllers/stockToolsController');
 router.post('/products/import', requireRole('admin', 'manager'), stockToolsCtrl.importProducts);

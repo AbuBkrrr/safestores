@@ -1,7 +1,7 @@
 const { request } = require('./helpers/app');
 const { createActiveStoreWithAdmin, createProduct } = require('./helpers/factories');
 const { pool } = require('../src/config/db');
-const { v4: uuidv4 } = require('uuid');
+const { randomUUID: uuidv4 } = require('crypto');
 
 async function getSyncKey(storeId) {
   const { rows } = await pool.query('SELECT sync_key FROM stores WHERE id = $1', [storeId]);

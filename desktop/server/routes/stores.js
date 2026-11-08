@@ -196,6 +196,8 @@ router.post('/shifts', requireRole(...TILL), shiftsCtrl.openShift);
 router.post('/shifts/:shiftId/close', requireRole(...TILL), shiftsCtrl.closeShift);
 router.get('/shifts/:shiftId/report', requireRole(...TILL), shiftsCtrl.shiftReport);
 router.get('/reports/daily', requireRole('admin', 'manager'), shiftsCtrl.dailyReport);
+router.get('/onboarding', requireRole('admin', 'manager'), require('../controllers/onboardingController').status);
+router.post('/onboarding/sample-data', requireRole('admin'), require('../controllers/onboardingController').loadSamples);
 router.get('/settings', shiftsCtrl.getSettings);
 
 // Insights, product import, loyalty — see growthController.js.

@@ -206,3 +206,22 @@ describe('Admin sets a staff password', () => {
     expect((await request().post('/api/auth/admin/login').send({ email: staff.email, password: 'TempPass2024' })).status).toBe(200);
   });
 });
+
+describe('End-of-day summary email', () => {
+  it('sends once per local day to verified admins, at 21:00 store time', async () => {
+    const { store, admin } = await createActiveStoreWithAdmin();
+    await pool.query('UPDATE users SET email_verified_at = now() WHERE id = $1', [admin.id]);
+    // Pick a time zone where it is 21:xx right now.
+    const tz = Intl.supportedValuesOf('timeZone').find((z) => new Intl.DateTimeFormat('en-US', { timeZone: z, hour: '2-digit', hourCycle: 'h23' }).format(new Date()) === '21');
+    if (!tz) return; // no zone at 21h this instant (only happens with half-hour edge cases)
+    await pool.query('UPDATE stores SET timezone = $1 WHERE id = $2', [tz, store.id]);
+    const { runDailySummarySweep } = require('../src/jobs/dailySummaryJob');
+    sent.length = 0;
+    await runDailySummarySweep();
+    const mine = sent.filter((m) => m.to === admin.email);
+    expect(mine).toHaveLength(1);
+    expect(mine[0].text).toContain('Sales:');
+    await runDailySummarySweep();
+    expect(sent.filter((m) => m.to === admin.email)).toHaveLength(1);
+  });
+});

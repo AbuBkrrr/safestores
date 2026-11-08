@@ -143,10 +143,14 @@ async function shiftReport(req, res) {
 
 // GET /api/stores/:storeId/reports/daily?date=YYYY-MM-DD  (store time zone; default = today there)
 async function dailyReport(req, res) {
-  const { storeId } = req.params;
+  res.json(await buildDailyReport(req.params.storeId, req.query.date || null));
+}
+
+/** Also used by the end-of-day summary email (jobs/dailySummaryJob.js). */
+async function buildDailyReport(storeId, date) {
   const { rows: st } = await db.query('SELECT timezone FROM stores WHERE id = $1', [storeId]);
   const tz = st[0]?.timezone || 'UTC';
-  const { rows: d } = await db.query(`SELECT COALESCE($1::date, (now() AT TIME ZONE $2)::date) AS day`, [req.query.date || null, tz]);
+  const { rows: d } = await db.query(`SELECT COALESCE($1::date, (now() AT TIME ZONE $2)::date)::text AS day`, [date || null, tz]);
   const day = d[0].day;
   const inDay = (col) => `(${col} AT TIME ZONE $2)::date = $3::date`;
 
@@ -185,7 +189,7 @@ async function dailyReport(req, res) {
   );
   const num = (rows, keys) => rows.map((r) => { const o = { ...r }; keys.forEach((k) => { o[k] = Number(o[k]); }); return o; });
   const t = totals[0];
-  res.json({
+  return ({
     date: day instanceof Date ? day.toISOString().slice(0, 10) : String(day), timezone: tz,
     orders: t.orders, gross: Number(t.gross), discounts: Number(t.discounts), tax: Number(t.tax), average: r2(t.average),
     refunds: { total: Number(refunds[0].total), count: refunds[0].count },
@@ -194,4 +198,4 @@ async function dailyReport(req, res) {
   });
 }
 
-module.exports = { currentShift, openShift, closeShift, listShifts, shiftReport, dailyReport };
+module.exports = { currentShift, openShift, closeShift, listShifts, shiftReport, dailyReport, buildDailyReport };

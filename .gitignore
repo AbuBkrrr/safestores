@@ -47,3 +47,6 @@ desktop/release/
 *.key
 *.pem
 !desktop/**/*.example.*
+
+# Generated at build time (frontend/scripts/licenses.mjs)
+frontend/public/third-party-licenses.json

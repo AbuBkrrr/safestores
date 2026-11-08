@@ -13,6 +13,34 @@ Two editions live in this repo:
 
 The rest of this file covers the web app edition.
 
+**Launching?** Follow **[`LAUNCH_GUIDE.md`](./LAUNCH_GUIDE.md)** — the
+ordered, step-by-step path from this repo to paying customers.
+
+### What's new in v26
+
+- **Accounts & security:** password reset and email verification by email,
+  change password, two-factor sign-in (authenticator apps), sign out
+  everywhere, activity log, personal-data export, account deletion, store
+  closure with a 30-day grace period.
+- **Till:** per-store currency, time zone and tax (inclusive or exclusive);
+  discounts with manager approval; split payments with change; refunds and
+  returns; cashier shifts with Z-reports; End-of-Day report; parked sales;
+  best-seller quick picks and keyboard shortcuts; receipts as print, PDF,
+  WhatsApp, QR digital receipt, and direct ESC/POS thermal printing (USB,
+  serial, Bluetooth).
+- **Stock:** spreadsheet import (CSV/Excel), barcodes, pack sizes, variants,
+  label and barcode printing, branch transfers, purchase orders as PDF or
+  WhatsApp.
+- **Insights:** profit and margin, ABC analysis, dead stock, demand
+  forecast, busiest hours.
+- **Customers:** loyalty points with expiry, birthdays, statements,
+  WhatsApp reminders.
+- **Storefront:** responsive shop, search, share previews, WhatsApp
+  ordering, order tracking, sitemap.
+- **Experience:** getting-started checklist and sample data, starts with no
+  internet (service worker), faster loading, dark mode, larger text option,
+  built-in Help, Terms, Privacy and open-source licence pages.
+
 **Want to deploy this right now?** See
 [`DEPLOY_RAILWAY_RENDER.md`](./DEPLOY_RAILWAY_RENDER.md) for copy-paste
 steps to get it live on GitHub + Railway/Render. For deeper background

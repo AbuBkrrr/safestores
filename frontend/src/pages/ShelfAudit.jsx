@@ -202,7 +202,7 @@ export default function ShelfAudit() {
       <div className="topbar"><h1>{t('shelfAuditPage.title')}</h1></div>
 
       {conflicts.length > 0 && (
-        <div className="card" style={{ background: '#fef3e0', borderColor: '#e6c860' }}>
+        <div className="card" style={{ background: 'var(--offline-bg)', borderColor: '#e6c860' }}>
           <h3 style={{ marginBottom: 12, color: '#a56511' }}>{t('shelfAuditPage.recountNeeded', { count: conflicts.length })}</h3>
           {conflicts.map((c) => {
             const location = c.area === 'shelf'
@@ -334,7 +334,7 @@ export default function ShelfAudit() {
           </div>
 
           {selectedClaim && (
-            <div className="card" style={{ background: '#fff8e1', borderColor: '#e6c860', marginBottom: 16 }}>
+            <div className="card" style={{ background: 'var(--offline-bg)', borderColor: '#e6c860', marginBottom: 16 }}>
               {t('shelfAuditPage.claimWarning', { name: selectedClaim.userName })}
             </div>
           )}

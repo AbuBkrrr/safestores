@@ -63,11 +63,11 @@ export default function Signup() {
           </div>
           <div className="form-group">
             <label>{t('login.password')}</label>
-            <input type="password" value={form.password} onChange={update('password')} required minLength={6} placeholder={t('signupPage.minPasswordChars')} />
+            <input type="password" value={form.password} onChange={update('password')} required minLength={8} autoComplete="new-password" placeholder={t('passwordHint')} />
           </div>
           <div className="form-group">
             <label>{t('signupPage.confirmPasswordLabel')}</label>
-            <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={6} placeholder={t('signupPage.confirmPasswordPh')} />
+            <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={8} autoComplete="new-password" placeholder={t('signupPage.confirmPasswordPh')} />
           </div>
           <div className="form-group">
             <label>{t('signupPage.storeSize')}</label>
@@ -83,6 +83,10 @@ export default function Signup() {
           <p className="muted mt-1">
             {t('signupPage.postRegisterNote')}
           </p>
+          <label className="flex" style={{ fontSize: 13, marginBottom: 12, alignItems: 'flex-start' }}>
+            <input type="checkbox" required style={{ width: 'auto', marginTop: 3 }} />
+            <span>{t('signupPage.agreePrefix')} <a href="/terms" target="_blank" rel="noreferrer">{t('nav.terms')}</a> {t('signupPage.agreeAnd')} <a href="/privacy" target="_blank" rel="noreferrer">{t('nav.privacy')}</a>.</span>
+          </label>
           <button className="btn" style={{ width: '100%' }} disabled={loading}>
             {loading ? t('signupPage.registering') : t('signupPage.registerStore')}
           </button>

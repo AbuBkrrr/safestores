@@ -41,6 +41,7 @@ export default function StoreSettings() {
         phone: s.phone || '', address: s.address || '', city: s.city || '',
         receiptHeader: s.receipt_header || '', receiptFooter: s.receipt_footer || '',
         maxCashierDiscountPct: Number(s.max_cashier_discount_pct) || 0, requireShift: !!s.require_shift,
+        ...(s.daily_summary_enabled !== undefined ? { dailySummaryEnabled: s.daily_summary_enabled !== false } : {}),
         pointsPer100: Number(s.points_per_100) || 0, pointValue: Number(s.point_value) || 0, pointsExpiryMonths: Number(s.points_expiry_months) || 0,
       });
       setS(data);
@@ -102,6 +103,9 @@ export default function StoreSettings() {
           <h3>🛒 {t('settingsPage.till')}</h3>
           <div className="form-group"><label htmlFor="st-disc">{t('settingsPage.maxDiscount')}</label><input id="st-disc" type="number" min="0" max="100" step="0.5" value={s.max_cashier_discount_pct} onChange={set('max_cashier_discount_pct')} /><span className="help-text">{t('settingsPage.maxDiscountHelp')}</span></div>
           <label className="flex"><input type="checkbox" checked={!!s.require_shift} onChange={set('require_shift')} /> {t('settingsPage.requireShift')}</label>
+          {import.meta.env.VITE_EDITION !== 'desktop' && (
+            <label className="flex mt-1"><input type="checkbox" checked={s.daily_summary_enabled !== false} onChange={set('daily_summary_enabled')} /> {t('settingsPage.dailySummary')}</label>
+          )}
           <div className="form-group mt-1"><label htmlFor="st-rh">{t('settingsPage.receiptHeader')}</label><textarea id="st-rh" value={s.receipt_header || ''} onChange={set('receipt_header')} maxLength={500} /></div>
           <div className="form-group"><label htmlFor="st-rf">{t('settingsPage.receiptFooter')}</label><textarea id="st-rf" value={s.receipt_footer || ''} onChange={set('receipt_footer')} maxLength={500} placeholder={t('settingsPage.receiptFooterPlaceholder')} /></div>
         </div>

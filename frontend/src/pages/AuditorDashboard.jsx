@@ -55,7 +55,7 @@ export default function AuditorDashboard() {
           <h3 style={{ marginBottom: 12 }}>{t('auditorDashPage.openRequests')}</h3>
           {open.length === 0 && <p className="muted">{t('auditorDashPage.noOpenRequests')}</p>}
           {open.map((e) => (
-            <div key={e.id} className="card" style={{ background: '#fafcfc' }}>
+            <div key={e.id} className="card" style={{ background: 'var(--bg)' }}>
               <strong>{e.store_name}</strong> <Badge status={e.status} />
               <p className="muted">{e.notes || t('auditorDashPage.noNotesProvided')} · {t('auditorDashPage.requestedAt', { time: new Date(e.requested_at).toLocaleString() })}</p>
               <button className="btn small mt-1" onClick={() => accept(e.id)}>{t('auditorDashPage.acceptEngagement')}</button>
@@ -67,7 +67,7 @@ export default function AuditorDashboard() {
           <h3 style={{ marginBottom: 12 }}>{t('auditorDashPage.myActiveEngagements')}</h3>
           {mine.length === 0 && <p className="muted">{t('auditorDashPage.noActiveEngagements')}</p>}
           {mine.map((e) => (
-            <div key={e.id} className="card" style={{ background: '#fafcfc' }}>
+            <div key={e.id} className="card" style={{ background: 'var(--bg)' }}>
               <strong>{e.store_name}</strong> <Badge status={e.status} />
               <p className="muted">{e.notes}</p>
               <div className="flex mt-1">

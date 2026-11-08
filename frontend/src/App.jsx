@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import api from './api/client.js';
 import Login from './pages/Login.jsx';
@@ -6,68 +6,72 @@ import Signup from './pages/Signup.jsx';
 import SuperLogin from './pages/SuperLogin.jsx';
 import Setup from './pages/Setup.jsx';
 import ActivateStore from './pages/ActivateStore.jsx';
-import ForgotPassword from './pages/ForgotPassword.jsx';
-import ResetPassword from './pages/ResetPassword.jsx';
-import VerifyEmail from './pages/VerifyEmail.jsx';
-import Account from './pages/Account.jsx';
-import ActivityLog from './pages/ActivityLog.jsx';
-import Sales from './pages/Sales.jsx';
-import Shifts from './pages/Shifts.jsx';
-import DailyReport from './pages/DailyReport.jsx';
-import StoreSettings from './pages/StoreSettings.jsx';
-import PublicReceipt from './pages/PublicReceipt.jsx';
-import ImportProducts from './pages/ImportProducts.jsx';
-import Labels from './pages/Labels.jsx';
-import Insights from './pages/Insights.jsx';
-import Transfers from './pages/Transfers.jsx';
-import TrackOrder from './pages/TrackOrder.jsx';
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword.jsx'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword.jsx'));
+const VerifyEmail = lazy(() => import('./pages/VerifyEmail.jsx'));
+const Account = lazy(() => import('./pages/Account.jsx'));
+const ActivityLog = lazy(() => import('./pages/ActivityLog.jsx'));
+const Sales = lazy(() => import('./pages/Sales.jsx'));
+const Shifts = lazy(() => import('./pages/Shifts.jsx'));
+const DailyReport = lazy(() => import('./pages/DailyReport.jsx'));
+const StoreSettings = lazy(() => import('./pages/StoreSettings.jsx'));
+const PublicReceipt = lazy(() => import('./pages/PublicReceipt.jsx'));
+const ImportProducts = lazy(() => import('./pages/ImportProducts.jsx'));
+const Labels = lazy(() => import('./pages/Labels.jsx'));
+const Insights = lazy(() => import('./pages/Insights.jsx'));
+const Transfers = lazy(() => import('./pages/Transfers.jsx'));
+const TrackOrder = lazy(() => import('./pages/TrackOrder.jsx'));
+const Help = lazy(() => import('./pages/Help.jsx'));
+const Terms = lazy(() => import('./pages/Legal.jsx').then((m) => ({ default: m.Terms })));
+const Privacy = lazy(() => import('./pages/Legal.jsx').then((m) => ({ default: m.Privacy })));
+const Licenses = lazy(() => import('./pages/Legal.jsx').then((m) => ({ default: m.Licenses })));
 import Layout from './components/Layout.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import { useAuth } from './context/AuthContext.jsx';
 
-import Dashboard from './pages/Dashboard.jsx';
-import Analytics from './pages/Analytics.jsx';
-import Products from './pages/Products.jsx';
-import StockArrival from './pages/StockArrival.jsx';
-import Movements from './pages/Movements.jsx';
-import Replenishment from './pages/Replenishment.jsx';
-import ShelfAudit from './pages/ShelfAudit.jsx';
-import AuditReport from './pages/AuditReport.jsx';
-import ShrinkageReport from './pages/ShrinkageReport.jsx';
-import Auditor from './pages/Auditor.jsx';
-import Receipts from './pages/Receipts.jsx';
-import Camera from './pages/Camera.jsx';
-import Checkout from './pages/Checkout.jsx';
-import BillingStatus from './pages/BillingStatus.jsx';
-import Marketplace from './pages/Marketplace.jsx';
-import LendingPartners from './pages/LendingPartners.jsx';
-import Invites from './pages/Invites.jsx';
-import Users from './pages/Users.jsx';
-import Reports from './pages/Reports.jsx';
-import Export from './pages/Export.jsx';
-import Support from './pages/Support.jsx';
-import Integrations from './pages/Integrations.jsx';
-import Suppliers from './pages/Suppliers.jsx';
-import Customers from './pages/Customers.jsx';
-import ExpiryTracking from './pages/ExpiryTracking.jsx';
-import CycleCounting from './pages/CycleCounting.jsx';
+const Dashboard = lazy(() => import('./pages/Dashboard.jsx'));
+const Analytics = lazy(() => import('./pages/Analytics.jsx'));
+const Products = lazy(() => import('./pages/Products.jsx'));
+const StockArrival = lazy(() => import('./pages/StockArrival.jsx'));
+const Movements = lazy(() => import('./pages/Movements.jsx'));
+const Replenishment = lazy(() => import('./pages/Replenishment.jsx'));
+const ShelfAudit = lazy(() => import('./pages/ShelfAudit.jsx'));
+const AuditReport = lazy(() => import('./pages/AuditReport.jsx'));
+const ShrinkageReport = lazy(() => import('./pages/ShrinkageReport.jsx'));
+const Auditor = lazy(() => import('./pages/Auditor.jsx'));
+const Receipts = lazy(() => import('./pages/Receipts.jsx'));
+const Camera = lazy(() => import('./pages/Camera.jsx'));
+const Checkout = lazy(() => import('./pages/Checkout.jsx'));
+const BillingStatus = lazy(() => import('./pages/BillingStatus.jsx'));
+const Marketplace = lazy(() => import('./pages/Marketplace.jsx'));
+const LendingPartners = lazy(() => import('./pages/LendingPartners.jsx'));
+const Invites = lazy(() => import('./pages/Invites.jsx'));
+const Users = lazy(() => import('./pages/Users.jsx'));
+const Reports = lazy(() => import('./pages/Reports.jsx'));
+const Export = lazy(() => import('./pages/Export.jsx'));
+const Support = lazy(() => import('./pages/Support.jsx'));
+const Integrations = lazy(() => import('./pages/Integrations.jsx'));
+const Suppliers = lazy(() => import('./pages/Suppliers.jsx'));
+const Customers = lazy(() => import('./pages/Customers.jsx'));
+const ExpiryTracking = lazy(() => import('./pages/ExpiryTracking.jsx'));
+const CycleCounting = lazy(() => import('./pages/CycleCounting.jsx'));
 
-import AuditorSignup from './pages/AuditorSignup.jsx';
-import AuditorLogin from './pages/AuditorLogin.jsx';
-import AuditorDashboard from './pages/AuditorDashboard.jsx';
-import Storefront from './pages/Storefront.jsx';
-import MarketplaceHome from './pages/MarketplaceHome.jsx';
+const AuditorSignup = lazy(() => import('./pages/AuditorSignup.jsx'));
+const AuditorLogin = lazy(() => import('./pages/AuditorLogin.jsx'));
+const AuditorDashboard = lazy(() => import('./pages/AuditorDashboard.jsx'));
+const Storefront = lazy(() => import('./pages/Storefront.jsx'));
+const MarketplaceHome = lazy(() => import('./pages/MarketplaceHome.jsx'));
 
-import SuperDashboard from './pages/super/SuperDashboard.jsx';
-import ManageStores from './pages/super/ManageStores.jsx';
-import Subscriptions from './pages/super/Subscriptions.jsx';
-import BillingCharges from './pages/super/BillingCharges.jsx';
-import Auditors from './pages/super/Auditors.jsx';
-import MarketplaceControl from './pages/super/MarketplaceControl.jsx';
-import AllUsers from './pages/super/AllUsers.jsx';
-import Referrals from './pages/super/Referrals.jsx';
-import SupportTickets from './pages/super/SupportTickets.jsx';
-import LendingPartnersAdmin from './pages/super/LendingPartnersAdmin.jsx';
+const SuperDashboard = lazy(() => import('./pages/super/SuperDashboard.jsx'));
+const ManageStores = lazy(() => import('./pages/super/ManageStores.jsx'));
+const Subscriptions = lazy(() => import('./pages/super/Subscriptions.jsx'));
+const BillingCharges = lazy(() => import('./pages/super/BillingCharges.jsx'));
+const Auditors = lazy(() => import('./pages/super/Auditors.jsx'));
+const MarketplaceControl = lazy(() => import('./pages/super/MarketplaceControl.jsx'));
+const AllUsers = lazy(() => import('./pages/super/AllUsers.jsx'));
+const Referrals = lazy(() => import('./pages/super/Referrals.jsx'));
+const SupportTickets = lazy(() => import('./pages/super/SupportTickets.jsx'));
+const LendingPartnersAdmin = lazy(() => import('./pages/super/LendingPartnersAdmin.jsx'));
 
 const STORE_ROLES = ['admin', 'manager', 'staff', 'cashier', 'checkout', 'stock_taker'];
 
@@ -97,6 +101,12 @@ function RequireActiveStore({ children }) {
   return children;
 }
 
+// Pages load on demand (code-splitting) so the first visit downloads only
+// what the current screen needs — much faster on slow mobile networks.
+export function PageLoading() {
+  return <div className="page-loading" role="status" aria-live="polite"><span className="spinner" /></div>;
+}
+
 export default function App() {
   // Desktop edition only: checks whether the one-time Super Admin setup
   // wizard needs to run. On the web backend this endpoint doesn't exist,
@@ -117,6 +127,7 @@ export default function App() {
   if (needsSetup) return <Setup onComplete={() => setNeedsSetup(false)} />;
 
   return (
+    <Suspense fallback={<PageLoading />}>
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
@@ -126,6 +137,9 @@ export default function App() {
       {/* Digital receipt behind the QR code — public, no login. */}
       <Route path="/r/:token" element={<PublicReceipt />} />
       <Route path="/track/:token" element={<TrackOrder />} />
+      <Route path="/terms" element={<Terms />} />
+      <Route path="/privacy" element={<Privacy />} />
+      <Route path="/licenses" element={<Licenses />} />
       {APP_VARIANT === 'superadmin' && <Route path="/super-login" element={<SuperLogin />} />}
       <Route path="/auditor-signup" element={<AuditorSignup />} />
       <Route path="/auditor-login" element={<AuditorLogin />} />
@@ -155,6 +169,7 @@ export default function App() {
         {/* Account + activity stay reachable for pending/locked stores too. */}
         <Route path="/account" element={<Account />} />
         <Route path="/activity" element={<ActivityLog />} />
+        <Route path="/help" element={<Help />} />
       </Route>
 
       {/* Auditor-marketplace portal — separate role, not store-scoped.
@@ -238,10 +253,12 @@ export default function App() {
           <Route path="/super/support" element={<SupportTickets />} />
           <Route path="/super/activity" element={<ActivityLog />} />
           <Route path="/super/account" element={<Account />} />
+          <Route path="/super/help" element={<Help />} />
         </Route>
       )}
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </Suspense>
   );
 }

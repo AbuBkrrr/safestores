@@ -538,3 +538,61 @@ tr:hover td { background: #fafbfc; }
 .track-steps { list-style: none; display: flex; gap: 8px; padding: 0; margin: 12px 0; }
 .track-steps li { flex: 1; padding: 8px 10px; border-radius: 8px; background: #eef2f4; color: var(--muted); font-weight: 600; text-align: center; }
 .track-steps li.done { background: var(--primary); color: #fff; }
+
+/* ---------- Dark mode & text size (v26) ---------- */
+:root[data-theme="dark"] {
+  --bg: #11181d;
+  --panel: #1a242b;
+  --text: #e6edf1;
+  --muted: #9aaab5;
+  --line: #2c3a43;
+  --primary: #2a9aab;
+  --primary-light: #123a40;
+  --primary-dark: #7fd0dc;
+  --online-bg: #173a28;
+  --offline-bg: #3a2e14;
+  --shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+  color-scheme: dark;
+}
+:root[data-theme="dark"] input, :root[data-theme="dark"] select, :root[data-theme="dark"] textarea { background: #141d23; color: var(--text); border-color: var(--line); }
+:root[data-theme="dark"] thead { background: #1f2b33; }
+:root[data-theme="dark"] tr:hover td { background: #1f2b33; }
+:root[data-theme="dark"] .alert.error { background: #3a1f1f; border-color: #5a2a2a; color: #f2a5a5; }
+:root[data-theme="dark"] .alert.success { background: #173a28; border-color: #23573b; color: #9be0b8; }
+:root[data-theme="dark"] .alert.info { background: #12333a; border-color: #1d4c55; color: #9fd8e2; }
+:root[data-theme="dark"] .alert.warning { background: #3a2e14; border-color: #5a4720; color: #f1cf87; }
+:root[data-theme="dark"] .auth-screen { background: linear-gradient(135deg, #0f171c 0%, #12333a 100%); }
+:root[data-theme="dark"] .badge.used, :root[data-theme="dark"] .badge.closed, :root[data-theme="dark"] .track-steps li { background: #24313a; }
+:root[data-theme="dark"] .btn.secondary { background: transparent; color: var(--primary-dark); border-color: var(--primary); }
+:root[data-theme="dark"] code, :root[data-theme="dark"] .code-chip { background: #24313a; color: var(--text); }
+:root[data-theme="dark"] .modal-card, :root[data-theme="dark"] .card { background: var(--panel); color: var(--text); }
+/* Larger text for readability: scales the working area (not the sidebar). */
+:root[data-text-size="115"] .main-content, :root[data-text-size="115"] .auth-card { zoom: 1.15; }
+:root[data-text-size="130"] .main-content, :root[data-text-size="130"] .auth-card { zoom: 1.3; }
+/* Visible keyboard focus everywhere. */
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.skip-link { position: absolute; left: -9999px; top: 8px; z-index: 3000; background: var(--panel); color: var(--text); padding: 8px 12px; border-radius: 8px; }
+.skip-link:focus { left: 8px; }
+.prefs { display: flex; gap: 6px; margin-top: 8px; }
+.prefs select { flex: 1; font-size: 12px; padding: 4px 6px; }
+@media (prefers-reduced-motion: reduce) { * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; } }
+.page-loading { display: grid; place-items: center; min-height: 40vh; }
+.spinner { width: 34px; height: 34px; border-radius: 50%; border: 3px solid var(--line); border-top-color: var(--primary); animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.sidebar-links { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 10px; font-size: 12px; }
+.sidebar-links a { color: #8a9ca8; text-decoration: none; }
+.sidebar-links a:hover, .sidebar-links a.active { color: #fff; }
+.getting-started .progress { height: 6px; background: var(--line); border-radius: 4px; margin: 10px 0; overflow: hidden; }
+.getting-started .progress span { display: block; height: 100%; background: var(--secondary); }
+.gs-steps { list-style: none; padding: 0; margin: 0; }
+.gs-steps li { display: grid; grid-template-columns: 24px 1fr auto; gap: 10px; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.gs-steps li.done { opacity: 0.65; }
+.help-item { padding: 10px 0; border-bottom: 1px solid var(--line); }
+.help-item summary { cursor: pointer; font-weight: 600; }
+.help-item p { margin: 8px 0; }
+.legal { max-width: 760px; margin: 0 auto; padding: 24px 16px; line-height: 1.6; }
+.legal h1 { font-size: 26px; margin: 8px 0; } .legal h2 { font-size: 18px; margin: 20px 0 6px; }
+.legal ul { padding-left: 20px; } .legal details { padding: 6px 0; border-bottom: 1px solid var(--line); }
+.legal hr { border: none; border-top: 1px solid var(--line); margin: 24px 0 12px; }
+:root[data-theme="dark"] .row-item { background: #1f2b33; }
+:root[data-theme="dark"] .empty-state { color: var(--muted); }

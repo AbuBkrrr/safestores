@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useSocket } from '../context/SocketContext.jsx';
 import { useOffline } from '../context/OfflineContext.jsx';
 import { SUPPORTED_LANGUAGES } from '../i18n/config.js';
+import { getThemePref, setThemePref, getTextSize, setTextSize } from '../utils/preferences.js';
 
 // Inventory features (Products, Suppliers, Cycle Counting, etc.) work
 // identically in both editions now — Web/LAN Edition runs the same
@@ -105,6 +106,27 @@ export function LanguageSwitcher() {
   );
 }
 
+/** Theme (system/light/dark) + text size, remembered per device. */
+export function DisplayPrefs() {
+  const { t } = useTranslation();
+  const [theme, setTheme] = useState(getThemePref());
+  const [size, setSize] = useState(getTextSize());
+  return (
+    <div className="prefs">
+      <select aria-label={t('nav.theme')} value={theme} onChange={(e) => { setTheme(e.target.value); setThemePref(e.target.value); }}>
+        <option value="system">🖥️ {t('nav.themeSystem')}</option>
+        <option value="light">☀️ {t('nav.themeLight')}</option>
+        <option value="dark">🌙 {t('nav.themeDark')}</option>
+      </select>
+      <select aria-label={t('nav.textSize')} value={size} onChange={(e) => { setSize(e.target.value); setTextSize(e.target.value); }}>
+        <option value="100">A</option>
+        <option value="115">A+</option>
+        <option value="130">A++</option>
+      </select>
+    </div>
+  );
+}
+
 export default function Layout() {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
@@ -153,6 +175,7 @@ export default function Layout() {
 
   return (
     <>
+      <a className="skip-link" href="#main">{t('nav.skipToContent')}</a>
       <div className="status-bar">
         <div className="sync-status">
           <span className={`sync-dot${statusOk ? '' : ' offline'}`} />
@@ -201,12 +224,18 @@ export default function Layout() {
             <button onClick={handleLogout}><span>🚪</span> {t('nav.signOut')}</button>
           </div>
           {!isSuperAdmin && <LanguageSwitcher />}
+          <DisplayPrefs />
+          <div className="sidebar-links">
+            <NavLink to={isSuperAdmin ? "/super/help" : "/help"}>❓ {t("nav.help")}</NavLink>
+            <a href="/terms" target="_blank" rel="noreferrer">{t('nav.terms')}</a>
+            <a href="/privacy" target="_blank" rel="noreferrer">{t('nav.privacy')}</a>
+          </div>
           <div style={{ padding: '12px 4px 0', fontSize: 11, color: '#5a6f7c', textAlign: 'center', opacity: 0.8 }}>
             A product of <strong>A I Brains Ventures</strong>
           </div>
         </aside>
 
-        <main className="main-content">
+        <main className="main-content" id="main" tabIndex={-1}>
           {/* Every page renders its own `.topbar`/<h1> (see the comment on
               .topbar in global.css) — rather than editing each of those
               pages, one persistent toggle button here covers all of them.
@@ -220,7 +249,9 @@ export default function Layout() {
           >
             ☰
           </button>
-          <Outlet />
+          <Suspense fallback={<div className="page-loading" role="status"><span className="spinner" /></div>}>
+            <Outlet />
+          </Suspense>
         </main>
       </div>
     </>

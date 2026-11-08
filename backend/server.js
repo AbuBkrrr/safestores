@@ -10,6 +10,7 @@ const { startBillingJob } = require('./src/jobs/billingJob');
 const { startCycleCountJob } = require('./src/jobs/cycleCountJob');
 const { startExpiryJob } = require('./src/jobs/expiryJob');
 const { startRetentionJob } = require('./src/jobs/retentionJob');
+const { startDailySummaryJob } = require('./src/jobs/dailySummaryJob');
 const errorMonitoring = require('./src/utils/errorMonitoring');
 
 // Catches crashes Express's own error handler never sees at all — a
@@ -47,6 +48,7 @@ const stopBillingJob = startBillingJob();
 const stopCycleCountJob = startCycleCountJob();
 const stopExpiryJob = startExpiryJob();
 const stopRetentionJob = startRetentionJob();
+const stopDailySummaryJob = startDailySummaryJob();
 
 bootstrapSuperAdmin()
   .catch((err) => console.error('Bootstrap failed:', err.message))
@@ -63,6 +65,7 @@ function shutdown(signal) {
   stopCycleCountJob();
   stopExpiryJob();
   stopRetentionJob();
+  stopDailySummaryJob();
   server.close(() => {
     console.log('HTTP server closed.');
     const { pool } = require('./src/config/db');

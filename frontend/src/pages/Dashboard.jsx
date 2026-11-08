@@ -4,6 +4,7 @@ import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { Metric, Alert } from '../components/ui.jsx';
 import { useCurrency } from '../context/CurrencyContext.jsx';
+import GettingStarted from '../components/GettingStarted.jsx';
 
 export default function Dashboard() {
   const { t } = useTranslation();
@@ -62,6 +63,7 @@ export default function Dashboard() {
         </div>
         <button className="btn secondary" onClick={shareSummary} disabled={!summary}>{t('dashboard.shareSummary')}</button>
       </div>
+      <GettingStarted />
 
       {notifications.length > 0 && (
         <div className="card">

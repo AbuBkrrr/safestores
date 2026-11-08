@@ -10,6 +10,17 @@ import { hideSplashScreen, setupStatusBar, registerPushOnLogin } from './mobile/
 import { init as initErrorMonitoring, ErrorBoundary } from './utils/errorMonitoring.js';
 import './i18n/config.js';
 import './styles/global.css';
+import { initPreferences } from './utils/preferences.js';
+
+initPreferences(); // theme + text size, before first paint
+
+// Offline start for the web edition (see public/sw.js). Not in the
+// Android (Capacitor) or desktop (Electron) shells — they ship the app
+// files locally already — and not in dev, where it would cache stale code.
+if (import.meta.env.PROD && import.meta.env.VITE_EDITION !== 'desktop' && 'serviceWorker' in navigator
+    && !(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform())) {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(() => {}); });
+}
 
 initErrorMonitoring(); // safe no-op if VITE_SENTRY_DSN wasn't set at build time — see that file
 

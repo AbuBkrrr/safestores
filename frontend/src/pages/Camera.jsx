@@ -215,7 +215,7 @@ export default function Camera() {
             <button className="btn">{t('cameraPage.lookUp')}</button>
           </form>
           {lookupResult && (
-            <div className="card mt-1" style={{ background: '#fafcfc' }}>
+            <div className="card mt-1" style={{ background: 'var(--bg)' }}>
               <strong>{lookupResult.name}</strong>
               <p className="muted">{t('cameraPage.sku')}: {lookupResult.sku} · {t('cameraPage.backroom')}: {lookupResult.backroom_qty} · {t('cameraPage.shelf')}: {lookupResult.shelf_qty}</p>
               <button className="btn small mt-1" onClick={addScannedToStock}>{t('cameraPage.addOneToBackroom')}</button>
@@ -223,7 +223,7 @@ export default function Camera() {
           )}
 
           {error && (
-            <div className="card mt-1" style={{ background: '#fafcfc' }}>
+            <div className="card mt-1" style={{ background: 'var(--bg)' }}>
               <strong>{t('cameraPage.noBarcodeTitle')}</strong>
               <p className="muted mt-1">{t('cameraPage.noBarcodeHelp')}</p>
               <input

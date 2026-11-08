@@ -78,7 +78,7 @@ export default function Receipts() {
       <div className="card">
         <h3 className="mt-1" style={{ marginBottom: 12 }}>{t('receiptsPage.receiptHistory')}</h3>
         {receipts.map((r) => (
-          <div key={r.id} className="card" style={{ background: '#fafcfc' }}>
+          <div key={r.id} className="card" style={{ background: 'var(--bg)' }}>
             <div className="flex-between">
               <strong>{t('receiptsPage.receiptLabel', { id: r.id.slice(0, 8) })}</strong>
               <Badge status={r.status} />
