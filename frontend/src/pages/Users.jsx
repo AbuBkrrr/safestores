@@ -21,6 +21,17 @@ export default function Users() {
     load();
   };
 
+  const setPassword = async (u) => {
+    const password = prompt(t('usersPage.setPasswordPrompt', { name: u.name }));
+    if (!password) return;
+    try {
+      const { data } = await api.patch(`/stores/${user.storeId}/users/${u.id}/password`, { password });
+      showToast(data.message, 'success');
+    } catch (err) {
+      showToast(err.response?.data?.error || t('common.errorGeneric'), 'error');
+    }
+  };
+
   const removeUser = async (id) => {
     if (!confirm(t('usersPage.removeConfirm'))) return;
     await api.delete(`/stores/${user.storeId}/users/${id}`);
@@ -40,6 +51,9 @@ export default function Users() {
                 <td><Badge status={u.status === 'active' ? 'active' : 'suspended'} /></td>
                 <td>{new Date(u.created_at).toLocaleDateString()}</td>
                 <td className="flex">
+                  {user.role === 'admin' && u.id !== user.id && (
+                    <button className="btn small secondary" onClick={() => setPassword(u)}>{t('usersPage.setPassword')}</button>
+                  )}
                   {u.role !== 'admin' && (
                     <>
                       <button className="btn small secondary" onClick={() => toggleStatus(u)}>

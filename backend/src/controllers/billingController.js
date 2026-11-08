@@ -150,6 +150,7 @@ async function markPaid(req, res) {
     const charge = await markChargePaid(id, { markedPaidBy: req.user.sub, paidVia: 'manual' });
     if (!charge) return res.status(404).json({ error: 'Charge not found' });
     res.json(charge);
+    require('../utils/activityLog').logActivity(req, { storeId: charge.store_id || null, action: 'billing.charge_marked_paid', entityType: 'billing_charge', entityId: id, details: { amount: charge.amount_due } });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to mark charge paid' });

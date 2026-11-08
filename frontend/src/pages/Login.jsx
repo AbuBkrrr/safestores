@@ -13,6 +13,10 @@ export default function Login() {
   const [tab, setTab] = useState(inviteFromLink ? 'invite' : 'admin'); // 'admin' | 'invite'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [otp, setOtp] = useState('');
+  const [needOtp, setNeedOtp] = useState(false);
+  const [storeChoices, setStoreChoices] = useState(null);
+  const [storeId, setStoreId] = useState('');
   const [code, setCode] = useState(inviteFromLink ? inviteFromLink.toUpperCase() : '');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -33,12 +37,17 @@ export default function Login() {
     e.preventDefault();
     setError(''); setLoading(true);
     try {
-      const { data } = await api.post('/auth/admin/login', { email, password });
+      const { data } = await api.post('/auth/admin/login', {
+        email, password, otp: needOtp ? otp : undefined, storeId: storeId || undefined,
+      });
       login(data.token, data.user);
       // A pending store's admin gets sent to activation instead of the dashboard.
       navigate(data.user.subscriptionStatus && data.user.subscriptionStatus !== 'active' ? '/activate-store' : '/');
     } catch (err) {
-      setError(err.response?.data?.error || 'Login failed');
+      const body = err.response?.data || {};
+      if (['TOTP_REQUIRED', 'TOTP_INVALID'].includes(body.code)) setNeedOtp(true);
+      if (body.code === 'CHOOSE_STORE') { setStoreChoices(body.stores); setStoreId(body.stores[0]?.id || ''); }
+      setError(body.error || 'Login failed');
     } finally {
       setLoading(false);
     }
@@ -79,8 +88,25 @@ export default function Login() {
             </div>
             <div className="form-group">
               <label htmlFor="login-password">{t('login.password')}</label>
-              <input id="login-password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <input id="login-password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <span className="help-text"><Link to="/forgot-password">{t('login.forgotPassword')}</Link></span>
             </div>
+            {storeChoices && (
+              <div className="form-group">
+                <label htmlFor="login-store">{t('login.chooseStore')}</label>
+                <select id="login-store" value={storeId} onChange={(e) => setStoreId(e.target.value)}>
+                  {storeChoices.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
+                <span className="help-text">{t('login.chooseStoreHelp')}</span>
+              </div>
+            )}
+            {needOtp && (
+              <div className="form-group">
+                <label htmlFor="login-otp">{t('login.twoFactorCode')}</label>
+                <input id="login-otp" inputMode="numeric" autoComplete="one-time-code" maxLength={6} autoFocus value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))} required />
+                <span className="help-text">{t('login.twoFactorHelp')}</span>
+              </div>
+            )}
             <button className="btn" style={{ width: '100%' }} disabled={loading}>
               {loading ? t('login.signingIn') : t('login.signIn')}
             </button>

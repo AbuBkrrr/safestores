@@ -35,6 +35,7 @@ function createApp() {
   // sensitive, and the public customer Storefront needs this too, not just
   // logged-in admin pages.
   app.get('/api/settings/currency', settingsCtrl.getCurrency);
+  app.use('/api/account', require('./routes/account'));
   app.use('/api/super', superRoutes);
   app.use('/api/stores/:storeId', storeRoutes);
 

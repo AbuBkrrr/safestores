@@ -2,22 +2,37 @@ const bcrypt = require('bcryptjs');
 const db = require('../config/db');
 const { signToken } = require('../utils/jwt');
 const { generateInviteCode } = require('../utils/codes');
+const totp = require('../utils/totp');
+const { checkPassword } = require('../utils/passwordPolicy');
+
+/** Second-factor gate shared by every password login. Returns null when
+ * the login may proceed, or a response body to send (401) otherwise. A
+ * missing code is answered with code TOTP_REQUIRED so the client can show
+ * the code box and resubmit the same credentials plus `otp`. */
+function twoFactorProblem(account, otp) {
+  if (!account.totp_enabled) return null;
+  if (!otp) return { error: 'Enter the 6-digit code from your authenticator app.', code: 'TOTP_REQUIRED' };
+  if (!totp.verifyCode(account.totp_secret, otp)) return { error: 'That code is not correct. Try the newest code in your app.', code: 'TOTP_INVALID' };
+  return null;
+}
 
 // ------------------------------------------------------------
 // POST /api/auth/super-admin/login
 // ------------------------------------------------------------
 async function superAdminLogin(req, res) {
-  const { email, password } = req.body;
+  const { email, password, otp } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
 
-  const { rows } = await db.query('SELECT * FROM super_admins WHERE email = $1', [email]);
+  const { rows } = await db.query('SELECT * FROM super_admins WHERE lower(email) = lower($1)', [email]);
   const admin = rows[0];
   if (!admin) return res.status(401).json({ error: 'Invalid credentials' });
 
   const ok = await bcrypt.compare(password, admin.password_hash);
   if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
+  const tf = twoFactorProblem(admin, otp);
+  if (tf) return res.status(401).json(tf);
 
-  const token = signToken({ sub: admin.id, role: 'super_admin', storeId: null });
+  const token = signToken({ sub: admin.id, role: 'super_admin', storeId: null, tv: admin.token_version || 0 });
   res.json({ token, user: { id: admin.id, name: admin.name, email: admin.email, role: 'super_admin' } });
 }
 
@@ -34,6 +49,8 @@ async function storeSignup(req, res) {
   if (!storeName || !adminName || !adminEmail || !password) {
     return res.status(400).json({ error: 'All fields are required' });
   }
+  const pwProblem = checkPassword(password);
+  if (pwProblem) return res.status(400).json({ error: pwProblem });
 
   const client = await db.pool.connect();
   try {
@@ -50,10 +67,12 @@ async function storeSignup(req, res) {
     const userResult = await client.query(
       `INSERT INTO users (store_id, name, email, password_hash, role)
        VALUES ($1, $2, $3, $4, 'admin') RETURNING id, name, email, role`,
-      [store.id, adminName, adminEmail, passwordHash]
+      [store.id, adminName, String(adminEmail).trim(), passwordHash]
     );
 
     await client.query('COMMIT');
+    // Fire-and-forget: a mail outage must never block registration.
+    require('./accountController').sendVerificationEmail(userResult.rows[0]).catch(() => {});
     res.status(201).json({
       message: 'Store registered! You can log in right away to activate your subscription with an access code.',
       store,
@@ -74,20 +93,34 @@ async function storeSignup(req, res) {
 // body: { email, password }
 // ------------------------------------------------------------
 async function adminLogin(req, res) {
-  const { email, password } = req.body;
+  const { email, password, otp, storeId: chosenStoreId } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
 
+  // The same email can belong to accounts at several stores (e.g. an owner
+  // of two shops). Try each one whose password matches; if more than one
+  // matches and the client didn't say which store, ask it to choose.
   const { rows } = await db.query(
     `SELECT u.*, s.subscription_status, s.name AS store_name, s.sync_key, s.locked
      FROM users u JOIN stores s ON s.id = u.store_id
-     WHERE u.email = $1 AND u.password_hash IS NOT NULL`,
+     WHERE lower(u.email) = lower($1) AND u.password_hash IS NOT NULL
+     ORDER BY u.created_at ASC`,
     [email]
   );
-  const user = rows[0];
-  if (!user) return res.status(401).json({ error: 'Invalid credentials' });
-
-  const ok = await bcrypt.compare(password, user.password_hash);
-  if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
+  const matches = [];
+  for (const candidate of rows) {
+    if (chosenStoreId && candidate.store_id !== chosenStoreId) continue;
+    // eslint-disable-next-line no-await-in-loop
+    if (await bcrypt.compare(password, candidate.password_hash)) matches.push(candidate);
+  }
+  if (matches.length === 0) return res.status(401).json({ error: 'Invalid credentials' });
+  if (matches.length > 1) {
+    return res.status(409).json({
+      error: 'This email is used at more than one store. Choose which store to sign in to.',
+      code: 'CHOOSE_STORE',
+      stores: matches.map((m) => ({ id: m.store_id, name: m.store_name })),
+    });
+  }
+  const user = matches[0];
 
   if (user.subscription_status === 'suspended') {
     return res.status(403).json({ error: 'This store\'s subscription is suspended. Contact support.' });
@@ -103,13 +136,17 @@ async function adminLogin(req, res) {
     return res.status(403).json({ error: 'This store is not yet activated. Ask your admin to activate it first.' });
   }
 
-  const token = signToken({ sub: user.id, role: user.role, storeId: user.store_id });
+  const tf = twoFactorProblem(user, otp);
+  if (tf) return res.status(401).json(tf);
+
+  const token = signToken({ sub: user.id, role: user.role, storeId: user.store_id, tv: user.token_version || 0 });
   res.json({
     token,
     user: {
       id: user.id, name: user.name, email: user.email, role: user.role,
       storeId: user.store_id, storeName: user.store_name, subscriptionStatus: user.subscription_status,
       syncKey: user.sync_key, locked: !!user.locked,
+      emailVerified: !!user.email_verified_at, twoFactorEnabled: !!user.totp_enabled,
     },
   });
 }
@@ -149,6 +186,7 @@ async function inviteLogin(req, res) {
     }
 
     let userId = invite.claimed_by_user;
+    let tokenVersion = 0;
 
     if (invite.status === 'pending') {
       // First use: create the user now and mark invite claimed.
@@ -168,16 +206,17 @@ async function inviteLogin(req, res) {
       // accounts never get one), so a store admin disabling them in
       // Users.jsx must actually block this path too, not just their
       // existing session (see requireAuth's matching check for that half).
-      const { rows: userRows } = await client.query('SELECT status FROM users WHERE id = $1', [userId]);
+      const { rows: userRows } = await client.query('SELECT status, token_version FROM users WHERE id = $1', [userId]);
       if (!userRows[0] || userRows[0].status !== 'active') {
         await client.query('ROLLBACK');
         return res.status(403).json({ error: 'This account is no longer active. Contact your store admin.', code: 'ACCOUNT_DISABLED' });
       }
+      tokenVersion = userRows[0].token_version || 0;
     }
 
     await client.query('COMMIT');
 
-    const token = signToken({ sub: userId, role: invite.role, storeId: invite.store_id });
+    const token = signToken({ sub: userId, role: invite.role, storeId: invite.store_id, tv: tokenVersion });
     res.json({ token, user: { id: userId, name: invite.name, role: invite.role, storeId: invite.store_id, syncKey: invite.sync_key } });
   } catch (err) {
     await client.query('ROLLBACK');

@@ -11,6 +11,7 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 router.use(requireAuth, requireRole('super_admin'));
 
 router.get('/stores', ctrl.listStores);
+router.get('/activity', require('../controllers/accountController').listActivity);
 router.get('/referrals', ctrl.listReferrals);
 router.post('/stores', ctrl.createStore);
 router.patch('/stores/:id', ctrl.updateStore);

@@ -1,6 +1,9 @@
 const crypto = require('crypto');
 const db = require('../db');
 const { generateInviteCode } = require('../utils/codes');
+const bcrypt = require('bcryptjs');
+const { checkPassword } = require('../utils/passwordPolicy');
+const { logActivity } = require('../utils/activityLog');
 
 // GET /api/stores/:storeId/users
 function listUsers(req, res) {
@@ -27,6 +30,22 @@ function updateUserStatus(req, res) {
   const user = db.prepare('SELECT id, name, status FROM users WHERE id = ?').get(userId);
   if (!user) return res.status(404).json({ error: 'User not found' });
   res.json(user);
+  logActivity(req, { storeId, action: `user.${status === 'active' ? 'enabled' : 'disabled'}`, entityType: 'user', entityId: userId, details: { name: user.name } });
+}
+
+// PATCH /api/stores/:storeId/users/:userId/password { password } — admin sets
+// a staff member's password (offline stand-in for an emailed reset link).
+// Signs that person out everywhere.
+async function setUserPassword(req, res) {
+  const { storeId, userId } = req.params;
+  const problem = checkPassword(req.body?.password);
+  if (problem) return res.status(400).json({ error: problem });
+  const user = db.prepare('SELECT id, name FROM users WHERE id = ? AND store_id = ?').get(userId, storeId);
+  if (!user) return res.status(404).json({ error: 'User not found' });
+  const hash = await bcrypt.hash(req.body.password, 10);
+  db.prepare('UPDATE users SET password_hash = ?, token_version = token_version + 1 WHERE id = ?').run(hash, userId);
+  logActivity(req, { storeId, action: 'user.password_set_by_admin', entityType: 'user', entityId: userId, details: { name: user.name } });
+  res.json({ message: `Password set for ${user.name}. They have been signed out of other devices.` });
 }
 
 // GET /api/stores/:storeId/invites
@@ -104,6 +123,7 @@ function revokeInvite(req, res) {
 }
 
 module.exports = {
+  setUserPassword,
   listUsers, removeUser, updateUserStatus,
   listInvites, createInvite, createBulkInvites, revokeInvite,
 };

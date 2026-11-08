@@ -16,7 +16,7 @@ async function superAdminLogin(req, res) {
   const ok = await bcrypt.compare(password, admin.password_hash);
   if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
 
-  const token = signToken({ sub: admin.id, role: 'super_admin', storeId: null });
+  const token = signToken({ sub: admin.id, role: 'super_admin', storeId: null, tv: admin.token_version || 0 });
   res.json({ token, user: { id: admin.id, name: admin.name, email: admin.email, role: 'super_admin' } });
 }
 
@@ -95,7 +95,7 @@ async function adminLogin(req, res) {
     return res.status(403).json({ error: 'This store is not yet activated. Ask your admin to activate it first.' });
   }
 
-  const token = signToken({ sub: user.id, role: user.role, storeId: user.store_id });
+  const token = signToken({ sub: user.id, role: user.role, storeId: user.store_id, tv: user.token_version || 0 });
   res.json({
     token,
     user: {
@@ -136,18 +136,19 @@ async function inviteLogin(req, res) {
         // password_hash), so a store admin disabling them in Users.jsx
         // must actually block this path too, not just their existing
         // session (see requireAuth's matching check for that half).
-        const user = db.prepare('SELECT status FROM users WHERE id = ?').get(userId);
+        const user = db.prepare('SELECT status, token_version FROM users WHERE id = ?').get(userId);
         if (!user || user.status !== 'active') {
           return { error: [403, 'This account is no longer active. Contact your store admin.'] };
         }
       }
 
-      return { userId, role: invite.role, storeId: invite.store_id, name: invite.name };
+      const tv = db.prepare('SELECT token_version FROM users WHERE id = ?').get(userId)?.token_version || 0;
+      return { userId, role: invite.role, storeId: invite.store_id, name: invite.name, tv };
     })();
 
     if (result.error) return res.status(result.error[0]).json({ error: result.error[1] });
 
-    const token = signToken({ sub: result.userId, role: result.role, storeId: result.storeId });
+    const token = signToken({ sub: result.userId, role: result.role, storeId: result.storeId, tv: result.tv });
     res.json({ token, user: { id: result.userId, name: result.name, role: result.role, storeId: result.storeId } });
   } catch (err) {
     console.error(err);

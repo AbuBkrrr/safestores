@@ -9,6 +9,8 @@ export default function SuperLogin() {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [otp, setOtp] = useState('');
+  const [needOtp, setNeedOtp] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
@@ -18,10 +20,11 @@ export default function SuperLogin() {
     e.preventDefault();
     setError(''); setLoading(true);
     try {
-      const { data } = await api.post('/auth/super-admin/login', { email, password });
+      const { data } = await api.post('/auth/super-admin/login', { email, password, otp: needOtp ? otp : undefined });
       login(data.token, data.user);
       navigate('/super');
     } catch (err) {
+      if (['TOTP_REQUIRED', 'TOTP_INVALID'].includes(err.response?.data?.code)) setNeedOtp(true);
       setError(err.response?.data?.error || t('superLoginPage.loginFailed'));
     } finally {
       setLoading(false);
@@ -43,6 +46,13 @@ export default function SuperLogin() {
             <label>{t('login.password')}</label>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
+          {needOtp && (
+            <div className="form-group">
+              <label htmlFor="super-otp">{t('login.twoFactorCode')}</label>
+              <input id="super-otp" inputMode="numeric" autoComplete="one-time-code" maxLength={6} autoFocus value={otp} onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))} required />
+              <span className="help-text">{t('login.twoFactorHelp')}</span>
+            </div>
+          )}
           <button className="btn gold" style={{ width: '100%' }} disabled={loading}>
             {loading ? t('login.signingIn') : t('superLoginPage.submit')}
           </button>

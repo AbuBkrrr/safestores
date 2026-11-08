@@ -7,6 +7,9 @@
 
 const crypto = require('crypto');
 const db = require('../config/db');
+const { logActivity } = require('../utils/activityLog');
+const bcrypt = require('bcryptjs');
+const { checkPassword } = require('../utils/passwordPolicy');
 const { generateInviteCode } = require('../utils/codes');
 
 // GET /api/stores/:storeId/users
@@ -25,6 +28,7 @@ async function removeUser(req, res) {
   const { rowCount } = await db.query('DELETE FROM users WHERE id = $1 AND store_id = $2', [userId, storeId]);
   if (rowCount === 0) return res.status(404).json({ error: 'User not found' });
   res.status(204).end();
+  logActivity(req, { storeId, action: 'user.removed', entityType: 'user', entityId: userId });
 }
 
 // PATCH /api/stores/:storeId/users/:userId  { status }
@@ -38,6 +42,24 @@ async function updateUserStatus(req, res) {
   );
   if (!rows[0]) return res.status(404).json({ error: 'User not found' });
   res.json(rows[0]);
+  logActivity(req, { storeId, action: `user.${status === 'active' ? 'enabled' : 'disabled'}`, entityType: 'user', entityId: userId, details: { name: rows[0].name } });
+}
+
+// PATCH /api/stores/:storeId/users/:userId/password { password } — admin sets
+// a staff member's password (works with no email server at all). Signs
+// that person out everywhere.
+async function setUserPassword(req, res) {
+  const { storeId, userId } = req.params;
+  const problem = checkPassword(req.body?.password);
+  if (problem) return res.status(400).json({ error: problem });
+  const hash = await bcrypt.hash(req.body.password, 10);
+  const { rows } = await db.query(
+    'UPDATE users SET password_hash = $1, token_version = token_version + 1 WHERE id = $2 AND store_id = $3 RETURNING id, name',
+    [hash, userId, storeId]
+  );
+  if (!rows[0]) return res.status(404).json({ error: 'User not found' });
+  logActivity(req, { storeId, action: 'user.password_set_by_admin', entityType: 'user', entityId: userId, details: { name: rows[0].name } });
+  res.json({ message: `Password set for ${rows[0].name}. They have been signed out of other devices.` });
 }
 
 // GET /api/stores/:storeId/invites
@@ -121,6 +143,7 @@ async function revokeInvite(req, res) {
 }
 
 module.exports = {
+  setUserPassword,
   listUsers, removeUser, updateUserStatus,
   listInvites, createInvite, createBulkInvites, revokeInvite,
 };

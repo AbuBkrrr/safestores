@@ -36,6 +36,8 @@ const storeNav = [
   { group: 'administration', to: '/export', navKey: 'export', icon: '⬇️', roles: ['admin'] },
   { group: 'administration', to: '/support', navKey: 'support', icon: '🎧', roles: ['admin', 'manager'] },
   { group: 'administration', to: '/integrations', navKey: 'integrations', icon: '🔌', roles: ['admin'] },
+  { group: 'administration', to: '/activity', navKey: 'activity', icon: '🕓', roles: ['admin', 'manager'] },
+  { group: 'administration', to: '/account', navKey: 'account', icon: '👤' },
   { group: 'reports', to: '/reports', navKey: 'reports', icon: '📄' },
   { group: 'reports', to: '/shrinkage-report', navKey: 'shrinkage', icon: '📉', roles: ['admin', 'manager'] },
 ];
@@ -65,6 +67,8 @@ const superNav = [
   { group: 'Administration', to: '/super/subscriptions', label: '💳 Tiers & Codes', icon: '💳', text: 'Tiers & Codes' },
   { group: 'Administration', to: '/super/billing', label: '💰 Billing Charges', icon: '💰', text: 'Billing Charges' },
   { group: 'Administration', to: '/super/support', label: '🎧 Support Tickets', icon: '🎧', text: 'Support Tickets' },
+  { group: 'Administration', to: '/super/activity', label: '🕓 Activity Log', icon: '🕓', text: 'Activity Log' },
+  { group: 'Administration', to: '/super/account', label: '👤 My Account', icon: '👤', text: 'My Account' },
 ];
 const superMarketplaceNav = [
   { group: 'Marketplace', to: '/super/marketplace', label: '🛒 Marketplace Control', icon: '🛒', text: 'Marketplace Control' },

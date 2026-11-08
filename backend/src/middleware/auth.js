@@ -20,9 +20,19 @@ async function authenticateJwt(req) {
 
   try {
     if (['admin', 'manager', 'staff', 'cashier', 'checkout', 'stock_taker'].includes(user.role)) {
-      const { rows } = await db.query('SELECT status FROM users WHERE id = $1', [user.sub]);
+      const { rows } = await db.query('SELECT status, token_version FROM users WHERE id = $1', [user.sub]);
       if (!rows[0] || rows[0].status !== 'active') {
         return { ok: false, status: 401, body: { error: 'This account is no longer active. Contact your store admin.', code: 'ACCOUNT_DISABLED' } };
+      }
+      // token_version is bumped by password change/reset and "sign out
+      // everywhere" — any token minted before that is no longer accepted.
+      if ((user.tv || 0) !== (rows[0].token_version || 0)) {
+        return { ok: false, status: 401, body: { error: 'Your session has ended. Please sign in again.', code: 'SESSION_REVOKED' } };
+      }
+    } else if (user.role === 'super_admin') {
+      const { rows } = await db.query('SELECT token_version FROM super_admins WHERE id = $1', [user.sub]);
+      if (!rows[0] || (user.tv || 0) !== (rows[0].token_version || 0)) {
+        return { ok: false, status: 401, body: { error: 'Your session has ended. Please sign in again.', code: 'SESSION_REVOKED' } };
       }
     } else if (user.role === 'auditor') {
       const { rows } = await db.query('SELECT status FROM auditors WHERE id = $1', [user.sub]);

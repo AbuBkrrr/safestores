@@ -223,6 +223,8 @@ if (!paymentSettingsColumns.includes('gateway_enabled')) {
   db.exec('ALTER TABLE payment_settings ADD COLUMN gateway_enabled INTEGER NOT NULL DEFAULT 0');
 }
 
+require('./schemaUpgrades').applySchemaUpgrades(db);
+
 module.exports = db;
 module.exports.dbPath = dbPath;
 module.exports.uploadsDir = path.join(userDataDir, 'uploads');

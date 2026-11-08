@@ -76,7 +76,10 @@ api.interceptors.response.use(
     const config = err.config || {};
     const isNetworkError = !err.response;
 
-    if (err.response?.status === 401) {
+    // A 401 from a sign-in call (wrong password, 2FA code needed) is part
+    // of that form's normal flow — only a 401 on an authenticated call
+    // means the session itself is gone.
+    if (err.response?.status === 401 && !String(config.url || '').startsWith('/auth/')) {
       localStorage.removeItem('ss_token');
       localStorage.removeItem('ss_user');
       if (!window.location.pathname.startsWith('/login')) {

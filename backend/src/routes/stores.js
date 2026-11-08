@@ -120,6 +120,15 @@ router.post('/billing/charges/:chargeId/pay/verify', requireRole('admin', 'manag
 // kept reachable regardless of lock state so a locked store's admin still
 // sees why/what's going on.
 router.get('/notifications', storeNotifCtrl.list);
+
+// Store closure (data-protection erasure, 30-day grace) and the activity
+// log stay reachable for a locked store too — an owner leaving because
+// of billing must still be able to close their account and see history.
+const accountCtrl = require('../controllers/accountController');
+router.get('/deletion', requireRole('admin'), accountCtrl.getStoreDeletion);
+router.post('/deletion', requireRole('admin'), accountCtrl.requestStoreDeletion);
+router.delete('/deletion', requireRole('admin'), accountCtrl.cancelStoreDeletion);
+router.get('/activity', requireRole('admin', 'manager'), accountCtrl.listActivity);
 router.patch('/notifications/:id/read', storeNotifCtrl.markRead);
 
 // Everything below requires the store to actually be active (requireActiveStore
@@ -130,6 +139,7 @@ router.use(requireActiveStore);
 router.get('/users', usersCtrl.listUsers);
 router.delete('/users/:userId', requireRole('admin'), usersCtrl.removeUser);
 router.patch('/users/:userId', requireRole('admin'), usersCtrl.updateUserStatus);
+router.patch('/users/:userId/password', requireRole('admin'), usersCtrl.setUserPassword);
 router.get('/invites', usersCtrl.listInvites);
 router.post('/invites', requireRole('admin', 'manager'), usersCtrl.createInvite);
 router.post('/invites/bulk', requireRole('admin', 'manager'), usersCtrl.createBulkInvites);

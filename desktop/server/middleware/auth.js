@@ -22,9 +22,17 @@ function requireAuth(req, res, next) {
   }
 
   if (['admin', 'manager', 'staff', 'cashier', 'checkout'].includes(req.user.role)) {
-    const user = db.prepare('SELECT status FROM users WHERE id = ?').get(req.user.sub);
+    const user = db.prepare('SELECT status, token_version FROM users WHERE id = ?').get(req.user.sub);
     if (!user || user.status !== 'active') {
       return res.status(401).json({ error: 'This account is no longer active. Contact your store admin.', code: 'ACCOUNT_DISABLED' });
+    }
+    if ((req.user.tv || 0) !== (user.token_version || 0)) {
+      return res.status(401).json({ error: 'Your session has ended. Please sign in again.', code: 'SESSION_REVOKED' });
+    }
+  } else if (req.user.role === 'super_admin') {
+    const sa = db.prepare('SELECT token_version FROM super_admins WHERE id = ?').get(req.user.sub);
+    if (!sa || (req.user.tv || 0) !== (sa.token_version || 0)) {
+      return res.status(401).json({ error: 'Your session has ended. Please sign in again.', code: 'SESSION_REVOKED' });
     }
   }
 

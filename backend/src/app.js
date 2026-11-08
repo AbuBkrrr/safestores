@@ -96,6 +96,7 @@ function createApp() {
   // store's admin needs this to know how to pay in the first place.
   app.get('/api/settings/payment-instructions', requireAuth, billingCtrl.getPaymentSettings);
   app.get('/api/settings/currency', settingsCtrl.getCurrency);
+  app.use('/api/account', require('./routes/account'));
   app.use('/api/super', superRoutes);
   app.use('/api/stores/:storeId', storeRoutes);
   app.use('/api/auditor', auditorRoutes);

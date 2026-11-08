@@ -203,6 +203,7 @@ async function suspendStore(req, res) {
   );
   if (!rows[0]) return res.status(404).json({ error: 'Store not found' });
   res.json(rows[0]);
+  require('../utils/activityLog').logActivity(req, { storeId: id, action: 'store.suspended', entityType: 'store', entityId: id });
 }
 
 // DELETE /api/super/stores/:id

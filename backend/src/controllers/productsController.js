@@ -10,6 +10,7 @@
 // ------------------------------------------------------------
 
 const db = require('../config/db');
+const { logActivity } = require('../utils/activityLog');
 const { findOrCreateSupplier } = require('../utils/supplierLookup');
 const { emitToStore } = require('../realtime');
 
@@ -130,6 +131,7 @@ const CAMEL_TO_SNAKE = {
 // PUT /api/stores/:storeId/products/:productId
 async function updateProduct(req, res) {
   const { storeId, productId } = req.params;
+  const { rows: beforeRows } = await db.query('SELECT name, cost_price, price_multiplier FROM products WHERE id = $1 AND store_id = $2', [productId, storeId]);
 
   const client = await db.pool.connect();
   try {
@@ -165,6 +167,14 @@ async function updateProduct(req, res) {
     const product = rows[0];
     if (!product) return res.status(404).json({ error: 'Product not found' });
     res.json(product);
+    const before = beforeRows[0];
+    if (before && (Number(before.cost_price) !== Number(product.cost_price) || Number(before.price_multiplier) !== Number(product.price_multiplier))) {
+      logActivity(req, { storeId, action: 'product.price_changed', entityType: 'product', entityId: productId, details: {
+        name: product.name,
+        from: Number(before.cost_price) * Number(before.price_multiplier),
+        to: Number(product.cost_price) * Number(product.price_multiplier),
+      } });
+    }
     try {
       emitToStore(storeId, 'product:updated', product);
     } catch (sideEffectErr) {
@@ -192,6 +202,7 @@ async function deleteProduct(req, res) {
   );
   if (rowCount === 0) return res.status(404).json({ error: 'Product not found or already archived' });
   res.status(204).end();
+  logActivity(req, { storeId, action: 'product.archived', entityType: 'product', entityId: productId });
   emitToStore(storeId, 'product:deleted', { id: productId });
 }
 

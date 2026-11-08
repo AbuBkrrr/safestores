@@ -97,7 +97,9 @@
       "workingOffline": "Working offline — saved on this device"
     },
     "shrinkage": "Shrinkage",
-    "lendingPartners": "Lending Partners"
+    "lendingPartners": "Lending Partners",
+    "account": "My Account",
+    "activity": "Activity Log"
   },
   "login": {
     "welcomeBack": "Welcome Back",
@@ -115,7 +117,12 @@
     "enterWithCode": "Enter with Code",
     "newStore": "New store?",
     "registerStore": "Register your store",
-    "superAdminLogin": "Super Admin login →"
+    "superAdminLogin": "Super Admin login →",
+    "forgotPassword": "Forgot password?",
+    "twoFactorCode": "Authenticator code",
+    "twoFactorHelp": "Open your authenticator app and enter the 6-digit code for SAFE Stores.",
+    "chooseStore": "Which store?",
+    "chooseStoreHelp": "This email is used at more than one store. Pick the one to sign in to."
   },
   "dashboard": {
     "title": "Dashboard",
@@ -457,7 +464,9 @@
     "enable": "Enable",
     "remove": "Remove",
     "removeConfirm": "Remove this user?",
-    "statusChanged": "{{name}} is now {{status}}"
+    "statusChanged": "{{name}} is now {{status}}",
+    "setPassword": "Set password",
+    "setPasswordPrompt": "New password for {{name}} (at least 8 characters):"
   },
   "cameraPage": {
     "title": "Camera & QR Scanner",
@@ -1021,5 +1030,79 @@
     "loginFailed": "Login failed",
     "submit": "⭐ Access Super Admin",
     "backToStore": "← Back to store login"
+  },
+  "forgotPage": {
+    "title": "Reset your password",
+    "subtitle": "Enter the email you sign in with. We'll send you a link to choose a new password.",
+    "send": "Send reset link",
+    "sending": "Sending…",
+    "backToLogin": "Back to sign in",
+    "noEmailHint": "Staff without an email address: ask your store admin to set a new password for you from the Users page."
+  },
+  "resetPage": {
+    "title": "Choose a new password",
+    "newPassword": "New password",
+    "confirmPassword": "Confirm new password",
+    "mismatch": "The two passwords don't match.",
+    "save": "Save new password",
+    "missingToken": "This link is incomplete. Open the link from your email again, or request a new one.",
+    "done": "Password updated. You can sign in now.",
+    "goToLogin": "Go to sign in"
+  },
+  "verifyPage": {
+    "title": "Confirm your email",
+    "working": "Confirming…",
+    "continue": "Continue"
+  },
+  "passwordHint": "At least 8 characters. A short phrase is easier to remember and harder to guess.",
+  "accountPage": {
+    "title": "My Account",
+    "profile": "Profile",
+    "emailNotVerified": "Your email isn't confirmed yet. Confirming it lets you reset your password if you forget it.",
+    "resend": "Resend confirmation email",
+    "changePassword": "Change password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "updatePassword": "Update password",
+    "twoFactor": "Two-factor sign-in",
+    "twoFactorIntro": "Add a second step to sign-in using a free authenticator app (Google Authenticator, Microsoft Authenticator, Authy…). Even if someone learns your password, they can't sign in without your phone.",
+    "twoFactorOn": "Two-factor sign-in is ON.",
+    "twoFactorOff": "Two-factor sign-in is off.",
+    "turnOn": "Set up two-factor",
+    "turnOff": "Turn off two-factor",
+    "scanQr": "1. Scan this QR code with your authenticator app (or type the key below).",
+    "enterCode": "2. Enter the 6-digit code it shows:",
+    "confirmCode": "Confirm and turn on",
+    "codeLabel": "6-digit code",
+    "passwordLabel": "Password",
+    "notAvailableDesktop": "Two-factor sign-in is available on the online (web) edition.",
+    "sessions": "Devices & sessions",
+    "sessionsIntro": "Lost a phone or used a shared computer? Sign out everywhere else.",
+    "logoutAll": "Sign out all other devices",
+    "yourData": "Your data",
+    "yourDataIntro": "Download a copy of the personal data SAFE Stores holds about you.",
+    "download": "Download my data",
+    "deleteAccount": "Delete my account",
+    "deleteAccountIntro": "Removes your name, email and login. Sales you recorded stay in the store's books as \"Deleted user\".",
+    "deleteConfirm": "Delete your account permanently? This cannot be undone.",
+    "closeStore": "Close store and delete all data",
+    "closeStoreIntro": "Permanently deletes this store and everything in it after a 30-day grace period. You can cancel during those 30 days.",
+    "typeStoreName": "Type the store name to confirm",
+    "scheduledFor": "This store is scheduled for permanent deletion on {{date}}.",
+    "cancelDeletion": "Cancel deletion",
+    "requestDeletion": "Schedule deletion"
+  },
+  "activityPage": {
+    "title": "Activity Log",
+    "subtitle": "Who did what, and when — price changes, refunds, discounts, users, security changes.",
+    "when": "When",
+    "who": "Who",
+    "action": "Action",
+    "details": "Details",
+    "store": "Store",
+    "filter": "Filter",
+    "all": "All actions",
+    "empty": "Nothing recorded yet.",
+    "loadMore": "Load more"
   }
 }

@@ -6,6 +6,11 @@ import Signup from './pages/Signup.jsx';
 import SuperLogin from './pages/SuperLogin.jsx';
 import Setup from './pages/Setup.jsx';
 import ActivateStore from './pages/ActivateStore.jsx';
+import ForgotPassword from './pages/ForgotPassword.jsx';
+import ResetPassword from './pages/ResetPassword.jsx';
+import VerifyEmail from './pages/VerifyEmail.jsx';
+import Account from './pages/Account.jsx';
+import ActivityLog from './pages/ActivityLog.jsx';
 import Layout from './components/Layout.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import { useAuth } from './context/AuthContext.jsx';
@@ -105,6 +110,9 @@ export default function App() {
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
+      <Route path="/verify-email" element={<VerifyEmail />} />
       {APP_VARIANT === 'superadmin' && <Route path="/super-login" element={<SuperLogin />} />}
       <Route path="/auditor-signup" element={<AuditorSignup />} />
       <Route path="/auditor-login" element={<AuditorLogin />} />
@@ -131,6 +139,9 @@ export default function App() {
             resolve. */}
         <Route path="/activate-store" element={<ActivateStore />} />
         <Route path="/billing" element={<BillingStatus />} />
+        {/* Account + activity stay reachable for pending/locked stores too. */}
+        <Route path="/account" element={<Account />} />
+        <Route path="/activity" element={<ActivityLog />} />
       </Route>
 
       {/* Auditor-marketplace portal — separate role, not store-scoped.
@@ -204,6 +215,8 @@ export default function App() {
           <Route path="/super/users" element={<AllUsers />} />
           <Route path="/super/referrals" element={<Referrals />} />
           <Route path="/super/support" element={<SupportTickets />} />
+          <Route path="/super/activity" element={<ActivityLog />} />
+          <Route path="/super/account" element={<Account />} />
         </Route>
       )}
 

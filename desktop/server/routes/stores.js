@@ -36,6 +36,9 @@ router.use(requireAuth, scopeToOwnStore);
 // store's admin activates it in the first place.
 router.post('/redeem-code', requireRole('admin'), storesCtrl.redeemCode);
 
+// Activity log — reachable even while locked (see cloud routes/stores.js).
+router.get('/activity', requireRole('admin', 'manager'), require('../controllers/accountController').listActivity);
+
 // Everything below requires the store to actually be active.
 router.use(requireActiveStore);
 
@@ -61,6 +64,7 @@ router.patch('/notifications/:id/read', storeNotifCtrl.markRead);
 router.get('/users', usersCtrl.listUsers);
 router.delete('/users/:userId', requireRole('admin'), usersCtrl.removeUser);
 router.patch('/users/:userId', requireRole('admin'), usersCtrl.updateUserStatus);
+router.patch('/users/:userId/password', requireRole('admin'), usersCtrl.setUserPassword);
 
 router.get('/invites', usersCtrl.listInvites);
 router.post('/invites', requireRole('admin', 'manager'), usersCtrl.createInvite);
