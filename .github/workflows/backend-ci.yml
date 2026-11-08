@@ -1,0 +1,71 @@
+name: Backend (cloud) CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+  pull_request:
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: safestores_jest
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Audit production dependencies (fails the build on moderate+ vulnerabilities)
+        run: npm audit --omit=dev --audit-level=moderate
+
+      - name: Run test suite
+        run: npm test
+        env:
+          NODE_ENV: test
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/safestores_jest
+          JWT_SECRET: ci_only_jwt_secret_do_not_use_in_prod_1234567890
+          JWT_EXPIRES_IN: 1h
+          FRONTEND_URL: http://localhost:5173
+
+      - name: Verify the app actually boots with real config validation
+        run: |
+          cp .env.example .env
+          sed -i "s#postgres://user:password@your-db-host:5432/safestores#postgres://postgres:postgres@localhost:5432/safestores_jest#" .env
+          sed -i "s#NODE_ENV=production#NODE_ENV=development#" .env
+          sed -i "s#DATABASE_SSL=require#DATABASE_SSL=disable#" .env
+          SECRET=$(node -e "console.log(require('crypto').randomBytes(48).toString('hex'))")
+          sed -i "s#JWT_SECRET=change_this_to_a_long_random_string#JWT_SECRET=$SECRET#" .env
+          node src/db/migrate.js
+          timeout 5 node server.js &
+          sleep 2
+          curl -sf http://localhost:4000/api/settings/currency || (echo "Server did not boot correctly" && exit 1)

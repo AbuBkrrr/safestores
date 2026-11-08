@@ -1,0 +1,91 @@
+# Render Blueprint — deploys everything in one shot from the Render
+# dashboard's "New > Blueprint" flow, which reads this file automatically
+# once it's committed at the repo root.
+#
+# What this creates:
+#   1. A managed Postgres database
+#   2. The backend as a Docker web service (uses backend/Dockerfile)
+#   3. The frontend as a static site (built with VITE_API_URL pointed at
+#      the backend's public URL)
+#
+# IMPORTANT — service URLs are hardcoded below (not looked up via
+# `fromService`): Render's Blueprint spec only exposes another service's
+# bare hostname that way (no https:// scheme), which breaks both CORS
+# (FRONTEND_URL) and API calls (VITE_API_URL) if used directly. Render
+# assigns predictable URLs of the form https://<service-name>.onrender.com,
+# so as long as you keep the `name:` fields below exactly as they are,
+# these hardcoded URLs are correct on first deploy. If you rename either
+# service in the Render dashboard, or attach a custom domain, update the
+# two URLs below (and redeploy) to match.
+#
+# After the blueprint finishes deploying once, go set the real values for
+# JWT_SECRET and BOOTSTRAP_SUPER_ADMIN_PASSWORD (marked sync: false below,
+# meaning Render will prompt you for them rather than storing a guessed
+# value) — see the root-level DEPLOY_RAILWAY_RENDER.md for the exact
+# commands to generate them.
+databases:
+  - name: safestores-db
+    plan: free
+    databaseName: safestores
+    user: safestores
+
+services:
+  - type: web
+    name: safestores-backend
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    plan: free
+    healthCheckPath: /api/settings/currency
+    # Overrides the Dockerfile's plain `CMD` — same reasoning as
+    # docker-compose.yml's own `command:` override: migrations need to run
+    # once before the app starts serving traffic. Render's paid-tier-only
+    # "pre-deploy command" would be the cleaner mechanism for this, but
+    # this free-tier blueprint can't rely on a paid feature; migrate.js is
+    # idempotent (tracks applied versions in schema_migrations), so
+    # running it on every boot is safe for a single-instance service like
+    # this. If you later scale this service to multiple instances, switch
+    # to Render's pre-deploy command instead and remove this override, to
+    # avoid two instances racing to apply the same new migration.
+    dockerCommand: sh -c "node src/db/migrate.js && node server.js"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: safestores-db
+          property: connectionString
+      - key: DATABASE_SSL
+        value: require
+      - key: DB_POOL_MAX
+        value: "10"
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      # See the file-level note above on why this is a literal URL rather
+      # than a fromService reference.
+      - key: FRONTEND_URL
+        value: https://safestores-frontend.onrender.com
+      - key: BOOTSTRAP_SUPER_ADMIN_NAME
+        value: Super Admin
+      - key: BOOTSTRAP_SUPER_ADMIN_EMAIL
+        sync: false
+      - key: BOOTSTRAP_SUPER_ADMIN_PASSWORD
+        sync: false
+
+  - type: web
+    name: safestores-frontend
+    runtime: static
+    buildCommand: cd frontend && npm ci && npm run build
+    staticPublishPath: ./frontend/dist
+    envVars:
+      # Same note as FRONTEND_URL above — literal URL, not fromService.
+      - key: VITE_API_URL
+        value: https://safestores-backend.onrender.com
+    routes:
+      # SPA fallback — React Router handles the path client-side, so every
+      # unmatched route needs to resolve to index.html rather than a 404.
+      - type: rewrite
+        source: /*
+        destination: /index.html

@@ -1,0 +1,99 @@
+{
+  "name": "safe-stores-desktop",
+  "version": "1.0.0",
+  "description": "SAFE Stores — Enterprise Inventory Management (Desktop Edition)",
+  "main": "main.js",
+  "author": "A I Brains Ventures",
+  "scripts": {
+    "prebuild": "node scripts/build-frontend.js",
+    "test": "npm rebuild better-sqlite3 --silent && jest --runInBand",
+    "test:e2e": "electron-rebuild --force && playwright test",
+    "start": "electron .",
+    "postinstall": "electron-builder install-app-deps",
+    "build:win": "npm run build:win:superadmin",
+    "build:win:superadmin": "cross-env VITE_APP_VARIANT=superadmin VITE_EDITION=desktop npm run prebuild && electron-builder --win nsis -c.extraMetadata.name=safe-stores-desktop-superadmin -c.productName=\"SAFE Stores — Super Admin\" -c.appId=com.safestores.desktop.superadmin",
+    "build:win:admin": "cross-env VITE_APP_VARIANT=admin VITE_EDITION=desktop npm run prebuild && electron-builder --win nsis -c.extraMetadata.name=safe-stores-desktop-admin -c.productName=\"SAFE Stores\" -c.appId=com.safestores.desktop.admin",
+    "build:win-store": "cross-env VITE_EDITION=desktop npm run prebuild && electron-builder --win appx",
+    "build:mac": "cross-env VITE_EDITION=desktop npm run prebuild && electron-builder --mac dmg",
+    "build:mac-store": "cross-env VITE_EDITION=desktop npm run prebuild && electron-builder --mac mas",
+    "build:linux": "cross-env VITE_EDITION=desktop npm run prebuild && electron-builder --linux"
+  },
+  "dependencies": {
+    "@sentry/node": "^10.69.0",
+    "axios": "^1.7.7",
+    "bcryptjs": "^2.4.3",
+    "better-sqlite3": "^11.10.0",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "morgan": "^1.10.0",
+    "multer": "^2.0.0",
+    "socket.io": "^4.7.5",
+    "tesseract.js": "^5.1.1"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.62.1",
+    "cross-env": "^7.0.3",
+    "electron": "^31.3.1",
+    "electron-builder": "^26.15.3",
+    "jest": "^30.4.2",
+    "supertest": "^7.2.2"
+  },
+  "build": {
+    "appId": "com.safestores.desktop",
+    "productName": "SAFE Stores",
+    "files": [
+      "main.js",
+      "server/**/*",
+      "frontend-dist/**/*",
+      "!server/*.db"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+    "appx": {
+      "applicationId": "SafeStores",
+      "identityName": "REPLACE_WITH_YOUR_PARTNER_CENTER_IDENTITY_NAME",
+      "publisher": "REPLACE_WITH_YOUR_PARTNER_CENTER_PUBLISHER_ID",
+      "publisherDisplayName": "REPLACE_WITH_YOUR_COMPANY_NAME",
+      "languages": [
+        "en-US"
+      ],
+      "backgroundColor": "#0f7180"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.business",
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "build/entitlements.mac.plist",
+      "entitlementsInherit": "build/entitlements.mac.plist"
+    },
+    "mas": {
+      "category": "public.app-category.business",
+      "entitlements": "build/entitlements.mas.plist",
+      "entitlementsInherit": "build/entitlements.mas.inherit.plist",
+      "provisioningProfile": "build/embedded.provisionprofile"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "icon": "build/icon.png",
+      "category": "Office"
+    }
+  }
+}
