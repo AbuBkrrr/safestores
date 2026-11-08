@@ -11,6 +11,11 @@ import ResetPassword from './pages/ResetPassword.jsx';
 import VerifyEmail from './pages/VerifyEmail.jsx';
 import Account from './pages/Account.jsx';
 import ActivityLog from './pages/ActivityLog.jsx';
+import Sales from './pages/Sales.jsx';
+import Shifts from './pages/Shifts.jsx';
+import DailyReport from './pages/DailyReport.jsx';
+import StoreSettings from './pages/StoreSettings.jsx';
+import PublicReceipt from './pages/PublicReceipt.jsx';
 import Layout from './components/Layout.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import { useAuth } from './context/AuthContext.jsx';
@@ -113,6 +118,8 @@ export default function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/verify-email" element={<VerifyEmail />} />
+      {/* Digital receipt behind the QR code — public, no login. */}
+      <Route path="/r/:token" element={<PublicReceipt />} />
       {APP_VARIANT === 'superadmin' && <Route path="/super-login" element={<SuperLogin />} />}
       <Route path="/auditor-signup" element={<AuditorSignup />} />
       <Route path="/auditor-login" element={<AuditorLogin />} />
@@ -182,6 +189,10 @@ export default function App() {
         <Route path="/receipts" element={<Receipts />} />
         <Route path="/camera" element={<Camera />} />
         <Route path="/checkout" element={<Checkout />} />
+        <Route path="/sales" element={<Sales />} />
+        <Route path="/shifts" element={<Shifts />} />
+        <Route path="/daily-report" element={<DailyReport />} />
+        <Route path="/settings" element={<StoreSettings />} />
         {EDITION !== 'desktop' && <Route path="/marketplace" element={<Marketplace />} />}
         {EDITION !== 'desktop' && <Route path="/lending-partners" element={<LendingPartners />} />}
         <Route path="/invites" element={<Invites />} />

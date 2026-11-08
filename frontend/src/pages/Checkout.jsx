@@ -1,99 +1,90 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { BrowserMultiFormatReader } from '@zxing/browser';
 import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useRealtimeEvents } from '../context/SocketContext.jsx';
-import { Alert, Toast } from '../components/ui.jsx';
+import { Alert, Modal, Toast } from '../components/ui.jsx';
 import { useToast } from '../components/useToast.js';
 import { useCurrency } from '../context/CurrencyContext.jsx';
-import { formatCurrency as formatMoney } from '../utils/currency.js';
+import ReceiptView from '../components/ReceiptView.jsx';
 
 const SYNC_EVENTS = ['order:updated', 'order:paid', 'order:cancelled'];
 const CAN_TAKE_PAYMENT = ['admin', 'manager', 'cashier'];
-
-// These two build a print/download receipt outside any component, so they
-// take the currency symbol as a parameter rather than using the
-// useCurrency() hook (hooks only work inside component bodies).
-function downloadReceipt(receipt, currency) {
-  const lines = [
-    'SAFE STORES — RECEIPT',
-    `Receipt #: ${receipt.receipt_number}`,
-    `Date: ${new Date(receipt.paid_at).toLocaleString()}`,
-    `Payment method: ${receipt.payment_method}`,
-    '',
-    'Items:',
-    ...(receipt.items || []).map((i) => `  ${i.product_name} x${i.quantity} .......... ${formatMoney(i.line_total, currency)}`),
-    '',
-    `TOTAL: ${formatMoney(receipt.total, currency)}`,
-  ];
-  const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
-  const url = window.URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url; link.setAttribute('download', `receipt-${receipt.receipt_number}.txt`);
-  document.body.appendChild(link); link.click(); link.remove();
-  window.URL.revokeObjectURL(url);
-}
-
-function printReceipt(receipt, currency) {
-  const win = window.open('', '_blank', 'width=380,height=600');
-  const itemRows = (receipt.items || [])
-    .map((i) => `<tr><td>${i.product_name} x${i.quantity}</td><td style="text-align:right">${formatMoney(i.line_total, currency)}</td></tr>`)
-    .join('');
-  win.document.write(`
-    <html><head><title>Receipt ${receipt.receipt_number}</title>
-    <style>body{font-family:monospace;padding:16px;font-size:13px} table{width:100%;border-collapse:collapse} td{padding:4px 0} .total{font-weight:bold;border-top:1px dashed #000;padding-top:8px}</style>
-    </head><body>
-      <h3 style="text-align:center">SAFE STORES</h3>
-      <p>Receipt #: ${receipt.receipt_number}<br/>Date: ${new Date(receipt.paid_at).toLocaleString()}<br/>Method: ${receipt.payment_method}</p>
-      <table>${itemRows}</table>
-      <p class="total">TOTAL: ${formatMoney(receipt.total, currency)}</p>
-    </body></html>
-  `);
-  win.document.close();
-  win.focus();
-  win.print();
-}
+const TILL_ROLES = ['admin', 'manager', 'cashier', 'checkout'];
+const METHODS = ['cash', 'card', 'transfer', 'mobile_money', 'credit', 'other'];
 
 export default function Checkout() {
   const { t } = useTranslation();
   const { user } = useAuth();
-  const { currency, formatCurrency } = useCurrency();
+  const { formatCurrency } = useCurrency();
   const canPay = CAN_TAKE_PAYMENT.includes(user.role);
+  const usesShifts = TILL_ROLES.includes(user.role);
   const [pending, setPending] = useState([]);
   const [order, setOrder] = useState(null);
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState('');
   const [scanning, setScanning] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState('cash');
+  const [received, setReceived] = useState('');
+  const [splitMode, setSplitMode] = useState(false);
+  const [splits, setSplits] = useState([{ method: 'cash', amount: '' }, { method: 'card', amount: '' }]);
   const [customers, setCustomers] = useState([]);
   const [creditCustomerId, setCreditCustomerId] = useState('');
   const [receipt, setReceipt] = useState(null);
   const [error, setError] = useState('');
   const [toast, showToast] = useToast();
+  const [shift, setShift] = useState(null);
+  const [shiftModal, setShiftModal] = useState(null); // 'open' | 'close'
+  const [shiftForm, setShiftForm] = useState({ amount: '', notes: '' });
+  const [discountModal, setDiscountModal] = useState(false);
+  const [discount, setDiscount] = useState({ type: 'percent', value: '', reason: '', approverEmail: '', approverPassword: '', needsApproval: false });
   const videoRef = useRef();
   const readerRef = useRef();
+  const searchRef = useRef();
+  const payRef = useRef();
 
-  const loadPending = () => api.get(`/stores/${user.storeId}/orders`, { params: { status: 'pending_payment' } }).then((r) => setPending(r.data));
+  const loadPending = () => api.get(`/stores/${user.storeId}/orders`, { params: { status: 'pending_payment' } }).then((r) => setPending(Array.isArray(r.data) ? r.data : []));
+  const loadShift = () => usesShifts && api.get(`/stores/${user.storeId}/shifts/current`).then((r) => setShift(r.data?.id ? r.data : null)).catch(() => {});
   useEffect(() => {
     loadPending();
-    api.get(`/stores/${user.storeId}/products`).then((r) => setProducts(r.data));
-  }, [user.storeId]);
+    loadShift();
+    api.get(`/stores/${user.storeId}/products`).then((r) => setProducts(Array.isArray(r.data) ? r.data : []));
+  }, [user.storeId]); // eslint-disable-line react-hooks/exhaustive-deps
   useRealtimeEvents(SYNC_EVENTS, () => { loadPending(); if (order) refreshOrder(order.id); });
 
   useEffect(() => {
-    if (paymentMethod === 'credit' && customers.length === 0) {
+    const needsCustomers = paymentMethod === 'credit' || (splitMode && splits.some((s) => s.method === 'credit'));
+    if (needsCustomers && customers.length === 0) {
       api.get(`/stores/${user.storeId}/customers`).then((r) => setCustomers(r.data)).catch(() => setCustomers([]));
     }
-  }, [paymentMethod, user.storeId]);
+  }, [paymentMethod, splitMode, splits, user.storeId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Till keyboard shortcuts: F2 = search, F4 = pay, Esc = clear search.
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'F2') { e.preventDefault(); searchRef.current?.focus(); }
+      if (e.key === 'F4') { e.preventDefault(); payRef.current?.focus(); payRef.current?.click(); }
+      if (e.key === 'Escape' && document.activeElement === searchRef.current) setSearch('');
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   const refreshOrder = (orderId) => api.get(`/stores/${user.storeId}/orders/${orderId}`).then((r) => setOrder(r.data));
+
+  const resetPayment = () => {
+    setPaymentMethod('cash'); setCreditCustomerId(''); setReceived(''); setSplitMode(false);
+    setSplits([{ method: 'cash', amount: '' }, { method: 'card', amount: '' }]);
+  };
 
   const startOrder = async () => {
     const { data } = await api.post(`/stores/${user.storeId}/orders`, {});
     setOrder({ ...data, items: [] });
     setReceipt(null);
+    resetPayment();
     loadPending();
+    setTimeout(() => searchRef.current?.focus(), 0);
   };
 
   const pickUp = (orderId) => refreshOrder(orderId).then(() => setReceipt(null));
@@ -111,28 +102,63 @@ export default function Checkout() {
     }
   };
 
+  // A USB/Bluetooth barcode scanner "types" the code and presses Enter.
+  const onSearchKey = async (e) => {
+    if (e.key !== 'Enter' || !search.trim()) return;
+    e.preventDefault();
+    const code = search.trim();
+    const exact = products.find((p) => p.sku?.toLowerCase() === code.toLowerCase() || p.barcode === code);
+    if (exact) return addProduct(exact.id, 'scan');
+    try {
+      const { data } = await api.get(`/stores/${user.storeId}/barcode-lookup`, { params: { code } });
+      if (data?.id) return addProduct(data.id, 'scan');
+    } catch { /* not a barcode — fall back to the first name match */ }
+    if (filteredProducts.length === 1) addProduct(filteredProducts[0].id, 'manual_search');
+  };
+
   const removeItem = async (itemId) => {
     const { data } = await api.delete(`/stores/${user.storeId}/orders/${order.id}/items/${itemId}`);
     setOrder(data);
     refreshOrder(order.id);
   };
 
+  const total = Number(order?.total || 0);
+  const splitTotal = splits.reduce((s, p) => s + (Number(p.amount) || 0), 0);
+  const changeDue = splitMode
+    ? Math.max(0, splitTotal - total)
+    : (paymentMethod === 'cash' && Number(received) > 0 ? Math.max(0, Number(received) - total) : 0);
+
   const pay = async () => {
-    if (paymentMethod === 'credit' && !creditCustomerId) {
+    const usesCredit = splitMode ? splits.some((s) => s.method === 'credit' && Number(s.amount) > 0) : paymentMethod === 'credit';
+    if (usesCredit && !creditCustomerId) {
       setError(t('checkout.selectCustomerError'));
       return;
     }
+    if (paymentMethod === 'cash' && !splitMode && received !== '' && Number(received) < total) {
+      setError(t('checkout.receivedTooLow'));
+      return;
+    }
     setError('');
-    const { data } = await api.post(`/stores/${user.storeId}/orders/${order.id}/pay`, {
-      paymentMethod, storeCustomerId: paymentMethod === 'credit' ? creditCustomerId : undefined,
-    });
-    const full = await api.get(`/stores/${user.storeId}/orders/${data.id}`);
-    setReceipt(full.data);
-    setOrder(null);
-    setPaymentMethod('cash');
-    setCreditCustomerId('');
-    loadPending();
-    showToast(t('checkout.paymentConfirmedToast'), 'success');
+    let body;
+    if (splitMode) {
+      body = { payments: splits.filter((s) => Number(s.amount) > 0).map((s) => ({ method: s.method, amount: Number(s.amount) })), storeCustomerId: usesCredit ? creditCustomerId : undefined };
+    } else if (paymentMethod === 'cash' && Number(received) > 0) {
+      body = { payments: [{ method: 'cash', amount: Number(received) }] };
+    } else {
+      body = { paymentMethod, storeCustomerId: paymentMethod === 'credit' ? creditCustomerId : undefined };
+    }
+    try {
+      const { data } = await api.post(`/stores/${user.storeId}/orders/${order.id}/pay`, body);
+      const full = await api.get(`/stores/${user.storeId}/orders/${data.id}`);
+      setReceipt(full.data);
+      setOrder(null);
+      resetPayment();
+      loadPending();
+      showToast(t('checkout.paymentConfirmedToast'), 'success');
+    } catch (err) {
+      if (err.response?.data?.code === 'SHIFT_REQUIRED') setShiftModal('open');
+      setError(err.response?.data?.error || t('common.errorGeneric'));
+    }
   };
 
   const cancelOrder = async () => {
@@ -140,6 +166,57 @@ export default function Checkout() {
     await api.post(`/stores/${user.storeId}/orders/${order.id}/cancel`);
     setOrder(null);
     loadPending();
+  };
+
+  const parkOrder = async () => {
+    const label = prompt(t('checkout.parkPrompt'), order.parked_label || '');
+    if (label === null) return;
+    await api.patch(`/stores/${user.storeId}/orders/${order.id}/park`, { label: label || t('checkout.parkedDefault') });
+    setOrder(null);
+    loadPending();
+    showToast(t('checkout.parkedToast'), 'success');
+  };
+
+  const submitDiscount = async (e) => {
+    e?.preventDefault();
+    setError('');
+    try {
+      const { data } = await api.post(`/stores/${user.storeId}/orders/${order.id}/discount`, {
+        type: discount.type, value: Number(discount.value), reason: discount.reason || undefined,
+        approverEmail: discount.needsApproval ? discount.approverEmail : undefined,
+        approverPassword: discount.needsApproval ? discount.approverPassword : undefined,
+      });
+      setOrder((o) => ({ ...o, ...data }));
+      setDiscountModal(false);
+      setDiscount({ type: 'percent', value: '', reason: '', approverEmail: '', approverPassword: '', needsApproval: false });
+    } catch (err) {
+      if (err.response?.data?.code === 'DISCOUNT_APPROVAL_REQUIRED') setDiscount((d) => ({ ...d, needsApproval: true }));
+      setError(err.response?.data?.error || t('common.errorGeneric'));
+    }
+  };
+
+  const removeDiscount = async () => {
+    const { data } = await api.post(`/stores/${user.storeId}/orders/${order.id}/discount`, { type: null });
+    setOrder((o) => ({ ...o, ...data }));
+  };
+
+  const submitShift = async (e) => {
+    e.preventDefault();
+    setError('');
+    try {
+      if (shiftModal === 'open') {
+        await api.post(`/stores/${user.storeId}/shifts`, { openingFloat: Number(shiftForm.amount) || 0 });
+        showToast(t('shift.openedToast'), 'success');
+      } else {
+        const { data } = await api.post(`/stores/${user.storeId}/shifts/${shift.id}/close`, { countedCash: Number(shiftForm.amount), notes: shiftForm.notes || undefined });
+        showToast(t('shift.closedToast', { variance: formatCurrency(data.variance) }), Math.abs(data.variance) < 0.01 ? 'success' : 'warning');
+      }
+      setShiftModal(null);
+      setShiftForm({ amount: '', notes: '' });
+      loadShift();
+    } catch (err) {
+      setError(err.response?.data?.error || t('common.errorGeneric'));
+    }
   };
 
   // Live barcode scanning, same approach as the Camera page
@@ -160,33 +237,64 @@ export default function Checkout() {
         } catch { /* no match — ignore this frame */ }
       });
     }).catch(() => setError(t('checkout.cameraError')));
-    return () => { codeReader.reset(); stream?.getTracks().forEach((t) => t.stop()); };
+    return () => { codeReader.reset(); stream?.getTracks().forEach((tr) => tr.stop()); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scanning]);
 
   const filteredProducts = search.length > 0
     ? products.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()) || p.sku.toLowerCase().includes(search.toLowerCase()))
     : [];
+  // Quick-pick grid: the store's best sellers that are on the shelf.
+  const quickPicks = useMemo(() => [...products]
+    .filter((p) => !p.archived_at && Number(p.shelf_qty) > 0)
+    .sort((a, b) => Number(b.sold_qty || 0) - Number(a.sold_qty || 0))
+    .slice(0, 12), [products]);
+
+  const shiftBar = usesShifts && (
+    <div className="card flex-between shift-bar" style={{ padding: '10px 16px' }}>
+      {shift ? (
+        <>
+          <span>🟢 {t('shift.onShift', { time: new Date(shift.opened_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) })} · {t('shift.expectedCash')}: <strong>{formatCurrency(shift.expected_cash_now)}</strong></span>
+          <button className="btn small secondary" onClick={() => { setShiftForm({ amount: '', notes: '' }); setShiftModal('close'); }}>{t('shift.end')}</button>
+        </>
+      ) : (
+        <>
+          <span className="muted">{t('shift.noShift')}</span>
+          <button className="btn small secondary" onClick={() => { setShiftForm({ amount: '', notes: '' }); setShiftModal('open'); }}>{t('shift.start')}</button>
+        </>
+      )}
+    </div>
+  );
+
+  const shiftDialog = shiftModal && (
+    <Modal title={shiftModal === 'open' ? t('shift.startTitle') : t('shift.endTitle')} onClose={() => setShiftModal(null)}>
+      <form onSubmit={submitShift}>
+        {shiftModal === 'close' && shift && <p className="muted">{t('shift.expectedCash')}: <strong>{formatCurrency(shift.expected_cash_now)}</strong></p>}
+        <div className="form-group">
+          <label htmlFor="shift-amount">{shiftModal === 'open' ? t('shift.openingFloat') : t('shift.countedCash')}</label>
+          <input id="shift-amount" type="number" min="0" step="0.01" inputMode="decimal" autoFocus value={shiftForm.amount} onChange={(e) => setShiftForm({ ...shiftForm, amount: e.target.value })} required={shiftModal === 'close'} />
+        </div>
+        {shiftModal === 'close' && (
+          <div className="form-group">
+            <label htmlFor="shift-notes">{t('shift.notes')}</label>
+            <input id="shift-notes" value={shiftForm.notes} onChange={(e) => setShiftForm({ ...shiftForm, notes: e.target.value })} />
+          </div>
+        )}
+        <div className="modal-actions">
+          <button type="button" className="btn secondary" onClick={() => setShiftModal(null)}>{t('common.cancel')}</button>
+          <button className="btn">{shiftModal === 'open' ? t('shift.start') : t('shift.end')}</button>
+        </div>
+      </form>
+    </Modal>
+  );
 
   if (receipt) {
     return (
       <div>
         <div className="topbar"><h1>{t('checkout.receiptTitle')}</h1></div>
-        <div className="card" style={{ maxWidth: 480 }}>
-          <h3>{t('checkout.receiptHeading', { number: receipt.receipt_number })}</h3>
-          <p className="muted">{t('checkout.paidVia', { method: receipt.payment_method, date: new Date(receipt.paid_at).toLocaleString() })}</p>
-          {(receipt.items || []).map((i) => (
-            <div key={i.id} className="flex" style={{ justifyContent: 'space-between', padding: '4px 0' }}>
-              <span>{i.product_name} × {i.quantity}</span><span>{formatCurrency(i.line_total)}</span>
-            </div>
-          ))}
-          <p style={{ fontSize: 24, fontWeight: 700, marginTop: 8 }}>{formatCurrency(receipt.total)}</p>
-          <div className="flex mt-1">
-            <button className="btn secondary" onClick={() => downloadReceipt(receipt, currency)}>{t('checkout.download')}</button>
-            <button className="btn secondary" onClick={() => printReceipt(receipt, currency)}>{t('checkout.print')}</button>
-          </div>
-          <button className="btn mt-1" onClick={() => setReceipt(null)}>{t('checkout.newOrder')}</button>
-        </div>
+        <ReceiptView receipt={receipt} onToast={showToast} />
+        <button className="btn mt-1" onClick={() => setReceipt(null)}>{t('checkout.newOrder')}</button>
+        <Toast {...(toast || {})} />
       </div>
     );
   }
@@ -195,19 +303,27 @@ export default function Checkout() {
     return (
       <div>
         <div className="topbar"><h1>{t('checkout.title')}</h1></div>
+        <Alert type="error">{error}</Alert>
+        {shiftBar}
         <div className="card">
           <button className="btn" onClick={startOrder}>{t('checkout.startNewOrder')}</button>
+          <p className="muted mt-1">{t('checkout.shortcutsHint')}</p>
         </div>
         <div className="card">
           <h3 style={{ marginBottom: 12 }}>{t('checkout.pendingOrders')} {canPay ? t('checkout.pendingOrdersHint') : ''}</h3>
           {pending.length === 0 && <p className="muted">{t('checkout.noPendingOrders')}</p>}
           {pending.map((o) => (
             <div key={o.id} className="flex" style={{ justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #eee' }}>
-              <span>{t('checkout.orderStartedBy', { name: o.created_by_name || t('checkout.someone') })} · {formatCurrency(o.total)}</span>
+              <span>
+                {o.parked_label && <strong>⏸ {o.parked_label} · </strong>}
+                {t('checkout.orderStartedBy', { name: o.created_by_name || t('checkout.someone') })} · {formatCurrency(o.total)}
+              </span>
               <button className="btn small" onClick={() => pickUp(o.id)}>{t('checkout.open')}</button>
             </div>
           ))}
         </div>
+        {shiftDialog}
+        <Toast {...(toast || {})} />
       </div>
     );
   }
@@ -228,8 +344,8 @@ export default function Checkout() {
           {scanning && <video ref={videoRef} autoPlay playsInline style={{ width: '100%', marginTop: 8, borderRadius: 8, background: '#000', maxHeight: 200, objectFit: 'cover' }} />}
 
           <div className="form-group mt-1">
-            <label>{t('checkout.searchLabel')}</label>
-            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t('checkout.searchPlaceholder')} />
+            <label htmlFor="checkout-search">{t('checkout.searchLabel')}</label>
+            <input id="checkout-search" ref={searchRef} value={search} onChange={(e) => setSearch(e.target.value)} onKeyDown={onSearchKey} placeholder={t('checkout.searchPlaceholder')} autoComplete="off" />
           </div>
           {filteredProducts.length > 0 && (
             <div className="card" style={{ maxHeight: 200, overflowY: 'auto' }}>
@@ -241,6 +357,19 @@ export default function Checkout() {
               ))}
             </div>
           )}
+          {search.length === 0 && quickPicks.length > 0 && (
+            <>
+              <h4 className="mt-1">{t('checkout.quickPicks')}</h4>
+              <div className="quick-picks">
+                {quickPicks.map((p) => (
+                  <button key={p.id} type="button" className="quick-pick" onClick={() => addProduct(p.id, 'manual_search')} title={p.sku}>
+                    <span className="qp-name">{p.name}</span>
+                    <span className="qp-price">{formatCurrency(Number(p.cost_price) * Number(p.price_multiplier))}</span>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         <div className="card">
@@ -249,26 +378,65 @@ export default function Checkout() {
           {order.items?.map((item) => (
             <div key={item.id} className="flex" style={{ justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #eee' }}>
               <span>{item.product_name} × {item.quantity}</span>
-              <span>{formatCurrency(item.line_total)} <button className="btn danger small" onClick={() => removeItem(item.id)}>✕</button></span>
+              <span>{formatCurrency(item.line_total)} <button className="btn danger small" aria-label={t('checkout.removeItem')} onClick={() => removeItem(item.id)}>✕</button></span>
             </div>
           ))}
+
+          {Number(order.discount_amount) > 0 && (
+            <div className="flex-between mt-1 muted">
+              <span>{t('receipt.discount')}{order.discount_reason ? ` (${order.discount_reason})` : ''} <button className="btn small secondary" onClick={removeDiscount}>{t('checkout.removeDiscount')}</button></span>
+              <span>−{formatCurrency(order.discount_amount)}</span>
+            </div>
+          )}
+          {Number(order.tax_amount) > 0 && (
+            <div className="flex-between muted"><span>{t('receipt.tax')} {Number(order.tax_rate_pct)}%{order.tax_inclusive ? ` ${t('receipt.inclusive')}` : ''}</span><span>{formatCurrency(order.tax_amount)}</span></div>
+          )}
           <div className="flex mt-1" style={{ justifyContent: 'space-between', fontWeight: 700, fontSize: 18 }}>
             <span>{t('checkout.total')}</span><span>{formatCurrency(order.total || 0)}</span>
           </div>
+          {order.items?.length > 0 && (
+            <button className="btn small secondary mt-1" onClick={() => setDiscountModal(true)}>🏷️ {t('checkout.addDiscount')}</button>
+          )}
 
           {canPay ? (
             <div className="mt-1">
-              <div className="form-group">
-                <label htmlFor="payment-method">{t('checkout.paymentMethod')}</label>
-                <select id="payment-method" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-                  <option value="cash">{t('checkout.cash')}</option>
-                  <option value="card">{t('checkout.card')}</option>
-                  <option value="transfer">{t('checkout.transfer')}</option>
-                  <option value="credit">{t('checkout.credit')}</option>
-                  <option value="other">{t('checkout.other')}</option>
-                </select>
-              </div>
-              {paymentMethod === 'credit' && (
+              {!splitMode ? (
+                <>
+                  <div className="form-group">
+                    <label htmlFor="payment-method">{t('checkout.paymentMethod')}</label>
+                    <select id="payment-method" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
+                      <option value="cash">{t('checkout.cash')}</option>
+                      <option value="card">{t('checkout.card')}</option>
+                      <option value="transfer">{t('checkout.transfer')}</option>
+                      <option value="mobile_money">{t('checkout.mobileMoney')}</option>
+                      <option value="credit">{t('checkout.credit')}</option>
+                      <option value="other">{t('checkout.other')}</option>
+                    </select>
+                  </div>
+                  {paymentMethod === 'cash' && (
+                    <div className="form-group">
+                      <label htmlFor="cash-received">{t('checkout.amountReceived')}</label>
+                      <input id="cash-received" type="number" min="0" step="0.01" inputMode="decimal" value={received} onChange={(e) => setReceived(e.target.value)} placeholder={String(total)} />
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="form-group">
+                  <label>{t('checkout.splitPayments')}</label>
+                  {splits.map((s, idx) => (
+                    <div key={idx} className="flex" style={{ marginBottom: 6 }}>
+                      <select aria-label={`${t('checkout.paymentMethod')} ${idx + 1}`} value={s.method} onChange={(e) => setSplits(splits.map((x, i) => (i === idx ? { ...x, method: e.target.value } : x)))} style={{ maxWidth: 160 }}>
+                        {METHODS.map((m) => <option key={m} value={m}>{t(`checkout.${m === 'mobile_money' ? 'mobileMoney' : m}`)}</option>)}
+                      </select>
+                      <input aria-label={`${t('checkout.amount')} ${idx + 1}`} type="number" min="0" step="0.01" inputMode="decimal" value={s.amount} onChange={(e) => setSplits(splits.map((x, i) => (i === idx ? { ...x, amount: e.target.value } : x)))} style={{ maxWidth: 140 }} />
+                      {splits.length > 2 && <button type="button" className="btn small secondary" onClick={() => setSplits(splits.filter((_, i) => i !== idx))}>✕</button>}
+                    </div>
+                  ))}
+                  <button type="button" className="btn small secondary" onClick={() => setSplits([...splits, { method: 'transfer', amount: '' }])}>+ {t('checkout.addTender')}</button>
+                  <p className="muted">{t('checkout.remaining')}: {formatCurrency(Math.max(0, total - splitTotal))}</p>
+                </div>
+              )}
+              {(paymentMethod === 'credit' || (splitMode && splits.some((s) => s.method === 'credit'))) && (
                 <div className="form-group">
                   <label htmlFor="credit-customer">{t('checkout.customer')}</label>
                   <select id="credit-customer" value={creditCustomerId} onChange={(e) => setCreditCustomerId(e.target.value)}>
@@ -282,14 +450,63 @@ export default function Checkout() {
                   </p>
                 </div>
               )}
-              <button className="btn" onClick={pay} disabled={!order.items?.length}>{t('checkout.confirmPayment')}</button>
+              {changeDue > 0 && <p style={{ fontSize: 18, fontWeight: 700 }}>{t('receipt.change')}: {formatCurrency(changeDue)}</p>}
+              <div className="flex">
+                <button ref={payRef} className="btn" onClick={pay} disabled={!order.items?.length}>{t('checkout.confirmPayment')}</button>
+                <button type="button" className="btn small secondary" onClick={() => setSplitMode((m) => !m)}>{splitMode ? t('checkout.singlePayment') : t('checkout.splitPayment')}</button>
+              </div>
             </div>
           ) : (
             <p className="muted mt-1">{t('checkout.readyForCashier')}</p>
           )}
-          <button className="btn secondary small mt-1" onClick={cancelOrder}>{t('checkout.cancelOrder')}</button>
+          <div className="flex mt-1">
+            {order.items?.length > 0 && <button className="btn secondary small" onClick={parkOrder}>⏸ {t('checkout.park')}</button>}
+            <button className="btn secondary small" onClick={cancelOrder}>{t('checkout.cancelOrder')}</button>
+          </div>
         </div>
       </div>
+
+      {discountModal && (
+        <Modal title={t('checkout.addDiscount')} onClose={() => setDiscountModal(false)}>
+          <form onSubmit={submitDiscount}>
+            <div className="flex">
+              <div className="form-group" style={{ flex: 1 }}>
+                <label htmlFor="disc-type">{t('checkout.discountType')}</label>
+                <select id="disc-type" value={discount.type} onChange={(e) => setDiscount({ ...discount, type: e.target.value })}>
+                  <option value="percent">%</option>
+                  <option value="amount">{t('checkout.fixedAmount')}</option>
+                </select>
+              </div>
+              <div className="form-group" style={{ flex: 1 }}>
+                <label htmlFor="disc-value">{t('checkout.discountValue')}</label>
+                <input id="disc-value" type="number" min="0" step="0.01" inputMode="decimal" autoFocus value={discount.value} onChange={(e) => setDiscount({ ...discount, value: e.target.value })} required />
+              </div>
+            </div>
+            <div className="form-group">
+              <label htmlFor="disc-reason">{t('checkout.discountReason')}</label>
+              <input id="disc-reason" value={discount.reason} onChange={(e) => setDiscount({ ...discount, reason: e.target.value })} />
+            </div>
+            {discount.needsApproval && (
+              <>
+                <Alert type="warning">{t('checkout.approvalNeeded')}</Alert>
+                <div className="form-group">
+                  <label htmlFor="disc-appr-email">{t('checkout.managerEmail')}</label>
+                  <input id="disc-appr-email" type="email" value={discount.approverEmail} onChange={(e) => setDiscount({ ...discount, approverEmail: e.target.value })} required />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="disc-appr-pw">{t('checkout.managerPassword')}</label>
+                  <input id="disc-appr-pw" type="password" value={discount.approverPassword} onChange={(e) => setDiscount({ ...discount, approverPassword: e.target.value })} required />
+                </div>
+              </>
+            )}
+            <div className="modal-actions">
+              <button type="button" className="btn secondary" onClick={() => setDiscountModal(false)}>{t('common.cancel')}</button>
+              <button className="btn">{t('checkout.applyDiscount')}</button>
+            </div>
+          </form>
+        </Modal>
+      )}
+      {shiftDialog}
       <Toast {...(toast || {})} />
     </div>
   );

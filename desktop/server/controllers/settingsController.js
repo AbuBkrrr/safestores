@@ -6,6 +6,10 @@ const SUPPORTED_CODES = ['NGN', 'GHS', 'KES', 'ZAR', 'XOF', 'USD', 'GBP', 'EUR']
 // displays money needs this, regardless of role or store status).
 function getCurrency(req, res) {
   const row = db.prepare('SELECT code, symbol FROM currency_settings WHERE id = ?').get('default');
+  if (req.query.storeId) {
+    const s = db.prepare('SELECT currency_code, currency_symbol FROM stores WHERE id = ?').get(req.query.storeId);
+    if (s?.currency_code) return res.json({ code: s.currency_code, symbol: s.currency_symbol || s.currency_code });
+  }
   res.json(row || { code: 'NGN', symbol: '₦' });
 }
 

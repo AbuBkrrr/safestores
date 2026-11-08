@@ -181,5 +181,20 @@ router.post('/orders/:orderId/items', requireRole('admin', 'manager', 'cashier',
 router.delete('/orders/:orderId/items/:itemId', requireRole('admin', 'manager', 'cashier', 'checkout'), ordersCtrl.removeItem);
 router.post('/orders/:orderId/pay', requireRole('admin', 'manager', 'cashier'), ordersCtrl.payOrder);
 router.post('/orders/:orderId/cancel', requireRole('admin', 'manager', 'cashier', 'checkout'), ordersCtrl.cancelOrder);
+router.post('/orders/:orderId/discount', requireRole('admin', 'manager', 'cashier', 'checkout'), ordersCtrl.applyDiscount);
+router.patch('/orders/:orderId/park', requireRole('admin', 'manager', 'cashier', 'checkout'), ordersCtrl.parkOrder);
+router.post('/orders/:orderId/refunds', requireRole('admin', 'manager'), ordersCtrl.refundOrder);
+
+// Shifts, end-of-day reporting and store settings — see shiftsController.js.
+const shiftsCtrl = require('../controllers/shiftsController');
+const TILL = ['admin', 'manager', 'cashier', 'checkout'];
+router.get('/shifts/current', requireRole(...TILL), shiftsCtrl.currentShift);
+router.get('/shifts', requireRole(...TILL), shiftsCtrl.listShifts);
+router.post('/shifts', requireRole(...TILL), shiftsCtrl.openShift);
+router.post('/shifts/:shiftId/close', requireRole(...TILL), shiftsCtrl.closeShift);
+router.get('/shifts/:shiftId/report', requireRole(...TILL), shiftsCtrl.shiftReport);
+router.get('/reports/daily', requireRole('admin', 'manager'), shiftsCtrl.dailyReport);
+router.get('/settings', shiftsCtrl.getSettings);
+router.patch('/settings', requireRole('admin'), shiftsCtrl.updateSettings);
 
 module.exports = router;

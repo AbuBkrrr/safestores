@@ -39,7 +39,7 @@ api.interceptors.request.use((config) => {
 // a shelf is exactly the kind of shop-floor action that needs to survive a
 // dropped connection. Its sub-action (skipping a task) stays online-only —
 // lower-stakes and not time-sensitive the way an actual count is.
-const QUEUEABLE_WRITE = /\/(arrivals|movements|audits|products|images|receipts|orders(\/[^/]+\/(items|pay|cancel))?|cycle-counts)$/;
+const QUEUEABLE_WRITE = /\/(arrivals|movements|audits|products|images|receipts|orders(\/[^/]+\/(items|pay|cancel|discount))?|cycle-counts|shifts(\/[^/]+\/close)?)$/;
 const QUEUEABLE_PUT_DELETE = /\/products\/[^/]+$/;
 // `images/:id` was missing here — deleting a captured photo while offline
 // (a stockroom with poor signal is exactly where this gets used) just

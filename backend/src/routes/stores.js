@@ -129,6 +129,11 @@ router.get('/deletion', requireRole('admin'), accountCtrl.getStoreDeletion);
 router.post('/deletion', requireRole('admin'), accountCtrl.requestStoreDeletion);
 router.delete('/deletion', requireRole('admin'), accountCtrl.cancelStoreDeletion);
 router.get('/activity', requireRole('admin', 'manager'), accountCtrl.listActivity);
+
+// Store settings (currency, time zone, tax, receipt text, till rules).
+const storeSettingsCtrl = require('../controllers/storeSettingsController');
+router.get('/settings', storeSettingsCtrl.getSettings);
+router.patch('/settings', requireRole('admin'), storeSettingsCtrl.updateSettings);
 router.patch('/notifications/:id/read', storeNotifCtrl.markRead);
 
 // Everything below requires the store to actually be active (requireActiveStore
@@ -263,5 +268,18 @@ router.post('/orders/:orderId/items', requireRole('admin', 'manager', 'cashier',
 router.delete('/orders/:orderId/items/:itemId', requireRole('admin', 'manager', 'cashier', 'checkout'), ordersCtrl.removeItem);
 router.post('/orders/:orderId/pay', requireRole('admin', 'manager', 'cashier'), ordersCtrl.payOrder);
 router.post('/orders/:orderId/cancel', requireRole('admin', 'manager', 'cashier', 'checkout'), ordersCtrl.cancelOrder);
+router.post('/orders/:orderId/discount', requireRole('admin', 'manager', 'cashier', 'checkout'), ordersCtrl.applyDiscount);
+router.patch('/orders/:orderId/park', requireRole('admin', 'manager', 'cashier', 'checkout'), ordersCtrl.parkOrder);
+router.post('/orders/:orderId/refunds', requireRole('admin', 'manager'), ordersCtrl.refundOrder);
+
+// Cashier shifts + end-of-day reporting.
+const shiftsCtrl = require('../controllers/shiftsController');
+const TILL = ['admin', 'manager', 'cashier', 'checkout'];
+router.get('/shifts/current', requireRole(...TILL), shiftsCtrl.currentShift);
+router.get('/shifts', requireRole(...TILL), shiftsCtrl.listShifts);
+router.post('/shifts', requireRole(...TILL), shiftsCtrl.openShift);
+router.post('/shifts/:shiftId/close', requireRole(...TILL), shiftsCtrl.closeShift);
+router.get('/shifts/:shiftId/report', requireRole(...TILL), shiftsCtrl.shiftReport);
+router.get('/reports/daily', requireRole('admin', 'manager'), shiftsCtrl.dailyReport);
 
 module.exports = router;

@@ -38,6 +38,11 @@ export function AuthProvider({ children }) {
   );
 }
 
+/** Like useAuth, but returns {} outside an AuthProvider instead of throwing. */
+export function useOptionalAuth() {
+  return useContext(AuthContext) || {};
+}
+
 export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');

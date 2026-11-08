@@ -96,6 +96,8 @@ function createApp() {
   // store's admin needs this to know how to pay in the first place.
   app.get('/api/settings/payment-instructions', requireAuth, billingCtrl.getPaymentSettings);
   app.get('/api/settings/currency', settingsCtrl.getCurrency);
+  // Digital receipt behind the QR code / link printed on a receipt.
+  app.get('/api/public/receipts/:token', require('./controllers/ordersController').publicReceipt);
   app.use('/api/account', require('./routes/account'));
   app.use('/api/super', superRoutes);
   app.use('/api/stores/:storeId', storeRoutes);

@@ -502,3 +502,19 @@ tr:hover td { background: #fafbfc; }
   [dir='rtl'] .sidebar.open { transform: translateX(0); }
   [dir='rtl'] .main-content { margin-right: 0; }
 }
+
+/* ---------- Till (v26) ---------- */
+.quick-picks { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; margin-top: 8px; }
+.quick-pick { display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; min-height: 64px; padding: 8px 10px;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--panel, #fff); cursor: pointer; text-align: left; font: inherit; color: inherit; }
+.quick-pick:hover, .quick-pick:focus-visible { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(15, 113, 128, 0.15); }
+.quick-pick .qp-name { font-size: 13px; font-weight: 600; line-height: 1.2; }
+.quick-pick .qp-price { font-size: 12px; color: var(--muted); }
+.shift-bar { margin-bottom: 12px; }
+.receipt-totals > div { padding: 2px 0; }
+.table-wrap { overflow-x: auto; }
+@media print {
+  .sidebar, .status-bar, .topbar .btn, .modal-actions, .bottom-actions { display: none !important; }
+  .main-content { margin: 0 !important; padding: 0 !important; }
+  .modal-overlay { position: static !important; background: none !important; }
+}

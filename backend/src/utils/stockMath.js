@@ -26,8 +26,11 @@ async function recomputeProductQuantities(client, productId) {
        COALESCE(SUM(CASE WHEN type = 'transfer_to_shelf' THEN quantity
                           WHEN type IN ('sale', 'damage', 'expiry') THEN -quantity
                           WHEN type = 'adjustment' THEN quantity
+                          WHEN type = 'return' THEN quantity
                           ELSE 0 END), 0) AS shelf_qty,
-       COALESCE(SUM(CASE WHEN type = 'sale' THEN quantity ELSE 0 END), 0) AS sold_qty,
+       COALESCE(SUM(CASE WHEN type = 'sale' THEN quantity
+                          WHEN type = 'return' THEN -quantity
+                          ELSE 0 END), 0) AS sold_qty,
        COALESCE(SUM(CASE WHEN type IN ('damage', 'expiry') THEN quantity ELSE 0 END), 0) AS damaged_qty
      FROM stock_movements WHERE product_id = $1`,
     [productId]

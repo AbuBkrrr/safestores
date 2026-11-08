@@ -24,8 +24,8 @@ async function runForStore(storeId) {
   if (batchRows.length === 0) return;
 
   const { rows: consumedRows } = await db.query(
-    `SELECT product_id, COALESCE(SUM(quantity), 0) AS consumed
-     FROM stock_movements WHERE store_id = $1 AND type IN ('sale', 'damage', 'expiry')
+    `SELECT product_id, COALESCE(SUM(CASE WHEN type = 'return' THEN -quantity ELSE quantity END), 0) AS consumed
+     FROM stock_movements WHERE store_id = $1 AND type IN ('sale', 'damage', 'expiry', 'return')
      GROUP BY product_id`,
     [storeId]
   );
