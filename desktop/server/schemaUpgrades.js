@@ -85,6 +85,28 @@ function applySchemaUpgrades(db) {
     quantity INTEGER NOT NULL, amount REAL NOT NULL, restocked INTEGER NOT NULL DEFAULT 1
   )`);
   db.exec('CREATE INDEX IF NOT EXISTS idx_refund_items_item ON refund_items(order_item_id)');
+
+  // 033 — stock, customers (barcodes, packs, variants, loyalty points)
+  ensureColumn(db, 'products', 'barcode', 'TEXT');
+  ensureColumn(db, 'products', 'pack_size', 'INTEGER NOT NULL DEFAULT 1');
+  ensureColumn(db, 'products', 'pack_unit', 'TEXT');
+  ensureColumn(db, 'products', 'variant_of', 'TEXT');
+  ensureColumn(db, 'products', 'variant_label', 'TEXT');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_products_barcode ON products(store_id, barcode)');
+  ensureColumn(db, 'store_customers', 'email', 'TEXT');
+  ensureColumn(db, 'store_customers', 'birthday', 'TEXT');
+  ensureColumn(db, 'stores', 'points_per_100', 'REAL NOT NULL DEFAULT 0');
+  ensureColumn(db, 'stores', 'point_value', 'REAL NOT NULL DEFAULT 1');
+  ensureColumn(db, 'stores', 'points_expiry_months', 'INTEGER NOT NULL DEFAULT 12');
+  ensureColumn(db, 'orders', 'points_redeemed', 'INTEGER NOT NULL DEFAULT 0');
+  db.exec(`CREATE TABLE IF NOT EXISTS loyalty_points (
+    id TEXT PRIMARY KEY,
+    store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+    store_customer_id TEXT NOT NULL REFERENCES store_customers(id) ON DELETE CASCADE,
+    points INTEGER NOT NULL, order_id TEXT, reason TEXT NOT NULL DEFAULT 'sale', expires_at TEXT,
+    created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_loyalty_points_customer ON loyalty_points(store_customer_id, created_at)');
 }
 
 module.exports = { applySchemaUpgrades, ensureColumn };

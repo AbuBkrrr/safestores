@@ -41,6 +41,7 @@ export default function StoreSettings() {
         phone: s.phone || '', address: s.address || '', city: s.city || '',
         receiptHeader: s.receipt_header || '', receiptFooter: s.receipt_footer || '',
         maxCashierDiscountPct: Number(s.max_cashier_discount_pct) || 0, requireShift: !!s.require_shift,
+        pointsPer100: Number(s.points_per_100) || 0, pointValue: Number(s.point_value) || 0, pointsExpiryMonths: Number(s.points_expiry_months) || 0,
       });
       setS(data);
       refreshCurrency();
@@ -103,6 +104,14 @@ export default function StoreSettings() {
           <label className="flex"><input type="checkbox" checked={!!s.require_shift} onChange={set('require_shift')} /> {t('settingsPage.requireShift')}</label>
           <div className="form-group mt-1"><label htmlFor="st-rh">{t('settingsPage.receiptHeader')}</label><textarea id="st-rh" value={s.receipt_header || ''} onChange={set('receipt_header')} maxLength={500} /></div>
           <div className="form-group"><label htmlFor="st-rf">{t('settingsPage.receiptFooter')}</label><textarea id="st-rf" value={s.receipt_footer || ''} onChange={set('receipt_footer')} maxLength={500} placeholder={t('settingsPage.receiptFooterPlaceholder')} /></div>
+        </div>
+        <div className="card">
+          <h3>⭐ {t('settingsPage.loyalty')}</h3>
+          <p className="help-text">{t('settingsPage.loyaltyIntro')}</p>
+          <div className="form-group"><label htmlFor="st-pts">{t('settingsPage.pointsPer100')}</label><input id="st-pts" type="number" min="0" step="0.5" value={s.points_per_100} onChange={set('points_per_100')} /></div>
+          <div className="form-group"><label htmlFor="st-ptval">{t('settingsPage.pointValue')}</label><input id="st-ptval" type="number" min="0" step="0.01" value={s.point_value} onChange={set('point_value')} /></div>
+          <div className="form-group"><label htmlFor="st-ptexp">{t('settingsPage.pointsExpiry')}</label><input id="st-ptexp" type="number" min="0" step="1" value={s.points_expiry_months} onChange={set('points_expiry_months')} /><span className="help-text">{t('settingsPage.pointsExpiryHelp')}</span></div>
+          {Number(s.points_per_100) > 0 && <p className="help-text">{t('settingsPage.loyaltyExample', { points: Math.floor(10 * Number(s.points_per_100)), spend: formatCurrency(1000, { code: s.currency_code, symbol: s.currency_symbol }), worth: formatCurrency(Math.floor(10 * Number(s.points_per_100)) * Number(s.point_value || 0), { code: s.currency_code, symbol: s.currency_symbol }) })}</p>}
         </div>
         <div><button className="btn">{t('common.save')}</button></div>
       </form>

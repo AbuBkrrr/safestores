@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -30,6 +31,7 @@ const empty = {
   name: '', sku: '', category: '', supplier: '', unit: 'unit', location: '', storageType: 'ambient',
   costPrice: '', priceMultiplier: '1.3', reorderLevel: '5', initialBackroomQty: '0',
   leadTimeDays: '7', minOrderQty: '1', autoReorder: false,
+  barcode: '', packSize: '1', packUnit: '', variantOf: '', variantLabel: '',
 };
 
 export default function Products() {
@@ -44,6 +46,7 @@ export default function Products() {
   const [locationDrafts, setLocationDrafts] = useState({});
 
   const [showArchived, setShowArchived] = useState(false);
+  const [query, setQuery] = useState('');
 
   const load = () => api.get(`/stores/${user.storeId}/products${showArchived ? '?includeArchived=true' : ''}`).then((r) => setProducts(r.data));
   useEffect(() => { load(); }, [user.storeId, showArchived]);
@@ -95,6 +98,8 @@ export default function Products() {
           <input type="checkbox" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />
           {t('products.showArchived')}
         </label>
+        {['admin', 'manager'].includes(user.role) && <Link className="btn secondary small" to="/products/import">⬆️ {t('products.import')}</Link>}
+        <Link className="btn secondary small" to="/labels">🏷️ {t('products.labels')}</Link>
         <button className="btn" onClick={() => setShowForm((s) => !s)}>{showForm ? t('products.cancel') : t('products.newProduct')}</button>
       </div>
 
@@ -105,6 +110,17 @@ export default function Products() {
             <div className="grid grid-2">
               <div className="form-group"><label>{t('products.name')}</label><input value={form.name} onChange={update('name')} required /></div>
               <div className="form-group"><label>{t('products.skuOrBarcode')}</label><input value={form.sku} onChange={update('sku')} required /></div>
+              <div className="form-group"><label htmlFor="pf-barcode">{t('products.barcode')}</label><input id="pf-barcode" value={form.barcode} onChange={update('barcode')} placeholder={t('products.barcodePlaceholder')} /></div>
+              <div className="form-group">
+                <label htmlFor="pf-variant">{t('products.variantOf')}</label>
+                <select id="pf-variant" value={form.variantOf} onChange={update('variantOf')}>
+                  <option value="">{t('products.notAVariant')}</option>
+                  {products.filter((p) => !p.variant_of && !p.archived_at).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
+                </select>
+              </div>
+              {form.variantOf && <div className="form-group"><label htmlFor="pf-vlabel">{t('products.variantLabel')}</label><input id="pf-vlabel" value={form.variantLabel} onChange={update('variantLabel')} placeholder={t('products.variantLabelPlaceholder')} /></div>}
+              <div className="form-group"><label htmlFor="pf-pack">{t('products.packSize')}</label><input id="pf-pack" type="number" min="1" value={form.packSize} onChange={update('packSize')} /><span className="help-text">{t('products.packSizeHelp')}</span></div>
+              <div className="form-group"><label htmlFor="pf-packunit">{t('products.packUnit')}</label><input id="pf-packunit" value={form.packUnit} onChange={update('packUnit')} placeholder={t('products.packUnitPlaceholder')} /></div>
               <div className="form-group"><label>{t('products.category')}</label><input value={form.category} onChange={update('category')} /></div>
               <div className="form-group"><label>{t('products.supplier')}</label><input value={form.supplier} onChange={update('supplier')} /></div>
               <div className="form-group"><label>{t('products.unit')}</label><input value={form.unit} onChange={update('unit')} /></div>
@@ -121,7 +137,14 @@ export default function Products() {
                 </select>
               </div>
               <div className="form-group"><label>{t('products.costPrice')}</label><input type="number" step="0.01" value={form.costPrice} onChange={update('costPrice')} required /></div>
-              <div className="form-group"><label>{t('products.priceMultiplier')}</label><input type="number" step="0.01" value={form.priceMultiplier} onChange={update('priceMultiplier')} /></div>
+              <div className="form-group">
+                <label htmlFor="pf-sell">{t('products.sellingPrice')}</label>
+                <input id="pf-sell" type="number" step="0.01" min="0"
+                  value={form.costPrice && form.priceMultiplier ? String(Math.round(Number(form.costPrice) * Number(form.priceMultiplier) * 100) / 100) : ''}
+                  onChange={(e) => setForm({ ...form, priceMultiplier: Number(form.costPrice) > 0 ? String(Number(e.target.value) / Number(form.costPrice)) : form.priceMultiplier })}
+                  disabled={!(Number(form.costPrice) > 0)} />
+                <span className="help-text">{Number(form.costPrice) > 0 ? t('products.markupHelp', { pct: Math.round((Number(form.priceMultiplier) - 1) * 1000) / 10 }) : t('products.enterCostFirst')}</span>
+              </div>
               <div className="form-group"><label>{t('products.reorderLevel')}</label><input type="number" value={form.reorderLevel} onChange={update('reorderLevel')} /></div>
               <div className="form-group"><label>{t('products.initialBackroomQty')}</label><input type="number" value={form.initialBackroomQty} onChange={update('initialBackroomQty')} /></div>
               <div className="form-group"><label>{t('products.leadTimeDays')}</label><input type="number" value={form.leadTimeDays} onChange={update('leadTimeDays')} /></div>
@@ -143,6 +166,8 @@ export default function Products() {
       )}
 
       <div className="card">
+        <input aria-label={t('common.search')} placeholder={t('products.searchPlaceholder')} value={query} onChange={(e) => setQuery(e.target.value)} style={{ maxWidth: 320, marginBottom: 12 }} />
+        <div className="table-wrap">
         <table>
           <thead>
             <tr>
@@ -151,10 +176,15 @@ export default function Products() {
             </tr>
           </thead>
           <tbody>
-            {products.map((p) => (
+            {products.filter((p) => {
+              const q = query.trim().toLowerCase();
+              return !q || [p.name, p.sku, p.barcode, p.category, p.variant_label].some((v) => v && String(v).toLowerCase().includes(q));
+            }).map((p) => (
               <tr key={p.id}>
                 <td>
                   {p.name}
+                  {p.variant_label && <span className="muted"> · {p.variant_label}</span>}
+                  {p.pack_size > 1 && <span className="muted" title={t('products.packSize')}> · {p.pack_size}/{p.pack_unit || t('products.pack')}</span>}
                   {p.storage_type === 'frozen' && <span title={t('products.frozenTitle')}> 🧊</span>}
                   {p.storage_type === 'refrigerated' && <span title={t('products.refrigeratedTitle')}> ❄️</span>}
                   {p.shelf_qty <= p.reorder_level && <span title={t('products.lowStockTitle')}> ⚠️</span>}
@@ -171,7 +201,7 @@ export default function Products() {
                     </div>
                   )}
                 </td>
-                <td><span className="code-chip">{p.sku}</span></td>
+                <td><span className="code-chip">{p.sku}</span>{p.barcode && p.barcode !== p.sku && <div className="muted" style={{ fontSize: 11 }}>{p.barcode}</div>}</td>
                 <td>{p.category || '—'}</td>
                 <td>
                   <input
@@ -196,6 +226,7 @@ export default function Products() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
       <Toast {...(toast || {})} />
     </div>

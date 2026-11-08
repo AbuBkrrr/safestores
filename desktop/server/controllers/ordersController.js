@@ -181,9 +181,8 @@ function removeItem(req, res) {
 function payOrder(req, res) {
   const { storeId, orderId } = req.params;
   const { paymentMethod } = req.body || {};
-  const storeCustomerId = req.body?.storeCustomerId || req.body?.payments?.find((p) => p.storeCustomerId)?.storeCustomerId || null;
-
   const pending = db.prepare('SELECT * FROM orders WHERE id = ? AND store_id = ?').get(orderId, storeId);
+  const storeCustomerId = req.body?.storeCustomerId || req.body?.payments?.find((p) => p.storeCustomerId)?.storeCustomerId || pending?.store_customer_id || null;
   if (!pending || pending.status !== 'pending_payment') return res.status(400).json({ error: 'Order not found or already resolved' });
 
   const store = db.prepare('SELECT require_shift FROM stores WHERE id = ?').get(storeId) || {};
@@ -232,6 +231,7 @@ function payOrder(req, res) {
          VALUES (?,?,?,'credit_sale',?,?,?,?)`
       ).run(crypto.randomUUID(), storeId, storeCustomerId, credit, order.id, `Receipt ${order.receipt_number}`, req.user.sub);
     }
+    require('./growthController').settlePoints(order);
     return normalize(order);
   })();
 
@@ -299,7 +299,7 @@ async function applyDiscount(req, res) {
   }
 
   db.transaction(() => {
-    db.prepare('UPDATE orders SET discount_type = ?, discount_value = ?, discount_reason = ?, discount_approved_by = ? WHERE id = ?')
+    db.prepare('UPDATE orders SET discount_type = ?, discount_value = ?, discount_reason = ?, discount_approved_by = ?, points_redeemed = 0 WHERE id = ?')
       .run(clearing ? null : type, clearing ? 0 : value, clearing ? null : (reason ? String(reason).slice(0, 200) : null), approvedBy, orderId);
     recalcOrderTotals(orderId);
   })();
@@ -400,5 +400,5 @@ function publicReceipt(req, res) {
 
 module.exports = {
   createOrder, listOrders, getOrder, addItem, removeItem, payOrder, cancelOrder,
-  applyDiscount, parkOrder, refundOrder, publicReceipt, loadReceipt,
+  applyDiscount, parkOrder, refundOrder, publicReceipt, loadReceipt, recalcOrderTotals,
 };

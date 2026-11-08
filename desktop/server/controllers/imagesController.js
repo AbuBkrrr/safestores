@@ -34,7 +34,9 @@ function barcodeLookup(req, res) {
   const { code } = req.query;
   if (!code) return res.status(400).json({ error: 'code query param required' });
 
-  const product = db.prepare('SELECT * FROM products WHERE store_id = ? AND sku = ?').get(storeId, code);
+  const product = db.prepare(
+    'SELECT * FROM products WHERE store_id = ? AND (sku = ? OR barcode = ?) AND archived_at IS NULL ORDER BY (barcode = ?) DESC LIMIT 1'
+  ).get(storeId, code, code, code);
   if (!product) return res.status(404).json({ error: 'No product found for this code' });
   res.json(product);
 }

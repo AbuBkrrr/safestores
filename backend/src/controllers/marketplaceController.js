@@ -126,10 +126,10 @@ async function placeOrder(req, res) {
   try {
     await client.query('BEGIN');
     const orderRes = await client.query(
-      `INSERT INTO marketplace_orders (store_id, customer_id, guest_name, guest_email, guest_phone, delivery_address, customer_note)
-       VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+      `INSERT INTO marketplace_orders (store_id, customer_id, guest_name, guest_email, guest_phone, delivery_address, customer_note, tracking_token)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
       [storeId, customerId, customerId ? null : guestName, customerId ? null : (guestEmail || null), customerId ? null : (guestPhone || null),
-        deliveryAddress || null, customerNote || null]
+        deliveryAddress || null, customerNote || null, require('crypto').randomBytes(16).toString('hex')]
     );
     const order = orderRes.rows[0];
     let subtotal = 0;

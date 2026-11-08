@@ -141,12 +141,14 @@ const FIELDS = {
   taxRatePct: 'tax_rate_pct', taxInclusive: 'tax_inclusive', taxLabel: 'tax_label', taxNumber: 'tax_number',
   phone: 'phone', address: 'address', city: 'city', receiptHeader: 'receipt_header', receiptFooter: 'receipt_footer',
   maxCashierDiscountPct: 'max_cashier_discount_pct', requireShift: 'require_shift', name: 'name',
+  pointsPer100: 'points_per_100', pointValue: 'point_value', pointsExpiryMonths: 'points_expiry_months',
 };
 
 function readSettings(storeId) {
   const r = db.prepare(
     `SELECT s.id, s.name, s.timezone, s.tax_rate_pct, s.tax_inclusive, s.tax_label, s.tax_number, s.phone, s.address, s.city,
             s.receipt_header, s.receipt_footer, s.max_cashier_discount_pct, s.require_shift,
+            s.points_per_100, s.point_value, s.points_expiry_months,
             s.currency_code AS store_currency_code, s.currency_symbol AS store_currency_symbol,
             COALESCE(s.currency_code, c.code) AS currency_code, COALESCE(s.currency_symbol, c.symbol) AS currency_symbol
      FROM stores s LEFT JOIN currency_settings c ON c.id = 'default' WHERE s.id = ?`
@@ -173,6 +175,13 @@ function updateSettings(req, res) {
     }
   }
   if (body.timezone !== undefined && !isValidTimezone(body.timezone)) return res.status(400).json({ error: 'Unknown time zone' });
+  for (const k of ['pointsPer100', 'pointValue', 'pointsExpiryMonths']) {
+    if (body[k] !== undefined) {
+      const n = Number(body[k]);
+      if (!(n >= 0) || n > 100000) return res.status(400).json({ error: 'Loyalty settings must be zero or more' });
+      body[k] = k === 'pointsExpiryMonths' ? Math.floor(n) : n;
+    }
+  }
   for (const k of ['taxRatePct', 'maxCashierDiscountPct']) {
     if (body[k] !== undefined) {
       const r = Number(body[k]);

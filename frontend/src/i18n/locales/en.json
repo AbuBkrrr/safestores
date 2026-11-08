@@ -103,7 +103,10 @@
     "sales": "Sales & Refunds",
     "shifts": "Shifts",
     "dailyReport": "End of Day",
-    "settings": "Store Settings"
+    "settings": "Store Settings",
+    "insights": "Insights",
+    "labels": "Labels & Barcodes",
+    "transfers": "Branch Transfers"
   },
   "login": {
     "welcomeBack": "Welcome Back",
@@ -224,7 +227,12 @@
     "parkedToast": "Sale parked — resume it from the list below.",
     "quickPicks": "Best sellers",
     "removeItem": "Remove item",
-    "shortcutsHint": "Shortcuts: F2 search · Enter adds a scanned barcode · F4 pay · Esc clears search."
+    "shortcutsHint": "Shortcuts: F2 search · Enter adds a scanned barcode · F4 pay · Esc clears search.",
+    "loyaltyMember": "Loyalty member (optional)",
+    "noMember": "— None —",
+    "memberPoints": "{{points}} points (worth {{value}})",
+    "usePoints": "Use points",
+    "pointsApplied": "{{count}} points applied"
   },
   "products": {
     "title": "Product Management",
@@ -267,7 +275,24 @@
     "archive": "Archive",
     "productCreatedToast": "Product created",
     "createError": "Failed to create product",
-    "archiveConfirm": "Archive this product? Its history stays intact and it can be restored later."
+    "archiveConfirm": "Archive this product? Its history stays intact and it can be restored later.",
+    "import": "Import",
+    "labels": "Labels",
+    "barcode": "Barcode",
+    "barcodePlaceholder": "Scan or type (optional)",
+    "variantOf": "Variant of",
+    "notAVariant": "— Not a variant —",
+    "variantLabel": "Variant (size / colour)",
+    "variantLabelPlaceholder": "e.g. Large / Red",
+    "packSize": "Units per pack / carton",
+    "packSizeHelp": "Lets you receive stock by the carton. Leave 1 if you only buy singles.",
+    "packUnit": "Pack name",
+    "packUnitPlaceholder": "e.g. carton, crate",
+    "pack": "pack",
+    "searchPlaceholder": "Search name, SKU, barcode or category",
+    "sellingPrice": "Selling price",
+    "markupHelp": "Markup: {{pct}}% over cost",
+    "enterCostFirst": "Enter the cost price first"
   },
   "stockArrivalPage": {
     "title": "Stock Arrival",
@@ -286,7 +311,8 @@
     "batch": "Batch",
     "date": "Date",
     "recordedToast": "Stock arrival recorded",
-    "recordError": "Failed to record arrival"
+    "recordError": "Failed to record arrival",
+    "packsReceived": "{{unit}}s received ({{size}} each)"
   },
   "movementsPage": {
     "title": "Stock Movements",
@@ -399,7 +425,19 @@
     "paymentRecordedToast": "Payment recorded",
     "paymentError": "Failed to record payment",
     "whatsappReminder": "Hi {{name}}, this is a friendly reminder that you have an outstanding balance of {{amount}} with {{store}}. Thank you!",
-    "us": "us"
+    "us": "us",
+    "email": "Email (optional)",
+    "birthday": "Birthday (optional)",
+    "statement": "Statement",
+    "charges": "Charges",
+    "payments": "Payments",
+    "birthdaysSoon": "Birthdays this week",
+    "today": "today",
+    "inDays": "in {{count}} days",
+    "sendWish": "Send wishes",
+    "birthdayMessage": "Happy birthday, {{name}}! 🎉 Everyone at {{store}} wishes you a wonderful day. Pop in this week for a little treat!",
+    "pointsBalance": "Loyalty points: {{points}} (worth {{value}})",
+    "pointsExpiring": "{{count}} expiring within 30 days"
   },
   "cycleCountingPage": {
     "title": "⏱️ Cycle Counting",
@@ -701,7 +739,14 @@
     "actions": "Actions",
     "send": "Send",
     "cancel": "Cancel",
-    "markReceived": "Mark Received"
+    "markReceived": "Mark Received",
+    "poGreeting": "Hello {{supplier}}, please supply the following:",
+    "poFrom": "From",
+    "poThanks": "Thank you.",
+    "purchaseOrder": "Purchase Order",
+    "unitCost": "Unit cost",
+    "printPo": "Print / PDF",
+    "whatsappPo": "Send on WhatsApp"
   },
   "expiryPage": {
     "title": "Expiry Tracker",
@@ -937,7 +982,16 @@
     "somethingWentWrong": "Something went wrong",
     "orderPlaced": "Order placed!",
     "trackBelow": "You can track it below.",
-    "orderFailed": "Failed to place order"
+    "orderFailed": "Failed to place order",
+    "searchPlaceholder": "Search products",
+    "share": "Share shop",
+    "linkCopied": "Shop link copied",
+    "trackOrder": "Track your order →",
+    "remove": "Remove",
+    "payOnCollection": "Pay when you collect or on delivery.",
+    "orderOnWhatsApp": "Order on WhatsApp",
+    "waGreeting": "Hello {{store}}, I'd like to order:",
+    "metaDescription": "Shop {{name}} {{city}} online — order now, pay on collection or delivery."
   },
   "marketplaceHomePage": {
     "title": "🏪 SAFE Stores Marketplace",
@@ -1265,6 +1319,117 @@
     "requireShift": "Cashiers must start a shift (with a cash float) before taking payments",
     "receiptHeader": "Receipt header",
     "receiptFooter": "Receipt footer",
-    "receiptFooterPlaceholder": "e.g. Thank you! Goods sold can be returned within 7 days with this receipt."
+    "receiptFooterPlaceholder": "e.g. Thank you! Goods sold can be returned within 7 days with this receipt.",
+    "loyalty": "Loyalty points",
+    "loyaltyIntro": "Customers linked to a sale earn points they can spend at the till. Set points to 0 to turn this off.",
+    "pointsPer100": "Points earned per 100 spent",
+    "pointValue": "Value of 1 point (in your currency)",
+    "pointsExpiry": "Points expire after (months)",
+    "pointsExpiryHelp": "0 = never expire.",
+    "loyaltyExample": "Example: spending {{spend}} earns {{points}} points, worth {{worth}}."
+  },
+  "importPage": {
+    "title": "Import Products",
+    "subtitle": "Bring your whole product list in from a spreadsheet (CSV or Excel).",
+    "step1": "Download the template, or use your own sheet — common column names (Name, SKU, Barcode, Cost, Price, Stock…) are recognised automatically.",
+    "step2": "Choose the file below. We check every row before anything is saved.",
+    "step3": "Review the check, then import. Existing SKUs are updated (stock is never overwritten); new ones are created with their opening stock.",
+    "template": "Download template",
+    "chooseFile": "Spreadsheet file (.csv or .xlsx)",
+    "rowsFound": "{{count}} rows found",
+    "emptyFile": "This file has no rows.",
+    "checkTitle": "Check before importing",
+    "willCreate": "{{count}} new",
+    "willUpdate": "{{count}} to update",
+    "skipped": "{{count}} rows with problems (skipped)",
+    "row": "Row",
+    "problem": "Problem",
+    "preview": "Preview (first 20 rows)",
+    "importNow": "Import {{count}} products",
+    "done": "Done: {{created}} created, {{updated}} updated.",
+    "viewProducts": "View products"
+  },
+  "labelsPage": {
+    "title": "Labels & Barcodes",
+    "subtitle": "Print shelf-edge price labels and barcode stickers on any printer.",
+    "missing": "{{count}} products have no barcode yet.",
+    "generate": "Create in-store barcodes for them",
+    "generated": "Created {{count}} barcodes",
+    "size": "Label size",
+    "oneEach": "1 of each",
+    "print": "Print labels",
+    "copies": "Copies",
+    "pickSome": "Enter how many labels you want for at least one product."
+  },
+  "insightsPage": {
+    "title": "Insights",
+    "subtitle": "What's making you money, what isn't, and what to reorder.",
+    "period": "Period",
+    "lastDays": "Last {{count}} days",
+    "tabs": {
+      "profit": "Profit & margin",
+      "abc": "ABC analysis",
+      "deadStock": "Dead stock",
+      "forecast": "Forecast",
+      "heatmap": "Busiest times"
+    },
+    "revenue": "Revenue",
+    "cost": "Cost of goods",
+    "grossProfit": "Gross profit",
+    "margin": "Margin",
+    "units": "Units",
+    "profitNote": "Revenue is what customers paid after discounts and refunds; cost uses each product's current cost price.",
+    "noSales": "No sales in this period.",
+    "class": "Class",
+    "classA": "A — top sellers (80% of revenue)",
+    "classB": "B — steady (next 15%)",
+    "classC": "C — slow (last 5%)",
+    "share": "Share",
+    "abcNote": "Keep A items always in stock and well displayed; review C items — they tie up cash and shelf space.",
+    "idleItems": "Items idle {{days}}+ days",
+    "cashTiedUp": "Cash tied up (at cost)",
+    "deadNote": "Products with stock but no sale in the period. Consider a promotion, a bundle, or returning them to the supplier.",
+    "noDead": "Nothing sitting idle. 👍",
+    "onHand": "On hand",
+    "daysIdle": "Days idle",
+    "valueAtCost": "Value at cost",
+    "forecastNote": "Based on average daily sales over the last {{days}} days.",
+    "avgDaily": "Avg / day",
+    "next30": "Next 30 days",
+    "daysCover": "Days of stock left",
+    "suggested": "Suggested order",
+    "reorderNow": "Reorder now",
+    "heatmapNote": "Sales by weekday and hour ({{tz}}). Darker = busier — plan staff and deliveries around it."
+  },
+  "transfersPage": {
+    "title": "Branch Transfers",
+    "subtitle": "Move stock between your branches. It leaves your backroom now and arrives when the other branch confirms.",
+    "noBranches": "To transfer stock, you need an admin or manager account with the same email address at another branch.",
+    "new": "New transfer",
+    "to": "Send to",
+    "product": "Product",
+    "qty": "Qty",
+    "inBackroom": "{{count}} in backroom",
+    "addLine": "Add product",
+    "note": "Note (optional)",
+    "send": "Send stock",
+    "sent": "Transfer sent",
+    "history": "Transfers",
+    "empty": "No transfers yet.",
+    "when": "When",
+    "direction": "Branch",
+    "items": "Items",
+    "status": "Status",
+    "receive": "Receive"
+  },
+  "trackPage": {
+    "notFound": "We couldn't find this order. Check the link.",
+    "reference": "Order",
+    "cancelled": "This order was cancelled.",
+    "steps": {
+      "placed": "Order received",
+      "fulfilled": "Ready / delivered"
+    },
+    "questions": "Questions? Call the store:"
   }
 }

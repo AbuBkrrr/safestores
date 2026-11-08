@@ -151,6 +151,13 @@ router.post('/invites/bulk', requireRole('admin', 'manager'), usersCtrl.createBu
 router.patch('/invites/:inviteId/revoke', requireRole('admin', 'manager'), usersCtrl.revokeInvite);
 
 router.get('/products', productsCtrl.listProducts);
+const stockToolsCtrl = require('../controllers/stockToolsController');
+router.post('/products/import', requireRole('admin', 'manager'), stockToolsCtrl.importProducts);
+router.get('/transfers', requireRole('admin', 'manager'), stockToolsCtrl.listTransfers);
+router.get('/transfers/destinations', requireRole('admin', 'manager'), stockToolsCtrl.destinations);
+router.post('/transfers', requireRole('admin', 'manager'), stockToolsCtrl.createTransfer);
+router.post('/transfers/:transferId/receive', requireRole('admin', 'manager', 'staff'), stockToolsCtrl.receiveTransfer);
+router.post('/transfers/:transferId/cancel', requireRole('admin', 'manager'), stockToolsCtrl.cancelTransfer);
 router.post('/products', requireRole('admin', 'manager'), productsCtrl.createProduct);
 router.put('/products/:productId', requireRole('admin', 'manager'), productsCtrl.updateProduct);
 router.delete('/products/:productId', requireRole('admin'), productsCtrl.deleteProduct);
@@ -195,7 +202,12 @@ router.get('/suppliers/:id/performance', requireRole('admin', 'manager'), suppli
 
 // Customer credit tracking — cashiers/managers can record sales and
 // payments day-to-day; only admin can archive a customer record outright.
+const loyaltyCtrl = require('../controllers/loyaltyController');
+router.get('/customers/birthdays', requireRole('admin', 'manager', 'cashier', 'checkout'), loyaltyCtrl.upcomingBirthdays);
 router.get('/customers', requireRole('admin', 'manager', 'cashier', 'checkout'), customersCtrl.listCustomers);
+router.get('/customers/:customerId/points', requireRole('admin', 'manager', 'cashier', 'checkout'), loyaltyCtrl.getPoints);
+router.post('/orders/:orderId/redeem-points', requireRole('admin', 'manager', 'cashier', 'checkout'), loyaltyCtrl.redeemPoints);
+router.post('/orders/:orderId/customer', requireRole('admin', 'manager', 'cashier', 'checkout'), loyaltyCtrl.attachCustomer);
 router.post('/customers', requireRole('admin', 'manager', 'cashier', 'checkout'), customersCtrl.createCustomer);
 router.get('/customers/:customerId', requireRole('admin', 'manager', 'cashier', 'checkout'), customersCtrl.getCustomer);
 router.patch('/customers/:customerId', requireRole('admin', 'manager'), customersCtrl.updateCustomer);
@@ -249,6 +261,12 @@ router.get('/analytics/low-stock-distribution', analyticsCtrl.lowStockDistributi
 router.get('/analytics/reorder-alerts', analyticsCtrl.reorderAlerts);
 router.get('/analytics/expiring-soon', analyticsCtrl.expiringSoon);
 router.get('/analytics/shrinkage', requireRole('admin', 'manager'), analyticsCtrl.shrinkageReport);
+const insightsCtrl = require('../controllers/insightsController');
+router.get('/insights/profit', requireRole('admin', 'manager'), insightsCtrl.profit);
+router.get('/insights/abc', requireRole('admin', 'manager'), insightsCtrl.abc);
+router.get('/insights/dead-stock', requireRole('admin', 'manager'), insightsCtrl.deadStock);
+router.get('/insights/forecast', requireRole('admin', 'manager'), insightsCtrl.forecast);
+router.get('/insights/heatmap', requireRole('admin', 'manager'), insightsCtrl.heatmap);
 
 // Data export.
 router.get('/export/csv', requireRole('admin'), exportCtrl.exportCsv);

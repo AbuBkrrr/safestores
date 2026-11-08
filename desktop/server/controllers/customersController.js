@@ -37,11 +37,12 @@ function listCustomers(req, res) {
 // POST /api/stores/:storeId/customers  { name, phone?, notes? }
 function createCustomer(req, res) {
   const { storeId } = req.params;
-  const { name, phone, notes } = req.body;
+  const { name, phone, notes, email, birthday } = req.body;
   if (!name) return res.status(400).json({ error: 'name is required' });
+  if (birthday && Number.isNaN(Date.parse(birthday))) return res.status(400).json({ error: 'Invalid birthday' });
   const id = crypto.randomUUID();
-  db.prepare('INSERT INTO store_customers (id, store_id, name, phone, notes) VALUES (?,?,?,?,?)')
-    .run(id, storeId, name, phone || null, notes || null);
+  db.prepare('INSERT INTO store_customers (id, store_id, name, phone, notes, email, birthday) VALUES (?,?,?,?,?,?,?)')
+    .run(id, storeId, name, phone || null, notes || null, email || null, birthday ? String(birthday).slice(0, 10) : null);
   const customer = db.prepare('SELECT *, 0 AS balance FROM store_customers WHERE id = ?').get(id);
   res.status(201).json(customer);
 }
@@ -67,11 +68,14 @@ function updateCustomer(req, res) {
   const { storeId, customerId } = req.params;
   const existing = db.prepare('SELECT * FROM store_customers WHERE id = ? AND store_id = ?').get(customerId, storeId);
   if (!existing) return res.status(404).json({ error: 'Customer not found' });
-  const { name, phone, notes } = req.body;
-  db.prepare('UPDATE store_customers SET name = ?, phone = ?, notes = ? WHERE id = ?').run(
+  const { name, phone, notes, email, birthday } = req.body;
+  if (birthday && Number.isNaN(Date.parse(birthday))) return res.status(400).json({ error: 'Invalid birthday' });
+  db.prepare('UPDATE store_customers SET name = ?, phone = ?, notes = ?, email = ?, birthday = ? WHERE id = ?').run(
     name || existing.name,
     phone !== undefined ? phone : existing.phone,
     notes !== undefined ? notes : existing.notes,
+    email !== undefined ? (email || null) : existing.email,
+    birthday !== undefined ? (birthday ? String(birthday).slice(0, 10) : null) : existing.birthday,
     customerId
   );
   res.json(db.prepare('SELECT * FROM store_customers WHERE id = ?').get(customerId));

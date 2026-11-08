@@ -17,9 +17,11 @@ import { SUPPORTED_LANGUAGES } from '../i18n/config.js';
 const storeNav = [
   { group: 'overview', to: '/', navKey: 'dashboard', icon: '📊', end: true },
   { group: 'overview', to: '/analytics', navKey: 'analytics', icon: '📈' },
+  { group: 'overview', to: '/insights', navKey: 'insights', icon: '💡', roles: ['admin', 'manager'] },
   { group: 'storeOperations', to: '/products', navKey: 'products', icon: '📦' },
   { group: 'storeOperations', to: '/stock-arrival', navKey: 'stockArrival', icon: '🚚' },
   { group: 'storeOperations', to: '/movements', navKey: 'movements', icon: '🔁' },
+  { group: 'storeOperations', to: '/labels', navKey: 'labels', icon: '🏷️' },
   { group: 'storeOperations', to: '/replenishment', navKey: 'replenishment', icon: '🔄', roles: ['admin', 'manager'] },
   { group: 'storeOperations', to: '/suppliers', navKey: 'suppliers', icon: '🚚', roles: ['admin', 'manager'] },
   { group: 'storeOperations', to: '/customers', navKey: 'customers', icon: '🧾', roles: ['admin', 'manager', 'cashier', 'checkout', 'staff'] },
@@ -53,6 +55,7 @@ const storeNav = [
 // no longer are. The physical shelf/floor/row count audit above is a
 // same-store feature and works in both editions unconditionally.
 const marketplaceNav = [
+  { group: 'storeOperations', to: '/transfers', navKey: 'transfers', icon: '🚛', roles: ['admin', 'manager'] },
   { group: 'marketplace', to: '/auditor-tab', navKey: 'hireAuditor', icon: '🕵️' },
   { group: 'marketplace', to: '/marketplace', navKey: 'marketplace', icon: '🛍️' },
   { group: 'lending', to: '/lending-partners', navKey: 'lendingPartners', icon: '🏦', roles: ['admin'] },

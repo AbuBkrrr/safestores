@@ -252,7 +252,7 @@ async function payOrder(req, res) {
   const tenders = Array.isArray(req.body?.payments) && req.body.payments.length
     ? req.body.payments.map((p) => ({ method: p.method, amount: Number(p.amount), reference: p.reference ? String(p.reference).slice(0, 120) : null }))
     : [{ method: paymentMethod || 'cash', amount: Number(pending.total), reference: null }];
-  if (!storeCustomerId) storeCustomerId = req.body?.payments?.find((p) => p.storeCustomerId)?.storeCustomerId || null;
+  if (!storeCustomerId) storeCustomerId = req.body?.payments?.find((p) => p.storeCustomerId)?.storeCustomerId || pending.store_customer_id || null;
 
   // A credit sale must be tied to a real, known customer — otherwise
   // there's no one to collect from later, which defeats the point.
@@ -307,6 +307,7 @@ async function payOrder(req, res) {
         [storeId, storeCustomerId, creditAmount, order.id, `Receipt ${order.receipt_number}`, req.user.sub]
       );
     }
+    await require('./loyaltyController').settlePoints(client, order);
     await client.query('COMMIT');
   } catch (err) {
     await client.query('ROLLBACK');
@@ -371,7 +372,7 @@ async function applyDiscount(req, res) {
   try {
     await client.query('BEGIN');
     await client.query(
-      `UPDATE orders SET discount_type = $1, discount_value = $2, discount_reason = $3, discount_approved_by = $4 WHERE id = $5`,
+      `UPDATE orders SET discount_type = $1, discount_value = $2, discount_reason = $3, discount_approved_by = $4, points_redeemed = 0 WHERE id = $5`,
       [clearing ? null : type, clearing ? 0 : value, clearing ? null : (reason ? String(reason).slice(0, 200) : null), approvedBy, orderId]
     );
     await recalcOrderTotals(client, orderId);
@@ -568,5 +569,5 @@ async function cancelOrder(req, res) {
 
 module.exports = {
   createOrder, listOrders, getOrder, addItem, removeItem, payOrder, cancelOrder,
-  applyDiscount, parkOrder, refundOrder, publicReceipt, loadReceipt, openShiftFor,
+  applyDiscount, parkOrder, refundOrder, publicReceipt, loadReceipt, openShiftFor, recalcOrderTotals,
 };

@@ -69,6 +69,12 @@ function createProduct(req, res) {
       leadTimeDays ?? 7, minOrderQty ?? 1, autoReorder ? 1 : 0, initQty, storageType || 'ambient'
     );
 
+    const { barcode, packSize, packUnit, variantOf, variantLabel } = req.body;
+    if (barcode || packSize || packUnit || variantOf || variantLabel) {
+      db.prepare('UPDATE products SET barcode = ?, pack_size = ?, pack_unit = ?, variant_of = ?, variant_label = ? WHERE id = ?')
+        .run(barcode || null, Math.max(1, parseInt(packSize, 10) || 1), packUnit || null, variantOf || null, variantLabel || null, newId);
+    }
+
     if (initQty > 0) {
       db.prepare(
         `INSERT INTO stock_movements (id, store_id, product_id, type, quantity, note, performed_by)
@@ -87,8 +93,10 @@ function updateProduct(req, res) {
   const fields = [
     'name', 'sku', 'category', 'supplier', 'unit', 'location', 'cost_price', 'price_multiplier', 'reorder_level',
     'lead_time_days', 'min_order_qty', 'auto_reorder', 'brand', 'image_url', 'storage_type',
+    'barcode', 'pack_size', 'pack_unit', 'variant_of', 'variant_label',
   ];
   const camelToSnake = {
+    packSize: 'pack_size', packUnit: 'pack_unit', variantOf: 'variant_of', variantLabel: 'variant_label',
     costPrice: 'cost_price', priceMultiplier: 'price_multiplier', reorderLevel: 'reorder_level',
     leadTimeDays: 'lead_time_days', minOrderQty: 'min_order_qty', autoReorder: 'auto_reorder', imageUrl: 'image_url',
     storageType: 'storage_type',

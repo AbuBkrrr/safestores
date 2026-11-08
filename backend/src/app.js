@@ -98,6 +98,12 @@ function createApp() {
   app.get('/api/settings/currency', settingsCtrl.getCurrency);
   // Digital receipt behind the QR code / link printed on a receipt.
   app.get('/api/public/receipts/:token', require('./controllers/ordersController').publicReceipt);
+  const publicCtrl = require('./controllers/publicController');
+  app.get('/api/public/marketplace-orders/:token', publicCtrl.trackOrder);
+  app.get('/api/public/stores/:storeId', publicCtrl.storeInfo);
+  app.get('/share/shop/:storeId', publicCtrl.shareShop);
+  app.get('/sitemap.xml', publicCtrl.sitemap);
+  app.get('/robots.txt', publicCtrl.robots);
   app.use('/api/account', require('./routes/account'));
   app.use('/api/super', superRoutes);
   app.use('/api/stores/:storeId', storeRoutes);

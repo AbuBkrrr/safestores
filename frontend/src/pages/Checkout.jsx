@@ -39,6 +39,7 @@ export default function Checkout() {
   const [shiftForm, setShiftForm] = useState({ amount: '', notes: '' });
   const [discountModal, setDiscountModal] = useState(false);
   const [discount, setDiscount] = useState({ type: 'percent', value: '', reason: '', approverEmail: '', approverPassword: '', needsApproval: false });
+  const [memberPoints, setMemberPoints] = useState(null);
   const videoRef = useRef();
   const readerRef = useRef();
   const searchRef = useRef();
@@ -193,6 +194,26 @@ export default function Checkout() {
       if (err.response?.data?.code === 'DISCOUNT_APPROVAL_REQUIRED') setDiscount((d) => ({ ...d, needsApproval: true }));
       setError(err.response?.data?.error || t('common.errorGeneric'));
     }
+  };
+
+  // Loyalty: link a regular to this sale (they earn points) and optionally spend points.
+  const loadCustomers = () => { if (customers.length === 0) api.get(`/stores/${user.storeId}/customers`).then((r) => setCustomers(r.data)).catch(() => {}); };
+  const linkMember = async (id) => {
+    setError('');
+    try {
+      const { data } = await api.post(`/stores/${user.storeId}/orders/${order.id}/customer`, { storeCustomerId: id || null });
+      setOrder((o) => ({ ...o, ...data }));
+      setMemberPoints(null);
+      if (id) api.get(`/stores/${user.storeId}/customers/${id}/points`).then((r) => setMemberPoints(r.data)).catch(() => {});
+    } catch (err) { setError(err.response?.data?.error || t('common.errorGeneric')); }
+  };
+  const usePoints = async () => {
+    setError('');
+    try {
+      const { data } = await api.post(`/stores/${user.storeId}/orders/${order.id}/redeem-points`, { storeCustomerId: order.store_customer_id, points: memberPoints.available });
+      setOrder((o) => ({ ...o, ...data }));
+      showToast(t('checkout.pointsApplied', { count: data.points_redeemed }), 'success');
+    } catch (err) { setError(err.response?.data?.error || t('common.errorGeneric')); }
   };
 
   const removeDiscount = async () => {
@@ -396,6 +417,21 @@ export default function Checkout() {
           </div>
           {order.items?.length > 0 && (
             <button className="btn small secondary mt-1" onClick={() => setDiscountModal(true)}>🏷️ {t('checkout.addDiscount')}</button>
+          )}
+          {order.items?.length > 0 && (
+            <div className="form-group mt-1">
+              <label htmlFor="loyalty-member">⭐ {t('checkout.loyaltyMember')}</label>
+              <select id="loyalty-member" value={order.store_customer_id || ''} onFocus={loadCustomers} onChange={(e) => linkMember(e.target.value)} disabled={Number(order.points_redeemed) > 0}>
+                <option value="">{t('checkout.noMember')}</option>
+                {customers.map((c) => <option key={c.id} value={c.id}>{c.name}{c.phone ? ` · ${c.phone}` : ''}</option>)}
+              </select>
+              {memberPoints && Number(memberPoints.settings?.points_per_100) > 0 && (
+                <p className="muted" style={{ marginTop: 4 }}>
+                  {t('checkout.memberPoints', { points: memberPoints.available, value: formatCurrency(memberPoints.value) })}{' '}
+                  {memberPoints.available > 0 && !Number(order.points_redeemed) && <button type="button" className="btn small secondary" onClick={usePoints}>{t('checkout.usePoints')}</button>}
+                </p>
+              )}
+            </div>
           )}
 
           {canPay ? (

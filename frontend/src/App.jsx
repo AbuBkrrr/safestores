@@ -16,6 +16,11 @@ import Shifts from './pages/Shifts.jsx';
 import DailyReport from './pages/DailyReport.jsx';
 import StoreSettings from './pages/StoreSettings.jsx';
 import PublicReceipt from './pages/PublicReceipt.jsx';
+import ImportProducts from './pages/ImportProducts.jsx';
+import Labels from './pages/Labels.jsx';
+import Insights from './pages/Insights.jsx';
+import Transfers from './pages/Transfers.jsx';
+import TrackOrder from './pages/TrackOrder.jsx';
 import Layout from './components/Layout.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import { useAuth } from './context/AuthContext.jsx';
@@ -120,6 +125,7 @@ export default function App() {
       <Route path="/verify-email" element={<VerifyEmail />} />
       {/* Digital receipt behind the QR code — public, no login. */}
       <Route path="/r/:token" element={<PublicReceipt />} />
+      <Route path="/track/:token" element={<TrackOrder />} />
       {APP_VARIANT === 'superadmin' && <Route path="/super-login" element={<SuperLogin />} />}
       <Route path="/auditor-signup" element={<AuditorSignup />} />
       <Route path="/auditor-login" element={<AuditorLogin />} />
@@ -179,6 +185,10 @@ export default function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/products" element={<Products />} />
+        <Route path="/products/import" element={<ImportProducts />} />
+        <Route path="/labels" element={<Labels />} />
+        <Route path="/insights" element={<Insights />} />
+        {EDITION !== 'desktop' && <Route path="/transfers" element={<Transfers />} />}
         <Route path="/stock-arrival" element={<StockArrival />} />
         <Route path="/movements" element={<Movements />} />
         <Route path="/replenishment" element={<Replenishment />} />

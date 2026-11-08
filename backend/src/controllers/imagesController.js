@@ -50,7 +50,11 @@ async function barcodeLookup(req, res) {
   const { code } = req.query;
   if (!code) return res.status(400).json({ error: 'code query param required' });
 
-  const { rows } = await db.query('SELECT * FROM products WHERE store_id = $1 AND sku = $2', [storeId, code]);
+  const { rows } = await db.query(
+    `SELECT * FROM products WHERE store_id = $1 AND (sku = $2 OR barcode = $2) AND archived_at IS NULL
+     ORDER BY (barcode = $2) DESC LIMIT 1`,
+    [storeId, code]
+  );
   if (!rows[0]) return res.status(404).json({ error: 'No product found for this code' });
   res.json(rows[0]);
 }

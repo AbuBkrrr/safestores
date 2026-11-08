@@ -134,6 +134,8 @@ router.post('/webhooks/:id/test', requireRole('admin'), webhooksCtrl.testWebhook
 // feature, so (unlike marketplace/auditor) it's available on desktop
 // too. 'staff' is this edition's equivalent of cloud's cashier/checkout
 // roles for list/create/payment actions.
+// Registered before /customers/:customerId so 'birthdays' isn't read as an id.
+router.get('/customers/birthdays', requireRole('admin', 'manager', 'staff', 'cashier', 'checkout'), require('../controllers/growthController').upcomingBirthdays);
 router.get('/customers', requireRole('admin', 'manager', 'staff'), customersCtrl.listCustomers);
 router.post('/customers', requireRole('admin', 'manager', 'staff'), customersCtrl.createCustomer);
 router.get('/customers/:customerId', requireRole('admin', 'manager', 'staff'), customersCtrl.getCustomer);
@@ -195,6 +197,18 @@ router.post('/shifts/:shiftId/close', requireRole(...TILL), shiftsCtrl.closeShif
 router.get('/shifts/:shiftId/report', requireRole(...TILL), shiftsCtrl.shiftReport);
 router.get('/reports/daily', requireRole('admin', 'manager'), shiftsCtrl.dailyReport);
 router.get('/settings', shiftsCtrl.getSettings);
+
+// Insights, product import, loyalty — see growthController.js.
+const growthCtrl = require('../controllers/growthController');
+router.get('/insights/profit', requireRole('admin', 'manager'), growthCtrl.profit);
+router.get('/insights/abc', requireRole('admin', 'manager'), growthCtrl.abc);
+router.get('/insights/dead-stock', requireRole('admin', 'manager'), growthCtrl.deadStock);
+router.get('/insights/forecast', requireRole('admin', 'manager'), growthCtrl.forecast);
+router.get('/insights/heatmap', requireRole('admin', 'manager'), growthCtrl.heatmap);
+router.post('/products/import', requireRole('admin', 'manager'), growthCtrl.importProducts);
+router.get('/customers/:customerId/points', requireRole(...TILL), growthCtrl.getPoints);
+router.post('/orders/:orderId/redeem-points', requireRole(...TILL), growthCtrl.redeemPoints);
+router.post('/orders/:orderId/customer', requireRole(...TILL), growthCtrl.attachCustomer);
 router.patch('/settings', requireRole('admin'), shiftsCtrl.updateSettings);
 
 module.exports = router;

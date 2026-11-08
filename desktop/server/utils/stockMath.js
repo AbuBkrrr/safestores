@@ -10,6 +10,7 @@ function recomputeProductQuantities(db, productId) {
        COALESCE(SUM(CASE WHEN type = 'arrival' THEN quantity
                           WHEN type = 'transfer_to_shelf' THEN -quantity
                           WHEN type = 'backroom_adjustment' THEN quantity
+                          WHEN type = 'transfer_out' THEN -quantity
                           ELSE 0 END), 0) AS backroom_qty,
        COALESCE(SUM(CASE WHEN type = 'transfer_to_shelf' THEN quantity
                           WHEN type IN ('sale', 'damage', 'expiry') THEN -quantity

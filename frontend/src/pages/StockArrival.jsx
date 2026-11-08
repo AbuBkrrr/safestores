@@ -59,6 +59,18 @@ export default function StockArrival() {
                 {products.map((p) => <option key={p.id} value={p.id}>{p.name} ({p.sku})</option>)}
               </select>
             </div>
+            {(() => {
+              // Packs/cartons → units: a product with pack_size > 1 can be
+              // received by the carton; quantity is always stored in units.
+              const sel = products.find((p) => p.id === form.productId);
+              if (!sel || !(sel.pack_size > 1)) return null;
+              return (
+                <div className="form-group">
+                  <label htmlFor="arr-packs">{t('stockArrivalPage.packsReceived', { unit: sel.pack_unit || t('products.pack'), size: sel.pack_size })}</label>
+                  <input id="arr-packs" type="number" min="0" onChange={(e) => setForm({ ...form, quantity: String((Number(e.target.value) || 0) * sel.pack_size) })} />
+                </div>
+              );
+            })()}
             <div className="form-group"><label>{t('stockArrivalPage.quantityReceived')}</label><input type="number" min="1" value={form.quantity} onChange={update('quantity')} required /></div>
             <div className="form-group"><label>{t('stockArrivalPage.invoiceNumber')}</label><input value={form.invoiceNumber} onChange={update('invoiceNumber')} /></div>
             <div className="form-group"><label>{t('stockArrivalPage.expiryDate')}</label><input type="date" value={form.expiryDate} onChange={update('expiryDate')} /></div>

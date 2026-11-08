@@ -78,6 +78,29 @@ export default function Replenishment() {
     }
   };
 
+  const poText = (po) => [
+    t('replenishmentPage.poGreeting', { supplier: po.supplier || '' }),
+    `${t('replenishmentPage.poFrom')}: ${user.storeName || ''}`,
+    '',
+    ...(po.items || []).map((i) => `• ${i.name} (${i.sku}) × ${i.quantity}`),
+    '',
+    t('replenishmentPage.poThanks'),
+  ].join('\n');
+
+  const printPo = (po) => {
+    const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const rows = (po.items || []).map((i) => `<tr><td>${esc(i.sku)}</td><td>${esc(i.name)}</td><td style="text-align:right">${i.quantity}</td><td style="text-align:right">${esc(formatCurrency(i.unit_cost))}</td><td style="text-align:right">${esc(formatCurrency(Number(i.unit_cost) * i.quantity))}</td></tr>`).join('');
+    const win = window.open('', '_blank');
+    if (!win) return;
+    win.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>PO ${esc(po.id.slice(0, 8))}</title><style>body{font-family:Arial,sans-serif;padding:24px} table{width:100%;border-collapse:collapse;font-size:13px} th,td{border-bottom:1px solid #ddd;padding:6px;text-align:left} h1{font-size:20px}</style></head><body>
+      <h1>${esc(t('replenishmentPage.purchaseOrder'))} #${esc(po.id.slice(0, 8).toUpperCase())}</h1>
+      <p><strong>${esc(user.storeName || '')}</strong><br>${esc(t('replenishmentPage.supplier'))}: ${esc(po.supplier || '')}<br>${new Date(po.created_at).toLocaleDateString()}</p>
+      <table><thead><tr><th>SKU</th><th>${esc(t('replenishmentPage.items'))}</th><th>Qty</th><th>${esc(t('replenishmentPage.unitCost'))}</th><th>${esc(t('replenishmentPage.totalCost'))}</th></tr></thead><tbody>${rows}</tbody></table>
+      <p style="font-weight:700;text-align:right">${esc(t('replenishmentPage.totalCost'))}: ${esc(formatCurrency(po.total_cost))}</p></body></html>`);
+    win.document.close();
+    setTimeout(() => win.print(), 200);
+  };
+
   const sendOrder = async (id) => {
     try { await api.patch(`/stores/${user.storeId}/replenishment/purchase-orders/${id}/send`); load(); }
     catch (err) { showToast(err.response?.data?.error || t('replenishmentPage.sendFailed'), 'error'); }
@@ -178,6 +201,8 @@ export default function Replenishment() {
                 <td>{formatCurrency(po.total_cost)}</td>
                 <td>{new Date(po.created_at).toLocaleString()}</td>
                 <td>
+                  <button className="btn small secondary" onClick={() => printPo(po)} title={t('replenishmentPage.printPo')}>📄</button>{' '}
+                  <a className="btn small secondary" href={`https://wa.me/?text=${encodeURIComponent(poText(po))}`} target="_blank" rel="noreferrer" title={t('replenishmentPage.whatsappPo')}>💬</a>{' '}
                   {po.status === 'draft' && (
                     <>
                       <button className="btn small" onClick={() => sendOrder(po.id)}>{t('replenishmentPage.send')}</button>{' '}

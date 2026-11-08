@@ -29,11 +29,12 @@ async function listCustomers(req, res) {
 // POST /api/stores/:storeId/customers  { name, phone?, notes? }
 async function createCustomer(req, res) {
   const { storeId } = req.params;
-  const { name, phone, notes } = req.body;
+  const { name, phone, notes, email, birthday } = req.body;
   if (!name) return res.status(400).json({ error: 'name is required' });
+  if (birthday && Number.isNaN(Date.parse(birthday))) return res.status(400).json({ error: 'Invalid birthday' });
   const { rows } = await db.query(
-    `INSERT INTO store_customers (store_id, name, phone, notes) VALUES ($1,$2,$3,$4) RETURNING *, 0 AS balance`,
-    [storeId, name, phone || null, notes || null]
+    `INSERT INTO store_customers (store_id, name, phone, notes, email, birthday) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *, 0 AS balance`,
+    [storeId, name, phone || null, notes || null, email || null, birthday || null]
   );
   res.status(201).json(rows[0]);
 }
@@ -62,11 +63,13 @@ async function getCustomer(req, res) {
 // PATCH /api/stores/:storeId/customers/:customerId  { name?, phone?, notes? }
 async function updateCustomer(req, res) {
   const { storeId, customerId } = req.params;
-  const { name, phone, notes } = req.body;
+  const { name, phone, notes, email, birthday } = req.body;
+  if (birthday && Number.isNaN(Date.parse(birthday))) return res.status(400).json({ error: 'Invalid birthday' });
   const { rows } = await db.query(
-    `UPDATE store_customers SET name = COALESCE($1,name), phone = COALESCE($2,phone), notes = COALESCE($3,notes)
+    `UPDATE store_customers SET name = COALESCE($1,name), phone = COALESCE($2,phone), notes = COALESCE($3,notes),
+       email = CASE WHEN $6::boolean THEN $7 ELSE email END, birthday = CASE WHEN $8::boolean THEN $9::date ELSE birthday END
      WHERE id = $4 AND store_id = $5 RETURNING *`,
-    [name || null, phone, notes, customerId, storeId]
+    [name || null, phone, notes, customerId, storeId, email !== undefined, email || null, birthday !== undefined, birthday || null]
   );
   if (!rows[0]) return res.status(404).json({ error: 'Customer not found' });
   res.json(rows[0]);
