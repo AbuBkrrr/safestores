@@ -28,6 +28,13 @@ async function handlePaystackWebhook(req, res) {
   if (!reference) return res.status(200).json({ received: true });
 
   try {
+    // A store paying its settlement balance to the platform.
+    const { rows: sp } = await db.query('SELECT reference FROM store_settlement_payments WHERE reference = $1', [reference]);
+    if (sp[0]) {
+      await require('./settlementsController').confirmSettlementPayment(reference);
+      return res.status(200).json({ received: true });
+    }
+
     // Storefront order paid online (settles to the store's own subaccount).
     const { rows: mo } = await db.query('SELECT id FROM marketplace_orders WHERE payment_reference = $1', [reference]);
     if (mo[0]) {

@@ -3,7 +3,6 @@
 const mockPaystack = {
   isConfigured: true,
   SUPPORTED_CURRENCIES: ['NGN'],
-  COMMISSION_PCT: 0,
   listBanks: jest.fn(async () => [{ name: 'Test Bank', code: '058' }]),
   resolveAccount: jest.fn(async (acct) => {
     if (acct === '0000000000') throw new Error('Could not resolve');
@@ -71,7 +70,7 @@ describe('Shopper pays online', () => {
   it('checkout names the store subaccount; verify marks the order paid', async () => {
     const { store, product } = await connectedStore();
     const info = await request().get(`/api/public/stores/${store.id}`);
-    expect(info.body.payments).toEqual({ online: true, payOnDelivery: true });
+    expect(info.body.payments).toEqual({ online: true, payOnDelivery: true, cashPausedForBalance: false });
 
     const order = await placeOnline(store.id, product.id);
     expect(order.payment_method).toBe('online');
@@ -126,5 +125,87 @@ describe('Shopper pays online', () => {
     expect(neg.status).toBe(400);
     const ok = await request().post(`/api/marketplace/${store.id}/orders`).send({ items: [{ productId: product.id, quantity: 1 }], guestName: 'X' });
     expect(ok.body).toMatchObject({ payment_method: 'on_delivery', payment_status: 'unpaid' });
+  });
+});
+
+describe('Bolt-style settlements', () => {
+  const superHeaders = async () => {
+    const { createSuperAdmin, superToken } = require('./helpers/factories');
+    return A(superToken(await createSuperAdmin()));
+  };
+
+  it('cash order: store owes commission; next online order nets it; over the limit pauses pay-on-delivery', async () => {
+    const S = await superHeaders();
+    await request().patch('/api/super/settlement-settings').set(S).send({ marketplaceCommissionPct: 10, cashDebtLimit: 500, maxRecoveryPct: 50 });
+    const { store, token, product } = await connectedStore(); // product sells at 1500
+
+    // Two pay-on-delivery orders of 3000 each, fulfilled → 300 commission each = 600 owed.
+    for (let i = 0; i < 2; i += 1) {
+      const o = await request().post(`/api/marketplace/${store.id}/orders`).send({ items: [{ productId: product.id, quantity: 2 }], guestName: 'Cash' });
+      expect(o.body.payment_method).toBe('on_delivery');
+      expect((await request().patch(`/api/stores/${store.id}/marketplace/orders/${o.body.id}/fulfill`).set(A(token))).status).toBe(200);
+    }
+    let st = await request().get(`/api/stores/${store.id}/settlements`).set(A(token));
+    expect(st.body).toMatchObject({ balance: 600, owes: 600, cashBlocked: true });
+    expect(st.body.thisMonth).toMatchObject({ cashSales: 6000, commissions: 600 });
+
+    // Over the limit: storefront stops offering pay-on-delivery.
+    const info = await request().get(`/api/public/stores/${store.id}`);
+    expect(info.body.payments).toMatchObject({ online: true, payOnDelivery: false, cashPausedForBalance: true });
+    expect((await request().post(`/api/marketplace/${store.id}/orders`).send({ items: [{ productId: product.id, quantity: 1 }], guestName: 'X' })).status).toBe(400);
+
+    // Online order of 3000: commission 300 + recovery min(600, 50% of 2700 = 1350) = 600 → platform takes 900, store gets 2100.
+    const order = await placeOnline(store.id, product.id);
+    const pay = await request().post(`/api/marketplace/orders/${order.tracking_token}/pay`).send({});
+    expect(mockPaystack.initializeSplitTransaction).toHaveBeenLastCalledWith(expect.objectContaining({ amount: 3000, transactionCharge: 900, subaccount: 'ACCT_store123' }));
+    mockPaystack.verifySplitTransaction.mockResolvedValueOnce({ success: true, status: 'success', amount: 3000, currency: 'NGN', subaccountCode: 'ACCT_store123' });
+    await request().post(`/api/marketplace/orders/${order.tracking_token}/verify`).send({ reference: pay.body.reference });
+    // Verifying twice must not double-count.
+    mockPaystack.verifySplitTransaction.mockResolvedValueOnce({ success: true, status: 'success', amount: 3000, currency: 'NGN', subaccountCode: 'ACCT_store123' });
+    await request().post(`/api/marketplace/orders/${order.tracking_token}/verify`).send({ reference: pay.body.reference });
+
+    st = await request().get(`/api/stores/${store.id}/settlements`).set(A(token));
+    expect(st.body).toMatchObject({ balance: 0, cashBlocked: false });
+    expect(st.body.entries.map((e) => e.type).sort()).toEqual(['cash_commission', 'cash_commission', 'debt_recovered', 'online_commission']);
+    expect((await request().get(`/api/public/stores/${store.id}`)).body.payments.payOnDelivery).toBe(true);
+  });
+
+  it('two online payments in flight never recover the same debt twice', async () => {
+    const S = await superHeaders();
+    await request().patch('/api/super/settlement-settings').set(S).send({ marketplaceCommissionPct: 0, maxRecoveryPct: 90 });
+    const { store, product } = await connectedStore();
+    await request().post(`/api/super/settlements/${store.id}/entries`).set(S).send({ type: 'adjustment', amount: 1000, note: 'Opening balance' });
+    const a = await placeOnline(store.id, product.id);
+    const b = await placeOnline(store.id, product.id);
+    await request().post(`/api/marketplace/orders/${a.tracking_token}/pay`).send({});
+    await request().post(`/api/marketplace/orders/${b.tracking_token}/pay`).send({});
+    const charges = mockPaystack.initializeSplitTransaction.mock.calls.map((c) => c[0].transactionCharge);
+    expect(charges).toEqual([1000, 0]);
+  });
+
+  it('store pays its balance online; super admin records transfers and per-store commission', async () => {
+    const S = await superHeaders();
+    const { store, token } = await connectedStore();
+    await request().post(`/api/super/settlements/${store.id}/entries`).set(S).send({ type: 'adjustment', amount: 500, note: 'Commission owed' });
+
+    mockPaystack.initializeTransaction.mockResolvedValueOnce({ authorizationUrl: 'https://checkout.paystack.test/x', reference: 'r' });
+    const start = await request().post(`/api/stores/${store.id}/settlements/pay`).set(A(token)).send({});
+    expect(start.status).toBe(200);
+    expect(mockPaystack.initializeTransaction).toHaveBeenCalledWith(expect.objectContaining({ amountNaira: 500 }));
+    mockPaystack.verifyTransaction.mockResolvedValue({ success: true, amountNaira: 500, reference: start.body.reference });
+    expect((await request().post(`/api/stores/${store.id}/settlements/verify`).set(A(token)).send({ reference: start.body.reference })).body).toEqual({ paid: true });
+    expect((await request().post(`/api/stores/${store.id}/settlements/verify`).set(A(token)).send({ reference: start.body.reference })).body).toEqual({ paid: true });
+    expect((await request().get(`/api/stores/${store.id}/settlements`).set(A(token))).body.balance).toBe(0);
+
+    await request().post(`/api/super/settlements/${store.id}/entries`).set(S).send({ type: 'adjustment', amount: 200, note: 'x' });
+    const transfer = await request().post(`/api/super/settlements/${store.id}/entries`).set(S).send({ type: 'settlement_payment', amount: 200, reference: 'BANK-123' });
+    expect(transfer.body.balance).toBe(0);
+    expect((await request().post(`/api/super/settlements/${store.id}/entries`).set(S).send({ type: 'settlement_payment', amount: 200, reference: 'BANK-123' })).status).toBe(409);
+
+    const c = await request().patch(`/api/super/stores/${store.id}/commission`).set(S).send({ commissionPct: 5 });
+    expect(c.body).toMatchObject({ commissionPct: 5, customCommission: true });
+    const list = await request().get('/api/super/settlements').set(S);
+    expect(list.body.stores.find((x) => x.id === store.id).commission_pct).toBe(5);
+    expect((await request().get('/api/super/settlements').set(A(token))).status).toBe(403);
   });
 });

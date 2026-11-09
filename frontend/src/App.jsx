@@ -22,6 +22,8 @@ const Insights = lazy(() => import('./pages/Insights.jsx'));
 const Transfers = lazy(() => import('./pages/Transfers.jsx'));
 const TrackOrder = lazy(() => import('./pages/TrackOrder.jsx'));
 const Help = lazy(() => import('./pages/Help.jsx'));
+const Settlements = lazy(() => import('./pages/Settlements.jsx'));
+const SettlementsAdmin = lazy(() => import('./pages/super/SettlementsAdmin.jsx'));
 const Terms = lazy(() => import('./pages/Legal.jsx').then((m) => ({ default: m.Terms })));
 const Privacy = lazy(() => import('./pages/Legal.jsx').then((m) => ({ default: m.Privacy })));
 const Licenses = lazy(() => import('./pages/Legal.jsx').then((m) => ({ default: m.Licenses })));
@@ -204,6 +206,7 @@ export default function App() {
         <Route path="/labels" element={<Labels />} />
         <Route path="/insights" element={<Insights />} />
         {EDITION !== 'desktop' && <Route path="/transfers" element={<Transfers />} />}
+        {EDITION !== 'desktop' && <Route path="/settlements" element={<Settlements />} />}
         <Route path="/stock-arrival" element={<StockArrival />} />
         <Route path="/movements" element={<Movements />} />
         <Route path="/replenishment" element={<Replenishment />} />
@@ -254,6 +257,7 @@ export default function App() {
           <Route path="/super/activity" element={<ActivityLog />} />
           <Route path="/super/account" element={<Account />} />
           <Route path="/super/help" element={<Help />} />
+          {EDITION !== 'desktop' && <Route path="/super/settlements" element={<SettlementsAdmin />} />}
         </Route>
       )}
 

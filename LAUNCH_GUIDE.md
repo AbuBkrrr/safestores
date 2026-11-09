@@ -220,6 +220,7 @@ shoppers' money**:
 |---|---|---|
 | Subscription charges | Store → you | Manual bank transfer (works now), or Paystack checkout into your own Paystack balance |
 | Storefront orders | Shopper → **the store** | Paystack **split payments**: each store links its bank account once (Store Settings → Online payments); we register it as a Paystack *subaccount*, and Paystack settles every storefront payment straight to that store's bank. Pay on collection/delivery is still available. |
+| Your commission on storefront orders | Store → you, **Bolt-style** | Online: withheld at source by Paystack. Pay-on-delivery: the store collects the cash, so the commission goes on the store's **balance**, which is netted automatically from its next online payments (capped per payment) or paid by the store from **Settlements**. Over your balance limit, the store's pay-on-delivery pauses until it settles. In-store till sales are never charged. |
 
 Setup:
 
@@ -232,15 +233,17 @@ Setup:
      e.g. `NGN` (Nigeria), `GHS` (Ghana), `KES` (Kenya), `ZAR` (South Africa).
      A Paystack account is tied to one country; stores in other currencies
      keep pay on delivery.
-   - `MARKETPLACE_COMMISSION_PCT` — optional platform cut of each storefront
-     payment (default `0`). Paystack deducts it automatically, and it lands in
-     your own balance; the rest goes to the store.
 3. Paystack dashboard → Settings → API Keys & Webhooks: set the webhook URL to
    `https://api.safestores.name.ng/api/webhooks/paystack`. It confirms both
    subscription charges and storefront payments.
 4. Super Admin → Payment settings: enable the gateway for subscription charges
    (see `docs/PAYMENT_GATEWAY_SETUP.md`).
-5. Each store admin: Store Settings → **Online payments** → pick their bank,
+5. Super Admin → **Store Settlements**: set the commission % on storefront
+   orders (default 0), the balance limit at which a store's pay-on-delivery
+   pauses (0 = never), and the most of an online payment that may go to
+   clearing a store's balance (default 50%). You can override the commission
+   per store, record bank transfers from stores, and make adjustments.
+6. Each store admin: Store Settings → **Online payments** → pick their bank,
    enter the account number, confirm the account name Paystack returns, and
    link it. Only the last 4 digits are stored by SAFE Stores.
 
@@ -286,6 +289,7 @@ Do this on a phone **and** a laptop, as a brand-new customer would:
 - [ ] Customers: add one with a birthday; link them at the till; points appear.
 - [ ] Storefront (`/shop/<storeId>`): order as a guest → **Track your order** works.
 - [ ] Store Settings → Online payments: link a bank account (Paystack **test** keys on staging).
+- [ ] Settlements: set a 10% commission and a small balance limit; complete a pay-on-delivery order → the store's **Settlements** page shows the commission owed and pay-on-delivery pauses on its storefront; an online order then clears the balance automatically.
 - [ ] Storefront: **Pay now online** with a Paystack test card → you return to the tracking page showing **Paid**; the store's Marketplace orders list shows "Paid online"; in Paystack the transaction shows the store's subaccount.
 - [ ] Share the shop link on WhatsApp → the preview shows the store name.
 - [ ] Forgot password → reset works. Turn on 2FA for the store admin.

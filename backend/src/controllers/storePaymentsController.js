@@ -16,6 +16,7 @@ const db = require('../config/db');
 const paystack = require('../utils/paystack');
 const { logActivity } = require('../utils/activityLog');
 const { emitToStore } = require('../realtime');
+const settlements = require('./settlementsController');
 
 function frontendBase() {
   return (process.env.FRONTEND_URL || 'http://localhost:5173').split(',')[0].trim().replace(/\/$/, '');
@@ -51,7 +52,7 @@ async function getPayouts(req, res) {
     currency,
     gatewayConfigured: paystack.isConfigured,
     currencySupported: paystack.SUPPORTED_CURRENCIES.includes(currency),
-    commissionPct: paystack.COMMISSION_PCT,
+    commissionPct: (await settlements.terms(db, req.params.storeId)).commissionPct,
   });
 }
 
@@ -137,7 +138,11 @@ async function paymentOptionsFor(storeId) {
   const s = rows[0] || {};
   const currency = await storeCurrency(storeId);
   const online = !!(s.online_payments_enabled && s.payout_subaccount_code && paystack.isConfigured && paystack.SUPPORTED_CURRENCIES.includes(currency));
-  return { online, payOnDelivery: s.pay_on_delivery_enabled !== false || !online };
+  // Over the platform's balance limit → pay-on-delivery pauses until the
+  // store settles (Bolt-style). Online keeps working and nets the debt.
+  const blocked = await settlements.cashBlocked(db, storeId);
+  const payOnDelivery = !blocked && (s.pay_on_delivery_enabled !== false || !online);
+  return { online, payOnDelivery, cashPausedForBalance: blocked };
 }
 
 // POST /api/marketplace/orders/:token/pay  { email? } → { authorizationUrl }
@@ -163,12 +168,15 @@ async function startOrderPayment(req, res) {
   if (!email || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return res.status(400).json({ error: 'An email address is needed for the payment receipt', code: 'EMAIL_REQUIRED' });
 
   const reference = `SS-${order.id.slice(0, 8)}-${crypto.randomBytes(5).toString('hex')}`.toUpperCase();
+  // Platform commission + (capped) recovery of what the store owes; the rest settles to the store.
+  const split = await settlements.planOnlineSplit(db, order);
   let init;
   try {
     init = await paystack.initializeSplitTransaction({
       email, amount: Number(order.total), currency, reference,
       callbackUrl: `${frontendBase()}/track/${order.tracking_token}`,
       subaccount: order.payout_subaccount_code,
+      transactionCharge: split.commission + split.recovery,
       metadata: { kind: 'marketplace_order', order_id: order.id, store_id: order.store_id },
     });
   } catch (err) {
@@ -176,8 +184,8 @@ async function startOrderPayment(req, res) {
   }
   await db.query(
     `UPDATE marketplace_orders SET payment_method = 'online', payment_status = 'pending', payment_reference = $1, currency = $2,
-       guest_email = COALESCE(guest_email, $3) WHERE id = $4`,
-    [reference, currency, order.customer_id ? null : email, order.id]
+       guest_email = COALESCE(guest_email, $3), commission_pct = $5, commission_amount = $6, debt_recovery = $7 WHERE id = $4`,
+    [reference, currency, order.customer_id ? null : email, order.id, split.commissionPct, split.commission, split.recovery]
   );
   return res.json({ authorizationUrl: init.authorizationUrl, reference });
 }
@@ -207,6 +215,7 @@ async function confirmOrderPayment(reference) {
     [v.paidAt, v.amount, v.currency, order.id]
   );
   const paid = upd[0] || order;
+  if (upd[0]) await settlements.recordOnlinePaid(db, paid);
   try { emitToStore(order.store_id, 'marketplace:order_paid', { id: order.id }); } catch { /* best-effort */ }
   return { ok: true, order: paid };
 }

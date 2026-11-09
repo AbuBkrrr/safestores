@@ -231,7 +231,9 @@ export default function Storefront() {
                   <div className="form-group"><input aria-label={t('storefrontPage.phoneOptional')} placeholder={t('storefrontPage.phoneOptional')} value={guestPhone} onChange={(e) => setGuestPhone(e.target.value)} inputMode="tel" /></div>
                 </>
               )}
-              {canPayOnline && canPayOnDelivery ? (
+              {!canPayOnline && !canPayOnDelivery ? (
+                <div className="alert warning">{t('storefrontPage.notTakingOrders')}</div>
+              ) : canPayOnline && canPayOnDelivery ? (
                 <fieldset className="pay-choice">
                   <legend>{t('storefrontPage.howToPay')}</legend>
                   <label><input type="radio" name="pay" checked={method === 'online'} onChange={() => setPayMethod('online')} /> {t('storefrontPage.payOnline')}</label>
@@ -240,7 +242,7 @@ export default function Storefront() {
               ) : <p className="muted">{canPayOnline ? t('storefrontPage.payOnlineOnly') : t('storefrontPage.payOnCollection')}</p>}
               {method === 'online' && <p className="muted" style={{ fontSize: 12 }}>🔒 {t('storefrontPage.securePayNote', { store: store?.name || '' })}</p>}
               <div className="flex">
-                <button className="btn" onClick={placeOrder}>{method === 'online' ? t('storefrontPage.payNow', { amount: formatCurrency(cartTotal) }) : t('storefrontPage.placeOrder')}</button>
+                <button className="btn" disabled={!canPayOnline && !canPayOnDelivery} onClick={placeOrder}>{method === 'online' ? t('storefrontPage.payNow', { amount: formatCurrency(cartTotal) }) : t('storefrontPage.placeOrder')}</button>
                 {store?.phone && <button className="btn" style={{ background: '#25D366' }} onClick={whatsappOrder}>{t('storefrontPage.orderOnWhatsApp')}</button>}
               </div>
             </div>

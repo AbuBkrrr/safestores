@@ -122,7 +122,8 @@ async function placeOrder(req, res) {
   }
   const options = await require('./storePaymentsController').paymentOptionsFor(storeId);
   if (paymentMethod === 'online' && !options.online) return res.status(400).json({ error: 'This store does not take online payments' });
-  if (paymentMethod === 'on_delivery' && !options.payOnDelivery) return res.status(400).json({ error: 'This store only takes online payment' });
+  if (!options.online && !options.payOnDelivery) return res.status(400).json({ error: 'This store is not taking online orders right now' });
+  if (paymentMethod === 'on_delivery' && !options.payOnDelivery) return res.status(400).json({ error: 'This store only takes online payment right now' });
 
   const customerId = req.user?.sub || null;
   if (!customerId && !guestName) {
@@ -300,6 +301,8 @@ async function fulfillOrder(req, res) {
     }
 
     await client.query(`UPDATE marketplace_orders SET status = 'fulfilled', fulfilled_at = now() WHERE id = $1`, [orderId]);
+    // Pay-on-delivery: the store collected the money, so the commission goes on its balance.
+    await require('./settlementsController').recordCashCompleted(client, order, req.user.sub);
     await client.query('COMMIT');
     emitToStore(storeId, 'marketplace:order_fulfilled', { id: orderId });
     res.json({ message: 'Order fulfilled, stock updated' });

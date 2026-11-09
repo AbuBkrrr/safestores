@@ -47,7 +47,10 @@ async function restoreMutableSingletons() {
       methods = '["ussd","bank_transfer","cash","card"]',
       instructions = 'Pay via USSD, bank transfer, cash, or card to the OPAY account above, then click "I''ve Paid" and enter your payment reference.',
       gateway_provider = 'none',
-      gateway_enabled = false
+      gateway_enabled = false,
+      marketplace_commission_pct = 0,
+      cash_debt_limit = 0,
+      max_recovery_pct = 50
     WHERE id = 'default'
   `);
   await pool.query(`UPDATE currency_settings SET code = 'NGN', symbol = '₦' WHERE id = 'default'`);

@@ -59,6 +59,7 @@ const marketplaceNav = [
   { group: 'storeOperations', to: '/transfers', navKey: 'transfers', icon: '🚛', roles: ['admin', 'manager'] },
   { group: 'marketplace', to: '/auditor-tab', navKey: 'hireAuditor', icon: '🕵️' },
   { group: 'marketplace', to: '/marketplace', navKey: 'marketplace', icon: '🛍️' },
+  { group: 'marketplace', to: '/settlements', navKey: 'settlements', icon: '💱', roles: ['admin', 'manager'] },
   { group: 'lending', to: '/lending-partners', navKey: 'lendingPartners', icon: '🏦', roles: ['admin'] },
 ];
 
@@ -80,6 +81,7 @@ const superNav = [
 ];
 const superMarketplaceNav = [
   { group: 'Marketplace', to: '/super/marketplace', label: '🛒 Marketplace Control', icon: '🛒', text: 'Marketplace Control' },
+  { group: 'Marketplace', to: '/super/settlements', label: '💱 Store Settlements', icon: '💱', text: 'Store Settlements' },
   { group: 'Marketplace', to: '/super/auditors', label: '🕵️ Auditors', icon: '🕵️', text: 'Auditors' },
   { group: 'Marketplace', to: '/super/lending-partners', label: '🏦 Lending Partners', icon: '🏦', text: 'Lending Partners' },
 ];

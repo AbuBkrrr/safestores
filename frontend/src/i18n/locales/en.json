@@ -115,7 +115,8 @@
     "themeSystem": "Auto",
     "themeLight": "Light",
     "themeDark": "Dark",
-    "textSize": "Text size"
+    "textSize": "Text size",
+    "settlements": "Settlements"
   },
   "login": {
     "welcomeBack": "Welcome Back",
@@ -1009,7 +1010,8 @@
     "payOnlineOnly": "Payment is online at checkout.",
     "securePayNote": "Secure payment by Paystack, paid directly to {{store}}.",
     "emailForPayment": "Enter your email so we can send your payment receipt.",
-    "payNow": "Pay {{amount}}"
+    "payNow": "Pay {{amount}}",
+    "notTakingOrders": "This store isn't taking online orders right now. Please visit or call the store."
   },
   "marketplaceHomePage": {
     "title": "🏪 SAFE Stores Marketplace",
@@ -1588,6 +1590,10 @@
     "support": {
       "q": "How do I contact support?",
       "a": "Support → New ticket. Our team replies in the app."
+    },
+    "settlements": {
+      "q": "How do commissions and settlements work?",
+      "a": "Online storefront payments go straight to your bank with the platform's commission taken at source. For pay-on-delivery orders you collect the money, so the commission is added to your balance and cleared automatically from your next online payments — or you can pay it any time from Settlements."
     }
   },
   "paymentsCard": {
@@ -1608,5 +1614,39 @@
     "linked": "Bank account linked — online payments are on",
     "acceptOnline": "Accept online payments on my storefront",
     "acceptOnDelivery": "Accept pay on collection / delivery"
+  },
+  "settlementsPage": {
+    "title": "Settlements",
+    "subtitle": "Your balance with SAFE Stores for orders that come through your online storefront.",
+    "youOwe": "You owe",
+    "balanceClear": "Balance — all clear",
+    "credit": "In credit",
+    "appSalesMonth": "Online-store sales this month",
+    "commissionMonth": "Commission this month ({{pct}}%)",
+    "payPrompt": "Your balance is {{amount}}. Pay it any time — or it's cleared automatically from your next online orders.",
+    "payNow": "Pay {{amount}} now",
+    "payByTransfer": "Ask your admin to pay, or pay by bank transfer and the platform will record it.",
+    "paidThanks": "Payment received — thank you. Your balance has been updated.",
+    "notConfirmed": "We couldn't confirm the payment yet. If you were charged, it will update shortly.",
+    "cashPaused": "Your balance is over {{limit}}, so pay-on-delivery is paused on your storefront. Customers can still pay online. Settle your balance to turn it back on.",
+    "howTitle": "How settlements work",
+    "howOnline": "Online payments go straight from Paystack to your bank account. Our {{pct}}% commission is taken out automatically before it reaches you.",
+    "howCash": "Pay-on-delivery orders: you collect the full amount from the customer, so the {{pct}}% commission is added to your balance when you mark the order fulfilled.",
+    "howNetting": "Your balance is cleared automatically from your next online payments — up to {{pct}}% of each one — so you rarely need to pay separately.",
+    "howLimit": "If your balance goes over {{limit}}, pay-on-delivery pauses until it's settled.",
+    "howPos": "In-store sales at your till are never charged commission.",
+    "statement": "Statement",
+    "empty": "No online-store orders yet.",
+    "entry": "Entry",
+    "orderTotal": "Order",
+    "commission": "Commission",
+    "balanceChange": "Balance change",
+    "types": {
+      "cash_commission": "Pay-on-delivery order — commission owed",
+      "online_commission": "Online order — commission taken at payment",
+      "debt_recovered": "Balance cleared from an online payment",
+      "settlement_payment": "Payment received",
+      "adjustment": "Adjustment"
+    }
   }
 }

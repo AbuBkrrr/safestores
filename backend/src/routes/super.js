@@ -12,6 +12,13 @@ router.use(requireAuth, requireRole('super_admin'));
 
 router.get('/stores', ctrl.listStores);
 router.get('/activity', require('../controllers/accountController').listActivity);
+// Bolt-style settlements with stores (commission on app orders).
+const settlementsCtrl = require('../controllers/settlementsController');
+router.get('/settlements', settlementsCtrl.listBalances);
+router.patch('/settlement-settings', settlementsCtrl.updateSettings);
+router.get('/settlements/:storeId', settlementsCtrl.storeStatementForSuper);
+router.post('/settlements/:storeId/entries', settlementsCtrl.recordEntry);
+router.patch('/stores/:storeId/commission', settlementsCtrl.setStoreCommission);
 router.get('/referrals', ctrl.listReferrals);
 router.post('/stores', ctrl.createStore);
 router.patch('/stores/:id', ctrl.updateStore);

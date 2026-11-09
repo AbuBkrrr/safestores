@@ -27,6 +27,7 @@ const TOPICS = [
   { key: 'reorder', to: '/replenishment' },
   { key: 'security', to: '/account' },
   { key: 'export', to: '/export' },
+  { key: 'settlements', to: '/settlements' },
   { key: 'support', to: '/support' },
 ];
 

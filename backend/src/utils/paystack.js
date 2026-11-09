@@ -96,7 +96,6 @@ function verifyWebhookSignature(rawBody, signatureHeader) {
 // account is tied to one country (e.g. a Nigerian account collects NGN and
 // optionally USD); set PAYSTACK_CURRENCIES to match what yours supports.
 const SUPPORTED_CURRENCIES = (process.env.PAYSTACK_CURRENCIES || 'NGN').split(',').map((c) => c.trim().toUpperCase()).filter(Boolean);
-const COMMISSION_PCT = Math.min(Math.max(Number(process.env.MARKETPLACE_COMMISSION_PCT) || 0, 0), 50);
 
 /** Banks Paystack can pay out to, for a currency. */
 async function listBanks(currency = 'NGN') {
@@ -120,7 +119,9 @@ async function upsertSubaccount({ code, businessName, bankCode, accountNumber, e
     business_name: businessName,
     settlement_bank: bankCode,
     account_number: accountNumber,
-    percentage_charge: COMMISSION_PCT, // the platform's share; 0 = the store keeps everything
+    // The platform's share is set per transaction (transaction_charge),
+    // so it can include netting of what the store owes — see settlementsController.
+    percentage_charge: 0,
     primary_contact_email: email || undefined,
     primary_contact_phone: phone || undefined,
   };
@@ -135,13 +136,15 @@ async function upsertSubaccount({ code, businessName, bankCode, accountNumber, e
  * 'subaccount' means Paystack's own fee comes out of the store's share
  * (the store is the seller), so the platform is never out of pocket.
  */
-async function initializeSplitTransaction({ email, amount, currency, reference, callbackUrl, subaccount, metadata }) {
+async function initializeSplitTransaction({ email, amount, currency, reference, callbackUrl, subaccount, transactionCharge = 0, metadata }) {
   if (!isConfigured) throw new Error('Paystack is not configured on this server yet.');
   const data = await paystackFetch('/transaction/initialize', {
     method: 'POST',
     body: JSON.stringify({
       email, amount: Math.round(Number(amount) * 100), currency, reference, callback_url: callbackUrl,
       subaccount, bearer: 'subaccount', metadata,
+      // Flat amount to the platform for THIS payment: commission + any debt recovery.
+      transaction_charge: Math.round(Number(transactionCharge) * 100),
       channels: ['card', 'bank', 'ussd', 'bank_transfer', 'mobile_money', 'qr'],
     }),
   });
@@ -167,5 +170,5 @@ async function verifySplitTransaction(reference) {
 module.exports = {
   isConfigured, initializeTransaction, verifyTransaction, verifyWebhookSignature,
   listBanks, resolveAccount, upsertSubaccount, initializeSplitTransaction, verifySplitTransaction,
-  SUPPORTED_CURRENCIES, COMMISSION_PCT,
+  SUPPORTED_CURRENCIES,
 };

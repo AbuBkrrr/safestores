@@ -104,8 +104,6 @@ services:
         sync: false
       - key: PAYSTACK_CURRENCIES
         value: NGN
-      - key: MARKETPLACE_COMMISSION_PCT
-        value: "0"
 
   - type: web
     name: safestores-frontend
