@@ -1,11 +1,11 @@
 # Pinned to match the Node version used in CI (.github/workflows/backend-ci.yml)
 # so "passes CI" and "runs in this image" mean the same runtime.
-FROM node:20-slim AS deps
+FROM node:22-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev
 
-FROM node:20-slim AS runtime
+FROM node:22-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 # Uploads default to local disk (see server/utils/storage.js) — mount a

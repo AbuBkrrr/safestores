@@ -4,7 +4,8 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-const frontendDir = path.join(__dirname, '..', 'frontend');
+// scripts/ -> desktop/ -> repo root -> frontend/
+const frontendDir = path.join(__dirname, '..', '..', 'frontend');
 const distSrc = path.join(frontendDir, 'dist');
 const distDest = path.join(__dirname, '..', 'frontend-dist');
 

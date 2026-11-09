@@ -1,7 +1,7 @@
 {
   "name": "safe-stores-desktop",
   "version": "1.0.0",
-  "description": "SAFE Stores — Enterprise Inventory Management (Desktop Edition)",
+  "description": "SAFE Stores \u2014 Enterprise Inventory Management (Desktop Edition)",
   "main": "main.js",
   "author": "A I Brains Ventures",
   "scripts": {
@@ -11,7 +11,7 @@
     "start": "electron .",
     "postinstall": "electron-builder install-app-deps",
     "build:win": "npm run build:win:superadmin",
-    "build:win:superadmin": "cross-env VITE_APP_VARIANT=superadmin VITE_EDITION=desktop npm run prebuild && electron-builder --win nsis -c.extraMetadata.name=safe-stores-desktop-superadmin -c.productName=\"SAFE Stores — Super Admin\" -c.appId=com.safestores.desktop.superadmin",
+    "build:win:superadmin": "cross-env VITE_APP_VARIANT=superadmin VITE_EDITION=desktop npm run prebuild && electron-builder --win nsis -c.extraMetadata.name=safe-stores-desktop-superadmin -c.productName=\"SAFE Stores \u2014 Super Admin\" -c.appId=com.safestores.desktop.superadmin",
     "build:win:admin": "cross-env VITE_APP_VARIANT=admin VITE_EDITION=desktop npm run prebuild && electron-builder --win nsis -c.extraMetadata.name=safe-stores-desktop-admin -c.productName=\"SAFE Stores\" -c.appId=com.safestores.desktop.admin",
     "build:win-store": "cross-env VITE_EDITION=desktop npm run prebuild && electron-builder --win appx",
     "build:mac": "cross-env VITE_EDITION=desktop npm run prebuild && electron-builder --mac dmg",
@@ -95,5 +95,8 @@
       "icon": "build/icon.png",
       "category": "Office"
     }
+  },
+  "engines": {
+    "node": ">=22"
   }
 }
