@@ -99,6 +99,13 @@ services:
         sync: false
       - key: SENTRY_DSN
         sync: false
+      # Payments — subscription charges + storefront split payments (LAUNCH_GUIDE step 10).
+      - key: PAYSTACK_SECRET_KEY
+        sync: false
+      - key: PAYSTACK_CURRENCIES
+        value: NGN
+      - key: MARKETPLACE_COMMISSION_PCT
+        value: "0"
 
   - type: web
     name: safestores-frontend

@@ -29,7 +29,7 @@ export default function Signup() {
     }
     setLoading(true);
     try {
-      await api.post('/auth/store/signup', form);
+      await api.post('/auth/store/signup', { ...form, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone });
       setSuccess(t('signupPage.registrationSuccess'));
       setTimeout(() => navigate('/login'), 3500);
     } catch (err) {

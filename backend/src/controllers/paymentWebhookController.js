@@ -28,6 +28,13 @@ async function handlePaystackWebhook(req, res) {
   if (!reference) return res.status(200).json({ received: true });
 
   try {
+    // Storefront order paid online (settles to the store's own subaccount).
+    const { rows: mo } = await db.query('SELECT id FROM marketplace_orders WHERE payment_reference = $1', [reference]);
+    if (mo[0]) {
+      await require('./storePaymentsController').confirmOrderPayment(reference);
+      return res.status(200).json({ received: true });
+    }
+
     const { rows } = await db.query('SELECT id FROM billing_charges WHERE gateway_reference = $1', [reference]);
     const charge = rows[0];
     if (!charge) return res.status(200).json({ received: true }); // not one of ours, or already cleaned up

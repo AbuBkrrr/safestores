@@ -16,6 +16,7 @@ const UUID = /^[0-9a-f-]{36}$/i;
 async function trackOrder(req, res) {
   const { rows } = await db.query(
     `SELECT mo.id, mo.status, mo.subtotal, mo.total, mo.created_at, mo.fulfilled_at, mo.loyalty_discount_pct,
+            mo.payment_method, mo.payment_status, mo.paid_at, s.online_payments_enabled AND s.payout_subaccount_code IS NOT NULL AS can_pay_online,
             s.name AS store_name, s.phone AS store_phone, s.address AS store_address, s.city AS store_city,
             COALESCE(s.currency_code, c.code) AS currency_code, COALESCE(s.currency_symbol, c.symbol) AS currency_symbol
      FROM marketplace_orders mo JOIN stores s ON s.id = mo.store_id LEFT JOIN currency_settings c ON c.id = 'default'
@@ -80,7 +81,8 @@ async function storeInfo(req, res) {
     [req.params.storeId]
   );
   if (!rows[0]) return res.status(404).json({ error: 'Store not found' });
-  res.json(rows[0]);
+  const payments = await require('./storePaymentsController').paymentOptionsFor(rows[0].id);
+  res.json({ ...rows[0], payments });
 }
 
 module.exports = { trackOrder, shareShop, sitemap, robots, storeInfo };

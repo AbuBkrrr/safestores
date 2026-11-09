@@ -965,7 +965,10 @@
     "fulfill": "Fulfill",
     "orderFulfilled": "Order fulfilled — stock updated",
     "fulfillFailed": "Failed to fulfill order",
-    "noOrdersYet": "No marketplace orders yet."
+    "noOrdersYet": "No marketplace orders yet.",
+    "paidOnline": "Paid online",
+    "awaitingPayment": "Awaiting payment",
+    "payOnDelivery": "Pay on delivery"
   },
   "storefrontPage": {
     "title": "🛍️ Shop",
@@ -1000,7 +1003,13 @@
     "payOnCollection": "Pay when you collect or on delivery.",
     "orderOnWhatsApp": "Order on WhatsApp",
     "waGreeting": "Hello {{store}}, I'd like to order:",
-    "metaDescription": "Shop {{name}} {{city}} online — order now, pay on collection or delivery."
+    "metaDescription": "Shop {{name}} {{city}} online — order now, pay on collection or delivery.",
+    "howToPay": "How would you like to pay?",
+    "payOnline": "Pay now online (card, bank transfer, USSD)",
+    "payOnlineOnly": "Payment is online at checkout.",
+    "securePayNote": "Secure payment by Paystack, paid directly to {{store}}.",
+    "emailForPayment": "Enter your email so we can send your payment receipt.",
+    "payNow": "Pay {{amount}}"
   },
   "marketplaceHomePage": {
     "title": "🏪 SAFE Stores Marketplace",
@@ -1442,7 +1451,14 @@
       "placed": "Order received",
       "fulfilled": "Ready / delivered"
     },
-    "questions": "Questions? Call the store:"
+    "questions": "Questions? Call the store:",
+    "paid": "Paid",
+    "awaitingPayment": "Awaiting payment",
+    "payOnDelivery": "Pay on collection / delivery",
+    "payNow": "Pay now",
+    "paymentReceived": "Payment received — thank you!",
+    "paymentNotConfirmed": "We couldn't confirm the payment yet. If you were charged, it will update shortly.",
+    "emailPrompt": "Your email address for the payment receipt:"
   },
   "onboarding": {
     "title": "Get your store ready",
@@ -1573,5 +1589,24 @@
       "q": "How do I contact support?",
       "a": "Support → New ticket. Our team replies in the app."
     }
+  },
+  "paymentsCard": {
+    "title": "Online payments",
+    "intro": "Let shoppers pay online on your storefront. Payments are processed by Paystack and paid straight into YOUR bank account — SAFE Stores never holds your customers' money. Paystack's fee is taken from each payment.",
+    "commission": "A platform commission of {{pct}}% is deducted automatically from each online payment.",
+    "notConfigured": "Online payments aren't switched on for this platform yet. You can still take pay-on-delivery orders.",
+    "currencyUnsupported": "Online payments aren't available for {{currency}} yet. Pay on delivery still works.",
+    "linkedTo": "Payments go to {{name}} — {{bank}} ••••{{last4}}",
+    "change": "Change account",
+    "linkAccount": "Link a bank account",
+    "bank": "Bank",
+    "accountNumber": "Account number",
+    "accountName": "Account name: {{name}}",
+    "check": "Check account",
+    "confirmLink": "Yes, pay into this account",
+    "privacy": "We pass the account number to Paystack and keep only its last 4 digits.",
+    "linked": "Bank account linked — online payments are on",
+    "acceptOnline": "Accept online payments on my storefront",
+    "acceptOnDelivery": "Accept pay on collection / delivery"
   }
 }

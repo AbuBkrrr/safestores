@@ -35,8 +35,12 @@ export default function Storefront() {
   const [guestName, setGuestName] = useState('');
   const [guestEmail, setGuestEmail] = useState('');
   const [guestPhone, setGuestPhone] = useState('');
+  const [payMethod, setPayMethod] = useState('');
 
   const currency = store ? { code: store.currency_code, symbol: store.currency_symbol } : undefined;
+  const canPayOnline = !!store?.payments?.online;
+  const canPayOnDelivery = store ? store.payments?.payOnDelivery !== false : true;
+  const method = payMethod || (canPayOnline ? 'online' : 'on_delivery');
   const formatCurrency = (n) => format(n, currency);
 
   useEffect(() => {
@@ -101,8 +105,12 @@ export default function Storefront() {
       setError(t('storefrontPage.pleaseEnterNameGuest'));
       return;
     }
+    if (method === 'online' && !customer && !guestEmail) {
+      setError(t('storefrontPage.emailForPayment'));
+      return;
+    }
     try {
-      const body = { items: cartItems.map((i) => ({ productId: i.id, quantity: i.quantity })), deliveryAddress };
+      const body = { items: cartItems.map((i) => ({ productId: i.id, quantity: i.quantity })), deliveryAddress, paymentMethod: method };
       const config = {};
       if (customer) {
         config.headers = { Authorization: `Bearer ${customer.token}` };
@@ -113,6 +121,13 @@ export default function Storefront() {
       }
       const { data } = await client.post(`/marketplace/${storeId}/orders`, body, config);
       setCart({});
+      setPlaced(data); // tracking link stays available even if starting payment fails
+      if (method === 'online') {
+        // Paystack checkout: the money goes straight to this store's bank.
+        const pay = await client.post(`/marketplace/orders/${data.tracking_token}/pay`, { email: customer?.email || guestEmail });
+        window.location.assign(pay.data.authorizationUrl);
+        return;
+      }
       setPlaced(data);
       setMessage(t('storefrontPage.orderPlaced'));
       if (customer) {
@@ -216,9 +231,16 @@ export default function Storefront() {
                   <div className="form-group"><input aria-label={t('storefrontPage.phoneOptional')} placeholder={t('storefrontPage.phoneOptional')} value={guestPhone} onChange={(e) => setGuestPhone(e.target.value)} inputMode="tel" /></div>
                 </>
               )}
-              <p className="muted">{t('storefrontPage.payOnCollection')}</p>
+              {canPayOnline && canPayOnDelivery ? (
+                <fieldset className="pay-choice">
+                  <legend>{t('storefrontPage.howToPay')}</legend>
+                  <label><input type="radio" name="pay" checked={method === 'online'} onChange={() => setPayMethod('online')} /> {t('storefrontPage.payOnline')}</label>
+                  <label><input type="radio" name="pay" checked={method === 'on_delivery'} onChange={() => setPayMethod('on_delivery')} /> {t('storefrontPage.payOnCollection')}</label>
+                </fieldset>
+              ) : <p className="muted">{canPayOnline ? t('storefrontPage.payOnlineOnly') : t('storefrontPage.payOnCollection')}</p>}
+              {method === 'online' && <p className="muted" style={{ fontSize: 12 }}>🔒 {t('storefrontPage.securePayNote', { store: store?.name || '' })}</p>}
               <div className="flex">
-                <button className="btn" onClick={placeOrder}>{t('storefrontPage.placeOrder')}</button>
+                <button className="btn" onClick={placeOrder}>{method === 'online' ? t('storefrontPage.payNow', { amount: formatCurrency(cartTotal) }) : t('storefrontPage.placeOrder')}</button>
                 {store?.phone && <button className="btn" style={{ background: '#25D366' }} onClick={whatsappOrder}>{t('storefrontPage.orderOnWhatsApp')}</button>}
               </div>
             </div>

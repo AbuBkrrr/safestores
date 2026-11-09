@@ -45,7 +45,7 @@ async function superAdminLogin(req, res) {
 // the signer-up was referred by — see 023_referral_tracking.sql for why.
 // ------------------------------------------------------------
 async function storeSignup(req, res) {
-  const { storeName, adminName, adminEmail, password, referralContact, storeTier } = req.body;
+  const { storeName, adminName, adminEmail, password, referralContact, storeTier, timezone } = req.body;
   if (!storeName || !adminName || !adminEmail || !password) {
     return res.status(400).json({ error: 'All fields are required' });
   }
@@ -57,9 +57,11 @@ async function storeSignup(req, res) {
     await client.query('BEGIN');
 
     const storeResult = await client.query(
-      `INSERT INTO stores (name, subscription_status, referral_contact, requested_tier)
-       VALUES ($1, 'pending', $2, $3) RETURNING id, name, subscription_status, store_tier, requested_tier, referral_contact`,
-      [storeName, referralContact || null, ['mini', 'midi', 'mega'].includes(storeTier) ? storeTier : null]
+      `INSERT INTO stores (name, subscription_status, referral_contact, requested_tier, timezone)
+       VALUES ($1, 'pending', $2, $3, $4) RETURNING id, name, subscription_status, store_tier, requested_tier, referral_contact, timezone`,
+      [storeName, referralContact || null, ['mini', 'midi', 'mega'].includes(storeTier) ? storeTier : null,
+        // The owner's own device time zone, so "today" is right from day one.
+        require('./storeSettingsController').isValidTimezone(timezone) ? timezone : 'UTC']
     );
     const store = storeResult.rows[0];
 

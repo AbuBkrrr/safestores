@@ -131,6 +131,12 @@ router.delete('/deletion', requireRole('admin'), accountCtrl.cancelStoreDeletion
 router.get('/activity', requireRole('admin', 'manager'), accountCtrl.listActivity);
 
 // Store settings (currency, time zone, tax, receipt text, till rules).
+const storePaymentsCtrl = require('../controllers/storePaymentsController');
+router.get('/payouts', requireRole('admin', 'manager'), storePaymentsCtrl.getPayouts);
+router.get('/payouts/banks', requireRole('admin'), storePaymentsCtrl.listBanks);
+router.post('/payouts/resolve', requireRole('admin'), storePaymentsCtrl.resolveAccount);
+router.put('/payouts', requireRole('admin'), storePaymentsCtrl.connectPayouts);
+router.patch('/payouts', requireRole('admin'), storePaymentsCtrl.updatePaymentOptions);
 const storeSettingsCtrl = require('../controllers/storeSettingsController');
 router.get('/settings', storeSettingsCtrl.getSettings);
 router.patch('/settings', requireRole('admin'), storeSettingsCtrl.updateSettings);

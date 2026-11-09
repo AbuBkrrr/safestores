@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { useCurrency } from '../context/CurrencyContext.jsx';
 import { Alert, Toast } from '../components/ui.jsx';
 import { useToast } from '../components/useToast.js';
+import OnlinePaymentsCard from '../components/OnlinePaymentsCard.jsx';
 import { CURRENCIES, allCurrencyCodes, currencyName, formatCurrency } from '../utils/currency.js';
 
 function allTimezones() {
@@ -20,7 +21,7 @@ export default function StoreSettings() {
   const [s, setS] = useState(null);
   const [error, setError] = useState('');
   const [toast, showToast] = useToast();
-  const timezones = useMemo(allTimezones, []);
+  const zoneList = useMemo(allTimezones, []);
   const codes = useMemo(() => {
     const quick = CURRENCIES.map((c) => c.code);
     return [...quick, ...allCurrencyCodes().filter((c) => !quick.includes(c))];
@@ -28,6 +29,9 @@ export default function StoreSettings() {
 
   useEffect(() => { api.get(`/stores/${user.storeId}/settings`).then((r) => setS(r.data)); }, [user.storeId]);
   if (!s) return <p className="muted">{t('common.loading')}</p>;
+  // Browsers' zone lists omit "UTC" and some aliases; never let the select
+  // silently show (and then save) a different zone than the store's own.
+  const timezones = [...new Set(['UTC', s.timezone, ...zoneList].filter(Boolean))];
 
   const set = (k) => (e) => setS({ ...s, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value });
 
@@ -119,6 +123,8 @@ export default function StoreSettings() {
         </div>
         <div><button className="btn">{t('common.save')}</button></div>
       </form>
+      {/* Storefront payments settle straight to the store's bank (web edition only). */}
+      {import.meta.env.VITE_EDITION !== 'desktop' && <div className="mt-1"><OnlinePaymentsCard onToast={showToast} /></div>}
       <Toast {...(toast || {})} />
     </div>
   );

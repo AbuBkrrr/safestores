@@ -53,7 +53,7 @@ export default function Marketplace() {
                 <td>{o.customer_name}</td><td>{o.customer_phone || '—'}</td>
                 <td>{formatCurrency(o.total)}</td>
                 <td>{o.delivery_address || '—'}</td>
-                <td><Badge status={o.status} /></td>
+                <td><Badge status={o.status} /> {o.payment_status === 'paid' ? <span className="badge active">{t('marketplacePage.paidOnline')}</span> : o.payment_method === 'online' ? <span className="badge pending">{t('marketplacePage.awaitingPayment')}</span> : <span className="badge closed">{t('marketplacePage.payOnDelivery')}</span>}</td>
                 <td>{new Date(o.created_at).toLocaleString()}</td>
                 <td>{o.status === 'placed' && <button className="btn small" onClick={() => fulfill(o.id)}>{t('marketplacePage.fulfill')}</button>}</td>
               </tr>

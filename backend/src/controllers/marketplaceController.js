@@ -115,7 +115,14 @@ async function customerLogin(req, res) {
 async function placeOrder(req, res) {
   const { storeId } = req.params;
   const { items, deliveryAddress, customerNote, guestName, guestEmail, guestPhone } = req.body;
+  const paymentMethod = req.body.paymentMethod === 'online' ? 'online' : 'on_delivery';
   if (!Array.isArray(items) || items.length === 0) return res.status(400).json({ error: 'At least one item is required' });
+  if (items.some((i) => !Number.isInteger(Number(i.quantity)) || Number(i.quantity) < 1 || Number(i.quantity) > 1000)) {
+    return res.status(400).json({ error: 'Each quantity must be a whole number from 1 to 1000' });
+  }
+  const options = await require('./storePaymentsController').paymentOptionsFor(storeId);
+  if (paymentMethod === 'online' && !options.online) return res.status(400).json({ error: 'This store does not take online payments' });
+  if (paymentMethod === 'on_delivery' && !options.payOnDelivery) return res.status(400).json({ error: 'This store only takes online payment' });
 
   const customerId = req.user?.sub || null;
   if (!customerId && !guestName) {
@@ -126,10 +133,10 @@ async function placeOrder(req, res) {
   try {
     await client.query('BEGIN');
     const orderRes = await client.query(
-      `INSERT INTO marketplace_orders (store_id, customer_id, guest_name, guest_email, guest_phone, delivery_address, customer_note, tracking_token)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+      `INSERT INTO marketplace_orders (store_id, customer_id, guest_name, guest_email, guest_phone, delivery_address, customer_note, tracking_token, payment_method)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
       [storeId, customerId, customerId ? null : guestName, customerId ? null : (guestEmail || null), customerId ? null : (guestPhone || null),
-        deliveryAddress || null, customerNote || null, require('crypto').randomBytes(16).toString('hex')]
+        deliveryAddress || null, customerNote || null, require('crypto').randomBytes(16).toString('hex'), paymentMethod]
     );
     const order = orderRes.rows[0];
     let subtotal = 0;

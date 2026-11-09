@@ -46,7 +46,7 @@ export function Terms() {
       <h2>4. Plans, billing and suspension</h2>
       <p>Paid plans are billed as shown in the app. If a charge stays unpaid after its grace period your store may be locked until it is paid; you can still view billing, export your data and close your store. We may suspend accounts that breach these terms.</p>
       <h2>5. Online marketplace and storefronts</h2>
-      <p>Orders placed on a store&apos;s storefront are contracts between the shopper and that store. The store is responsible for fulfilment, payment collection, refunds and consumer-law obligations. We provide the software only.</p>
+      <p>Orders placed on a store&apos;s storefront are contracts between the shopper and that store. The store is responsible for fulfilment, refunds and consumer-law obligations. Online payments are processed by our licensed payment provider (Paystack) and settled directly to the store&apos;s own bank account; we do not receive or hold shoppers&apos; money, other than any platform commission disclosed to the store in advance. We provide the software only.</p>
       <h2>6. Lending partners and auditors</h2>
       <p>Lending partners and independent auditors listed in the Service are separate businesses. Any loan or audit is between you and them; we do not lend money, give financial advice or guarantee their services. We only share your data with a partner after you opt in, and you can withdraw consent at any time.</p>
       <h2>7. Availability</h2>

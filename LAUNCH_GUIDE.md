@@ -211,16 +211,43 @@ certificate. Then update `FRONTEND_URL` (backend) and `VITE_API_URL`
 
 ---
 
-## Step 10 — Payments (optional, 30 minutes)
+## Step 10 — Payments (1 hour, plus Paystack's business verification)
 
-Manual bank transfer works out of the box. To accept card and bank payments
-online for subscription charges, create a Paystack account, set
-`PAYSTACK_SECRET_KEY` on the backend, set the webhook URL in Paystack to
-`https://api.safestores.name.ng/api/webhooks/paystack`, and enable
-the gateway in Super Admin → Payment settings. See `docs/PAYMENT_GATEWAY_SETUP.md`.
+There are two separate money flows, and **the platform never holds
+shoppers' money**:
 
-Storefront orders are **pay on collection or delivery**, so you hold no
-shopper money and need no payment licence for them.
+| Flow | Who pays whom | How |
+|---|---|---|
+| Subscription charges | Store → you | Manual bank transfer (works now), or Paystack checkout into your own Paystack balance |
+| Storefront orders | Shopper → **the store** | Paystack **split payments**: each store links its bank account once (Store Settings → Online payments); we register it as a Paystack *subaccount*, and Paystack settles every storefront payment straight to that store's bank. Pay on collection/delivery is still available. |
+
+Setup:
+
+1. Open a Paystack business account and complete its verification (KYC) as
+   the platform. Paystack is the licensed payment processor; you never touch
+   the store's funds.
+2. On the backend set:
+   - `PAYSTACK_SECRET_KEY` — your live secret key (use the test key on staging).
+   - `PAYSTACK_CURRENCIES` — the currencies your Paystack account collects,
+     e.g. `NGN` (Nigeria), `GHS` (Ghana), `KES` (Kenya), `ZAR` (South Africa).
+     A Paystack account is tied to one country; stores in other currencies
+     keep pay on delivery.
+   - `MARKETPLACE_COMMISSION_PCT` — optional platform cut of each storefront
+     payment (default `0`). Paystack deducts it automatically, and it lands in
+     your own balance; the rest goes to the store.
+3. Paystack dashboard → Settings → API Keys & Webhooks: set the webhook URL to
+   `https://api.safestores.name.ng/api/webhooks/paystack`. It confirms both
+   subscription charges and storefront payments.
+4. Super Admin → Payment settings: enable the gateway for subscription charges
+   (see `docs/PAYMENT_GATEWAY_SETUP.md`).
+5. Each store admin: Store Settings → **Online payments** → pick their bank,
+   enter the account number, confirm the account name Paystack returns, and
+   link it. Only the last 4 digits are stored by SAFE Stores.
+
+Paystack's transaction fee is charged to the store's share (the store is the
+seller). Refunds of online storefront payments are made by the store to its
+customer; Paystack's dashboard also supports refunds on the original
+transaction.
 
 ---
 
@@ -258,6 +285,8 @@ Do this on a phone **and** a laptop, as a brand-new customer would:
 - [ ] End of Day and Insights show the sales.
 - [ ] Customers: add one with a birthday; link them at the till; points appear.
 - [ ] Storefront (`/shop/<storeId>`): order as a guest → **Track your order** works.
+- [ ] Store Settings → Online payments: link a bank account (Paystack **test** keys on staging).
+- [ ] Storefront: **Pay now online** with a Paystack test card → you return to the tracking page showing **Paid**; the store's Marketplace orders list shows "Paid online"; in Paystack the transaction shows the store's subaccount.
 - [ ] Share the shop link on WhatsApp → the preview shows the store name.
 - [ ] Forgot password → reset works. Turn on 2FA for the store admin.
 - [ ] My Account → **Download my data** works.
@@ -331,10 +360,10 @@ button at the release.
 - **Translations:** v26 screens are in English in all 8 languages until a
   native speaker translates the new keys in `frontend/src/i18n/locales/*.json`
   (the app falls back to English). The Super Admin console is English-only.
-- **Online card payment for storefront orders** is intentionally not built:
-  pay on collection or delivery avoids holding shopper money. If you add it
-  later, use Paystack or Stripe split payments so the provider holds the
-  payment licence.
+- **Online storefront payments** use Paystack (Nigeria, Ghana, Kenya, South
+  Africa). For stores elsewhere, add Stripe Connect (Express accounts), which
+  follows the same "money goes straight to the store" model; until then
+  those stores use pay on delivery.
 - **Branch transfers** need the same email on an admin or manager account at
   both stores (an owner of several branches).
 

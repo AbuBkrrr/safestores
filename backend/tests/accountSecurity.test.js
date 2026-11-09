@@ -84,6 +84,13 @@ describe('Email verification', () => {
     expect(rows[0].email_verified_at).not.toBeNull();
   });
 
+  it("new stores take the owner's time zone at signup (invalid ones fall back to UTC)", async () => {
+    const ok = await request().post('/api/auth/store/signup').send({ storeName: 'Nairobi Shop', adminName: 'W', adminEmail: `w${Date.now()}@example.com`, password: 'GoodPassword1', timezone: 'Africa/Nairobi' });
+    expect(ok.body.store.timezone).toBe('Africa/Nairobi');
+    const bad = await request().post('/api/auth/store/signup').send({ storeName: 'X Shop', adminName: 'X', adminEmail: `x${Date.now()}@example.com`, password: 'GoodPassword1', timezone: 'Mars/Base' });
+    expect(bad.body.store.timezone).toBe('UTC');
+  });
+
   it('rejects a weak signup password', async () => {
     const res = await request().post('/api/auth/store/signup').send({ storeName: 'X', adminName: 'Y', adminEmail: 'y@example.com', password: 'password' });
     expect(res.status).toBe(400);
