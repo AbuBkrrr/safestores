@@ -90,6 +90,8 @@ router.patch('/marketplace-profile', requireAuthOrStoreSyncKey('admin', 'manager
 router.get('/marketplace/orders', requireAuthOrStoreSyncKey('admin', 'manager'), marketplaceCtrl.listStoreOrders);
 router.get('/marketplace/orders/:orderId', requireAuthOrStoreSyncKey('admin', 'manager'), marketplaceCtrl.getStoreOrder);
 router.patch('/marketplace/orders/:orderId/fulfill', requireAuthOrStoreSyncKey('admin', 'manager'), marketplaceCtrl.fulfillOrder);
+router.patch('/marketplace/orders/:orderId/cancel', requireAuthOrStoreSyncKey('admin', 'manager'), marketplaceCtrl.cancelOrder);
+router.patch('/marketplace/orders/:orderId/refunded', requireAuthOrStoreSyncKey('admin', 'manager'), marketplaceCtrl.markRefunded);
 
 // Everything else on this router is a specific staff member's action
 // (or, for the eleven routes above, either that or the store-as-a-whole

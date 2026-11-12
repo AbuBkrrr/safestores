@@ -61,7 +61,7 @@ export default function TrackOrder() {
           <>
             <h1 style={{ fontSize: 22 }}>{o.store_name}</h1>
             <p className="muted">{t('trackPage.reference')}: <strong>{o.reference}</strong> · {new Date(o.created_at).toLocaleString()}</p>
-            {o.status === 'cancelled' ? <div className="alert error">{t('trackPage.cancelled')}</div> : (
+            {o.status === 'cancelled' ? <div className="alert error">{t('trackPage.cancelled')}{o.cancel_reason ? ` — ${o.cancel_reason}` : ''}{o.payment_status === 'refund_due' && <div>{t('trackPage.refundPending')}</div>}{o.payment_status === 'refunded' && <div>{t('trackPage.refundDone')}</div>}</div> : (
               <ol className="track-steps">
                 {STEPS.map((s, i) => <li key={s} className={i <= stepIndex ? 'done' : ''}>{t(`trackPage.steps.${s}`)}</li>)}
               </ol>

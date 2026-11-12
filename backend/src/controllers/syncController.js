@@ -59,10 +59,11 @@ async function exportChanges(req, res) {
     ),
     db.query('SELECT * FROM batches WHERE store_id = $1 AND created_at > $2 ORDER BY created_at ASC', [storeId, since]),
     db.query('SELECT * FROM receipts WHERE store_id = $1 AND created_at > $2 ORDER BY created_at ASC', [storeId, since]),
-    db.query('SELECT * FROM orders WHERE store_id = $1 AND created_at > $2 ORDER BY created_at ASC', [storeId, since]),
+    // Orders re-export when paid or cancelled later (a parked sale), not only when created.
+    db.query(`SELECT * FROM orders WHERE store_id = $1 AND (created_at > $2 OR paid_at > $2 OR cancelled_at > $2) ORDER BY created_at ASC`, [storeId, since]),
     db.query(
       `SELECT oi.* FROM order_items oi JOIN orders o ON o.id = oi.order_id
-       WHERE o.store_id = $1 AND o.created_at > $2`, [storeId, since]
+       WHERE o.store_id = $1 AND (o.created_at > $2 OR o.paid_at > $2 OR o.cancelled_at > $2)`, [storeId, since]
     ),
     // updated_at, not created_at — a webhook edited (or soft-deleted) long
     // after creation still needs to show up in an incremental export.
@@ -73,7 +74,18 @@ async function exportChanges(req, res) {
     db.query('SELECT * FROM cycle_counts WHERE store_id = $1 AND created_at > $2 ORDER BY created_at ASC', [storeId, since]),
   ]);
 
+  // v26 till data: shifts, split payments, refunds.
+  const [shifts, orderPayments, refunds, refundItems] = await Promise.all([
+    db.query('SELECT * FROM shifts WHERE store_id = $1 AND (opened_at > $2 OR closed_at > $2) ORDER BY opened_at ASC', [storeId, since]),
+    db.query('SELECT * FROM order_payments WHERE store_id = $1 AND created_at > $2 ORDER BY created_at ASC', [storeId, since]),
+    db.query('SELECT * FROM refunds WHERE store_id = $1 AND created_at > $2 ORDER BY created_at ASC', [storeId, since]),
+    db.query(
+      `SELECT ri.* FROM refund_items ri JOIN refunds r ON r.id = ri.refund_id WHERE r.store_id = $1 AND r.created_at > $2`, [storeId, since]
+    ),
+  ]);
+
   res.json({
+    shifts: shifts.rows, orderPayments: orderPayments.rows, refunds: refunds.rows, refundItems: refundItems.rows,
     serverTime: serverTime.toISOString(),
     users: users.rows,
     products: products.rows, arrivals: arrivals.rows, movements: movements.rows, audits: audits.rows,
@@ -99,6 +111,7 @@ async function importChanges(req, res) {
     users = [], products = [], arrivals = [], movements = [], audits = [],
     suppliers = [], purchaseOrders = [], purchaseOrderItems = [], batches = [],
     receipts = [], orders = [], orderItems = [], webhooks = [], cycleCounts = [],
+    shifts = [], orderPayments = [], refunds = [], refundItems = [],
   } = req.body;
 
   const client = await db.pool.connect();
@@ -187,6 +200,16 @@ async function importChanges(req, res) {
         );
         touchedProductIds.add(p.id);
       }
+    }
+    // Barcode / pack size / variant link travel with the product (v26 columns).
+    for (const p of products) {
+      if (p.barcode === undefined && p.pack_size === undefined) continue;
+      await client.query(
+        `UPDATE products SET barcode = $1, pack_size = $2,
+                variant_of = (SELECT id FROM products WHERE id = $3::uuid)
+         WHERE id = $4 AND updated_at = $5`,
+        [p.barcode || null, Number(p.pack_size) || 1, p.variant_of || null, p.id, p.updated_at]
+      );
     }
 
     // Movements first among these three (arrivals/audits reference product
@@ -289,6 +312,35 @@ async function importChanges(req, res) {
       }
     }
 
+    // Shifts before orders (orders/payments point at them). open -> closed only.
+    for (const sh of shifts) {
+      const { rows: ex } = await client.query('SELECT status FROM shifts WHERE id = $1', [sh.id]);
+      if (!ex[0]) {
+        await client.query(
+          `INSERT INTO shifts (id, store_id, opened_by, opened_at, opening_float, status, closed_by, closed_at, expected_cash, counted_cash, notes)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) ON CONFLICT DO NOTHING`,
+          [sh.id, storeId, resolveUser(sh.opened_by), sh.opened_at, sh.opening_float, sh.status, resolveUser(sh.closed_by), sh.closed_at, sh.expected_cash, sh.counted_cash, sh.notes]
+        );
+      } else if (ex[0].status === 'open' && sh.status === 'closed') {
+        await client.query(
+          `UPDATE shifts SET status='closed', closed_by=$1, closed_at=$2, expected_cash=$3, counted_cash=$4, notes=$5 WHERE id=$6`,
+          [resolveUser(sh.closed_by), sh.closed_at, sh.expected_cash, sh.counted_cash, sh.notes, sh.id]
+        );
+      }
+    }
+    const applyOrderMoney = (o) => client.query(
+      `UPDATE orders SET discount_type=$1, discount_value=$2, discount_amount=$3, discount_reason=$4, discount_approved_by=$5,
+              tax_rate_pct=$6, tax_inclusive=$7, tax_amount=$8, amount_tendered=$9, change_due=$10, parked_label=$11,
+              shift_id=(SELECT id FROM shifts WHERE id = $12::uuid),
+              store_customer_id=(SELECT id FROM store_customers WHERE id = $13::uuid AND store_id = $16),
+              public_token=COALESCE(public_token, $14), points_redeemed=$15
+       WHERE id=$17`,
+      [o.discount_type || null, o.discount_value || 0, o.discount_amount || 0, o.discount_reason || null, resolveUser(o.discount_approved_by),
+        o.tax_rate_pct || 0, o.tax_inclusive === undefined ? true : (o.tax_inclusive === true || Number(o.tax_inclusive) === 1), o.tax_amount || 0,
+        o.amount_tendered ?? null, o.change_due || 0, o.parked_label || null, o.shift_id || null, o.store_customer_id || null,
+        o.public_token || null, o.points_redeemed || 0, storeId, o.id]
+    );
+
     // Orders (POS): status can advance pending_payment -> paid/cancelled.
     for (const o of orders) {
       const { rows: existingRows } = await client.query('SELECT status FROM orders WHERE id = $1', [o.id]);
@@ -298,11 +350,13 @@ async function importChanges(req, res) {
            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) ON CONFLICT (id) DO NOTHING`,
           [o.id, storeId, o.status, o.subtotal, o.total, resolveUser(o.created_by), resolveUser(o.paid_by), o.payment_method, o.receipt_number, o.created_at, o.paid_at, o.cancelled_at]
         );
+        await applyOrderMoney(o);
       } else if ((ORDER_STATUS_RANK[o.status] ?? 0) > (ORDER_STATUS_RANK[existingRows[0].status] ?? 0)) {
         await client.query(
           'UPDATE orders SET status=$1, paid_by=$2, payment_method=$3, receipt_number=$4, paid_at=$5, cancelled_at=$6 WHERE id=$7',
           [o.status, resolveUser(o.paid_by), o.payment_method, o.receipt_number, o.paid_at, o.cancelled_at, o.id]
         );
+        await applyOrderMoney(o);
       }
     }
     for (const item of orderItems) {
@@ -310,6 +364,40 @@ async function importChanges(req, res) {
         `INSERT INTO order_items (id, order_id, product_id, quantity, unit_price, line_total, added_via, movement_id, created_at)
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT (id) DO NOTHING`,
         [item.id, item.order_id, item.product_id, item.quantity, item.unit_price, item.line_total, item.added_via, item.movement_id, item.created_at]
+      );
+    }
+
+    // Split tenders and refunds are append-only; refunded_total is re-derived.
+    for (const p of orderPayments) {
+      await client.query(
+        `INSERT INTO order_payments (id, order_id, store_id, method, amount, reference, shift_id, created_at)
+         SELECT $1,$2,$3,$4,$5,$6,(SELECT id FROM shifts WHERE id = $7::uuid),$8 WHERE EXISTS (SELECT 1 FROM orders WHERE id = $2)
+         ON CONFLICT (id) DO NOTHING`,
+        [p.id, p.order_id, storeId, p.method, p.amount, p.reference, p.shift_id || null, p.created_at]
+      );
+    }
+    const refundedOrders = new Set();
+    for (const r of refunds) {
+      const ins = await client.query(
+        `INSERT INTO refunds (id, order_id, store_id, amount, method, reason, created_by, shift_id, created_at)
+         SELECT $1,$2,$3,$4,$5,$6,$7,(SELECT id FROM shifts WHERE id = $8::uuid),$9 WHERE EXISTS (SELECT 1 FROM orders WHERE id = $2)
+         ON CONFLICT (id) DO NOTHING`,
+        [r.id, r.order_id, storeId, r.amount, r.method, r.reason, resolveUser(r.created_by), r.shift_id || null, r.created_at]
+      );
+      if (ins.rowCount) refundedOrders.add(r.order_id);
+    }
+    for (const ri of refundItems) {
+      await client.query(
+        `INSERT INTO refund_items (id, refund_id, order_item_id, product_id, quantity, amount, restocked)
+         SELECT $1,$2,$3,$4,$5,$6,$7 WHERE EXISTS (SELECT 1 FROM refunds WHERE id = $2) AND EXISTS (SELECT 1 FROM order_items WHERE id = $3)
+           AND EXISTS (SELECT 1 FROM products WHERE id = $4)
+         ON CONFLICT (id) DO NOTHING`,
+        [ri.id, ri.refund_id, ri.order_item_id, ri.product_id, ri.quantity, ri.amount, ri.restocked === true || Number(ri.restocked) === 1]
+      );
+    }
+    for (const orderId of refundedOrders) {
+      await client.query(
+        `UPDATE orders SET refunded_total = (SELECT COALESCE(SUM(amount), 0) FROM refunds WHERE order_id = $1) WHERE id = $1`, [orderId]
       );
     }
 
@@ -349,6 +437,7 @@ async function importChanges(req, res) {
         suppliers: suppliers.length, purchaseOrders: purchaseOrders.length, purchaseOrderItems: purchaseOrderItems.length,
         batches: batches.length, receipts: receipts.length, orders: orders.length, orderItems: orderItems.length,
         webhooks: webhooks.length, cycleCounts: cycleCounts.length,
+        shifts: shifts.length, orderPayments: orderPayments.length, refunds: refunds.length, refundItems: refundItems.length,
       },
     });
   } catch (err) {

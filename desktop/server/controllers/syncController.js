@@ -47,9 +47,17 @@ function exportChanges(req, res) {
   const cycleCounts = db.prepare('SELECT * FROM cycle_counts WHERE store_id = ? AND created_at > ? ORDER BY created_at ASC').all(storeId, since);
   const receipts = db.prepare('SELECT * FROM receipts WHERE store_id = ? AND created_at > ? ORDER BY created_at ASC').all(storeId, since)
     .map((r) => ({ ...r, parsed_items: JSON.parse(r.parsed_items) }));
-  const orders = db.prepare('SELECT * FROM orders WHERE store_id = ? AND created_at > ? ORDER BY created_at ASC').all(storeId, since);
+  // Orders re-export when paid or cancelled later (a parked sale), not only when created.
+  const orders = db.prepare('SELECT * FROM orders WHERE store_id = ? AND (created_at > ? OR paid_at > ? OR cancelled_at > ?) ORDER BY created_at ASC').all(storeId, since, since, since);
   const orderItems = db.prepare(
-    `SELECT oi.* FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.store_id = ? AND o.created_at > ?`
+    `SELECT oi.* FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.store_id = ? AND (o.created_at > ? OR o.paid_at > ? OR o.cancelled_at > ?)`
+  ).all(storeId, since, since, since);
+  // v26 till data: shifts, split payments, refunds.
+  const shifts = db.prepare('SELECT * FROM shifts WHERE store_id = ? AND (opened_at > ? OR closed_at > ?) ORDER BY opened_at ASC').all(storeId, since, since);
+  const orderPayments = db.prepare('SELECT * FROM order_payments WHERE store_id = ? AND created_at > ? ORDER BY created_at ASC').all(storeId, since);
+  const refunds = db.prepare('SELECT * FROM refunds WHERE store_id = ? AND created_at > ? ORDER BY created_at ASC').all(storeId, since);
+  const refundItems = db.prepare(
+    'SELECT ri.* FROM refund_items ri JOIN refunds r ON r.id = ri.refund_id WHERE r.store_id = ? AND r.created_at > ?'
   ).all(storeId, since);
   // updated_at, not created_at — a webhook edited (or soft-deleted) long
   // after creation still needs to show up in an incremental export.
@@ -59,6 +67,7 @@ function exportChanges(req, res) {
     serverTime: new Date().toISOString(),
     users, products, arrivals, movements, audits,
     suppliers, purchaseOrders, purchaseOrderItems, batches, receipts, orders, orderItems, webhooks, cycleCounts,
+    shifts, orderPayments, refunds, refundItems,
   });
 }
 
@@ -76,6 +85,7 @@ function importChanges(req, res) {
     users = [], products = [], arrivals = [], movements = [], audits = [],
     suppliers = [], purchaseOrders = [], purchaseOrderItems = [], batches = [],
     receipts = [], orders = [], orderItems = [], webhooks = [], cycleCounts = [],
+    shifts = [], orderPayments = [], refunds = [], refundItems = [],
   } = req.body;
   const touched = new Set();
 
@@ -164,6 +174,14 @@ function importChanges(req, res) {
         touched.add(p.id);
       }
     }
+    // Barcode / pack size / variant link travel with the product (v26 columns).
+    for (const p of products) {
+      if (p.barcode === undefined && p.pack_size === undefined) continue;
+      db.prepare(
+        `UPDATE products SET barcode = ?, pack_size = ?, variant_of = (SELECT id FROM products WHERE id = ?)
+         WHERE id = ? AND updated_at = ?`
+      ).run(p.barcode || null, Number(p.pack_size) || 1, p.variant_of || null, p.id, p.updated_at);
+    }
 
     for (const m of movements) {
       db.prepare(
@@ -243,6 +261,32 @@ function importChanges(req, res) {
       }
     }
 
+    // Shifts before orders (orders/payments point at them). open -> closed only.
+    for (const sh of shifts) {
+      const ex = db.prepare('SELECT status FROM shifts WHERE id = ?').get(sh.id);
+      if (!ex) {
+        db.prepare(
+          `INSERT OR IGNORE INTO shifts (id, store_id, opened_by, opened_at, opening_float, status, closed_by, closed_at, expected_cash, counted_cash, notes)
+           VALUES (?,?,?,?,?,?,?,?,?,?,?)`
+        ).run(sh.id, storeId, resolveUser(sh.opened_by), sh.opened_at, sh.opening_float, sh.status, resolveUser(sh.closed_by), sh.closed_at, sh.expected_cash, sh.counted_cash, sh.notes);
+      } else if (ex.status === 'open' && sh.status === 'closed') {
+        db.prepare("UPDATE shifts SET status='closed', closed_by=?, closed_at=?, expected_cash=?, counted_cash=?, notes=? WHERE id=?")
+          .run(resolveUser(sh.closed_by), sh.closed_at, sh.expected_cash, sh.counted_cash, sh.notes, sh.id);
+      }
+    }
+    const num = (v) => (v == null ? 0 : Number(v));
+    const applyOrderMoney = (o) => db.prepare(
+      `UPDATE orders SET discount_type=?, discount_value=?, discount_amount=?, discount_reason=?, discount_approved_by=?,
+              tax_rate_pct=?, tax_inclusive=?, tax_amount=?, amount_tendered=?, change_due=?, parked_label=?,
+              shift_id=(SELECT id FROM shifts WHERE id = ?),
+              store_customer_id=(SELECT id FROM store_customers WHERE id = ? AND store_id = ?),
+              public_token=COALESCE(public_token, ?), points_redeemed=?
+       WHERE id=?`
+    ).run(o.discount_type || null, num(o.discount_value), num(o.discount_amount), o.discount_reason || null, resolveUser(o.discount_approved_by),
+      num(o.tax_rate_pct), o.tax_inclusive === undefined || o.tax_inclusive === true || Number(o.tax_inclusive) === 1 ? 1 : 0, num(o.tax_amount),
+      o.amount_tendered == null ? null : Number(o.amount_tendered), num(o.change_due), o.parked_label || null, o.shift_id || null,
+      o.store_customer_id || null, storeId, o.public_token || null, num(o.points_redeemed), o.id);
+
     for (const o of orders) {
       const existing = db.prepare('SELECT status FROM orders WHERE id = ?').get(o.id);
       if (!existing) {
@@ -250,10 +294,12 @@ function importChanges(req, res) {
           `INSERT INTO orders (id, store_id, status, subtotal, total, created_by, paid_by, payment_method, receipt_number, created_at, paid_at, cancelled_at)
            VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`
         ).run(o.id, storeId, o.status, o.subtotal, o.total, resolveUser(o.created_by), resolveUser(o.paid_by), o.payment_method, o.receipt_number, o.created_at, o.paid_at, o.cancelled_at);
+        applyOrderMoney(o);
       } else if ((ORDER_STATUS_RANK[o.status] ?? 0) > (ORDER_STATUS_RANK[existing.status] ?? 0)) {
         db.prepare(
           'UPDATE orders SET status=?, paid_by=?, payment_method=?, receipt_number=?, paid_at=?, cancelled_at=? WHERE id=?'
         ).run(o.status, resolveUser(o.paid_by), o.payment_method, o.receipt_number, o.paid_at, o.cancelled_at, o.id);
+        applyOrderMoney(o);
       }
     }
     for (const item of orderItems) {
@@ -261,6 +307,31 @@ function importChanges(req, res) {
         `INSERT OR IGNORE INTO order_items (id, order_id, product_id, quantity, unit_price, line_total, added_via, movement_id, created_at)
          VALUES (?,?,?,?,?,?,?,?,?)`
       ).run(item.id, item.order_id, item.product_id, item.quantity, item.unit_price, item.line_total, item.added_via, item.movement_id, item.created_at);
+    }
+
+    // Split tenders and refunds are append-only; refunded_total is re-derived.
+    for (const p of orderPayments) {
+      db.prepare(
+        `INSERT OR IGNORE INTO order_payments (id, order_id, store_id, method, amount, reference, shift_id, created_at)
+         SELECT ?,?,?,?,?,?,(SELECT id FROM shifts WHERE id = ?),? WHERE EXISTS (SELECT 1 FROM orders WHERE id = ?)`
+      ).run(p.id, p.order_id, storeId, p.method, Number(p.amount), p.reference || null, p.shift_id || null, p.created_at, p.order_id);
+    }
+    const refundedOrders = new Set();
+    for (const r of refunds) {
+      const ins = db.prepare(
+        `INSERT OR IGNORE INTO refunds (id, order_id, store_id, amount, method, reason, created_by, shift_id, created_at)
+         SELECT ?,?,?,?,?,?,?,(SELECT id FROM shifts WHERE id = ?),? WHERE EXISTS (SELECT 1 FROM orders WHERE id = ?)`
+      ).run(r.id, r.order_id, storeId, Number(r.amount), r.method, r.reason || null, resolveUser(r.created_by), r.shift_id || null, r.created_at, r.order_id);
+      if (ins.changes) refundedOrders.add(r.order_id);
+    }
+    for (const ri of refundItems) {
+      db.prepare(
+        `INSERT OR IGNORE INTO refund_items (id, refund_id, order_item_id, product_id, quantity, amount, restocked)
+         SELECT ?,?,?,?,?,?,? WHERE EXISTS (SELECT 1 FROM refunds WHERE id = ?) AND EXISTS (SELECT 1 FROM order_items WHERE id = ?) AND EXISTS (SELECT 1 FROM products WHERE id = ?)`
+      ).run(ri.id, ri.refund_id, ri.order_item_id, ri.product_id, ri.quantity, Number(ri.amount), ri.restocked === false || Number(ri.restocked) === 0 ? 0 : 1, ri.refund_id, ri.order_item_id, ri.product_id);
+    }
+    for (const orderId of refundedOrders) {
+      db.prepare('UPDATE orders SET refunded_total = (SELECT COALESCE(SUM(amount), 0) FROM refunds WHERE order_id = ?) WHERE id = ?').run(orderId, orderId);
     }
 
     for (const productId of touched) {
@@ -279,6 +350,7 @@ function importChanges(req, res) {
         suppliers: suppliers.length, purchaseOrders: purchaseOrders.length, purchaseOrderItems: purchaseOrderItems.length,
         batches: batches.length, receipts: receipts.length, orders: orders.length, orderItems: orderItems.length,
         cycleCounts: cycleCounts.length,
+        shifts: shifts.length, orderPayments: orderPayments.length, refunds: refunds.length, refundItems: refundItems.length,
       },
     });
   } catch (err) {

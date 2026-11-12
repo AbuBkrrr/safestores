@@ -969,7 +969,16 @@
     "noOrdersYet": "No marketplace orders yet.",
     "paidOnline": "Paid online",
     "awaitingPayment": "Awaiting payment",
-    "payOnDelivery": "Pay on delivery"
+    "payOnDelivery": "Pay on delivery",
+    "cancel": "Cancel",
+    "cancelPrompt": "Cancel this order? Add a short reason for the customer (optional):",
+    "orderCancelled": "Order cancelled",
+    "cancelFailed": "Could not update the order",
+    "refundDueToast": "Order cancelled. It was paid online, so please refund {{amount}} to the customer from your Paystack dashboard. The platform's commission has been returned to your settlement balance.",
+    "refundDue": "Refund due",
+    "refunded": "Refunded",
+    "markRefunded": "Mark refunded",
+    "confirmRefunded": "Confirm you have refunded this customer in full?"
   },
   "storefrontPage": {
     "title": "🛍️ Shop",
@@ -1460,7 +1469,9 @@
     "payNow": "Pay now",
     "paymentReceived": "Payment received — thank you!",
     "paymentNotConfirmed": "We couldn't confirm the payment yet. If you were charged, it will update shortly.",
-    "emailPrompt": "Your email address for the payment receipt:"
+    "emailPrompt": "Your email address for the payment receipt:",
+    "refundPending": "You paid online, so the store will refund you. Contact the store if you have not received it within a few days.",
+    "refundDone": "The store has marked your refund as sent."
   },
   "onboarding": {
     "title": "Get your store ready",

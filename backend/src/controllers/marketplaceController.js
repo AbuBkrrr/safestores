@@ -315,7 +315,62 @@ async function fulfillOrder(req, res) {
   }
 }
 
+// PATCH /api/stores/:storeId/marketplace/orders/:orderId/cancel  { reason }
+// Only unfulfilled orders. Pay-on-delivery: nothing was collected, nothing owed.
+// Online-paid: the store already holds the money, so it must refund the
+// customer; the platform credits its commission back on the ledger (the debt
+// recovered stays recovered — that part paid down a real balance).
+async function cancelOrder(req, res) {
+  const { storeId, orderId } = req.params;
+  const reason = String(req.body?.reason || '').trim().slice(0, 300) || null;
+  const client = await db.pool.connect();
+  try {
+    await client.query('BEGIN');
+    const { rows } = await client.query(
+      `SELECT * FROM marketplace_orders WHERE id = $1 AND store_id = $2 FOR UPDATE`, [orderId, storeId]
+    );
+    const order = rows[0];
+    if (!order || !['placed', 'confirmed'].includes(order.status)) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({ error: 'Order not found or already resolved' });
+    }
+    const paid = order.payment_status === 'paid';
+    const nextPayment = paid ? 'refund_due' : (order.payment_status === 'pending' ? 'failed' : order.payment_status);
+    await client.query(
+      `UPDATE marketplace_orders SET status = 'cancelled', cancelled_at = now(), cancel_reason = $1, payment_status = $2 WHERE id = $3`,
+      [reason, nextPayment, orderId]
+    );
+    if (paid && Number(order.commission_amount) > 0) {
+      await client.query(
+        `INSERT INTO store_ledger (store_id, type, amount, order_total, commission, marketplace_order_id, note, created_by)
+         VALUES ($1,'adjustment',$2,$3,$4,$5,'Commission returned: order cancelled',$6) ON CONFLICT DO NOTHING`,
+        [storeId, -Number(order.commission_amount), order.total, order.commission_amount, orderId, req.user?.sub || null]
+      );
+    }
+    await client.query('COMMIT');
+    emitToStore(storeId, 'marketplace:order_cancelled', { id: orderId });
+    res.json({ message: 'Order cancelled', refundDue: paid, amount: paid ? Number(order.amount_paid || order.total) : 0 });
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {});
+    console.error(err);
+    res.status(500).json({ error: 'Failed to cancel order' });
+  } finally {
+    client.release();
+  }
+}
+
+// PATCH /api/stores/:storeId/marketplace/orders/:orderId/refunded — store confirms it refunded the customer
+async function markRefunded(req, res) {
+  const { rows } = await db.query(
+    `UPDATE marketplace_orders SET payment_status = 'refunded' WHERE id = $1 AND store_id = $2 AND payment_status = 'refund_due' RETURNING id`,
+    [req.params.orderId, req.params.storeId]
+  );
+  if (!rows[0]) return res.status(400).json({ error: 'No refund is due on this order' });
+  res.json({ message: 'Marked as refunded' });
+}
+
 module.exports = {
+  cancelOrder, markRefunded,
   browseProducts, listStores, searchProducts, customerSignup, customerLogin, placeOrder, listMyOrders,
   listStoreOrders, getStoreOrder, fulfillOrder,
 };

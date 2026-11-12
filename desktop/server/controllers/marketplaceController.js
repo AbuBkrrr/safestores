@@ -56,4 +56,20 @@ async function fulfillOrder(req, res) {
   } catch (err) { forwardError(err, res); }
 }
 
-module.exports = { listStoreOrders, getStoreOrder, fulfillOrder };
+function proxyPatch(action) {
+  return async (req, res) => {
+    const cloud = cloudClientOrError(res);
+    if (!cloud) return;
+    try {
+      const { data } = await axios.patch(
+        `${cloud.baseUrl}/api/stores/${cloud.storeId}/marketplace/orders/${req.params.orderId}/${action}`,
+        req.body || {}, { headers: cloud.headers, timeout: 10000 }
+      );
+      res.json(data);
+    } catch (err) { forwardError(err, res); }
+  };
+}
+const cancelOrder = proxyPatch('cancel');
+const markRefunded = proxyPatch('refunded');
+
+module.exports = { listStoreOrders, getStoreOrder, fulfillOrder, cancelOrder, markRefunded };

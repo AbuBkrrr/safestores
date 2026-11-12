@@ -198,7 +198,7 @@ async function confirmOrderPayment(reference) {
   );
   const order = rows[0];
   if (!order) return { ok: false, reason: 'unknown_reference' };
-  if (order.payment_status === 'paid') return { ok: true, order };
+  if (['paid', 'refund_due', 'refunded'].includes(order.payment_status)) return { ok: true, order };
   const v = await paystack.verifySplitTransaction(reference);
   if (!v.success) {
     if (['failed', 'abandoned', 'reversed'].includes(v.status)) {
@@ -211,11 +211,23 @@ async function confirmOrderPayment(reference) {
   if (v.subaccountCode && v.subaccountCode !== order.payout_subaccount_code) return { ok: false, reason: 'wrong_destination' };
   const { rows: upd } = await db.query(
     `UPDATE marketplace_orders SET payment_status = 'paid', paid_at = COALESCE($1::timestamptz, now()), amount_paid = $2, currency = $3
-     WHERE id = $4 AND payment_status <> 'paid' RETURNING *`,
+     WHERE id = $4 AND payment_status NOT IN ('paid', 'refund_due', 'refunded') RETURNING *`,
     [v.paidAt, v.amount, v.currency, order.id]
   );
   const paid = upd[0] || order;
   if (upd[0]) await settlements.recordOnlinePaid(db, paid);
+  if (upd[0] && paid.status === 'cancelled') {
+    // Paid after the store cancelled: the store must refund; the platform returns its commission.
+    await db.query(`UPDATE marketplace_orders SET payment_status = 'refund_due' WHERE id = $1`, [paid.id]);
+    if (Number(paid.commission_amount) > 0) {
+      await db.query(
+        `INSERT INTO store_ledger (store_id, type, amount, order_total, commission, marketplace_order_id, note)
+         VALUES ($1,'adjustment',$2,$3,$4,$5,'Commission returned: order cancelled') ON CONFLICT DO NOTHING`,
+        [paid.store_id, -Number(paid.commission_amount), paid.total, paid.commission_amount, paid.id]
+      );
+    }
+    paid.payment_status = 'refund_due';
+  }
   try { emitToStore(order.store_id, 'marketplace:order_paid', { id: order.id }); } catch { /* best-effort */ }
   return { ok: true, order: paid };
 }

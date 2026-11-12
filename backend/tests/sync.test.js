@@ -136,3 +136,57 @@ describe('Sync: import', () => {
     expect(rows[0].id).toBe(localSupplier.body.id);
   });
 });
+
+describe('Sync: v26 till data', () => {
+  it('shifts, split tenders, discounts and refunds round-trip; replay is a no-op', async () => {
+    const { store, admin: user } = await createActiveStoreWithAdmin();
+    const syncKey = await getSyncKey(store.id);
+    const now = new Date().toISOString();
+    const [productId, shiftId, orderId, itemId, refundId] = [uuidv4(), uuidv4(), uuidv4(), uuidv4(), uuidv4()];
+    const batch = {
+      products: [{ id: productId, name: 'Rice', sku: 'R1', unit: 'bag', cost_price: 100, price_multiplier: 1.5, reorder_level: 1, lead_time_days: 1, min_order_qty: 1, auto_reorder: false, barcode: '1234567890128', pack_size: 6, created_at: now, updated_at: now }],
+      shifts: [{ id: shiftId, opened_by: user.id, opened_at: now, opening_float: 500, status: 'closed', closed_by: user.id, closed_at: now, expected_cash: 600, counted_cash: 600, notes: null }],
+      orders: [{ id: orderId, status: 'paid', subtotal: 300, total: 270, created_by: user.id, paid_by: user.id, payment_method: 'split', receipt_number: 'R-1', created_at: now, paid_at: now,
+        discount_type: 'percent', discount_value: 10, discount_amount: 30, tax_rate_pct: 7.5, tax_inclusive: 1, tax_amount: 18.84, change_due: 0, shift_id: shiftId, points_redeemed: 0 }],
+      orderItems: [{ id: itemId, order_id: orderId, product_id: productId, quantity: 2, unit_price: 150, line_total: 300, added_via: 'scan', created_at: now }],
+      orderPayments: [
+        { id: uuidv4(), order_id: orderId, method: 'cash', amount: 100, shift_id: shiftId, created_at: now },
+        { id: uuidv4(), order_id: orderId, method: 'card', amount: 170, reference: 'POS-9', shift_id: shiftId, created_at: now },
+      ],
+      refunds: [{ id: refundId, order_id: orderId, amount: 135, method: 'cash', reason: 'Torn bag', created_by: user.id, shift_id: shiftId, created_at: now }],
+      refundItems: [{ id: uuidv4(), refund_id: refundId, order_item_id: itemId, product_id: productId, quantity: 1, amount: 135, restocked: 1 }],
+    };
+    for (let i = 0; i < 2; i++) {
+      const r = await request().post(`/api/stores/${store.id}/sync/import`).set('x-store-sync-key', syncKey).send(batch);
+      expect(r.status).toBe(200);
+    }
+    const { rows: [o] } = await pool.query('SELECT * FROM orders WHERE id = $1', [orderId]);
+    expect(o).toMatchObject({ discount_type: 'percent', tax_inclusive: true, shift_id: shiftId });
+    expect(Number(o.discount_amount)).toBe(30);
+    expect(Number(o.refunded_total)).toBe(135);
+    const { rows: pays } = await pool.query('SELECT method FROM order_payments WHERE order_id = $1 ORDER BY amount', [orderId]);
+    expect(pays.map((p) => p.method)).toEqual(['cash', 'card']);
+    const { rows: [p] } = await pool.query('SELECT barcode, pack_size FROM products WHERE id = $1', [productId]);
+    expect(p).toEqual({ barcode: '1234567890128', pack_size: 6 });
+
+    const exp = await request().get(`/api/stores/${store.id}/sync/export`).set('x-store-sync-key', syncKey);
+    expect(exp.body.shifts).toHaveLength(1);
+    expect(exp.body.orderPayments).toHaveLength(2);
+    expect(exp.body.refunds).toHaveLength(1);
+    expect(exp.body.refundItems).toHaveLength(1);
+  });
+
+  it('a sale parked earlier and paid later re-exports', async () => {
+    const { store, admin: user } = await createActiveStoreWithAdmin();
+    const syncKey = await getSyncKey(store.id);
+    const id = uuidv4();
+    await pool.query(
+      `INSERT INTO orders (id, store_id, status, subtotal, total, created_by, created_at) VALUES ($1,$2,'pending_payment',10,10,$3, now() - interval '2 days')`,
+      [id, store.id, user.id]
+    );
+    const since = new Date(Date.now() - 86400000).toISOString();
+    await pool.query(`UPDATE orders SET status = 'paid', paid_at = now() WHERE id = $1`, [id]);
+    const exp = await request().get(`/api/stores/${store.id}/sync/export?since=${since}`).set('x-store-sync-key', syncKey);
+    expect(exp.body.orders.map((x) => x.id)).toContain(id);
+  });
+});

@@ -209,3 +209,34 @@ describe('Bolt-style settlements', () => {
     expect((await request().get('/api/super/settlements').set(A(token))).status).toBe(403);
   });
 });
+
+describe('Store cancels a storefront order', () => {
+  it('pay-on-delivery: cancelled with nothing owed; cannot be fulfilled afterwards', async () => {
+    const { store, token, product } = await connectedStore();
+    const o = await request().post(`/api/marketplace/${store.id}/orders`).send({ items: [{ productId: product.id, quantity: 1 }], guestName: 'X' });
+    const c = await request().patch(`/api/stores/${store.id}/marketplace/orders/${o.body.id}/cancel`).set(A(token)).send({ reason: 'Out of stock' });
+    expect(c.body).toMatchObject({ refundDue: false });
+    expect((await request().patch(`/api/stores/${store.id}/marketplace/orders/${o.body.id}/fulfill`).set(A(token))).status).toBe(400);
+    expect((await request().patch(`/api/stores/${store.id}/marketplace/orders/${o.body.id}/cancel`).set(A(token))).status).toBe(400);
+    const { rows } = await pool.query('SELECT COUNT(*)::int AS n FROM store_ledger WHERE store_id = $1', [store.id]);
+    expect(rows[0].n).toBe(0);
+  });
+
+  it('online-paid: refund is due and the platform returns its commission on the ledger', async () => {
+    await pool.query('UPDATE payment_settings SET marketplace_commission_pct = 10');
+    const { store, token, product } = await connectedStore();
+    const order = await placeOnline(store.id, product.id); // 3000
+    const pay = await request().post(`/api/marketplace/orders/${order.tracking_token}/pay`).send({});
+    mockPaystack.verifySplitTransaction.mockResolvedValueOnce({ success: true, status: 'success', amount: 3000, currency: 'NGN', reference: pay.body.reference, subaccountCode: 'ACCT_store123' });
+    await request().post(`/api/marketplace/orders/${order.tracking_token}/verify`).send({ reference: pay.body.reference });
+
+    const c = await request().patch(`/api/stores/${store.id}/marketplace/orders/${order.id}/cancel`).set(A(token)).send({});
+    expect(c.body).toMatchObject({ refundDue: true, amount: 3000 });
+    const { rows } = await pool.query(`SELECT amount FROM store_ledger WHERE store_id = $1 AND type = 'adjustment'`, [store.id]);
+    expect(rows.map((r) => Number(r.amount))).toEqual([-300]);
+
+    expect((await request().patch(`/api/stores/${store.id}/marketplace/orders/${order.id}/refunded`).set(A(token))).status).toBe(200);
+    const track = await request().get(`/api/public/marketplace-orders/${order.tracking_token}`);
+    expect(track.body).toMatchObject({ status: 'cancelled', payment_status: 'refunded' });
+  });
+});

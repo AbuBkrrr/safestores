@@ -103,6 +103,8 @@ router.get('/cycle-counts/accuracy', requireRole('admin', 'manager'), cycleCount
 router.get('/marketplace/orders', requireRole('admin', 'manager'), marketplaceCtrl.listStoreOrders);
 router.get('/marketplace/orders/:orderId', requireRole('admin', 'manager'), marketplaceCtrl.getStoreOrder);
 router.patch('/marketplace/orders/:orderId/fulfill', requireRole('admin', 'manager'), marketplaceCtrl.fulfillOrder);
+router.patch('/marketplace/orders/:orderId/cancel', requireRole('admin', 'manager'), marketplaceCtrl.cancelOrder);
+router.patch('/marketplace/orders/:orderId/refunded', requireRole('admin', 'manager'), marketplaceCtrl.markRefunded);
 
 // Support tickets — proxied to the cloud Super Admin queue, see supportController.js's header.
 router.get('/support/tickets', requireRole('admin', 'manager'), supportCtrl.listMyTickets);

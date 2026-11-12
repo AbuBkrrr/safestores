@@ -355,12 +355,21 @@ button at the release.
 
 ---
 
+## Cancelling storefront orders
+
+Stores can cancel an order that has not been fulfilled (Online Marketplace →
+Cancel, with an optional reason the shopper sees on the tracking page).
+Pay-on-delivery orders: nothing is owed. Paid online: the money is already
+in the store's account, so the order shows **Refund due** — the store
+refunds the shopper from its Paystack dashboard, then taps **Mark refunded**.
+The platform's commission on that order is credited back to the store's
+settlement balance automatically.
+
 ## Known limitations (plan for v27)
 
-- **Desktop ↔ cloud sync** covers products, stock movements, orders and order
-  items, but not yet the new v26 tables (payments, refunds, shifts, loyalty
-  points) or the new order money fields. Stock levels stay correct across
-  sync; desktop shift, refund and points history stays on the desktop.
+- **Desktop ↔ cloud sync** now carries shifts, split payments, refunds,
+  discounts/tax and barcodes too. Loyalty points and customer records stay on
+  the device that created them (customers are not synced yet).
 - **Translations:** v26 screens are in English in all 8 languages until a
   native speaker translates the new keys in `frontend/src/i18n/locales/*.json`
   (the app falls back to English). The Super Admin console is English-only.
