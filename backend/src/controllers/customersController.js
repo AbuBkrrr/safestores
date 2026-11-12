@@ -67,7 +67,8 @@ async function updateCustomer(req, res) {
   if (birthday && Number.isNaN(Date.parse(birthday))) return res.status(400).json({ error: 'Invalid birthday' });
   const { rows } = await db.query(
     `UPDATE store_customers SET name = COALESCE($1,name), phone = COALESCE($2,phone), notes = COALESCE($3,notes),
-       email = CASE WHEN $6::boolean THEN $7 ELSE email END, birthday = CASE WHEN $8::boolean THEN $9::date ELSE birthday END
+       email = CASE WHEN $6::boolean THEN $7 ELSE email END, birthday = CASE WHEN $8::boolean THEN $9::date ELSE birthday END,
+       updated_at = now()
      WHERE id = $4 AND store_id = $5 RETURNING *`,
     [name || null, phone, notes, customerId, storeId, email !== undefined, email || null, birthday !== undefined, birthday || null]
   );
@@ -79,7 +80,7 @@ async function updateCustomer(req, res) {
 async function archiveCustomer(req, res) {
   const { storeId, customerId } = req.params;
   const { rows } = await db.query(
-    `UPDATE store_customers SET archived_at = now() WHERE id = $1 AND store_id = $2 AND archived_at IS NULL RETURNING id`,
+    `UPDATE store_customers SET archived_at = now(), updated_at = now() WHERE id = $1 AND store_id = $2 AND archived_at IS NULL RETURNING id`,
     [customerId, storeId]
   );
   if (!rows[0]) return res.status(404).json({ error: 'Customer not found or already archived' });

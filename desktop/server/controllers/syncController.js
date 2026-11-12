@@ -59,6 +59,9 @@ function exportChanges(req, res) {
   const refundItems = db.prepare(
     'SELECT ri.* FROM refund_items ri JOIN refunds r ON r.id = ri.refund_id WHERE r.store_id = ? AND r.created_at > ?'
   ).all(storeId, since);
+  const customers = db.prepare('SELECT * FROM store_customers WHERE store_id = ? AND COALESCE(updated_at, created_at) > ? ORDER BY created_at ASC').all(storeId, since);
+  const customerLedger = db.prepare('SELECT * FROM customer_ledger_entries WHERE store_id = ? AND created_at > ? ORDER BY created_at ASC').all(storeId, since);
+  const loyaltyPoints = db.prepare('SELECT * FROM loyalty_points WHERE store_id = ? AND created_at > ? ORDER BY created_at ASC').all(storeId, since);
   // updated_at, not created_at — a webhook edited (or soft-deleted) long
   // after creation still needs to show up in an incremental export.
   const webhooks = db.prepare('SELECT * FROM webhooks WHERE store_id = ? AND updated_at > ? ORDER BY updated_at ASC').all(storeId, since);
@@ -67,7 +70,7 @@ function exportChanges(req, res) {
     serverTime: new Date().toISOString(),
     users, products, arrivals, movements, audits,
     suppliers, purchaseOrders, purchaseOrderItems, batches, receipts, orders, orderItems, webhooks, cycleCounts,
-    shifts, orderPayments, refunds, refundItems,
+    shifts, orderPayments, refunds, refundItems, customers, customerLedger, loyaltyPoints,
   });
 }
 
@@ -86,6 +89,7 @@ function importChanges(req, res) {
     suppliers = [], purchaseOrders = [], purchaseOrderItems = [], batches = [],
     receipts = [], orders = [], orderItems = [], webhooks = [], cycleCounts = [],
     shifts = [], orderPayments = [], refunds = [], refundItems = [],
+    customers = [], customerLedger = [], loyaltyPoints = [],
   } = req.body;
   const touched = new Set();
 
@@ -261,6 +265,22 @@ function importChanges(req, res) {
       }
     }
 
+    // Store customers: last-write-wins on updated_at (falls back to created_at for never-edited rows).
+    for (const c of customers) {
+      const stamp = c.updated_at || c.created_at;
+      const ex = db.prepare('SELECT COALESCE(updated_at, created_at) AS stamp FROM store_customers WHERE id = ?').get(c.id);
+      const birthday = c.birthday ? new Date(c.birthday).toISOString().slice(0, 10) : null;
+      if (!ex) {
+        db.prepare(
+          `INSERT OR IGNORE INTO store_customers (id, store_id, name, phone, notes, email, birthday, created_at, archived_at, updated_at)
+           VALUES (?,?,?,?,?,?,?,?,?,?)`
+        ).run(c.id, storeId, c.name, c.phone || null, c.notes || null, c.email || null, birthday, c.created_at, c.archived_at || null, stamp);
+      } else if (new Date(stamp) > new Date(ex.stamp)) {
+        db.prepare('UPDATE store_customers SET name=?, phone=?, notes=?, email=?, birthday=?, archived_at=?, updated_at=? WHERE id=?')
+          .run(c.name, c.phone || null, c.notes || null, c.email || null, birthday, c.archived_at || null, stamp, c.id);
+      }
+    }
+
     // Shifts before orders (orders/payments point at them). open -> closed only.
     for (const sh of shifts) {
       const ex = db.prepare('SELECT status FROM shifts WHERE id = ?').get(sh.id);
@@ -309,6 +329,20 @@ function importChanges(req, res) {
       ).run(item.id, item.order_id, item.product_id, item.quantity, item.unit_price, item.line_total, item.added_via, item.movement_id, item.created_at);
     }
 
+    // Credit ledger and loyalty points are append-only; balances are sums over them.
+    for (const e of customerLedger) {
+      db.prepare(
+        `INSERT OR IGNORE INTO customer_ledger_entries (id, store_id, store_customer_id, type, amount, order_id, note, recorded_by, created_at)
+         SELECT ?,?,?,?,?,(SELECT id FROM orders WHERE id = ?),?,?,? WHERE EXISTS (SELECT 1 FROM store_customers WHERE id = ? AND store_id = ?)`
+      ).run(e.id, storeId, e.store_customer_id, e.type, Number(e.amount), e.order_id || null, e.note || null, resolveUser(e.recorded_by), e.created_at, e.store_customer_id, storeId);
+    }
+    for (const lp of loyaltyPoints) {
+      db.prepare(
+        `INSERT OR IGNORE INTO loyalty_points (id, store_id, store_customer_id, points, order_id, reason, expires_at, created_at)
+         SELECT ?,?,?,?,(SELECT id FROM orders WHERE id = ?),?,?,? WHERE EXISTS (SELECT 1 FROM store_customers WHERE id = ? AND store_id = ?)`
+      ).run(lp.id, storeId, lp.store_customer_id, lp.points, lp.order_id || null, lp.reason || 'sale', lp.expires_at || null, lp.created_at, lp.store_customer_id, storeId);
+    }
+
     // Split tenders and refunds are append-only; refunded_total is re-derived.
     for (const p of orderPayments) {
       db.prepare(
@@ -351,6 +385,7 @@ function importChanges(req, res) {
         batches: batches.length, receipts: receipts.length, orders: orders.length, orderItems: orderItems.length,
         cycleCounts: cycleCounts.length,
         shifts: shifts.length, orderPayments: orderPayments.length, refunds: refunds.length, refundItems: refundItems.length,
+        customers: customers.length, customerLedger: customerLedger.length, loyaltyPoints: loyaltyPoints.length,
       },
     });
   } catch (err) {

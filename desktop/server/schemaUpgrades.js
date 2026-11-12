@@ -95,6 +95,8 @@ function applySchemaUpgrades(db) {
   db.exec('CREATE INDEX IF NOT EXISTS idx_products_barcode ON products(store_id, barcode)');
   ensureColumn(db, 'store_customers', 'email', 'TEXT');
   ensureColumn(db, 'store_customers', 'birthday', 'TEXT');
+  // Last-write-wins merge of customer edits across devices (NULL = never edited; created_at applies).
+  ensureColumn(db, 'store_customers', 'updated_at', 'TEXT');
   ensureColumn(db, 'stores', 'points_per_100', 'REAL NOT NULL DEFAULT 0');
   ensureColumn(db, 'stores', 'point_value', 'REAL NOT NULL DEFAULT 1');
   ensureColumn(db, 'stores', 'points_expiry_months', 'INTEGER NOT NULL DEFAULT 12');

@@ -75,17 +75,21 @@ async function exportChanges(req, res) {
   ]);
 
   // v26 till data: shifts, split payments, refunds.
-  const [shifts, orderPayments, refunds, refundItems] = await Promise.all([
+  const [shifts, orderPayments, refunds, refundItems, customers, customerLedger, loyaltyPoints] = await Promise.all([
     db.query('SELECT * FROM shifts WHERE store_id = $1 AND (opened_at > $2 OR closed_at > $2) ORDER BY opened_at ASC', [storeId, since]),
     db.query('SELECT * FROM order_payments WHERE store_id = $1 AND created_at > $2 ORDER BY created_at ASC', [storeId, since]),
     db.query('SELECT * FROM refunds WHERE store_id = $1 AND created_at > $2 ORDER BY created_at ASC', [storeId, since]),
     db.query(
       `SELECT ri.* FROM refund_items ri JOIN refunds r ON r.id = ri.refund_id WHERE r.store_id = $1 AND r.created_at > $2`, [storeId, since]
     ),
+    db.query('SELECT * FROM store_customers WHERE store_id = $1 AND updated_at > $2 ORDER BY created_at ASC', [storeId, since]),
+    db.query('SELECT * FROM customer_ledger_entries WHERE store_id = $1 AND created_at > $2 ORDER BY created_at ASC', [storeId, since]),
+    db.query('SELECT * FROM loyalty_points WHERE store_id = $1 AND created_at > $2 ORDER BY created_at ASC', [storeId, since]),
   ]);
 
   res.json({
     shifts: shifts.rows, orderPayments: orderPayments.rows, refunds: refunds.rows, refundItems: refundItems.rows,
+    customers: customers.rows, customerLedger: customerLedger.rows, loyaltyPoints: loyaltyPoints.rows,
     serverTime: serverTime.toISOString(),
     users: users.rows,
     products: products.rows, arrivals: arrivals.rows, movements: movements.rows, audits: audits.rows,
@@ -112,6 +116,7 @@ async function importChanges(req, res) {
     suppliers = [], purchaseOrders = [], purchaseOrderItems = [], batches = [],
     receipts = [], orders = [], orderItems = [], webhooks = [], cycleCounts = [],
     shifts = [], orderPayments = [], refunds = [], refundItems = [],
+    customers = [], customerLedger = [], loyaltyPoints = [],
   } = req.body;
 
   const client = await db.pool.connect();
@@ -312,6 +317,24 @@ async function importChanges(req, res) {
       }
     }
 
+    // Store customers: last-write-wins on updated_at (falls back to created_at for never-edited rows).
+    for (const c of customers) {
+      const stamp = c.updated_at || c.created_at;
+      const { rows: ex } = await client.query('SELECT updated_at FROM store_customers WHERE id = $1', [c.id]);
+      if (!ex[0]) {
+        await client.query(
+          `INSERT INTO store_customers (id, store_id, name, phone, notes, email, birthday, created_at, archived_at, updated_at)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (id) DO NOTHING`,
+          [c.id, storeId, c.name, c.phone || null, c.notes || null, c.email || null, c.birthday ? String(c.birthday).slice(0, 10) : null, c.created_at, c.archived_at || null, stamp]
+        );
+      } else if (new Date(stamp) > new Date(ex[0].updated_at)) {
+        await client.query(
+          `UPDATE store_customers SET name=$1, phone=$2, notes=$3, email=$4, birthday=$5, archived_at=$6, updated_at=$7 WHERE id=$8`,
+          [c.name, c.phone || null, c.notes || null, c.email || null, c.birthday ? String(c.birthday).slice(0, 10) : null, c.archived_at || null, stamp, c.id]
+        );
+      }
+    }
+
     // Shifts before orders (orders/payments point at them). open -> closed only.
     for (const sh of shifts) {
       const { rows: ex } = await client.query('SELECT status FROM shifts WHERE id = $1', [sh.id]);
@@ -364,6 +387,26 @@ async function importChanges(req, res) {
         `INSERT INTO order_items (id, order_id, product_id, quantity, unit_price, line_total, added_via, movement_id, created_at)
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT (id) DO NOTHING`,
         [item.id, item.order_id, item.product_id, item.quantity, item.unit_price, item.line_total, item.added_via, item.movement_id, item.created_at]
+      );
+    }
+
+    // Credit ledger and loyalty points are append-only; balances are sums over them.
+    for (const e of customerLedger) {
+      await client.query(
+        `INSERT INTO customer_ledger_entries (id, store_id, store_customer_id, type, amount, order_id, note, recorded_by, created_at)
+         SELECT $1,$2,$3,$4,$5,(SELECT id FROM orders WHERE id = $6::uuid),$7,$8,$9
+         WHERE EXISTS (SELECT 1 FROM store_customers WHERE id = $3 AND store_id = $2)
+         ON CONFLICT (id) DO NOTHING`,
+        [e.id, storeId, e.store_customer_id, e.type, e.amount, e.order_id || null, e.note || null, resolveUser(e.recorded_by), e.created_at]
+      );
+    }
+    for (const lp of loyaltyPoints) {
+      await client.query(
+        `INSERT INTO loyalty_points (id, store_id, store_customer_id, points, order_id, reason, expires_at, created_at)
+         SELECT $1,$2,$3,$4,(SELECT id FROM orders WHERE id = $5::uuid),$6,$7,$8
+         WHERE EXISTS (SELECT 1 FROM store_customers WHERE id = $3 AND store_id = $2)
+         ON CONFLICT (id) DO NOTHING`,
+        [lp.id, storeId, lp.store_customer_id, lp.points, lp.order_id || null, lp.reason || 'sale', lp.expires_at || null, lp.created_at]
       );
     }
 
@@ -438,6 +481,7 @@ async function importChanges(req, res) {
         batches: batches.length, receipts: receipts.length, orders: orders.length, orderItems: orderItems.length,
         webhooks: webhooks.length, cycleCounts: cycleCounts.length,
         shifts: shifts.length, orderPayments: orderPayments.length, refunds: refunds.length, refundItems: refundItems.length,
+        customers: customers.length, customerLedger: customerLedger.length, loyaltyPoints: loyaltyPoints.length,
       },
     });
   } catch (err) {

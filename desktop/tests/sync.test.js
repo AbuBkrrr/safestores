@@ -199,3 +199,32 @@ describe('Sync: v26 till data', () => {
     expect(exp.body.orders.map((x) => x.id)).toContain(id);
   });
 });
+
+describe('Sync: store customers', () => {
+  it('customers, credit ledger and points merge; a newer edit wins, an older one does not', async () => {
+    const { store, admin } = await createActiveStoreWithAdmin();
+    const syncKey = getSyncKey(store.id);
+    const t0 = new Date(Date.now() - 60000).toISOString();
+    const t1 = new Date().toISOString();
+    const [cid, oid] = [crypto.randomUUID(), crypto.randomUUID()];
+    const send = (b) => request().post(`/api/stores/${store.id}/sync/import`).set('x-store-sync-key', syncKey).send(b);
+    const batch = {
+      customers: [{ id: cid, name: 'Mama Ngozi', phone: '0803', created_at: t0, updated_at: t0, birthday: '1980-04-02' }],
+      orders: [{ id: oid, status: 'paid', subtotal: 50, total: 50, created_by: admin.id, paid_by: admin.id, payment_method: 'credit', created_at: t0, paid_at: t0, store_customer_id: cid }],
+      customerLedger: [{ id: crypto.randomUUID(), store_customer_id: cid, type: 'credit_sale', amount: 50, order_id: oid, recorded_by: admin.id, created_at: t0 }],
+      loyaltyPoints: [{ id: crypto.randomUUID(), store_customer_id: cid, points: 5, order_id: oid, reason: 'sale', created_at: t0 }],
+    };
+    expect((await send(batch)).status).toBe(200);
+    expect((await send(batch)).status).toBe(200);
+    expect((await send({ customers: [{ ...batch.customers[0], name: 'Ngozi A.', updated_at: t1 }] })).status).toBe(200);
+    expect((await send({ customers: [{ ...batch.customers[0], name: 'Stale', updated_at: t0 }] })).status).toBe(200);
+    expect(db.prepare('SELECT name FROM store_customers WHERE id = ?').get(cid).name).toBe('Ngozi A.');
+    expect(db.prepare('SELECT store_customer_id FROM orders WHERE id = ?').get(oid).store_customer_id).toBe(cid);
+    expect(db.prepare('SELECT SUM(amount) AS owed FROM customer_ledger_entries WHERE store_customer_id = ?').get(cid).owed).toBe(50);
+    expect(db.prepare('SELECT SUM(points) AS p FROM loyalty_points WHERE store_customer_id = ?').get(cid).p).toBe(5);
+    const exp = await request().get(`/api/stores/${store.id}/sync/export`).set('x-store-sync-key', syncKey);
+    expect(exp.body.customers.map((c) => c.id)).toContain(cid);
+    expect(exp.body.customerLedger).toHaveLength(1);
+    expect(exp.body.loyaltyPoints).toHaveLength(1);
+  });
+});

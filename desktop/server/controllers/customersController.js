@@ -70,7 +70,7 @@ function updateCustomer(req, res) {
   if (!existing) return res.status(404).json({ error: 'Customer not found' });
   const { name, phone, notes, email, birthday } = req.body;
   if (birthday && Number.isNaN(Date.parse(birthday))) return res.status(400).json({ error: 'Invalid birthday' });
-  db.prepare('UPDATE store_customers SET name = ?, phone = ?, notes = ?, email = ?, birthday = ? WHERE id = ?').run(
+  db.prepare("UPDATE store_customers SET name = ?, phone = ?, notes = ?, email = ?, birthday = ?, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id = ?").run(
     name || existing.name,
     phone !== undefined ? phone : existing.phone,
     notes !== undefined ? notes : existing.notes,
@@ -85,7 +85,7 @@ function updateCustomer(req, res) {
 function archiveCustomer(req, res) {
   const { storeId, customerId } = req.params;
   const result = db.prepare(
-    `UPDATE store_customers SET archived_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
+    `UPDATE store_customers SET archived_at = strftime('%Y-%m-%dT%H:%M:%fZ','now'), updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')
      WHERE id = ? AND store_id = ? AND archived_at IS NULL`
   ).run(customerId, storeId);
   if (result.changes === 0) return res.status(404).json({ error: 'Customer not found or already archived' });

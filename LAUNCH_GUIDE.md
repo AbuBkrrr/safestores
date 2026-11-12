@@ -368,15 +368,14 @@ settlement balance automatically.
 ## Known limitations (plan for v27)
 
 - **Desktop ↔ cloud sync** now carries shifts, split payments, refunds,
-  discounts/tax and barcodes too. Loyalty points and customer records stay on
-  the device that created them (customers are not synced yet).
+  discounts/tax, barcodes, store customers, their credit ledger and loyalty
+  points too.
 - **Translations:** v26 screens are in English in all 8 languages until a
   native speaker translates the new keys in `frontend/src/i18n/locales/*.json`
   (the app falls back to English). The Super Admin console is English-only.
-- **Online storefront payments** use Paystack (Nigeria, Ghana, Kenya, South
-  Africa). For stores elsewhere, add Stripe Connect (Express accounts), which
-  follows the same "money goes straight to the store" model; until then
-  those stores use pay on delivery.
+- **Online storefront payments** use Paystack only (Nigeria, Ghana, Kenya,
+  South Africa). Stores elsewhere use pay on delivery. Stripe Connect can be
+  added later on the same "money goes straight to the store" model.
 - **Branch transfers** need the same email on an admin or manager account at
   both stores (an owner of several branches).
 
