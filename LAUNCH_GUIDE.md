@@ -370,9 +370,10 @@ settlement balance automatically.
 - **Desktop ↔ cloud sync** now carries shifts, split payments, refunds,
   discounts/tax, barcodes, store customers, their credit ledger and loyalty
   points too.
-- **Translations:** v26 screens are in English in all 8 languages until a
-  native speaker translates the new keys in `frontend/src/i18n/locales/*.json`
-  (the app falls back to English). The Super Admin console is English-only.
+- **Translations:** all v26 screens are machine-drafted in French, Hausa,
+  Yoruba, Igbo, Swahili, Arabic and Chinese. Have a native speaker review
+  `frontend/src/i18n/locales/*.json` before launch (Hausa, Yoruba and Igbo
+  most of all). The Super Admin console is English-only.
 - **Online storefront payments** use Paystack only (Nigeria, Ghana, Kenya,
   South Africa). Stores elsewhere use pay on delivery. Stripe Connect can be
   added later on the same "money goes straight to the store" model.

@@ -97,7 +97,26 @@
     },
     "shrinkage": "Asara",
     "lendingPartners": "Abokan Bayar da Bashi",
-    "toggleMenu": "Sauya Menu"
+    "toggleMenu": "Sauya Menu",
+    "account": "Asusuna",
+    "activity": "Rajistar Ayyuka",
+    "sales": "Tallace-tallace da Mayarwa",
+    "shifts": "Lokutan Aiki",
+    "dailyReport": "Rufe Rana",
+    "settings": "Saitunan Shago",
+    "insights": "Bincike",
+    "labels": "Lambobi da Barcode",
+    "transfers": "Canja Kaya tsakanin Rassa",
+    "help": "Taimako",
+    "terms": "Sharuɗɗa",
+    "privacy": "Sirri",
+    "skipToContent": "Tsallaka zuwa babban abun ciki",
+    "theme": "Jigo",
+    "themeSystem": "Kai-tsaye",
+    "themeLight": "Haske",
+    "themeDark": "Duhu",
+    "textSize": "Girman rubutu",
+    "settlements": "Sasantawa"
   },
   "login": {
     "welcomeBack": "Barka da Dawowa",
@@ -115,7 +134,12 @@
     "tagline": "Basirar Kaya na Kamfani",
     "adminSubtitle": "Shiga da bayanan shagonka",
     "inviteSubtitle": "Shigar da lambar gayyatarka don samun damar dashbord ɗinka",
-    "inviteCodeHelp": "Shigar da lambar gayyatar da aka aiko maka — wannan kuma shine yadda za ka sake shiga a karo na gaba"
+    "inviteCodeHelp": "Shigar da lambar gayyatar da aka aiko maka — wannan kuma shine yadda za ka sake shiga a karo na gaba",
+    "forgotPassword": "Ka manta kalmar sirri?",
+    "twoFactorCode": "Lambar tantancewa",
+    "twoFactorHelp": "Buɗe manhajar tantancewa ka shigar da lambar lamba 6 ta SAFE Stores.",
+    "chooseStore": "Wane shago?",
+    "chooseStoreHelp": "Ana amfani da wannan imel a shago fiye da ɗaya. Zaɓi wanda za ka shiga."
   },
   "dashboard": {
     "title": "Dashboard",
@@ -187,7 +211,38 @@
     "selectCustomerError": "Zaɓi abokin ciniki don siyar da bashi",
     "addItemError": "An kasa ƙara kaya",
     "cameraError": "An kasa isa ga kyamara don duba lambar kaya.",
-    "paymentConfirmedToast": "An tabbatar da biya"
+    "paymentConfirmedToast": "An tabbatar da biya",
+    "mobileMoney": "Kuɗin waya",
+    "amountReceived": "Kuɗin hannu da aka karɓa (zaɓi — don canji)",
+    "receivedTooLow": "Kuɗin hannu da aka karɓa bai kai jimilla ba.",
+    "splitPayment": "Raba biya",
+    "singlePayment": "Biya ɗaya",
+    "splitPayments": "Biyan kuɗi",
+    "addTender": "Ƙara biya",
+    "amount": "Adadi",
+    "remaining": "Saura a biya",
+    "addDiscount": "Rangwame",
+    "removeDiscount": "Cire",
+    "discountType": "Iri",
+    "fixedAmount": "Ƙayyadadden adadi",
+    "discountValue": "Ƙima",
+    "discountReason": "Dalili (yana bayyana a rasit)",
+    "applyDiscount": "Sanya rangwame",
+    "approvalNeeded": "Wannan rangwame ya wuce abin da mai karɓar kuɗi zai iya bayarwa shi kaɗai. Dole manaja ko mai gudanarwa ya amince.",
+    "managerEmail": "Imel ɗin manaja",
+    "managerPassword": "Kalmar sirrin manaja",
+    "park": "Ajiye siyarwa",
+    "parkPrompt": "Ba wannan siyarwar da aka ajiye suna don ka same ta (misali sunan abokin ciniki):",
+    "parkedDefault": "Siyarwar da aka ajiye",
+    "parkedToast": "An ajiye siyarwa — ci gaba da ita daga jerin da ke ƙasa.",
+    "quickPicks": "Mafi sayuwa",
+    "removeItem": "Cire kaya",
+    "shortcutsHint": "Gajerun hanyoyi: F2 nema · Enter yana ƙara barcode da aka duba · F4 biya · Esc share nema.",
+    "loyaltyMember": "Memba na aminci (zaɓi)",
+    "noMember": "— Babu —",
+    "memberPoints": "Maki {{points}} (darajarsu {{value}})",
+    "usePoints": "Yi amfani da maki",
+    "pointsApplied": "An yi amfani da maki {{count}}"
   },
   "products": {
     "title": "Sarrafa Kayayyaki",
@@ -230,7 +285,24 @@
     "archive": "Ajiye a Fayil",
     "productCreatedToast": "An ƙirƙiri kaya",
     "createError": "An kasa ƙirƙirar kaya",
-    "archiveConfirm": "Ajiye wannan kaya a fayil? Tarihinsa zai kasance kuma za a iya mayar da shi daga baya."
+    "archiveConfirm": "Ajiye wannan kaya a fayil? Tarihinsa zai kasance kuma za a iya mayar da shi daga baya.",
+    "import": "Shigo da",
+    "labels": "Lambobi",
+    "barcode": "Barcode",
+    "barcodePlaceholder": "Duba ko rubuta (zaɓi)",
+    "variantOf": "Nau'in",
+    "notAVariant": "— Ba nau'i ba ne —",
+    "variantLabel": "Nau'i (girma / launi)",
+    "variantLabelPlaceholder": "misali Babba / Ja",
+    "packSize": "Guda a kowane fakiti / kwali",
+    "packSizeHelp": "Yana ba ka damar karɓar kaya da kwali. Bar 1 idan guda-guda kake saya.",
+    "packUnit": "Sunan fakiti",
+    "packUnitPlaceholder": "misali kwali, akwati",
+    "pack": "fakiti",
+    "searchPlaceholder": "Nema da suna, SKU, barcode ko rukuni",
+    "sellingPrice": "Farashin sayarwa",
+    "markupHelp": "Riba: {{pct}}% sama da kuɗin saye",
+    "enterCostFirst": "Shigar da kuɗin saye tukuna"
   },
   "stockArrivalPage": {
     "title": "Isowar Kaya",
@@ -249,7 +321,8 @@
     "batch": "Rukuni",
     "date": "Kwanan Wata",
     "recordedToast": "An rikodin isowar kaya",
-    "recordError": "An kasa rikodin isowa"
+    "recordError": "An kasa rikodin isowa",
+    "packsReceived": "An karɓi {{unit}} ({{size}} kowanne)"
   },
   "movementsPage": {
     "title": "Motsin Kaya",
@@ -362,7 +435,19 @@
     "paymentRecordedToast": "An rikodin biya",
     "paymentError": "An kasa rikodin biya",
     "whatsappReminder": "Sannu {{name}}, wannan tunatarwa ce ta abokantaka cewa kuna da bashi na {{amount}} tare da {{store}}. Na gode!",
-    "us": "mu"
+    "us": "mu",
+    "email": "Imel (zaɓi)",
+    "birthday": "Ranar haihuwa (zaɓi)",
+    "statement": "Bayanin asusu",
+    "charges": "Bashi",
+    "payments": "Biyan kuɗi",
+    "birthdaysSoon": "Ranakun haihuwa a wannan mako",
+    "today": "yau",
+    "inDays": "nan da kwana {{count}}",
+    "sendWish": "Aika fatan alheri",
+    "birthdayMessage": "Barka da ranar haihuwa, {{name}}! 🎉 Dukkanmu a {{store}} muna maka fatan rana mai daɗi. Ka zo wannan makon don ƙaramar kyauta!",
+    "pointsBalance": "Makin aminci: {{points}} (darajarsu {{value}})",
+    "pointsExpiring": "{{count}} za su ƙare cikin kwana 30"
   },
   "cycleCountingPage": {
     "title": "⏱️ Kirga Kaya na Zagaye",
@@ -457,7 +542,9 @@
     "enable": "Kunna",
     "remove": "Cire",
     "removeConfirm": "Cire wannan mai amfani?",
-    "statusChanged": "{{name}} yanzu {{status}}"
+    "statusChanged": "{{name}} yanzu {{status}}",
+    "setPassword": "Saita kalmar sirri",
+    "setPasswordPrompt": "Sabuwar kalmar sirri don {{name}} (aƙalla haruffa 8):"
   },
   "cameraPage": {
     "title": "Kamara da Na'urar Bincike ta QR",
@@ -662,7 +749,14 @@
     "actions": "Ayyuka",
     "send": "Aika",
     "cancel": "Soke",
-    "markReceived": "Yiwa Alama An Karɓa"
+    "markReceived": "Yiwa Alama An Karɓa",
+    "poGreeting": "Sannu {{supplier}}, don Allah a kawo mana waɗannan:",
+    "poFrom": "Daga",
+    "poThanks": "Na gode.",
+    "purchaseOrder": "Odar Saye",
+    "unitCost": "Kuɗin kowanne",
+    "printPo": "Buga / PDF",
+    "whatsappPo": "Aika ta WhatsApp"
   },
   "expiryPage": {
     "title": "Na'urar Bin Diddigin Ƙarewa",
@@ -872,7 +966,19 @@
     "fulfill": "Cika",
     "orderFulfilled": "An cika oda — an sabunta kaya",
     "fulfillFailed": "An kasa cika oda",
-    "noOrdersYet": "Babu odar kasuwa tukuna."
+    "noOrdersYet": "Babu odar kasuwa tukuna.",
+    "paidOnline": "An biya ta yanar gizo",
+    "awaitingPayment": "Ana jiran biya",
+    "payOnDelivery": "Biya idan an kawo",
+    "cancel": "Soke",
+    "cancelPrompt": "Soke wannan odar? Ƙara gajeren dalili ga abokin ciniki (zaɓi):",
+    "orderCancelled": "An soke odar",
+    "cancelFailed": "Ba a iya sabunta odar ba",
+    "refundDueToast": "An soke odar. An biya ta yanar gizo, don haka don Allah ka mayar wa abokin ciniki {{amount}} daga dashboard ɗin Paystack ɗinka. An mayar da kwamishan dandalin cikin ma'aunin sasantawarka.",
+    "refundDue": "Ana bin mayarwa",
+    "refunded": "An mayar",
+    "markRefunded": "Yi alama an mayar",
+    "confirmRefunded": "Ka tabbatar ka mayar wa wannan abokin ciniki duka kuɗinsa?"
   },
   "storefrontPage": {
     "title": "🛍️ Shago",
@@ -898,7 +1004,23 @@
     "somethingWentWrong": "Wani abu ya faru ba daidai ba",
     "orderPlaced": "An sanya oda!",
     "trackBelow": "Za ka iya bin diddiginsa a ƙasa.",
-    "orderFailed": "An kasa sanya oda"
+    "orderFailed": "An kasa sanya oda",
+    "searchPlaceholder": "Nemi kaya",
+    "share": "Raba shago",
+    "linkCopied": "An kwafi hanyar shago",
+    "trackOrder": "Bibiyi odarka →",
+    "remove": "Cire",
+    "payOnCollection": "Biya idan ka karɓa ko idan an kawo.",
+    "orderOnWhatsApp": "Yi oda ta WhatsApp",
+    "waGreeting": "Sannu {{store}}, ina so in yi odar:",
+    "metaDescription": "Saya daga {{name}} {{city}} ta yanar gizo — yi oda yanzu, biya idan ka karɓa ko an kawo.",
+    "howToPay": "Ta yaya kake so ka biya?",
+    "payOnline": "Biya yanzu ta yanar gizo (kati, tura kuɗin banki, USSD)",
+    "payOnlineOnly": "Ana biya ta yanar gizo lokacin oda.",
+    "securePayNote": "Biya mai tsaro ta Paystack, ana biyan {{store}} kai tsaye.",
+    "emailForPayment": "Shigar da imel ɗinka don mu aiko maka da rasit ɗin biya.",
+    "payNow": "Biya {{amount}}",
+    "notTakingOrders": "Wannan shagon ba ya karɓar odar yanar gizo a yanzu. Don Allah ka ziyarci ko ka kira shagon."
   },
   "marketplaceHomePage": {
     "title": "🏪 Kasuwar SAFE Stores",
@@ -1001,7 +1123,9 @@
     "tierMegaLabel": "Babban Shago",
     "tierMegaDesc": "Kayayyaki da masu amfani marasa iyaka — mafi kyau ga manyan shaguna ko masu wurare da yawa",
     "heading": "Yi Rijistar Shagonka",
-    "confirmPasswordLabel": "Tabbatar da Kalmar Sirri"
+    "confirmPasswordLabel": "Tabbatar da Kalmar Sirri",
+    "agreePrefix": "Na amince da",
+    "agreeAnd": "da"
   },
   "setupPage": {
     "title": "👋 Barka da zuwa SAFE Stores",
@@ -1021,5 +1145,519 @@
     "loginFailed": "Shiga ya kasa",
     "submit": "⭐ Shiga Super Admin",
     "backToStore": "← Koma shigar shago"
+  },
+  "forgotPage": {
+    "title": "Sake saita kalmar sirri",
+    "subtitle": "Shigar da imel ɗin da kake shiga da shi. Za mu aiko maka da hanyar zaɓar sabuwar kalmar sirri.",
+    "send": "Aika hanyar sake saitawa",
+    "sending": "Ana aikawa…",
+    "backToLogin": "Koma shiga",
+    "noEmailHint": "Ma'aikata marasa imel: roƙi mai gudanar da shago ya saita maka sabuwar kalmar sirri daga shafin Masu Amfani."
+  },
+  "resetPage": {
+    "title": "Zaɓi sabuwar kalmar sirri",
+    "newPassword": "Sabuwar kalmar sirri",
+    "confirmPassword": "Tabbatar da sabuwar kalmar sirri",
+    "mismatch": "Kalmomin sirrin biyu ba su yi daidai ba.",
+    "save": "Ajiye sabuwar kalmar sirri",
+    "missingToken": "Wannan hanyar ba ta cika ba. Sake buɗe hanyar daga imel ɗinka, ko nemi sabuwa.",
+    "done": "An sabunta kalmar sirri. Yanzu za ka iya shiga.",
+    "goToLogin": "Je zuwa shiga"
+  },
+  "verifyPage": {
+    "title": "Tabbatar da imel ɗinka",
+    "working": "Ana tabbatarwa…",
+    "continue": "Ci gaba"
+  },
+  "passwordHint": "Aƙalla haruffa 8. Gajeriyar jumla ta fi sauƙin tunawa kuma ta fi wuyar zato.",
+  "accountPage": {
+    "title": "Asusuna",
+    "profile": "Bayanan kai",
+    "emailNotVerified": "Ba a tabbatar da imel ɗinka ba tukuna. Tabbatar da shi yana ba ka damar sake saita kalmar sirri idan ka manta.",
+    "resend": "Sake aika imel na tabbatarwa",
+    "changePassword": "Canja kalmar sirri",
+    "currentPassword": "Kalmar sirri ta yanzu",
+    "newPassword": "Sabuwar kalmar sirri",
+    "updatePassword": "Sabunta kalmar sirri",
+    "twoFactor": "Shiga mai matakai biyu",
+    "twoFactorIntro": "Ƙara mataki na biyu wajen shiga da manhajar tantancewa ta kyauta (Google Authenticator, Microsoft Authenticator, Authy…). Ko da wani ya san kalmar sirrinka, ba zai iya shiga ba sai da wayarka.",
+    "twoFactorOn": "Shiga mai matakai biyu yana KUNNE.",
+    "twoFactorOff": "Shiga mai matakai biyu a kashe yake.",
+    "turnOn": "Saita matakai biyu",
+    "turnOff": "Kashe matakai biyu",
+    "scanQr": "1. Duba wannan lambar QR da manhajar tantancewarka (ko rubuta maɓallin da ke ƙasa).",
+    "enterCode": "2. Shigar da lambar lamba 6 da ta nuna:",
+    "confirmCode": "Tabbatar ka kunna",
+    "codeLabel": "Lamba mai lambobi 6",
+    "passwordLabel": "Kalmar sirri",
+    "notAvailableDesktop": "Shiga mai matakai biyu yana samuwa a sigar yanar gizo.",
+    "sessions": "Na'urori da zama",
+    "sessionsIntro": "Ka rasa waya ko ka yi amfani da kwamfutar jama'a? Fita daga ko'ina.",
+    "logoutAll": "Fita daga dukkan sauran na'urori",
+    "yourData": "Bayananka",
+    "yourDataIntro": "Sauke kwafin bayanan sirri da SAFE Stores ke riƙe da su game da kai.",
+    "download": "Sauke bayanaina",
+    "deleteAccount": "Goge asusuna",
+    "deleteAccountIntro": "Yana cire sunanka, imel da shigarka. Tallace-tallacen da ka rubuta suna nan a littafin shago a matsayin \"Mai amfani da aka goge\".",
+    "deleteConfirm": "Goge asusunka gaba ɗaya? Ba za a iya maido da wannan ba.",
+    "closeStore": "Rufe shago ka goge dukkan bayanai",
+    "closeStoreIntro": "Yana goge wannan shago da duk abin da ke cikinsa gaba ɗaya bayan lokacin jinkiri na kwana 30. Za ka iya soke cikin waɗannan kwana 30.",
+    "typeStoreName": "Rubuta sunan shago don tabbatarwa",
+    "scheduledFor": "An tsara goge wannan shago gaba ɗaya a ranar {{date}}.",
+    "cancelDeletion": "Soke gogewa",
+    "requestDeletion": "Tsara gogewa"
+  },
+  "activityPage": {
+    "title": "Rajistar Ayyuka",
+    "subtitle": "Wa ya yi me, kuma yaushe — canjin farashi, mayarwa, rangwame, masu amfani, canjin tsaro.",
+    "when": "Yaushe",
+    "who": "Wa",
+    "action": "Aiki",
+    "details": "Cikakken bayani",
+    "store": "Shago",
+    "filter": "Tace",
+    "all": "Dukkan ayyuka",
+    "empty": "Babu abin da aka rubuta tukuna.",
+    "loadMore": "Ƙara lodawa"
+  },
+  "receipt": {
+    "subtotal": "Jimilla ƙarama",
+    "discount": "Rangwame",
+    "tax": "Haraji",
+    "inclusive": "(an haɗa)",
+    "change": "Canji",
+    "refunded": "An mayar",
+    "returned": "An dawo da {{count}}",
+    "pdf": "Ajiye a matsayin PDF",
+    "copyLink": "Kwafi hanya",
+    "linkCopied": "An kwafi hanyar rasit",
+    "share": "Raba",
+    "customerPhone": "Lambar WhatsApp ta abokin ciniki",
+    "customerPhonePlaceholder": "Lambar WhatsApp ta abokin ciniki",
+    "printerType": "Haɗin firintar rasit",
+    "thermalChoose": "Firintar zafi…",
+    "thermalPrint": "Buga a firintar rasit",
+    "thermalPick": "Zaɓi firinta",
+    "sentToPrinter": "An aika zuwa firintar rasit",
+    "printerFailed": "Ba a iya kaiwa ga firintar rasit ba",
+    "qrAlt": "Lambar QR da ke kai wa ga wannan rasit na dijital",
+    "scanForDigital": "Duba don samun rasit ɗinka na dijital",
+    "notFound": "Ba mu sami wannan rasit ba. Watakila hanyar ba ta cika ba."
+  },
+  "shift": {
+    "title": "Lokutan Aiki",
+    "subtitle": "Lokacin aiki na kowane mai karɓar kuɗi: kuɗin farawa, kuɗin hannu da aka karɓa, da kuɗin da aka ƙirga lokacin rufewa.",
+    "onShift": "Yana aiki tun {{time}}",
+    "noShift": "Ba ka cikin lokacin aiki.",
+    "start": "Fara lokacin aiki",
+    "end": "Ƙare lokacin aiki",
+    "startTitle": "Fara lokacin aikinka",
+    "endTitle": "Ƙare lokacin aiki ka ƙirga drowa",
+    "openingFloat": "Kuɗin farawa (kuɗin hannu a drowa yanzu)",
+    "countedCash": "Kuɗin da aka ƙirga",
+    "expectedCash": "Kuɗin da ake tsammani",
+    "notes": "Bayani (zaɓi)",
+    "openedToast": "An fara lokacin aiki",
+    "closedToast": "An rufe lokacin aiki. Ƙari/ragi: {{variance}}",
+    "cashier": "Mai karɓar kuɗi",
+    "started": "An fara",
+    "ended": "An ƙare",
+    "status": "Matsayi",
+    "variance": "Ƙari / ragi",
+    "zReport": "Rahoton Z",
+    "empty": "Babu lokacin aiki tukuna. Fara ɗaya daga wurin biya.",
+    "stillOpen": "har yanzu a buɗe",
+    "sales": "Tallace-tallace",
+    "salesCount": "Tallace-tallace",
+    "unitsSold": "Kayan da aka sayar",
+    "gross": "Jimillar tallace-tallace",
+    "net": "Saura (bayan mayarwa)",
+    "byMethod": "Ta hanyar biya",
+    "cashDrawer": "Drowar kuɗi",
+    "cashSales": "Tallace-tallacen kuɗin hannu",
+    "cashRefunds": "Mayarwar kuɗin hannu",
+    "openingFloatShort": "Kuɗin farawa"
+  },
+  "salesPage": {
+    "title": "Tallace-tallace da Mayarwa",
+    "subtitle": "Nemo kowace siyarwa, sake buga ko raba rasit ɗinta, kuma ka gudanar da dawowa.",
+    "search": "Lambar rasit",
+    "searchPlaceholder": "Lambar rasit (misali haruffa 4 na ƙarshe)",
+    "from": "Daga",
+    "to": "Zuwa",
+    "empty": "Ba a sami siyarwa ba.",
+    "receipt": "Rasit",
+    "when": "Yaushe",
+    "cashier": "Mai karɓar kuɗi",
+    "method": "An biya da",
+    "items": "Kaya",
+    "view": "Duba",
+    "refund": "Mayar da kuɗi / karɓi kayan da aka dawo",
+    "refundHistory": "Mayarwa a wannan siyarwa",
+    "refundIntro": "Zaɓi adadin kowane kaya da ake dawowa. Cire alamar \"Mayar ma'aji\" ga kaya masu lalacewa — za a rubuta su a matsayin asara maimakon komawa kan shiryayye.",
+    "canReturn": "har zuwa {{count}}",
+    "qtyToReturn": "Adadin da za a dawo",
+    "restock": "Mayar ma'aji",
+    "refundMethod": "An mayar da kuɗi ta",
+    "storeCredit": "Ajiyar shago (yana rage abin da abokin ciniki ke bi)",
+    "reason": "Dalili",
+    "reasonPlaceholder": "misali girman da ba daidai ba, lalatacce",
+    "confirmRefund": "Tabbatar da mayarwa",
+    "pickItems": "Shigar da adadi ga aƙalla kaya ɗaya.",
+    "refunded": "An mayar da {{amount}}"
+  },
+  "dailyPage": {
+    "title": "Rufe Rana",
+    "subtitle": "Ranar kalanda a lokacin yankin shago ({{tz}}).",
+    "date": "Kwanan wata",
+    "gross": "Jimillar tallace-tallace",
+    "orders": "Tallace-tallace",
+    "average": "Matsakaicin siyarwa",
+    "net": "Saura bayan mayarwa",
+    "refunds": "Mayarwa ({{count}})",
+    "noSales": "Babu siyarwa a wannan rana.",
+    "byCashier": "Ta mai karɓar kuɗi",
+    "byHour": "Ta sa'a",
+    "topItems": "Manyan kaya"
+  },
+  "settingsPage": {
+    "title": "Saitunan Shago",
+    "subtitle": "Kuɗi, lokacin yanki, haraji da bayanan rasit na wannan shago.",
+    "saved": "An ajiye saituna",
+    "store": "Bayanan shago",
+    "storeName": "Sunan shago",
+    "phone": "Waya (ana bugawa a rasit)",
+    "address": "Adireshi",
+    "city": "Gari",
+    "region": "Kuɗi da lokacin yanki",
+    "currency": "Kuɗi",
+    "platformDefault": "Tsoffin dandali ({{code}})",
+    "preview": "Misali",
+    "currencyNote": "Canja kuɗi yana canja yadda ake nuna adadi daga yanzu; ba ya canja tsoffin adadi.",
+    "timezone": "Lokacin yanki",
+    "timezoneNote": "Yana ƙayyade ma'anar \"yau\" ga rahotanni, faɗakarwar ƙarewa da rasit.",
+    "tax": "Haraji",
+    "taxLabel": "Sunan haraji",
+    "taxRate": "Kashi (%)",
+    "taxInclusive": "Farashi sun riga sun haɗa da haraji",
+    "inclusiveHelp": "Farashin shiryayye suna nan yadda suke; rasit suna nuna nawa ne haraji a kowace siyarwa.",
+    "exclusiveHelp": "Ana ƙara haraji a kan farashin shiryayye a wurin biya.",
+    "taxNumber": "Lambar rajistar haraji (zaɓi)",
+    "taxNote": "Saita kashin da hukumar harajinka ke buƙata. 0 yana kashe haraji.",
+    "till": "Wurin biya da rasit",
+    "maxDiscount": "Mafi girman rangwamen da mai karɓar kuɗi zai iya bayarwa ba tare da manaja ba (%)",
+    "maxDiscountHelp": "Sama da haka, manaja ko mai gudanarwa yana amincewa da imel da kalmar sirrinsa.",
+    "requireShift": "Dole masu karɓar kuɗi su fara lokacin aiki (da kuɗin farawa) kafin karɓar biya",
+    "receiptHeader": "Kan rasit",
+    "receiptFooter": "Ƙasan rasit",
+    "receiptFooterPlaceholder": "misali Na gode! Ana iya dawo da kaya cikin kwana 7 da wannan rasit.",
+    "loyalty": "Makin aminci",
+    "loyaltyIntro": "Abokan ciniki da aka haɗa da siyarwa suna samun maki da za su iya kashewa a wurin biya. Saita maki 0 don kashewa.",
+    "pointsPer100": "Makin da ake samu a kowane 100 da aka kashe",
+    "pointValue": "Darajar maki 1 (a kuɗinka)",
+    "pointsExpiry": "Maki suna ƙarewa bayan (watanni)",
+    "pointsExpiryHelp": "0 = ba sa ƙarewa.",
+    "loyaltyExample": "Misali: kashe {{spend}} yana samar da maki {{points}}, darajarsu {{worth}}.",
+    "dailySummary": "Aika wa masu gudanarwa taƙaitaccen tallace-tallacen rana ta imel da ƙarfe 9 na dare"
+  },
+  "importPage": {
+    "title": "Shigo da Kaya",
+    "subtitle": "Kawo dukkan jerin kayanka daga takardar lissafi (CSV ko Excel).",
+    "step1": "Sauke samfuri, ko yi amfani da takardarka — ana gane sunayen ginshiƙai na yau da kullum (Suna, SKU, Barcode, Kuɗin saye, Farashi, Kaya…) kai tsaye.",
+    "step2": "Zaɓi fayil ɗin da ke ƙasa. Muna duba kowane layi kafin a ajiye komai.",
+    "step3": "Duba sakamakon binciken, sannan ka shigo da su. Ana sabunta SKU da ke akwai (ba a taɓa share kaya ba); ana ƙirƙirar sababbi da kayansu na farko.",
+    "template": "Sauke samfuri",
+    "chooseFile": "Fayil ɗin takardar lissafi (.csv ko .xlsx)",
+    "rowsFound": "An sami layi {{count}}",
+    "emptyFile": "Wannan fayil ba shi da layi.",
+    "checkTitle": "Duba kafin shigowa",
+    "willCreate": "Sababbi {{count}}",
+    "willUpdate": "{{count}} da za a sabunta",
+    "skipped": "Layi {{count}} masu matsala (an tsallake)",
+    "row": "Layi",
+    "problem": "Matsala",
+    "preview": "Samfoti (layi 20 na farko)",
+    "importNow": "Shigo da kaya {{count}}",
+    "done": "An gama: an ƙirƙiri {{created}}, an sabunta {{updated}}.",
+    "viewProducts": "Duba kaya"
+  },
+  "labelsPage": {
+    "title": "Lambobi da Barcode",
+    "subtitle": "Buga lambobin farashin shiryayye da sitika na barcode a kowace firinta.",
+    "missing": "Kaya {{count}} ba su da barcode tukuna.",
+    "generate": "Ƙirƙiri barcode na shago gare su",
+    "generated": "An ƙirƙiri barcode {{count}}",
+    "size": "Girman lamba",
+    "oneEach": "1 na kowanne",
+    "print": "Buga lambobi",
+    "copies": "Kwafi",
+    "pickSome": "Shigar da adadin lambobin da kake so ga aƙalla kaya ɗaya."
+  },
+  "insightsPage": {
+    "title": "Bincike",
+    "subtitle": "Abin da ke kawo maka kuɗi, abin da ba ya kawowa, da abin da za ka sake yin oda.",
+    "period": "Lokaci",
+    "lastDays": "Kwanaki {{count}} da suka wuce",
+    "tabs": {
+      "profit": "Riba da kashi",
+      "abc": "Binciken ABC",
+      "deadStock": "Kayan da ba sa motsi",
+      "forecast": "Hasashe",
+      "heatmap": "Lokutan cunkoso"
+    },
+    "revenue": "Kuɗin shiga",
+    "cost": "Kuɗin kaya",
+    "grossProfit": "Jimillar riba",
+    "margin": "Kashin riba",
+    "units": "Guda",
+    "profitNote": "Kuɗin shiga shi ne abin da abokan ciniki suka biya bayan rangwame da mayarwa; kuɗin saye yana amfani da farashin saye na yanzu na kowane kaya.",
+    "noSales": "Babu siyarwa a wannan lokaci.",
+    "class": "Aji",
+    "classA": "A — mafi sayuwa (80% na kuɗin shiga)",
+    "classB": "B — matsakaita (15% na gaba)",
+    "classC": "C — masu jinkiri (5% na ƙarshe)",
+    "share": "Rabo",
+    "abcNote": "Ka tabbata kayan A suna nan koyaushe kuma an nuna su da kyau; sake duba kayan C — suna riƙe kuɗi da wurin shiryayye.",
+    "idleItems": "Kayan da ba su motsa ba kwana {{days}}+",
+    "cashTiedUp": "Kuɗin da aka riƙe (a kuɗin saye)",
+    "deadNote": "Kaya da ke akwai amma ba a sayar ba a wannan lokaci. Yi tunanin talla, haɗa su, ko mayar wa mai kawowa.",
+    "noDead": "Babu abin da ke zaune. 👍",
+    "onHand": "A hannu",
+    "daysIdle": "Kwanakin zaman banza",
+    "valueAtCost": "Daraja a kuɗin saye",
+    "forecastNote": "Bisa matsakaicin tallace-tallacen yau da kullum a kwanaki {{days}} da suka wuce.",
+    "avgDaily": "Matsakaici / rana",
+    "next30": "Kwanaki 30 masu zuwa",
+    "daysCover": "Kwanakin kaya da suka rage",
+    "suggested": "Odar da aka ba da shawara",
+    "reorderNow": "Sake yin oda yanzu",
+    "heatmapNote": "Tallace-tallace ta ranar mako da sa'a ({{tz}}). Mai duhu = cunkoso — tsara ma'aikata da isar da kaya bisa haka."
+  },
+  "transfersPage": {
+    "title": "Canja Kaya tsakanin Rassa",
+    "subtitle": "Matsar da kaya tsakanin rassanka. Yana barin ma'ajinka yanzu kuma yana isa idan ɗayan reshen ya tabbatar.",
+    "noBranches": "Don canja kaya, kana buƙatar asusun mai gudanarwa ko manaja mai imel iri ɗaya a wani reshe.",
+    "new": "Sabon canja kaya",
+    "to": "Aika zuwa",
+    "product": "Kaya",
+    "qty": "Adadi",
+    "inBackroom": "{{count}} a ma'aji",
+    "addLine": "Ƙara kaya",
+    "note": "Bayani (zaɓi)",
+    "send": "Aika kaya",
+    "sent": "An aika canja kaya",
+    "history": "Canje-canjen kaya",
+    "empty": "Babu canja kaya tukuna.",
+    "when": "Yaushe",
+    "direction": "Reshe",
+    "items": "Kaya",
+    "status": "Matsayi",
+    "receive": "Karɓa"
+  },
+  "trackPage": {
+    "notFound": "Ba mu sami wannan odar ba. Duba hanyar.",
+    "reference": "Oda",
+    "cancelled": "An soke wannan odar.",
+    "steps": {
+      "placed": "An karɓi oda",
+      "fulfilled": "A shirye / an kawo"
+    },
+    "questions": "Tambayoyi? Kira shagon:",
+    "paid": "An biya",
+    "awaitingPayment": "Ana jiran biya",
+    "payOnDelivery": "Biya idan ka karɓa / an kawo",
+    "payNow": "Biya yanzu",
+    "paymentReceived": "An karɓi biya — na gode!",
+    "paymentNotConfirmed": "Ba mu iya tabbatar da biyan ba tukuna. Idan an cire maka kuɗi, zai sabunta nan ba da daɗewa ba.",
+    "emailPrompt": "Adireshin imel ɗinka don rasit ɗin biya:",
+    "refundPending": "Ka biya ta yanar gizo, don haka shagon zai mayar maka da kuɗi. Tuntuɓi shagon idan ba ka karɓa ba cikin 'yan kwanaki.",
+    "refundDone": "Shagon ya yi alamar cewa an aika mayarwarka."
+  },
+  "onboarding": {
+    "title": "Shirya shagonka",
+    "hide": "Ɓoye",
+    "go": "Fara",
+    "samplesHint": "Kana dai dubawa? Ƙara kayan misali goma sha biyu don gwada wurin biya nan da nan.",
+    "loadSamples": "Ƙara kayan misali",
+    "steps": {
+      "settings": {
+        "title": "Saita shagonka",
+        "hint": "Kuɗi, lokacin yanki, haraji da bayanan rasit."
+      },
+      "products": {
+        "title": "Ƙara kayanka",
+        "hint": "Shigo da takardar lissafi, ko ka ƙara su ɗaya bayan ɗaya."
+      },
+      "shelf": {
+        "title": "Sanya kaya kan shiryayye",
+        "hint": "Matsar da kaya daga ma'aji don a iya sayar da su."
+      },
+      "staff": {
+        "title": "Gayyaci tawagarka",
+        "hint": "Aika wa masu karɓar kuɗi da ma'aikata lambar gayyata ta WhatsApp ko SMS."
+      },
+      "sale": {
+        "title": "Yi siyarwarka ta farko",
+        "hint": "Buɗe wurin biya, duba ko taɓa kaya, karɓi biya."
+      }
+    }
+  },
+  "help": {
+    "title": "Taimako",
+    "subtitle": "Amsoshi masu sauri don ayyukan yau da kullum.",
+    "searchPlaceholder": "Me kake so ka yi?",
+    "noMatch": "Babu amsar da ta dace.",
+    "askSupport": "Tambayi tawagar taimakonmu →",
+    "goThere": "Je can",
+    "shortcutsTitle": "Gajerun hanyoyin madannai a wurin biya",
+    "firstSteps": {
+      "q": "Ta yaya zan fara?",
+      "a": "Bi jerin da ke kan Dashboard: saita shago, ƙara kaya, sanya kaya kan shiryayye, gayyaci ma'aikata, sannan ka yi siyarwar gwaji."
+    },
+    "importProducts": {
+      "q": "Ta yaya zan ƙara kaya da yawa lokaci ɗaya?",
+      "a": "Kaya → Shigo da. Sauke samfuri ko yi amfani da takardarka (CSV ko Excel). Muna duba kowane layi kafin a ajiye komai."
+    },
+    "receiveStock": {
+      "q": "Ta yaya zan rubuta kayan da suka iso?",
+      "a": "Isowar Kaya → zaɓi kaya da adadi. Idan kayan suna zuwa a kwali, shigar da adadin kwalaye kuma za mu lissafa guda. Ƙara rukuni da ranar ƙarewa ga kaya masu lalacewa."
+    },
+    "moveToShelf": {
+      "q": "Me yasa ba zan iya sayar da kayan da na karɓa yanzu ba?",
+      "a": "Sabbin kaya suna zuwa ma'aji. Yi amfani da Motsin Kaya → Matsar zuwa shiryayye don su samu a wurin biya."
+    },
+    "sell": {
+      "q": "Ta yaya zan yi siyarwa?",
+      "a": "Wurin biya → Fara Sabuwar Oda. Duba barcode da na'urar dubawa ko kyamara, taɓa mafi sayuwa, ko nema. Sannan zaɓi yadda abokin ciniki zai biya ka tabbatar."
+    },
+    "shift": {
+      "q": "Mene ne lokacin aiki?",
+      "a": "Lokacin mai karɓar kuɗi a wurin biya. Fara da kuɗin da ke cikin drowa, ka ƙare ta hanyar ƙirga kuɗin. Rahoton Z yana nuna kowane ƙari ko ragi."
+    },
+    "discount": {
+      "q": "Ta yaya zan ba da rangwame?",
+      "a": "A buɗaɗɗiyar oda, taɓa Rangwame ka shigar da % ko adadi. Masu karɓar kuɗi suna iya bayarwa har zuwa iyakar shago; rangwame mafi girma yana buƙatar imel da kalmar sirrin manaja."
+    },
+    "splitPay": {
+      "q": "Abokin ciniki yana so ya biya wani ɓangare da kuɗin hannu, wani da kati?",
+      "a": "Taɓa Raba biya, ka ƙara kowace hanyar biya da adadinta. Kuɗin hannu na iya wuce abin da ake bi — muna nuna canji."
+    },
+    "refund": {
+      "q": "Ta yaya zan mayar da kuɗi ko karɓar kayan da aka dawo?",
+      "a": "Tallace-tallace da Mayarwa → nemo rasit → Duba → Mayar da kuɗi / karɓi kaya. Zaɓi adadi; cire alamar Mayar ma'aji ga kaya masu lalacewa. Manajoji da masu gudanarwa ne kaɗai ke iya mayar da kuɗi."
+    },
+    "receipts": {
+      "q": "Ta yaya zan sake buga ko aika rasit?",
+      "a": "Tallace-tallace da Mayarwa → Duba. Buga, ajiye a matsayin PDF, aika ta WhatsApp, ko raba hanya. Kowane rasit yana da lambar QR zuwa kwafin dijital."
+    },
+    "thermal": {
+      "q": "Zan iya bugawa a firintar rasit?",
+      "a": "I, a Chrome ko Edge. A kan rasit, zaɓi haɗin firinta (USB, Serial ko Bluetooth), sannan Buga a firintar rasit. Burauzarka tana tuna firintar."
+    },
+    "labels": {
+      "q": "Ta yaya zan buga lambobin farashi da barcode?",
+      "a": "Lambobi da Barcode → saita adadin kwafin kowane kaya, zaɓi girman lamba, Buga. Kayan da ba su da barcode suna iya samun barcode na shago da danna ɗaya."
+    },
+    "credit": {
+      "q": "Ta yaya zan sayar a bashi (biya daga baya)?",
+      "a": "Ƙara abokin ciniki a Abokan Ciniki, sannan zaɓi Bashi a wurin biya. Ma'auninsa yana sabuntawa da kansa; rubuta biyan kuɗi ka aika tunatarwa ta WhatsApp daga shafin Abokan Ciniki."
+    },
+    "loyalty": {
+      "q": "Ta yaya makin aminci ke aiki?",
+      "a": "Kunna su a Saitunan Shago. Zaɓi abokin ciniki a matsayin memba na aminci a wurin biya don ya sami maki; yi amfani da Yi amfani da maki don kashe su a matsayin rangwame."
+    },
+    "tax": {
+      "q": "Ta yaya zan saita VAT ko harajin tallace-tallace?",
+      "a": "Saitunan Shago → Haraji. Shigar da kashi kuma ka nuna ko farashin shiryayyenka sun riga sun haɗa da haraji. Rasit da rahotanni za su nuna harajin."
+    },
+    "staff": {
+      "q": "Ta yaya zan ƙara mai karɓar kuɗi?",
+      "a": "Gayyata → ƙirƙiri gayyata da matsayinsa ka raba lambar ta WhatsApp, SMS ko imel. Masu gudanarwa suna iya saita ko sake saita kalmar sirrin ma'aikaci daga Masu Amfani."
+    },
+    "offline": {
+      "q": "Me ke faruwa idan intanet ta ɗauke?",
+      "a": "Ci gaba da sayarwa. Ana ajiye tallace-tallace da canje-canjen kaya a na'urar kuma ana aika su kai tsaye idan haɗin ya dawo. Sandar sama tana nuna nawa ke jira."
+    },
+    "endOfDay": {
+      "q": "Ina zan ga kuɗin shigar yau?",
+      "a": "Rufe Rana yana nuna tallace-tallace, hanyoyin biya, mayarwa, manyan kaya da sa'o'in cunkoso na kowace rana, a lokacin yankin shagonka."
+    },
+    "insights": {
+      "q": "Waɗanne kaya ne ke kawo mini kuɗi mafi yawa?",
+      "a": "Bincike → Riba da kashi, Binciken ABC da Kayan da ba sa motsi suna nuna abin da ke kawo riba, abin da ke jinkiri, da abin da ke riƙe kuɗi."
+    },
+    "reorder": {
+      "q": "Me zan sake yin odarsa?",
+      "a": "Cike Kaya yana ba da shawarar adadi bisa tallace-tallacenka. Ƙirƙiri odar saye ka aika wa mai kawowa a matsayin PDF ko ta WhatsApp."
+    },
+    "security": {
+      "q": "Ta yaya zan kiyaye asusuna?",
+      "a": "Asusuna → kunna Shiga mai matakai biyu da manhajar tantancewa. Idan waya ta ɓace, yi amfani da Fita daga dukkan sauran na'urori ka canja kalmar sirrinka."
+    },
+    "export": {
+      "q": "Ta yaya zan sauke bayanaina?",
+      "a": "Masu gudanarwa suna iya fitar da bayanan shago (CSV/JSON) daga Fitarwa. Kowa yana iya sauke bayanansa na sirri daga Asusuna."
+    },
+    "support": {
+      "q": "Ta yaya zan tuntuɓi taimako?",
+      "a": "Taimako → Sabon tikiti. Tawagarmu tana amsawa a cikin manhajar."
+    },
+    "settlements": {
+      "q": "Ta yaya kwamishan da sasantawa ke aiki?",
+      "a": "Biyan kuɗin shagon yanar gizonka yana zuwa bankinka kai tsaye, an cire kwamishan dandali tun daga tushe. Ga odar biya idan an kawo, kai ne ke karɓar kuɗin, don haka ana ƙara kwamishan a ma'auninka kuma ana share shi kai tsaye daga biyan yanar gizo na gaba — ko za ka iya biya a kowane lokaci daga Sasantawa."
+    }
+  },
+  "paymentsCard": {
+    "title": "Biyan kuɗi ta yanar gizo",
+    "intro": "Bari masu saye su biya ta yanar gizo a shagonka. Paystack ne ke sarrafa biyan kuɗi kuma ana biya kai tsaye cikin asusun bankinKA — SAFE Stores ba ta taɓa riƙe kuɗin abokan cinikinka ba. Ana cire kuɗin Paystack daga kowane biya.",
+    "commission": "Ana cire kwamishan dandali na {{pct}}% kai tsaye daga kowane biya ta yanar gizo.",
+    "notConfigured": "Ba a kunna biyan kuɗi ta yanar gizo a wannan dandali ba tukuna. Har yanzu za ka iya karɓar odar biya idan an kawo.",
+    "currencyUnsupported": "Biyan kuɗi ta yanar gizo ba ya samuwa ga {{currency}} tukuna. Biya idan an kawo yana aiki har yanzu.",
+    "linkedTo": "Ana tura biya zuwa {{name}} — {{bank}} ••••{{last4}}",
+    "change": "Canja asusu",
+    "linkAccount": "Haɗa asusun banki",
+    "bank": "Banki",
+    "accountNumber": "Lambar asusu",
+    "accountName": "Sunan asusu: {{name}}",
+    "check": "Duba asusu",
+    "confirmLink": "I, a biya cikin wannan asusu",
+    "privacy": "Muna tura lambar asusu ga Paystack kuma muna riƙe lambobi 4 na ƙarshe kawai.",
+    "linked": "An haɗa asusun banki — biyan kuɗi ta yanar gizo yana kunne",
+    "acceptOnline": "Karɓi biyan kuɗi ta yanar gizo a shagona",
+    "acceptOnDelivery": "Karɓi biya idan an karɓa / an kawo"
+  },
+  "settlementsPage": {
+    "title": "Sasantawa",
+    "subtitle": "Ma'auninka da SAFE Stores don odar da ke zuwa ta shagon yanar gizonka.",
+    "youOwe": "Kana bi bashi",
+    "balanceClear": "Ma'auni — babu bashi",
+    "credit": "Kana da rara",
+    "appSalesMonth": "Tallace-tallacen shagon yanar gizo a wannan wata",
+    "commissionMonth": "Kwamishan a wannan wata ({{pct}}%)",
+    "payPrompt": "Ma'auninka shi ne {{amount}}. Biya shi a kowane lokaci — ko za a share shi kai tsaye daga odar yanar gizo na gaba.",
+    "payNow": "Biya {{amount}} yanzu",
+    "payByTransfer": "Roƙi mai gudanarwarka ya biya, ko ka biya ta tura kuɗin banki kuma dandalin zai rubuta.",
+    "paidThanks": "An karɓi biya — na gode. An sabunta ma'auninka.",
+    "notConfirmed": "Ba mu iya tabbatar da biyan ba tukuna. Idan an cire maka kuɗi, zai sabunta nan ba da daɗewa ba.",
+    "cashPaused": "Ma'auninka ya wuce {{limit}}, don haka an dakatar da biya idan an kawo a shagonka. Abokan ciniki har yanzu za su iya biya ta yanar gizo. Biya ma'auninka don sake kunna shi.",
+    "howTitle": "Yadda sasantawa ke aiki",
+    "howOnline": "Biyan kuɗi ta yanar gizo yana tafiya kai tsaye daga Paystack zuwa asusun bankinka. Ana cire kwamishanmu na {{pct}}% kai tsaye kafin ya iso gare ka.",
+    "howCash": "Odar biya idan an kawo: kana karɓar cikakken adadi daga abokin ciniki, don haka ana ƙara kwamishan {{pct}}% a ma'auninka idan ka yi alamar an cika odar.",
+    "howNetting": "Ana share ma'auninka kai tsaye daga biyan yanar gizo na gaba — har zuwa {{pct}}% na kowanne — don haka ba kasafai za ka buƙaci biya daban ba.",
+    "howLimit": "Idan ma'auninka ya wuce {{limit}}, ana dakatar da biya idan an kawo har sai an biya.",
+    "howPos": "Tallace-tallacen cikin shago a wurin biyanka ba a taɓa cajin kwamishan a kansu ba.",
+    "statement": "Bayanin asusu",
+    "empty": "Babu odar shagon yanar gizo tukuna.",
+    "entry": "Shigarwa",
+    "orderTotal": "Oda",
+    "commission": "Kwamishan",
+    "balanceChange": "Canjin ma'auni",
+    "types": {
+      "cash_commission": "Odar biya idan an kawo — ana bin kwamishan",
+      "online_commission": "Odar yanar gizo — an cire kwamishan lokacin biya",
+      "debt_recovered": "An share ma'auni daga biyan yanar gizo",
+      "settlement_payment": "An karɓi biya",
+      "adjustment": "Gyara"
+    }
   }
 }

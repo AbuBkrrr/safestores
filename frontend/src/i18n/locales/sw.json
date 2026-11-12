@@ -97,7 +97,26 @@
     },
     "shrinkage": "Upotevu",
     "lendingPartners": "Washirika wa Mikopo",
-    "toggleMenu": "Geuza Menyu"
+    "toggleMenu": "Geuza Menyu",
+    "account": "Akaunti Yangu",
+    "activity": "Kumbukumbu za Shughuli",
+    "sales": "Mauzo na Marejesho",
+    "shifts": "Zamu",
+    "dailyReport": "Mwisho wa Siku",
+    "settings": "Mipangilio ya Duka",
+    "insights": "Uchambuzi",
+    "labels": "Lebo na Misimbopau",
+    "transfers": "Uhamisho kati ya Matawi",
+    "help": "Msaada",
+    "terms": "Masharti",
+    "privacy": "Faragha",
+    "skipToContent": "Ruka hadi maudhui makuu",
+    "theme": "Mandhari",
+    "themeSystem": "Otomatiki",
+    "themeLight": "Mwanga",
+    "themeDark": "Giza",
+    "textSize": "Ukubwa wa maandishi",
+    "settlements": "Malipo ya Hesabu"
   },
   "login": {
     "welcomeBack": "Karibu Tena",
@@ -115,7 +134,12 @@
     "tagline": "Akili ya Hisa ya Kibiashara",
     "adminSubtitle": "Ingia kwa vitambulisho vya duka lako",
     "inviteSubtitle": "Weka msimbo wako wa mwaliko ili kufikia dashibodi yako",
-    "inviteCodeHelp": "Weka msimbo wa mwaliko uliotumwa kwako — hii pia ndiyo utakayotumia kuingia tena wakati mwingine"
+    "inviteCodeHelp": "Weka msimbo wa mwaliko uliotumwa kwako — hii pia ndiyo utakayotumia kuingia tena wakati mwingine",
+    "forgotPassword": "Umesahau nenosiri?",
+    "twoFactorCode": "Msimbo wa uthibitishaji",
+    "twoFactorHelp": "Fungua programu yako ya uthibitishaji na uweke msimbo wa tarakimu 6 wa SAFE Stores.",
+    "chooseStore": "Duka gani?",
+    "chooseStoreHelp": "Barua pepe hii inatumika katika duka zaidi ya moja. Chagua la kuingia."
   },
   "dashboard": {
     "title": "Dashibodi",
@@ -187,7 +211,38 @@
     "selectCustomerError": "Chagua mteja kwa ajili ya mauzo ya mkopo",
     "addItemError": "Imeshindwa kuongeza bidhaa",
     "cameraError": "Imeshindwa kufikia kamera kwa uchanganuzi.",
-    "paymentConfirmedToast": "Malipo yamethibitishwa"
+    "paymentConfirmedToast": "Malipo yamethibitishwa",
+    "mobileMoney": "Pesa kwa simu",
+    "amountReceived": "Pesa taslimu zilizopokelewa (si lazima — kwa chenji)",
+    "receivedTooLow": "Pesa taslimu zilizopokelewa ni chini ya jumla.",
+    "splitPayment": "Gawanya malipo",
+    "singlePayment": "Malipo moja",
+    "splitPayments": "Malipo",
+    "addTender": "Ongeza malipo",
+    "amount": "Kiasi",
+    "remaining": "Kilichobaki kulipwa",
+    "addDiscount": "Punguzo",
+    "removeDiscount": "Ondoa",
+    "discountType": "Aina",
+    "fixedAmount": "Kiasi maalum",
+    "discountValue": "Thamani",
+    "discountReason": "Sababu (inaonekana kwenye risiti)",
+    "applyDiscount": "Weka punguzo",
+    "approvalNeeded": "Punguzo hili ni zaidi ya kile mhudumu wa kaunta anaweza kutoa peke yake. Meneja au msimamizi lazima aidhinishe.",
+    "managerEmail": "Barua pepe ya meneja",
+    "managerPassword": "Nenosiri la meneja",
+    "park": "Weka mauzo kando",
+    "parkPrompt": "Lipe jina mauzo haya yaliyowekwa kando ili uyapate tena (mf. jina la mteja):",
+    "parkedDefault": "Mauzo yaliyowekwa kando",
+    "parkedToast": "Mauzo yamewekwa kando — yaendeleze kutoka orodha hapa chini.",
+    "quickPicks": "Vinavyouzika zaidi",
+    "removeItem": "Ondoa bidhaa",
+    "shortcutsHint": "Njia za mkato: F2 tafuta · Enter huongeza msimbopau uliochanganuliwa · F4 lipa · Esc futa utafutaji.",
+    "loyaltyMember": "Mwanachama wa uaminifu (si lazima)",
+    "noMember": "— Hakuna —",
+    "memberPoints": "Pointi {{points}} (thamani {{value}})",
+    "usePoints": "Tumia pointi",
+    "pointsApplied": "Pointi {{count}} zimetumika"
   },
   "products": {
     "title": "Usimamizi wa Bidhaa",
@@ -230,7 +285,24 @@
     "archive": "Hifadhi Kumbukumbu",
     "productCreatedToast": "Bidhaa imeundwa",
     "createError": "Imeshindwa kuunda bidhaa",
-    "archiveConfirm": "Hifadhi bidhaa hii kumbukumbu? Historia yake itabaki salama na inaweza kurejeshwa baadaye."
+    "archiveConfirm": "Hifadhi bidhaa hii kumbukumbu? Historia yake itabaki salama na inaweza kurejeshwa baadaye.",
+    "import": "Ingiza",
+    "labels": "Lebo",
+    "barcode": "Msimbopau",
+    "barcodePlaceholder": "Changanua au andika (si lazima)",
+    "variantOf": "Aina ndogo ya",
+    "notAVariant": "— Si aina ndogo —",
+    "variantLabel": "Aina ndogo (ukubwa / rangi)",
+    "variantLabelPlaceholder": "mf. Kubwa / Nyekundu",
+    "packSize": "Vipande kwa pakiti / katoni",
+    "packSizeHelp": "Hukuwezesha kupokea bidhaa kwa katoni. Acha 1 ikiwa unanunua kimoja kimoja tu.",
+    "packUnit": "Jina la pakiti",
+    "packUnitPlaceholder": "mf. katoni, kreti",
+    "pack": "pakiti",
+    "searchPlaceholder": "Tafuta kwa jina, SKU, msimbopau au kategoria",
+    "sellingPrice": "Bei ya kuuza",
+    "markupHelp": "Faida: {{pct}}% juu ya gharama",
+    "enterCostFirst": "Weka bei ya gharama kwanza"
   },
   "stockArrivalPage": {
     "title": "Uwasili wa Bidhaa",
@@ -249,7 +321,8 @@
     "batch": "Kundi",
     "date": "Tarehe",
     "recordedToast": "Uwasili wa bidhaa umerekodiwa",
-    "recordError": "Imeshindwa kurekodi uwasili"
+    "recordError": "Imeshindwa kurekodi uwasili",
+    "packsReceived": "{{unit}} zimepokelewa ({{size}} kila moja)"
   },
   "movementsPage": {
     "title": "Miondoko ya Bidhaa",
@@ -362,7 +435,19 @@
     "paymentRecordedToast": "Malipo yamerekodiwa",
     "paymentError": "Imeshindwa kurekodi malipo",
     "whatsappReminder": "Habari {{name}}, huu ni ukumbusho wa kirafiki kwamba una salio la {{amount}} kwa {{store}}. Asante!",
-    "us": "sisi"
+    "us": "sisi",
+    "email": "Barua pepe (si lazima)",
+    "birthday": "Siku ya kuzaliwa (si lazima)",
+    "statement": "Taarifa ya akaunti",
+    "charges": "Madeni",
+    "payments": "Malipo",
+    "birthdaysSoon": "Siku za kuzaliwa wiki hii",
+    "today": "leo",
+    "inDays": "baada ya siku {{count}}",
+    "sendWish": "Tuma salamu",
+    "birthdayMessage": "Heri ya siku ya kuzaliwa, {{name}}! 🎉 Sote katika {{store}} tunakutakia siku njema. Pita wiki hii upate zawadi ndogo!",
+    "pointsBalance": "Pointi za uaminifu: {{points}} (thamani {{value}})",
+    "pointsExpiring": "{{count}} zinaisha muda ndani ya siku 30"
   },
   "cycleCountingPage": {
     "title": "⏱️ Uhesabuji wa Mzunguko",
@@ -457,7 +542,9 @@
     "enable": "Washa",
     "remove": "Ondoa",
     "removeConfirm": "Ondoa mtumiaji huyu?",
-    "statusChanged": "{{name}} sasa ni {{status}}"
+    "statusChanged": "{{name}} sasa ni {{status}}",
+    "setPassword": "Weka nenosiri",
+    "setPasswordPrompt": "Nenosiri jipya la {{name}} (angalau herufi 8):"
   },
   "cameraPage": {
     "title": "Kamera na Kichanganuzi cha QR",
@@ -662,7 +749,14 @@
     "actions": "Vitendo",
     "send": "Tuma",
     "cancel": "Ghairi",
-    "markReceived": "Weka Alama Imepokelewa"
+    "markReceived": "Weka Alama Imepokelewa",
+    "poGreeting": "Habari {{supplier}}, tafadhali tuletee yafuatayo:",
+    "poFrom": "Kutoka",
+    "poThanks": "Asante.",
+    "purchaseOrder": "Agizo la Ununuzi",
+    "unitCost": "Gharama kwa kipande",
+    "printPo": "Chapisha / PDF",
+    "whatsappPo": "Tuma kwa WhatsApp"
   },
   "expiryPage": {
     "title": "Kifuatiliaji cha Muda wa Kuisha",
@@ -872,7 +966,19 @@
     "fulfill": "Timiza",
     "orderFulfilled": "Agizo limetimizwa — hisa imesasishwa",
     "fulfillFailed": "Imeshindwa kutimiza agizo",
-    "noOrdersYet": "Hakuna maagizo ya sokoni bado."
+    "noOrdersYet": "Hakuna maagizo ya sokoni bado.",
+    "paidOnline": "Imelipwa mtandaoni",
+    "awaitingPayment": "Inasubiri malipo",
+    "payOnDelivery": "Lipa unapopokea",
+    "cancel": "Ghairi",
+    "cancelPrompt": "Ghairi agizo hili? Ongeza sababu fupi kwa mteja (si lazima):",
+    "orderCancelled": "Agizo limeghairiwa",
+    "cancelFailed": "Imeshindikana kusasisha agizo",
+    "refundDueToast": "Agizo limeghairiwa. Lililipwa mtandaoni, kwa hiyo tafadhali mrudishie mteja {{amount}} kupitia dashibodi yako ya Paystack. Kamisheni ya jukwaa imerudishwa kwenye salio lako la malipo.",
+    "refundDue": "Marejesho yanadaiwa",
+    "refunded": "Imerejeshwa",
+    "markRefunded": "Weka alama imerejeshwa",
+    "confirmRefunded": "Thibitisha kuwa umemrudishia mteja huyu pesa zote?"
   },
   "storefrontPage": {
     "title": "🛍️ Duka",
@@ -898,7 +1004,23 @@
     "somethingWentWrong": "Kuna hitilafu",
     "orderPlaced": "Agizo limewekwa!",
     "trackBelow": "Unaweza kufuatilia hapa chini.",
-    "orderFailed": "Imeshindwa kuweka agizo"
+    "orderFailed": "Imeshindwa kuweka agizo",
+    "searchPlaceholder": "Tafuta bidhaa",
+    "share": "Shiriki duka",
+    "linkCopied": "Kiungo cha duka kimenakiliwa",
+    "trackOrder": "Fuatilia agizo lako →",
+    "remove": "Ondoa",
+    "payOnCollection": "Lipa unapochukua au unapoletewa.",
+    "orderOnWhatsApp": "Agiza kwa WhatsApp",
+    "waGreeting": "Habari {{store}}, ningependa kuagiza:",
+    "metaDescription": "Nunua kutoka {{name}} {{city}} mtandaoni — agiza sasa, lipa unapochukua au unapoletewa.",
+    "howToPay": "Ungependa kulipa vipi?",
+    "payOnline": "Lipa sasa mtandaoni (kadi, uhamisho wa benki, USSD)",
+    "payOnlineOnly": "Malipo ni mtandaoni wakati wa kuagiza.",
+    "securePayNote": "Malipo salama kupitia Paystack, yanalipwa moja kwa moja kwa {{store}}.",
+    "emailForPayment": "Weka barua pepe yako ili tukutumie risiti ya malipo.",
+    "payNow": "Lipa {{amount}}",
+    "notTakingOrders": "Duka hili halipokei maagizo ya mtandaoni kwa sasa. Tafadhali tembelea au piga simu dukani."
   },
   "marketplaceHomePage": {
     "title": "🏪 Soko la SAFE Stores",
@@ -1001,7 +1123,9 @@
     "tierMegaLabel": "Duka Kubwa",
     "tierMegaDesc": "Bidhaa na watumiaji wasio na kikomo — bora kwa maduka makubwa au ya maeneo mengi",
     "heading": "Sajili Duka Lako",
-    "confirmPasswordLabel": "Thibitisha Nenosiri"
+    "confirmPasswordLabel": "Thibitisha Nenosiri",
+    "agreePrefix": "Ninakubali",
+    "agreeAnd": "na"
   },
   "setupPage": {
     "title": "👋 Karibu SAFE Stores",
@@ -1021,5 +1145,519 @@
     "loginFailed": "Kuingia kumeshindwa",
     "submit": "⭐ Ingia kwa Super Admin",
     "backToStore": "← Rudi kwenye kuingia dukani"
+  },
+  "forgotPage": {
+    "title": "Weka upya nenosiri lako",
+    "subtitle": "Weka barua pepe unayotumia kuingia. Tutakutumia kiungo cha kuchagua nenosiri jipya.",
+    "send": "Tuma kiungo",
+    "sending": "Inatuma…",
+    "backToLogin": "Rudi kwenye kuingia",
+    "noEmailHint": "Wafanyakazi wasio na barua pepe: muombe msimamizi wa duka akuwekee nenosiri jipya kutoka ukurasa wa Watumiaji."
+  },
+  "resetPage": {
+    "title": "Chagua nenosiri jipya",
+    "newPassword": "Nenosiri jipya",
+    "confirmPassword": "Thibitisha nenosiri jipya",
+    "mismatch": "Manenosiri mawili hayalingani.",
+    "save": "Hifadhi nenosiri jipya",
+    "missingToken": "Kiungo hiki hakijakamilika. Fungua tena kiungo kutoka barua pepe yako, au omba kingine.",
+    "done": "Nenosiri limesasishwa. Sasa unaweza kuingia.",
+    "goToLogin": "Nenda kwenye kuingia"
+  },
+  "verifyPage": {
+    "title": "Thibitisha barua pepe yako",
+    "working": "Inathibitisha…",
+    "continue": "Endelea"
+  },
+  "passwordHint": "Angalau herufi 8. Sentensi fupi ni rahisi kukumbuka na ngumu kukisia.",
+  "accountPage": {
+    "title": "Akaunti Yangu",
+    "profile": "Wasifu",
+    "emailNotVerified": "Barua pepe yako bado haijathibitishwa. Kuithibitisha hukuwezesha kuweka upya nenosiri ukilisahau.",
+    "resend": "Tuma tena barua pepe ya uthibitisho",
+    "changePassword": "Badilisha nenosiri",
+    "currentPassword": "Nenosiri la sasa",
+    "newPassword": "Nenosiri jipya",
+    "updatePassword": "Sasisha nenosiri",
+    "twoFactor": "Kuingia kwa hatua mbili",
+    "twoFactorIntro": "Ongeza hatua ya pili ya kuingia kwa kutumia programu ya bure ya uthibitishaji (Google Authenticator, Microsoft Authenticator, Authy…). Hata mtu akijua nenosiri lako, hawezi kuingia bila simu yako.",
+    "twoFactorOn": "Kuingia kwa hatua mbili KUMEWASHWA.",
+    "twoFactorOff": "Kuingia kwa hatua mbili kumezimwa.",
+    "turnOn": "Weka hatua mbili",
+    "turnOff": "Zima hatua mbili",
+    "scanQr": "1. Changanua msimbo huu wa QR kwa programu yako ya uthibitishaji (au andika ufunguo ulio hapa chini).",
+    "enterCode": "2. Weka msimbo wa tarakimu 6 unaoonyeshwa:",
+    "confirmCode": "Thibitisha na uwashe",
+    "codeLabel": "Msimbo wa tarakimu 6",
+    "passwordLabel": "Nenosiri",
+    "notAvailableDesktop": "Kuingia kwa hatua mbili kunapatikana kwenye toleo la mtandaoni (wavuti).",
+    "sessions": "Vifaa na vipindi",
+    "sessionsIntro": "Umepoteza simu au ulitumia kompyuta ya pamoja? Toka kila mahali pengine.",
+    "logoutAll": "Toka kwenye vifaa vingine vyote",
+    "yourData": "Data yako",
+    "yourDataIntro": "Pakua nakala ya data binafsi ambayo SAFE Stores inayo kukuhusu.",
+    "download": "Pakua data yangu",
+    "deleteAccount": "Futa akaunti yangu",
+    "deleteAccountIntro": "Huondoa jina lako, barua pepe na kuingia kwako. Mauzo uliyorekodi hubaki kwenye vitabu vya duka kama \"Mtumiaji aliyefutwa\".",
+    "deleteConfirm": "Futa akaunti yako kabisa? Hili haliwezi kutenduliwa.",
+    "closeStore": "Funga duka na ufute data yote",
+    "closeStoreIntro": "Hufuta kabisa duka hili na kila kitu ndani yake baada ya kipindi cha neema cha siku 30. Unaweza kughairi ndani ya siku hizo 30.",
+    "typeStoreName": "Andika jina la duka kuthibitisha",
+    "scheduledFor": "Duka hili limepangwa kufutwa kabisa tarehe {{date}}.",
+    "cancelDeletion": "Ghairi ufutaji",
+    "requestDeletion": "Panga ufutaji"
+  },
+  "activityPage": {
+    "title": "Kumbukumbu za Shughuli",
+    "subtitle": "Nani alifanya nini, na lini — mabadiliko ya bei, marejesho, punguzo, watumiaji, usalama.",
+    "when": "Lini",
+    "who": "Nani",
+    "action": "Kitendo",
+    "details": "Maelezo",
+    "store": "Duka",
+    "filter": "Chuja",
+    "all": "Vitendo vyote",
+    "empty": "Hakuna kilichorekodiwa bado.",
+    "loadMore": "Pakia zaidi"
+  },
+  "receipt": {
+    "subtotal": "Jumla ndogo",
+    "discount": "Punguzo",
+    "tax": "Kodi",
+    "inclusive": "(imejumuishwa)",
+    "change": "Chenji",
+    "refunded": "Imerejeshwa",
+    "returned": "{{count}} zimerudishwa",
+    "pdf": "Hifadhi kama PDF",
+    "copyLink": "Nakili kiungo",
+    "linkCopied": "Kiungo cha risiti kimenakiliwa",
+    "share": "Shiriki",
+    "customerPhone": "Namba ya WhatsApp ya mteja",
+    "customerPhonePlaceholder": "Namba ya WhatsApp ya mteja",
+    "printerType": "Muunganisho wa printa ya risiti",
+    "thermalChoose": "Printa ya joto…",
+    "thermalPrint": "Chapisha kwenye printa ya risiti",
+    "thermalPick": "Chagua printa",
+    "sentToPrinter": "Imetumwa kwa printa ya risiti",
+    "printerFailed": "Imeshindikana kufikia printa ya risiti",
+    "qrAlt": "Msimbo wa QR unaoelekeza kwenye risiti hii ya kidijitali",
+    "scanForDigital": "Changanua upate risiti yako ya kidijitali",
+    "notFound": "Hatukuweza kupata risiti hii. Huenda kiungo hakijakamilika."
+  },
+  "shift": {
+    "title": "Zamu",
+    "subtitle": "Zamu ya kila mhudumu: pesa za kuanzia, pesa taslimu zilizopokelewa, na pesa zilizohesabiwa wakati wa kufunga.",
+    "onShift": "Kwenye zamu tangu {{time}}",
+    "noShift": "Hauko kwenye zamu.",
+    "start": "Anza zamu",
+    "end": "Maliza zamu",
+    "startTitle": "Anza zamu yako",
+    "endTitle": "Maliza zamu na uhesabu droo",
+    "openingFloat": "Pesa za kuanzia (pesa taslimu kwenye droo sasa)",
+    "countedCash": "Pesa zilizohesabiwa",
+    "expectedCash": "Pesa zinazotarajiwa",
+    "notes": "Maelezo (si lazima)",
+    "openedToast": "Zamu imeanza",
+    "closedToast": "Zamu imefungwa. Ziada/upungufu: {{variance}}",
+    "cashier": "Mhudumu",
+    "started": "Ilianza",
+    "ended": "Iliisha",
+    "status": "Hali",
+    "variance": "Ziada / upungufu",
+    "zReport": "Ripoti ya Z",
+    "empty": "Bado hakuna zamu. Anzisha moja kutoka Kaunta.",
+    "stillOpen": "bado iko wazi",
+    "sales": "Mauzo",
+    "salesCount": "Mauzo",
+    "unitsSold": "Bidhaa zilizouzwa",
+    "gross": "Mauzo ghafi",
+    "net": "Halisi (baada ya marejesho)",
+    "byMethod": "Kwa njia ya malipo",
+    "cashDrawer": "Droo ya pesa",
+    "cashSales": "Mauzo ya pesa taslimu",
+    "cashRefunds": "Marejesho ya pesa taslimu",
+    "openingFloatShort": "Pesa za kuanzia"
+  },
+  "salesPage": {
+    "title": "Mauzo na Marejesho",
+    "subtitle": "Tafuta mauzo yoyote, chapisha upya au shiriki risiti yake, na shughulikia marejesho.",
+    "search": "Namba ya risiti",
+    "searchPlaceholder": "Namba ya risiti (mf. herufi 4 za mwisho)",
+    "from": "Kuanzia",
+    "to": "Hadi",
+    "empty": "Hakuna mauzo yaliyopatikana.",
+    "receipt": "Risiti",
+    "when": "Lini",
+    "cashier": "Mhudumu",
+    "method": "Imelipwa kwa",
+    "items": "Bidhaa",
+    "view": "Tazama",
+    "refund": "Rejesha pesa / pokea bidhaa zilizorudishwa",
+    "refundHistory": "Marejesho kwenye mauzo haya",
+    "refundIntro": "Chagua idadi ya kila bidhaa inayorudishwa. Ondoa alama \"Rudisha stoo\" kwa bidhaa zilizoharibika — zitaandikwa kama hasara badala ya kurudi rafuni.",
+    "canReturn": "hadi {{count}}",
+    "qtyToReturn": "Idadi ya kurudisha",
+    "restock": "Rudisha stoo",
+    "refundMethod": "Marejesho yamelipwa kwa",
+    "storeCredit": "Salio la dukani (hupunguza deni la mteja)",
+    "reason": "Sababu",
+    "reasonPlaceholder": "mf. saizi isiyo sahihi, mbovu",
+    "confirmRefund": "Thibitisha marejesho",
+    "pickItems": "Weka idadi kwa angalau bidhaa moja.",
+    "refunded": "Imerejeshwa {{amount}}"
+  },
+  "dailyPage": {
+    "title": "Mwisho wa Siku",
+    "subtitle": "Siku ya kalenda katika saa za eneo la duka ({{tz}}).",
+    "date": "Tarehe",
+    "gross": "Mauzo ghafi",
+    "orders": "Mauzo",
+    "average": "Wastani wa mauzo",
+    "net": "Halisi baada ya marejesho",
+    "refunds": "Marejesho ({{count}})",
+    "noSales": "Hakuna mauzo siku hii.",
+    "byCashier": "Kwa mhudumu",
+    "byHour": "Kwa saa",
+    "topItems": "Bidhaa bora"
+  },
+  "settingsPage": {
+    "title": "Mipangilio ya Duka",
+    "subtitle": "Sarafu, saa za eneo, kodi na maelezo ya risiti ya duka hili.",
+    "saved": "Mipangilio imehifadhiwa",
+    "store": "Maelezo ya duka",
+    "storeName": "Jina la duka",
+    "phone": "Simu (huchapishwa kwenye risiti)",
+    "address": "Anwani",
+    "city": "Mji",
+    "region": "Sarafu na saa za eneo",
+    "currency": "Sarafu",
+    "platformDefault": "Chaguo-msingi la jukwaa ({{code}})",
+    "preview": "Mfano",
+    "currencyNote": "Kubadilisha sarafu hubadilisha jinsi kiasi kinavyoonyeshwa kuanzia sasa; hakubadilishi kiasi cha zamani.",
+    "timezone": "Saa za eneo",
+    "timezoneNote": "Huamua \"leo\" inamaanisha nini kwa ripoti, tahadhari za kuisha muda na risiti.",
+    "tax": "Kodi",
+    "taxLabel": "Jina la kodi",
+    "taxRate": "Kiwango (%)",
+    "taxInclusive": "Bei tayari zinajumuisha kodi",
+    "inclusiveHelp": "Bei za rafuni hubaki zilezile; risiti zinaonyesha kiasi cha kodi katika kila mauzo.",
+    "exclusiveHelp": "Kodi huongezwa juu ya bei za rafuni kwenye kaunta.",
+    "taxNumber": "Namba ya usajili wa kodi (si lazima)",
+    "taxNote": "Weka kiwango kinachotakiwa na mamlaka ya kodi. 0 huzima kodi.",
+    "till": "Kaunta na risiti",
+    "maxDiscount": "Punguzo kubwa zaidi mhudumu anaweza kutoa bila meneja (%)",
+    "maxDiscountHelp": "Zaidi ya hapo, meneja au msimamizi huidhinisha kwa barua pepe na nenosiri lake.",
+    "requireShift": "Wahudumu lazima waanze zamu (na pesa za kuanzia) kabla ya kupokea malipo",
+    "receiptHeader": "Kichwa cha risiti",
+    "receiptFooter": "Sehemu ya chini ya risiti",
+    "receiptFooterPlaceholder": "mf. Asante! Bidhaa zinaweza kurudishwa ndani ya siku 7 ukiwa na risiti hii.",
+    "loyalty": "Pointi za uaminifu",
+    "loyaltyIntro": "Wateja waliounganishwa na mauzo hupata pointi wanazoweza kutumia kaunta. Weka pointi 0 kuzima.",
+    "pointsPer100": "Pointi zinazopatikana kwa kila 100 zilizotumika",
+    "pointValue": "Thamani ya pointi 1 (kwa sarafu yako)",
+    "pointsExpiry": "Pointi huisha muda baada ya (miezi)",
+    "pointsExpiryHelp": "0 = haziishi muda.",
+    "loyaltyExample": "Mfano: kutumia {{spend}} kunaleta pointi {{points}}, zenye thamani ya {{worth}}.",
+    "dailySummary": "Tuma kwa wasimamizi muhtasari wa mauzo ya siku saa 3 usiku"
+  },
+  "importPage": {
+    "title": "Ingiza Bidhaa",
+    "subtitle": "Leta orodha yako yote ya bidhaa kutoka lahajedwali (CSV au Excel).",
+    "step1": "Pakua kiolezo, au tumia jedwali lako — majina ya kawaida ya safu (Jina, SKU, Msimbopau, Gharama, Bei, Stoo…) hutambuliwa yenyewe.",
+    "step2": "Chagua faili hapa chini. Tunakagua kila safu kabla ya kuhifadhi chochote.",
+    "step3": "Pitia ukaguzi, kisha ingiza. SKU zilizopo husasishwa (stoo haiandikwi juu kamwe); mpya huundwa na stoo yake ya kuanzia.",
+    "template": "Pakua kiolezo",
+    "chooseFile": "Faili ya lahajedwali (.csv au .xlsx)",
+    "rowsFound": "Safu {{count}} zimepatikana",
+    "emptyFile": "Faili hii haina safu.",
+    "checkTitle": "Kagua kabla ya kuingiza",
+    "willCreate": "{{count}} mpya",
+    "willUpdate": "{{count}} za kusasisha",
+    "skipped": "Safu {{count}} zenye matatizo (zimerukwa)",
+    "row": "Safu",
+    "problem": "Tatizo",
+    "preview": "Hakiki (safu 20 za kwanza)",
+    "importNow": "Ingiza bidhaa {{count}}",
+    "done": "Imekamilika: {{created}} zimeundwa, {{updated}} zimesasishwa.",
+    "viewProducts": "Tazama bidhaa"
+  },
+  "labelsPage": {
+    "title": "Lebo na Misimbopau",
+    "subtitle": "Chapisha lebo za bei za rafuni na stika za msimbopau kwenye printa yoyote.",
+    "missing": "Bidhaa {{count}} bado hazina msimbopau.",
+    "generate": "Unda misimbopau ya dukani kwa ajili yake",
+    "generated": "Misimbopau {{count}} imeundwa",
+    "size": "Ukubwa wa lebo",
+    "oneEach": "1 ya kila moja",
+    "print": "Chapisha lebo",
+    "copies": "Nakala",
+    "pickSome": "Weka idadi ya lebo unazotaka kwa angalau bidhaa moja."
+  },
+  "insightsPage": {
+    "title": "Uchambuzi",
+    "subtitle": "Kinachokuletea pesa, kisicholeta, na cha kuagiza tena.",
+    "period": "Kipindi",
+    "lastDays": "Siku {{count}} zilizopita",
+    "tabs": {
+      "profit": "Faida na asilimia",
+      "abc": "Uchambuzi wa ABC",
+      "deadStock": "Stoo iliyodumaa",
+      "forecast": "Utabiri",
+      "heatmap": "Nyakati zenye shughuli nyingi"
+    },
+    "revenue": "Mapato",
+    "cost": "Gharama ya bidhaa",
+    "grossProfit": "Faida ghafi",
+    "margin": "Asilimia ya faida",
+    "units": "Vipande",
+    "profitNote": "Mapato ni kile wateja walicholipa baada ya punguzo na marejesho; gharama inatumia bei ya sasa ya gharama ya kila bidhaa.",
+    "noSales": "Hakuna mauzo katika kipindi hiki.",
+    "class": "Daraja",
+    "classA": "A — zinazouzika zaidi (80% ya mapato)",
+    "classB": "B — za kawaida (15% inayofuata)",
+    "classC": "C — za polepole (5% ya mwisho)",
+    "share": "Sehemu",
+    "abcNote": "Hakikisha bidhaa A zipo stoo kila wakati na zimeonyeshwa vizuri; pitia bidhaa C — zinashikilia pesa na nafasi ya rafu.",
+    "idleItems": "Bidhaa zisizouzwa siku {{days}}+",
+    "cashTiedUp": "Pesa zilizoshikiliwa (kwa gharama)",
+    "deadNote": "Bidhaa zilizopo stoo lakini hazijauzwa katika kipindi. Fikiria ofa, kifurushi, au kumrudishia msambazaji.",
+    "noDead": "Hakuna kilichodumaa. 👍",
+    "onHand": "Zilizopo",
+    "daysIdle": "Siku bila mauzo",
+    "valueAtCost": "Thamani kwa gharama",
+    "forecastNote": "Kulingana na wastani wa mauzo ya kila siku katika siku {{days}} zilizopita.",
+    "avgDaily": "Wastani / siku",
+    "next30": "Siku 30 zijazo",
+    "daysCover": "Siku za stoo zilizobaki",
+    "suggested": "Agizo linalopendekezwa",
+    "reorderNow": "Agiza sasa",
+    "heatmapNote": "Mauzo kwa siku ya wiki na saa ({{tz}}). Rangi nzito = shughuli nyingi — panga wafanyakazi na usafirishaji ipasavyo."
+  },
+  "transfersPage": {
+    "title": "Uhamisho kati ya Matawi",
+    "subtitle": "Hamisha stoo kati ya matawi yako. Inaondoka stoo yako sasa na kufika tawi lingine linapothibitisha.",
+    "noBranches": "Ili kuhamisha stoo, unahitaji akaunti ya msimamizi au meneja yenye barua pepe ileile katika tawi lingine.",
+    "new": "Uhamisho mpya",
+    "to": "Tuma kwa",
+    "product": "Bidhaa",
+    "qty": "Idadi",
+    "inBackroom": "{{count}} stoo",
+    "addLine": "Ongeza bidhaa",
+    "note": "Maelezo (si lazima)",
+    "send": "Tuma stoo",
+    "sent": "Uhamisho umetumwa",
+    "history": "Uhamisho",
+    "empty": "Bado hakuna uhamisho.",
+    "when": "Lini",
+    "direction": "Tawi",
+    "items": "Bidhaa",
+    "status": "Hali",
+    "receive": "Pokea"
+  },
+  "trackPage": {
+    "notFound": "Hatukuweza kupata agizo hili. Angalia kiungo.",
+    "reference": "Agizo",
+    "cancelled": "Agizo hili limeghairiwa.",
+    "steps": {
+      "placed": "Agizo limepokelewa",
+      "fulfilled": "Tayari / limeletwa"
+    },
+    "questions": "Maswali? Piga simu dukani:",
+    "paid": "Imelipwa",
+    "awaitingPayment": "Inasubiri malipo",
+    "payOnDelivery": "Lipa unapochukua / unapoletewa",
+    "payNow": "Lipa sasa",
+    "paymentReceived": "Malipo yamepokelewa — asante!",
+    "paymentNotConfirmed": "Bado hatujaweza kuthibitisha malipo. Ikiwa umekatwa pesa, itasasishwa hivi karibuni.",
+    "emailPrompt": "Barua pepe yako kwa risiti ya malipo:",
+    "refundPending": "Ulilipa mtandaoni, kwa hiyo duka litakurudishia pesa. Wasiliana na duka ikiwa hujazipokea ndani ya siku chache.",
+    "refundDone": "Duka limeweka alama kuwa marejesho yako yametumwa."
+  },
+  "onboarding": {
+    "title": "Andaa duka lako",
+    "hide": "Ficha",
+    "go": "Anza",
+    "samplesHint": "Unajaribu tu? Ongeza bidhaa kadhaa za mfano ujaribu kaunta mara moja.",
+    "loadSamples": "Ongeza bidhaa za mfano",
+    "steps": {
+      "settings": {
+        "title": "Weka mipangilio ya duka lako",
+        "hint": "Sarafu, saa za eneo, kodi na maelezo ya risiti."
+      },
+      "products": {
+        "title": "Ongeza bidhaa zako",
+        "hint": "Ingiza lahajedwali, au ziongeze moja moja."
+      },
+      "shelf": {
+        "title": "Weka stoo rafuni",
+        "hint": "Hamisha stoo kutoka ghala ili iweze kuuzwa."
+      },
+      "staff": {
+        "title": "Alika timu yako",
+        "hint": "Tuma kwa wahudumu na wafanyakazi msimbo wa mwaliko kwa WhatsApp au SMS."
+      },
+      "sale": {
+        "title": "Fanya mauzo yako ya kwanza",
+        "hint": "Fungua Kaunta, changanua au gusa bidhaa, pokea malipo."
+      }
+    }
+  },
+  "help": {
+    "title": "Msaada",
+    "subtitle": "Majibu ya haraka kwa kazi za kila siku.",
+    "searchPlaceholder": "Unataka kufanya nini?",
+    "noMatch": "Hakuna jibu lililolingana.",
+    "askSupport": "Uliza timu yetu ya msaada →",
+    "goThere": "Nenda huko",
+    "shortcutsTitle": "Njia za mkato za kibodi kwenye kaunta",
+    "firstSteps": {
+      "q": "Ninaanzaje?",
+      "a": "Fuata orodha kwenye Dashibodi: weka mipangilio ya duka, ongeza bidhaa, weka stoo rafuni, alika wafanyakazi, kisha fanya mauzo ya majaribio."
+    },
+    "importProducts": {
+      "q": "Ninaongezaje bidhaa nyingi kwa wakati mmoja?",
+      "a": "Bidhaa → Ingiza. Pakua kiolezo au tumia lahajedwali lako (CSV au Excel). Tunakagua kila safu kabla ya kuhifadhi chochote."
+    },
+    "receiveStock": {
+      "q": "Ninarekodije mzigo uliofika?",
+      "a": "Stoo Iliyofika → chagua bidhaa na idadi. Ikiwa bidhaa inakuja kwa katoni, weka idadi ya katoni nasi tutahesabu vipande. Ongeza namba ya kundi na tarehe ya kuisha kwa bidhaa zinazoharibika."
+    },
+    "moveToShelf": {
+      "q": "Kwa nini siwezi kuuza bidhaa niliyopokea sasa hivi?",
+      "a": "Stoo mpya huenda ghalani. Tumia Mienendo ya Stoo → Hamisha rafuni ili ipatikane kaunta."
+    },
+    "sell": {
+      "q": "Ninafanyaje mauzo?",
+      "a": "Kaunta → Anza Agizo Jipya. Changanua misimbopau kwa skana au kamera, gusa kinachouzika zaidi, au tafuta. Kisha chagua jinsi mteja analipa na uthibitishe."
+    },
+    "shift": {
+      "q": "Zamu ni nini?",
+      "a": "Muda wa mhudumu kwenye kaunta. Anza zamu na pesa zilizo kwenye droo, na uimalize kwa kuhesabu pesa. Ripoti ya Z inaonyesha ziada au upungufu wowote."
+    },
+    "discount": {
+      "q": "Ninatoaje punguzo?",
+      "a": "Kwenye agizo lililo wazi, gusa Punguzo na uweke % au kiasi. Wahudumu wanaweza kutoa hadi kikomo cha duka; punguzo kubwa zaidi linahitaji barua pepe na nenosiri la meneja."
+    },
+    "splitPay": {
+      "q": "Mteja anataka kulipa sehemu taslimu, sehemu kwa kadi?",
+      "a": "Gusa Gawanya malipo, ongeza kila njia ya malipo na kiasi chake. Pesa taslimu zinaweza kuzidi kinachodaiwa — tunaonyesha chenji."
+    },
+    "refund": {
+      "q": "Ninarejeshaje pesa au kupokea bidhaa iliyorudishwa?",
+      "a": "Mauzo na Marejesho → tafuta risiti → Tazama → Rejesha pesa / pokea bidhaa. Chagua idadi; ondoa alama Rudisha stoo kwa bidhaa zilizoharibika. Ni mameneja na wasimamizi pekee wanaoweza kurejesha pesa."
+    },
+    "receipts": {
+      "q": "Ninachapishaje upya au kutuma risiti?",
+      "a": "Mauzo na Marejesho → Tazama. Chapisha, hifadhi kama PDF, tuma kwa WhatsApp, au shiriki kiungo. Kila risiti pia ina msimbo wa QR kwa nakala ya kidijitali."
+    },
+    "thermal": {
+      "q": "Naweza kuchapisha kwenye printa ya risiti?",
+      "a": "Ndiyo, kwenye Chrome au Edge. Kwenye risiti, chagua muunganisho wa printa (USB, Serial au Bluetooth), kisha Chapisha kwenye printa ya risiti. Kivinjari chako hukumbuka printa."
+    },
+    "labels": {
+      "q": "Ninachapishaje lebo za bei na misimbopau?",
+      "a": "Lebo na Misimbopau → weka idadi ya nakala za kila bidhaa, chagua ukubwa wa lebo, Chapisha. Bidhaa zisizo na msimbopau zinaweza kupata msimbopau wa dukani kwa kubofya mara moja."
+    },
+    "credit": {
+      "q": "Ninauzaje kwa mkopo (lipa baadaye)?",
+      "a": "Ongeza mteja kwenye Wateja, kisha chagua Mkopo kwenye kaunta. Salio lake husasishwa lenyewe; rekodi malipo na tuma vikumbusho vya WhatsApp kutoka ukurasa wa Wateja."
+    },
+    "loyalty": {
+      "q": "Pointi za uaminifu hufanyaje kazi?",
+      "a": "Ziwashe kwenye Mipangilio ya Duka. Chagua mteja kama Mwanachama wa uaminifu kwenye kaunta ili apate pointi; tumia Tumia pointi kuzitumia kama punguzo."
+    },
+    "tax": {
+      "q": "Ninawekaje VAT au kodi ya mauzo?",
+      "a": "Mipangilio ya Duka → Kodi. Weka kiwango na kama bei zako za rafuni tayari zinajumuisha kodi. Risiti na ripoti kisha zinaonyesha kodi."
+    },
+    "staff": {
+      "q": "Ninaongezaje mhudumu wa kaunta?",
+      "a": "Mialiko → unda mwaliko na nafasi yake na ushiriki msimbo kwa WhatsApp, SMS au barua pepe. Wasimamizi wanaweza kuweka au kuweka upya nenosiri la mfanyakazi kutoka Watumiaji."
+    },
+    "offline": {
+      "q": "Nini hutokea intaneti ikikatika?",
+      "a": "Endelea kuuza. Mauzo na mabadiliko ya stoo huhifadhiwa kwenye kifaa na kutumwa yenyewe muunganisho ukirudi. Upau wa juu unaonyesha ngapi zinasubiri."
+    },
+    "endOfDay": {
+      "q": "Naona wapi mapato ya leo?",
+      "a": "Mwisho wa Siku unaonyesha mauzo, njia za malipo, marejesho, bidhaa bora na saa zenye shughuli nyingi kwa tarehe yoyote, katika saa za eneo la duka lako."
+    },
+    "insights": {
+      "q": "Bidhaa zipi zinaniletea pesa nyingi zaidi?",
+      "a": "Uchambuzi → Faida na asilimia, Uchambuzi wa ABC na Stoo iliyodumaa zinaonyesha kinacholeta faida, kilicho polepole, na kinachoshikilia pesa."
+    },
+    "reorder": {
+      "q": "Niagize nini tena?",
+      "a": "Kujaza Stoo hupendekeza idadi kulingana na mauzo yako. Unda agizo la ununuzi na umtumie msambazaji kama PDF au kwa WhatsApp."
+    },
+    "security": {
+      "q": "Ninalindaje akaunti yangu?",
+      "a": "Akaunti Yangu → washa Kuingia kwa hatua mbili kwa programu ya uthibitishaji. Simu ikipotea, tumia Toka kwenye vifaa vingine vyote na ubadilishe nenosiri lako."
+    },
+    "export": {
+      "q": "Ninapakuaje data yangu?",
+      "a": "Wasimamizi wanaweza kuhamisha data ya duka (CSV/JSON) kutoka Hamisha. Kila mtu anaweza kupakua data yake binafsi kutoka Akaunti Yangu."
+    },
+    "support": {
+      "q": "Nawasilianaje na msaada?",
+      "a": "Msaada → Tiketi mpya. Timu yetu hujibu ndani ya programu."
+    },
+    "settlements": {
+      "q": "Kamisheni na malipo ya hesabu hufanyaje kazi?",
+      "a": "Malipo ya mtandaoni ya duka lako huenda moja kwa moja benki kwako huku kamisheni ya jukwaa ikikatwa papo hapo. Kwa maagizo ya kulipa unapopokea, wewe ndiye unayepokea pesa, kwa hiyo kamisheni huongezwa kwenye salio lako na kulipwa yenyewe kutoka malipo yako ya mtandaoni yajayo — au unaweza kuilipa wakati wowote kutoka Malipo ya Hesabu."
+    }
+  },
+  "paymentsCard": {
+    "title": "Malipo ya mtandaoni",
+    "intro": "Waruhusu wanunuzi walipe mtandaoni kwenye duka lako. Malipo huchakatwa na Paystack na kulipwa moja kwa moja kwenye akaunti YAKO ya benki — SAFE Stores haishikilii pesa za wateja wako kamwe. Ada ya Paystack hukatwa kutoka kila malipo.",
+    "commission": "Kamisheni ya jukwaa ya {{pct}}% hukatwa yenyewe kutoka kila malipo ya mtandaoni.",
+    "notConfigured": "Malipo ya mtandaoni bado hayajawashwa kwenye jukwaa hili. Bado unaweza kupokea maagizo ya kulipa unapopokea.",
+    "currencyUnsupported": "Malipo ya mtandaoni bado hayapatikani kwa {{currency}}. Kulipa unapopokea bado kunafanya kazi.",
+    "linkedTo": "Malipo huenda kwa {{name}} — {{bank}} ••••{{last4}}",
+    "change": "Badilisha akaunti",
+    "linkAccount": "Unganisha akaunti ya benki",
+    "bank": "Benki",
+    "accountNumber": "Namba ya akaunti",
+    "accountName": "Jina la akaunti: {{name}}",
+    "check": "Kagua akaunti",
+    "confirmLink": "Ndiyo, lipa kwenye akaunti hii",
+    "privacy": "Tunampa Paystack namba ya akaunti na tunabaki na tarakimu 4 za mwisho tu.",
+    "linked": "Akaunti ya benki imeunganishwa — malipo ya mtandaoni yamewashwa",
+    "acceptOnline": "Pokea malipo ya mtandaoni kwenye duka langu",
+    "acceptOnDelivery": "Pokea malipo unapochukua / unapoletewa"
+  },
+  "settlementsPage": {
+    "title": "Malipo ya Hesabu",
+    "subtitle": "Salio lako na SAFE Stores kwa maagizo yanayokuja kupitia duka lako la mtandaoni.",
+    "youOwe": "Unadaiwa",
+    "balanceClear": "Salio — hakuna deni",
+    "credit": "Una salio la ziada",
+    "appSalesMonth": "Mauzo ya duka la mtandaoni mwezi huu",
+    "commissionMonth": "Kamisheni mwezi huu ({{pct}}%)",
+    "payPrompt": "Salio lako ni {{amount}}. Lilipe wakati wowote — au litalipwa lenyewe kutoka maagizo yako ya mtandaoni yajayo.",
+    "payNow": "Lipa {{amount}} sasa",
+    "payByTransfer": "Muombe msimamizi wako alipe, au lipa kwa uhamisho wa benki na jukwaa litarekodi.",
+    "paidThanks": "Malipo yamepokelewa — asante. Salio lako limesasishwa.",
+    "notConfirmed": "Bado hatujaweza kuthibitisha malipo. Ikiwa umekatwa pesa, itasasishwa hivi karibuni.",
+    "cashPaused": "Salio lako limezidi {{limit}}, kwa hiyo kulipa unapopokea kumesimamishwa kwenye duka lako. Wateja bado wanaweza kulipa mtandaoni. Lipa salio lako ili kukuwasha tena.",
+    "howTitle": "Jinsi malipo ya hesabu yanavyofanya kazi",
+    "howOnline": "Malipo ya mtandaoni huenda moja kwa moja kutoka Paystack hadi akaunti yako ya benki. Kamisheni yetu ya {{pct}}% hukatwa yenyewe kabla hayajakufikia.",
+    "howCash": "Maagizo ya kulipa unapopokea: unapokea kiasi chote kutoka kwa mteja, kwa hiyo kamisheni ya {{pct}}% huongezwa kwenye salio lako unapoweka alama agizo limekamilika.",
+    "howNetting": "Salio lako hulipwa lenyewe kutoka malipo yako ya mtandaoni yajayo — hadi {{pct}}% ya kila moja — kwa hiyo mara chache utahitaji kulipa kando.",
+    "howLimit": "Salio lako likizidi {{limit}}, kulipa unapopokea husimamishwa hadi lilipwe.",
+    "howPos": "Mauzo ya dukani kwenye kaunta yako hayatozwi kamisheni kamwe.",
+    "statement": "Taarifa",
+    "empty": "Bado hakuna maagizo ya duka la mtandaoni.",
+    "entry": "Ingizo",
+    "orderTotal": "Agizo",
+    "commission": "Kamisheni",
+    "balanceChange": "Mabadiliko ya salio",
+    "types": {
+      "cash_commission": "Agizo la kulipa unapopokea — kamisheni inadaiwa",
+      "online_commission": "Agizo la mtandaoni — kamisheni imekatwa wakati wa malipo",
+      "debt_recovered": "Salio limelipwa kutoka malipo ya mtandaoni",
+      "settlement_payment": "Malipo yamepokelewa",
+      "adjustment": "Marekebisho"
+    }
   }
 }

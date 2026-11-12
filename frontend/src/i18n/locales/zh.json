@@ -97,7 +97,26 @@
     },
     "shrinkage": "损耗",
     "lendingPartners": "贷款合作伙伴",
-    "toggleMenu": "切换菜单"
+    "toggleMenu": "切换菜单",
+    "account": "我的账户",
+    "activity": "操作日志",
+    "sales": "销售与退款",
+    "shifts": "班次",
+    "dailyReport": "日结",
+    "settings": "门店设置",
+    "insights": "数据分析",
+    "labels": "标签与条码",
+    "transfers": "分店调拨",
+    "help": "帮助",
+    "terms": "条款",
+    "privacy": "隐私",
+    "skipToContent": "跳到主要内容",
+    "theme": "主题",
+    "themeSystem": "自动",
+    "themeLight": "浅色",
+    "themeDark": "深色",
+    "textSize": "字号",
+    "settlements": "结算"
   },
   "login": {
     "welcomeBack": "欢迎回来",
@@ -115,7 +134,12 @@
     "tagline": "企业级库存智能",
     "adminSubtitle": "使用您的商店凭据登录",
     "inviteSubtitle": "输入您的邀请码以访问您的仪表盘",
-    "inviteCodeHelp": "输入发送给您的邀请码——下次登录时您也将使用此邀请码"
+    "inviteCodeHelp": "输入发送给您的邀请码——下次登录时您也将使用此邀请码",
+    "forgotPassword": "忘记密码？",
+    "twoFactorCode": "验证器代码",
+    "twoFactorHelp": "打开验证器应用，输入 SAFE Stores 的 6 位代码。",
+    "chooseStore": "选择门店",
+    "chooseStoreHelp": "此邮箱用于多个门店。请选择要登录的门店。"
   },
   "dashboard": {
     "title": "仪表盘",
@@ -187,7 +211,38 @@
     "selectCustomerError": "请选择赊账销售的客户",
     "addItemError": "添加商品失败",
     "cameraError": "无法访问相机进行扫描。",
-    "paymentConfirmedToast": "付款已确认"
+    "paymentConfirmedToast": "付款已确认",
+    "mobileMoney": "移动支付",
+    "amountReceived": "收到现金（可选，用于找零）",
+    "receivedTooLow": "收到的现金少于总额。",
+    "splitPayment": "拆分付款",
+    "singlePayment": "单一付款",
+    "splitPayments": "付款",
+    "addTender": "添加付款",
+    "amount": "金额",
+    "remaining": "待付",
+    "addDiscount": "折扣",
+    "removeDiscount": "移除",
+    "discountType": "类型",
+    "fixedAmount": "固定金额",
+    "discountValue": "数值",
+    "discountReason": "原因（显示在小票上）",
+    "applyDiscount": "应用折扣",
+    "approvalNeeded": "此折扣超出收银员的权限，需要经理或管理员批准。",
+    "managerEmail": "经理邮箱",
+    "managerPassword": "经理密码",
+    "park": "挂单",
+    "parkPrompt": "为此挂单命名以便查找（例如顾客姓名）：",
+    "parkedDefault": "挂单",
+    "parkedToast": "已挂单——可从下方列表恢复。",
+    "quickPicks": "畅销品",
+    "removeItem": "移除商品",
+    "shortcutsHint": "快捷键：F2 搜索 · Enter 添加扫描的条码 · F4 付款 · Esc 清空搜索。",
+    "loyaltyMember": "会员（可选）",
+    "noMember": "— 无 —",
+    "memberPoints": "{{points}} 积分（价值 {{value}}）",
+    "usePoints": "使用积分",
+    "pointsApplied": "已使用 {{count}} 积分"
   },
   "products": {
     "title": "产品管理",
@@ -230,7 +285,24 @@
     "archive": "归档",
     "productCreatedToast": "产品已创建",
     "createError": "创建产品失败",
-    "archiveConfirm": "要归档此产品吗？其历史记录将保留，之后可以恢复。"
+    "archiveConfirm": "要归档此产品吗？其历史记录将保留，之后可以恢复。",
+    "import": "导入",
+    "labels": "标签",
+    "barcode": "条码",
+    "barcodePlaceholder": "扫描或输入（可选）",
+    "variantOf": "规格所属商品",
+    "notAVariant": "— 非规格商品 —",
+    "variantLabel": "规格（尺寸 / 颜色）",
+    "variantLabelPlaceholder": "例如：大 / 红",
+    "packSize": "每包 / 每箱数量",
+    "packSizeHelp": "可按箱收货。只按单件采购请保留 1。",
+    "packUnit": "包装名称",
+    "packUnitPlaceholder": "例如：箱、筐",
+    "pack": "包",
+    "searchPlaceholder": "搜索名称、SKU、条码或类别",
+    "sellingPrice": "售价",
+    "markupHelp": "加价：成本之上 {{pct}}%",
+    "enterCostFirst": "请先输入成本价"
   },
   "stockArrivalPage": {
     "title": "到货入库",
@@ -249,7 +321,8 @@
     "batch": "批号",
     "date": "日期",
     "recordedToast": "已记录到货",
-    "recordError": "记录到货失败"
+    "recordError": "记录到货失败",
+    "packsReceived": "已收到 {{unit}}（每个 {{size}}）"
   },
   "movementsPage": {
     "title": "库存变动",
@@ -362,7 +435,19 @@
     "paymentRecordedToast": "已记录付款",
     "paymentError": "记录付款失败",
     "whatsappReminder": "您好 {{name}}，友情提醒您在 {{store}} 有 {{amount}} 的未结余额。谢谢！",
-    "us": "我们"
+    "us": "我们",
+    "email": "邮箱（可选）",
+    "birthday": "生日（可选）",
+    "statement": "对账单",
+    "charges": "赊账",
+    "payments": "还款",
+    "birthdaysSoon": "本周生日",
+    "today": "今天",
+    "inDays": "{{count}} 天后",
+    "sendWish": "发送祝福",
+    "birthdayMessage": "{{name}}，生日快乐！🎉 {{store}} 全体同仁祝您度过美好的一天。本周来店有小惊喜！",
+    "pointsBalance": "会员积分：{{points}}（价值 {{value}}）",
+    "pointsExpiring": "{{count}} 积分将在 30 天内过期"
   },
   "cycleCountingPage": {
     "title": "⏱️ 循环盘点",
@@ -457,7 +542,9 @@
     "enable": "启用",
     "remove": "移除",
     "removeConfirm": "确定要移除此用户吗？",
-    "statusChanged": "{{name}} 现在为 {{status}}"
+    "statusChanged": "{{name}} 现在为 {{status}}",
+    "setPassword": "设置密码",
+    "setPasswordPrompt": "为 {{name}} 设置新密码（至少 8 个字符）："
   },
   "cameraPage": {
     "title": "相机与二维码扫描仪",
@@ -662,7 +749,14 @@
     "actions": "操作",
     "send": "发送",
     "cancel": "取消",
-    "markReceived": "标记为已收货"
+    "markReceived": "标记为已收货",
+    "poGreeting": "{{supplier}} 您好，请供应以下商品：",
+    "poFrom": "发件方",
+    "poThanks": "谢谢。",
+    "purchaseOrder": "采购订单",
+    "unitCost": "单位成本",
+    "printPo": "打印 / PDF",
+    "whatsappPo": "通过 WhatsApp 发送"
   },
   "expiryPage": {
     "title": "保质期追踪",
@@ -872,7 +966,19 @@
     "fulfill": "处理",
     "orderFulfilled": "订单已处理——库存已更新",
     "fulfillFailed": "处理订单失败",
-    "noOrdersYet": "暂无市场订单。"
+    "noOrdersYet": "暂无市场订单。",
+    "paidOnline": "已在线支付",
+    "awaitingPayment": "等待付款",
+    "payOnDelivery": "货到付款",
+    "cancel": "取消",
+    "cancelPrompt": "取消此订单？可为顾客填写简短原因（可选）：",
+    "orderCancelled": "订单已取消",
+    "cancelFailed": "无法更新订单",
+    "refundDueToast": "订单已取消。该订单已在线支付，请在 Paystack 后台向顾客退款 {{amount}}。平台佣金已退回您的结算余额。",
+    "refundDue": "待退款",
+    "refunded": "已退款",
+    "markRefunded": "标记为已退款",
+    "confirmRefunded": "确认已向该顾客全额退款？"
   },
   "storefrontPage": {
     "title": "🛍️ 商店",
@@ -898,7 +1004,23 @@
     "somethingWentWrong": "出了点问题",
     "orderPlaced": "订单已提交！",
     "trackBelow": "您可以在下方追踪。",
-    "orderFailed": "下单失败"
+    "orderFailed": "下单失败",
+    "searchPlaceholder": "搜索商品",
+    "share": "分享店铺",
+    "linkCopied": "店铺链接已复制",
+    "trackOrder": "跟踪订单 →",
+    "remove": "移除",
+    "payOnCollection": "自提或送货时付款。",
+    "orderOnWhatsApp": "通过 WhatsApp 下单",
+    "waGreeting": "{{store}} 您好，我想订购：",
+    "metaDescription": "在线选购 {{name}} {{city}}——立即下单，自提或送货时付款。",
+    "howToPay": "您想如何付款？",
+    "payOnline": "立即在线支付（银行卡、转账、USSD）",
+    "payOnlineOnly": "下单时在线付款。",
+    "securePayNote": "由 Paystack 安全支付，款项直接付给 {{store}}。",
+    "emailForPayment": "请输入邮箱，以便我们发送付款收据。",
+    "payNow": "支付 {{amount}}",
+    "notTakingOrders": "本店目前不接受在线订单。请到店或致电门店。"
   },
   "marketplaceHomePage": {
     "title": "🏪 SAFE Stores 市场",
@@ -1001,7 +1123,9 @@
     "tierMegaLabel": "超级商店",
     "tierMegaDesc": "无限产品和用户——最适合大型或多地点商店",
     "heading": "注册您的商店",
-    "confirmPasswordLabel": "确认密码"
+    "confirmPasswordLabel": "确认密码",
+    "agreePrefix": "我同意",
+    "agreeAnd": "和"
   },
   "setupPage": {
     "title": "👋 欢迎使用 SAFE Stores",
@@ -1021,5 +1145,519 @@
     "loginFailed": "登录失败",
     "submit": "⭐ 进入超级管理员",
     "backToStore": "← 返回门店登录"
+  },
+  "forgotPage": {
+    "title": "重置密码",
+    "subtitle": "输入您的登录邮箱。我们会发送链接，供您设置新密码。",
+    "send": "发送重置链接",
+    "sending": "发送中…",
+    "backToLogin": "返回登录",
+    "noEmailHint": "没有邮箱的员工：请门店管理员在“用户”页面为您设置新密码。"
+  },
+  "resetPage": {
+    "title": "设置新密码",
+    "newPassword": "新密码",
+    "confirmPassword": "确认新密码",
+    "mismatch": "两次输入的密码不一致。",
+    "save": "保存新密码",
+    "missingToken": "此链接不完整。请重新打开邮件中的链接，或申请新的链接。",
+    "done": "密码已更新，现在可以登录。",
+    "goToLogin": "前往登录"
+  },
+  "verifyPage": {
+    "title": "确认您的邮箱",
+    "working": "正在确认…",
+    "continue": "继续"
+  },
+  "passwordHint": "至少 8 个字符。短语更容易记住，也更难被猜到。",
+  "accountPage": {
+    "title": "我的账户",
+    "profile": "个人资料",
+    "emailNotVerified": "您的邮箱尚未确认。确认后，忘记密码时可以重置。",
+    "resend": "重新发送确认邮件",
+    "changePassword": "修改密码",
+    "currentPassword": "当前密码",
+    "newPassword": "新密码",
+    "updatePassword": "更新密码",
+    "twoFactor": "两步验证登录",
+    "twoFactorIntro": "使用免费的验证器应用（Google Authenticator、Microsoft Authenticator、Authy 等）为登录增加第二步。即使有人知道您的密码，没有您的手机也无法登录。",
+    "twoFactorOn": "两步验证已开启。",
+    "twoFactorOff": "两步验证已关闭。",
+    "turnOn": "设置两步验证",
+    "turnOff": "关闭两步验证",
+    "scanQr": "1. 用验证器应用扫描此二维码（或输入下方密钥）。",
+    "enterCode": "2. 输入应用显示的 6 位代码：",
+    "confirmCode": "确认并开启",
+    "codeLabel": "6 位代码",
+    "passwordLabel": "密码",
+    "notAvailableDesktop": "两步验证仅在线上（网页）版提供。",
+    "sessions": "设备与会话",
+    "sessionsIntro": "手机丢失或用过公共电脑？退出其他所有设备。",
+    "logoutAll": "退出其他所有设备",
+    "yourData": "您的数据",
+    "yourDataIntro": "下载 SAFE Stores 保存的您的个人数据副本。",
+    "download": "下载我的数据",
+    "deleteAccount": "删除我的账户",
+    "deleteAccountIntro": "删除您的姓名、邮箱和登录信息。您记录的销售仍以“已删除用户”保留在门店账目中。",
+    "deleteConfirm": "永久删除您的账户？此操作无法撤销。",
+    "closeStore": "关闭门店并删除所有数据",
+    "closeStoreIntro": "30 天宽限期后永久删除此门店及其全部内容。30 天内可取消。",
+    "typeStoreName": "输入门店名称以确认",
+    "scheduledFor": "此门店将于 {{date}} 永久删除。",
+    "cancelDeletion": "取消删除",
+    "requestDeletion": "安排删除"
+  },
+  "activityPage": {
+    "title": "操作日志",
+    "subtitle": "谁在何时做了什么——价格变动、退款、折扣、用户、安全设置。",
+    "when": "时间",
+    "who": "人员",
+    "action": "操作",
+    "details": "详情",
+    "store": "门店",
+    "filter": "筛选",
+    "all": "所有操作",
+    "empty": "暂无记录。",
+    "loadMore": "加载更多"
+  },
+  "receipt": {
+    "subtotal": "小计",
+    "discount": "折扣",
+    "tax": "税",
+    "inclusive": "（已含）",
+    "change": "找零",
+    "refunded": "已退款",
+    "returned": "已退 {{count}} 件",
+    "pdf": "保存为 PDF",
+    "copyLink": "复制链接",
+    "linkCopied": "小票链接已复制",
+    "share": "分享",
+    "customerPhone": "顾客 WhatsApp 号码",
+    "customerPhonePlaceholder": "顾客 WhatsApp 号",
+    "printerType": "小票打印机连接",
+    "thermalChoose": "热敏打印机…",
+    "thermalPrint": "打印到小票打印机",
+    "thermalPick": "选择打印机",
+    "sentToPrinter": "已发送到小票打印机",
+    "printerFailed": "无法连接小票打印机",
+    "qrAlt": "链接到此电子小票的二维码",
+    "scanForDigital": "扫码获取电子小票",
+    "notFound": "找不到此小票，链接可能不完整。"
+  },
+  "shift": {
+    "title": "班次",
+    "subtitle": "每位收银员的班次：备用金、收取的现金以及交班时清点的现金。",
+    "onShift": "自 {{time}} 起当班",
+    "noShift": "您当前不在班次中。",
+    "start": "开始班次",
+    "end": "结束班次",
+    "startTitle": "开始您的班次",
+    "endTitle": "结束班次并清点钱箱",
+    "openingFloat": "备用金（钱箱中现有现金）",
+    "countedCash": "清点现金",
+    "expectedCash": "应有现金",
+    "notes": "备注（可选）",
+    "openedToast": "班次已开始",
+    "closedToast": "班次已结束。长短款：{{variance}}",
+    "cashier": "收银员",
+    "started": "开始",
+    "ended": "结束",
+    "status": "状态",
+    "variance": "长短款",
+    "zReport": "Z 报表",
+    "empty": "暂无班次。可在收银台开始。",
+    "stillOpen": "仍在进行",
+    "sales": "销售",
+    "salesCount": "销售笔数",
+    "unitsSold": "售出件数",
+    "gross": "销售总额",
+    "net": "净额（扣除退款）",
+    "byMethod": "按付款方式",
+    "cashDrawer": "钱箱",
+    "cashSales": "现金销售",
+    "cashRefunds": "现金退款",
+    "openingFloatShort": "备用金"
+  },
+  "salesPage": {
+    "title": "销售与退款",
+    "subtitle": "查找任意销售，重打或分享小票，处理退货。",
+    "search": "小票号",
+    "searchPlaceholder": "小票号（例如后 4 位）",
+    "from": "从",
+    "to": "至",
+    "empty": "未找到销售记录。",
+    "receipt": "小票",
+    "when": "时间",
+    "cashier": "收银员",
+    "method": "付款方式",
+    "items": "商品",
+    "view": "查看",
+    "refund": "退款 / 退货",
+    "refundHistory": "此笔销售的退款",
+    "refundIntro": "选择每件商品退回的数量。损坏商品请取消勾选“回库”——将作报损处理，而不放回货架。",
+    "canReturn": "最多 {{count}}",
+    "qtyToReturn": "退货数量",
+    "restock": "回库",
+    "refundMethod": "退款方式",
+    "storeCredit": "店内余额（抵减顾客欠款）",
+    "reason": "原因",
+    "reasonPlaceholder": "例如：尺码不对、有瑕疵",
+    "confirmRefund": "确认退款",
+    "pickItems": "请至少为一件商品输入数量。",
+    "refunded": "已退款 {{amount}}"
+  },
+  "dailyPage": {
+    "title": "日结",
+    "subtitle": "按门店时区的自然日（{{tz}}）。",
+    "date": "日期",
+    "gross": "销售总额",
+    "orders": "销售笔数",
+    "average": "平均客单价",
+    "net": "扣除退款后净额",
+    "refunds": "退款（{{count}}）",
+    "noSales": "当天无销售。",
+    "byCashier": "按收银员",
+    "byHour": "按小时",
+    "topItems": "热销商品"
+  },
+  "settingsPage": {
+    "title": "门店设置",
+    "subtitle": "此门店的货币、时区、税和小票信息。",
+    "saved": "设置已保存",
+    "store": "门店信息",
+    "storeName": "门店名称",
+    "phone": "电话（打印在小票上）",
+    "address": "地址",
+    "city": "城市",
+    "region": "货币与时区",
+    "currency": "货币",
+    "platformDefault": "平台默认（{{code}}）",
+    "preview": "示例",
+    "currencyNote": "更改货币只影响此后金额的显示，不会换算历史金额。",
+    "timezone": "时区",
+    "timezoneNote": "决定报表、过期提醒和小票中“今天”的含义。",
+    "tax": "税",
+    "taxLabel": "税种名称",
+    "taxRate": "税率（%）",
+    "taxInclusive": "价格已含税",
+    "inclusiveHelp": "货架价格不变；小票显示每笔销售中的税额。",
+    "exclusiveHelp": "在收银台于货架价格之上加税。",
+    "taxNumber": "税务登记号（可选）",
+    "taxNote": "设置税务机关要求的税率。0 表示不计税。",
+    "till": "收银与小票",
+    "maxDiscount": "收银员无需经理批准可给的最大折扣（%）",
+    "maxDiscountHelp": "超过此值，需经理或管理员用邮箱和密码批准。",
+    "requireShift": "收银员收款前必须开始班次（并登记备用金）",
+    "receiptHeader": "小票页眉",
+    "receiptFooter": "小票页脚",
+    "receiptFooterPlaceholder": "例如：谢谢惠顾！凭此小票 7 天内可退货。",
+    "loyalty": "会员积分",
+    "loyaltyIntro": "关联到销售的顾客可获得积分，并在收银台使用。积分设为 0 即关闭。",
+    "pointsPer100": "每消费 100 获得积分",
+    "pointValue": "1 积分的价值（以您的货币计）",
+    "pointsExpiry": "积分有效期（月）",
+    "pointsExpiryHelp": "0 = 永不过期。",
+    "loyaltyExample": "示例：消费 {{spend}} 获得 {{points}} 积分，价值 {{worth}}。",
+    "dailySummary": "每晚 9 点向管理员发送当日销售汇总邮件"
+  },
+  "importPage": {
+    "title": "导入商品",
+    "subtitle": "从电子表格（CSV 或 Excel）导入全部商品清单。",
+    "step1": "下载模板，或使用您自己的表格——常见列名（名称、SKU、条码、成本、价格、库存等）会被自动识别。",
+    "step2": "在下方选择文件。保存前我们会逐行检查。",
+    "step3": "查看检查结果后导入。已有 SKU 会被更新（库存不会被覆盖）；新商品按期初库存创建。",
+    "template": "下载模板",
+    "chooseFile": "电子表格文件（.csv 或 .xlsx）",
+    "rowsFound": "找到 {{count}} 行",
+    "emptyFile": "此文件没有数据行。",
+    "checkTitle": "导入前检查",
+    "willCreate": "新增 {{count}} 个",
+    "willUpdate": "更新 {{count}} 个",
+    "skipped": "{{count}} 行有问题（已跳过）",
+    "row": "行",
+    "problem": "问题",
+    "preview": "预览（前 20 行）",
+    "importNow": "导入 {{count}} 个商品",
+    "done": "完成：新增 {{created}} 个，更新 {{updated}} 个。",
+    "viewProducts": "查看商品"
+  },
+  "labelsPage": {
+    "title": "标签与条码",
+    "subtitle": "用任意打印机打印货架价签和条码贴纸。",
+    "missing": "{{count}} 个商品还没有条码。",
+    "generate": "为它们生成店内条码",
+    "generated": "已生成 {{count}} 个条码",
+    "size": "标签尺寸",
+    "oneEach": "每个 1 张",
+    "print": "打印标签",
+    "copies": "份数",
+    "pickSome": "请至少为一个商品输入标签数量。"
+  },
+  "insightsPage": {
+    "title": "数据分析",
+    "subtitle": "哪些商品赚钱、哪些不赚钱、该补什么货。",
+    "period": "期间",
+    "lastDays": "最近 {{count}} 天",
+    "tabs": {
+      "profit": "利润与毛利率",
+      "abc": "ABC 分析",
+      "deadStock": "滞销库存",
+      "forecast": "预测",
+      "heatmap": "高峰时段"
+    },
+    "revenue": "收入",
+    "cost": "商品成本",
+    "grossProfit": "毛利",
+    "margin": "毛利率",
+    "units": "数量",
+    "profitNote": "收入为顾客在折扣和退款后实际支付的金额；成本按各商品当前成本价计算。",
+    "noSales": "此期间无销售。",
+    "class": "类别",
+    "classA": "A — 畅销（占收入 80%）",
+    "classB": "B — 平稳（其次 15%）",
+    "classC": "C — 慢销（最后 5%）",
+    "share": "占比",
+    "abcNote": "A 类商品要始终有货并陈列醒目；复查 C 类商品——它们占用资金和货架。",
+    "idleItems": "滞销 {{days}} 天以上的商品",
+    "cashTiedUp": "占用资金（按成本）",
+    "deadNote": "期间内有库存但无销售的商品。可考虑促销、捆绑销售或退回供应商。",
+    "noDead": "没有滞销商品。👍",
+    "onHand": "现有库存",
+    "daysIdle": "滞销天数",
+    "valueAtCost": "成本价值",
+    "forecastNote": "基于最近 {{days}} 天的日均销量。",
+    "avgDaily": "日均",
+    "next30": "未来 30 天",
+    "daysCover": "可售天数",
+    "suggested": "建议订货量",
+    "reorderNow": "立即补货",
+    "heatmapNote": "按星期和小时统计的销售（{{tz}}）。颜色越深越忙——据此安排人员和送货。"
+  },
+  "transfersPage": {
+    "title": "分店调拨",
+    "subtitle": "在分店之间调拨库存。库存现在从后仓出库，对方分店确认后入库。",
+    "noBranches": "要调拨库存，您需要在另一家分店拥有使用相同邮箱的管理员或经理账户。",
+    "new": "新建调拨",
+    "to": "调往",
+    "product": "商品",
+    "qty": "数量",
+    "inBackroom": "后仓 {{count}} 件",
+    "addLine": "添加商品",
+    "note": "备注（可选）",
+    "send": "发出库存",
+    "sent": "调拨已发出",
+    "history": "调拨记录",
+    "empty": "暂无调拨。",
+    "when": "时间",
+    "direction": "分店",
+    "items": "商品",
+    "status": "状态",
+    "receive": "收货"
+  },
+  "trackPage": {
+    "notFound": "找不到此订单，请检查链接。",
+    "reference": "订单",
+    "cancelled": "此订单已取消。",
+    "steps": {
+      "placed": "已收到订单",
+      "fulfilled": "已备好 / 已送达"
+    },
+    "questions": "有疑问？请致电门店：",
+    "paid": "已付款",
+    "awaitingPayment": "等待付款",
+    "payOnDelivery": "自提 / 送货时付款",
+    "payNow": "立即付款",
+    "paymentReceived": "已收到付款——谢谢！",
+    "paymentNotConfirmed": "暂时无法确认付款。如已扣款，稍后会自动更新。",
+    "emailPrompt": "用于接收付款收据的邮箱：",
+    "refundPending": "您已在线付款，门店将为您退款。如几天内仍未收到，请联系门店。",
+    "refundDone": "门店已标记您的退款已发出。"
+  },
+  "onboarding": {
+    "title": "准备好您的门店",
+    "hide": "隐藏",
+    "go": "开始",
+    "samplesHint": "只是看看？添加十几个示例商品，马上试用收银台。",
+    "loadSamples": "添加示例商品",
+    "steps": {
+      "settings": {
+        "title": "设置门店",
+        "hint": "货币、时区、税和小票信息。"
+      },
+      "products": {
+        "title": "添加商品",
+        "hint": "导入电子表格，或逐个添加。"
+      },
+      "shelf": {
+        "title": "将库存上架",
+        "hint": "把库存从后仓移到货架，才能销售。"
+      },
+      "staff": {
+        "title": "邀请团队",
+        "hint": "通过 WhatsApp 或短信向收银员和员工发送邀请码。"
+      },
+      "sale": {
+        "title": "完成第一笔销售",
+        "hint": "打开收银台，扫码或点选商品，收款。"
+      }
+    }
+  },
+  "help": {
+    "title": "帮助",
+    "subtitle": "日常操作快速解答。",
+    "searchPlaceholder": "您想做什么？",
+    "noMatch": "没有匹配的答案。",
+    "askSupport": "联系我们的客服团队 →",
+    "goThere": "前往",
+    "shortcutsTitle": "收银台键盘快捷键",
+    "firstSteps": {
+      "q": "如何开始？",
+      "a": "按照仪表板上的清单操作：设置门店、添加商品、上架库存、邀请员工，然后做一笔测试销售。"
+    },
+    "importProducts": {
+      "q": "如何一次添加大量商品？",
+      "a": "商品 → 导入。下载模板或使用您自己的表格（CSV 或 Excel）。保存前我们会逐行检查。"
+    },
+    "receiveStock": {
+      "q": "如何登记到货？",
+      "a": "到货入库 → 选择商品和数量。如果按箱到货，输入箱数，系统会计算件数。易腐商品请填写批次和保质期。"
+    },
+    "moveToShelf": {
+      "q": "为什么刚收到的商品不能卖？",
+      "a": "新库存先进入后仓。请使用 库存变动 → 转到货架，使其在收银台可售。"
+    },
+    "sell": {
+      "q": "如何完成一笔销售？",
+      "a": "收银台 → 新建订单。用扫码枪或摄像头扫描条码，点选畅销品或搜索。然后选择顾客的付款方式并确认。"
+    },
+    "shift": {
+      "q": "什么是班次？",
+      "a": "收银员在收银台的工作时段。开班时登记钱箱现金，交班时清点现金。Z 报表会显示长款或短款。"
+    },
+    "discount": {
+      "q": "如何打折？",
+      "a": "在未结订单中点“折扣”，输入百分比或金额。收银员可在门店限额内打折；更大折扣需要经理的邮箱和密码。"
+    },
+    "splitPay": {
+      "q": "顾客想部分现金、部分刷卡？",
+      "a": "点“拆分付款”，添加每种付款方式及金额。现金可多于应付金额——系统会显示找零。"
+    },
+    "refund": {
+      "q": "如何退款或退货？",
+      "a": "销售与退款 → 找到小票 → 查看 → 退款 / 退货。选择数量；损坏商品取消勾选“回库”。只有经理和管理员可以退款。"
+    },
+    "receipts": {
+      "q": "如何重打或发送小票？",
+      "a": "销售与退款 → 查看。可打印、保存为 PDF、通过 WhatsApp 发送或分享链接。每张小票都有指向电子副本的二维码。"
+    },
+    "thermal": {
+      "q": "能用小票打印机打印吗？",
+      "a": "可以，使用 Chrome 或 Edge。在小票上选择打印机连接（USB、串口或蓝牙），然后点“打印到小票打印机”。浏览器会记住打印机。"
+    },
+    "labels": {
+      "q": "如何打印价签和条码？",
+      "a": "标签与条码 → 设置每个商品的份数，选择标签尺寸，打印。没有条码的商品可一键生成店内条码。"
+    },
+    "credit": {
+      "q": "如何赊账销售（以后付款）？",
+      "a": "在“顾客”中添加顾客，然后在收银台选择“赊账”。余额自动更新；可在“顾客”页面登记还款并发送 WhatsApp 提醒。"
+    },
+    "loyalty": {
+      "q": "会员积分如何使用？",
+      "a": "在门店设置中开启。收银时选择顾客为会员即可累积积分；点“使用积分”可抵扣为折扣。"
+    },
+    "tax": {
+      "q": "如何设置增值税或销售税？",
+      "a": "门店设置 → 税。输入税率并说明货架价格是否已含税。小票和报表随后会显示税额。"
+    },
+    "staff": {
+      "q": "如何添加收银员？",
+      "a": "邀请 → 按角色创建邀请，通过 WhatsApp、短信或邮件分享邀请码。管理员可在“用户”中设置或重置员工密码。"
+    },
+    "offline": {
+      "q": "断网了怎么办？",
+      "a": "继续销售。销售和库存变动会保存在设备上，网络恢复后自动上传。顶部栏会显示待上传数量。"
+    },
+    "endOfDay": {
+      "q": "在哪里查看今天的营业额？",
+      "a": "日结可按门店时区查看任意日期的销售、付款方式、退款、热销商品和高峰时段。"
+    },
+    "insights": {
+      "q": "哪些商品最赚钱？",
+      "a": "数据分析 → 利润与毛利率、ABC 分析和滞销库存，显示哪些赚钱、哪些慢销、哪些占用资金。"
+    },
+    "reorder": {
+      "q": "该补什么货？",
+      "a": "补货会根据销售建议数量。创建采购订单，以 PDF 或 WhatsApp 发给供应商。"
+    },
+    "security": {
+      "q": "如何保护我的账户安全？",
+      "a": "我的账户 → 使用验证器应用开启两步验证登录。如手机丢失，请“退出其他所有设备”并修改密码。"
+    },
+    "export": {
+      "q": "如何下载我的数据？",
+      "a": "管理员可在“导出”中导出门店数据（CSV/JSON）。任何人都可在“我的账户”下载个人数据。"
+    },
+    "support": {
+      "q": "如何联系客服？",
+      "a": "客服 → 新建工单。我们的团队会在应用内回复。"
+    },
+    "settlements": {
+      "q": "佣金和结算如何运作？",
+      "a": "网店的在线付款直接进入您的银行账户，平台佣金在付款时扣除。货到付款订单由您收款，因此佣金会计入您的余额，并从您之后的在线付款中自动抵扣——您也可以随时在“结算”中支付。"
+    }
+  },
+  "paymentsCard": {
+    "title": "在线支付",
+    "intro": "让顾客在您的网店在线付款。付款由 Paystack 处理，直接进入您自己的银行账户——SAFE Stores 从不持有您顾客的资金。Paystack 手续费从每笔付款中扣除。",
+    "commission": "每笔在线付款将自动扣除 {{pct}}% 的平台佣金。",
+    "notConfigured": "本平台尚未开启在线支付。您仍可接受货到付款订单。",
+    "currencyUnsupported": "{{currency}} 暂不支持在线支付。货到付款仍可使用。",
+    "linkedTo": "款项付至 {{name}} — {{bank}} ••••{{last4}}",
+    "change": "更换账户",
+    "linkAccount": "绑定银行账户",
+    "bank": "银行",
+    "accountNumber": "账号",
+    "accountName": "账户名：{{name}}",
+    "check": "核对账户",
+    "confirmLink": "是的，付款到此账户",
+    "privacy": "我们会将账号传给 Paystack，只保留后 4 位。",
+    "linked": "银行账户已绑定——在线支付已开启",
+    "acceptOnline": "在我的网店接受在线支付",
+    "acceptOnDelivery": "接受自提 / 货到付款"
+  },
+  "settlementsPage": {
+    "title": "结算",
+    "subtitle": "您通过网店产生的订单与 SAFE Stores 之间的余额。",
+    "youOwe": "您应付",
+    "balanceClear": "余额——已结清",
+    "credit": "有结余",
+    "appSalesMonth": "本月网店销售额",
+    "commissionMonth": "本月佣金（{{pct}}%）",
+    "payPrompt": "您的余额为 {{amount}}。可随时支付——否则将从您之后的在线订单中自动抵扣。",
+    "payNow": "立即支付 {{amount}}",
+    "payByTransfer": "请管理员支付，或通过银行转账支付，平台会登记入账。",
+    "paidThanks": "已收到付款——谢谢。您的余额已更新。",
+    "notConfirmed": "暂时无法确认付款。如已扣款，稍后会自动更新。",
+    "cashPaused": "您的余额已超过 {{limit}}，网店的货到付款已暂停。顾客仍可在线付款。结清余额即可恢复。",
+    "howTitle": "结算说明",
+    "howOnline": "在线付款由 Paystack 直接付至您的银行账户。我们的 {{pct}}% 佣金在到账前自动扣除。",
+    "howCash": "货到付款订单：您向顾客收取全额，因此在您将订单标记为已完成时，{{pct}}% 佣金会计入您的余额。",
+    "howNetting": "您的余额会从之后的在线付款中自动抵扣——每笔最多 {{pct}}%——因此很少需要单独支付。",
+    "howLimit": "如果余额超过 {{limit}}，货到付款将暂停，直至结清。",
+    "howPos": "在您收银台完成的店内销售从不收取佣金。",
+    "statement": "对账单",
+    "empty": "暂无网店订单。",
+    "entry": "条目",
+    "orderTotal": "订单",
+    "commission": "佣金",
+    "balanceChange": "余额变动",
+    "types": {
+      "cash_commission": "货到付款订单——应付佣金",
+      "online_commission": "在线订单——付款时已扣佣金",
+      "debt_recovered": "从在线付款中抵扣余额",
+      "settlement_payment": "已收到付款",
+      "adjustment": "调整"
+    }
   }
 }

@@ -97,7 +97,26 @@
     },
     "shrinkage": "Démarque",
     "lendingPartners": "Partenaires de financement",
-    "toggleMenu": "Basculer le menu"
+    "toggleMenu": "Basculer le menu",
+    "account": "Mon compte",
+    "activity": "Journal d'activité",
+    "sales": "Ventes et remboursements",
+    "shifts": "Services",
+    "dailyReport": "Clôture de journée",
+    "settings": "Paramètres du magasin",
+    "insights": "Analyses",
+    "labels": "Étiquettes et codes-barres",
+    "transfers": "Transferts entre succursales",
+    "help": "Aide",
+    "terms": "Conditions",
+    "privacy": "Confidentialité",
+    "skipToContent": "Aller au contenu principal",
+    "theme": "Thème",
+    "themeSystem": "Auto",
+    "themeLight": "Clair",
+    "themeDark": "Sombre",
+    "textSize": "Taille du texte",
+    "settlements": "Règlements"
   },
   "login": {
     "welcomeBack": "Bon retour",
@@ -115,7 +134,12 @@
     "tagline": "Intelligence d'inventaire d'entreprise",
     "adminSubtitle": "Connectez-vous avec les identifiants de votre magasin",
     "inviteSubtitle": "Entrez votre code d'invitation pour accéder à votre tableau de bord",
-    "inviteCodeHelp": "Entrez le code d'invitation qui vous a été envoyé — c'est aussi ce qui vous servira à vous reconnecter la prochaine fois"
+    "inviteCodeHelp": "Entrez le code d'invitation qui vous a été envoyé — c'est aussi ce qui vous servira à vous reconnecter la prochaine fois",
+    "forgotPassword": "Mot de passe oublié ?",
+    "twoFactorCode": "Code d'authentification",
+    "twoFactorHelp": "Ouvrez votre application d'authentification et saisissez le code à 6 chiffres pour SAFE Stores.",
+    "chooseStore": "Quel magasin ?",
+    "chooseStoreHelp": "Cet e-mail est utilisé dans plusieurs magasins. Choisissez celui auquel vous connecter."
   },
   "dashboard": {
     "title": "Tableau de bord",
@@ -187,7 +211,38 @@
     "selectCustomerError": "Sélectionnez un client pour une vente à crédit",
     "addItemError": "Échec de l'ajout de l'article",
     "cameraError": "Impossible d'accéder à la caméra pour le scan.",
-    "paymentConfirmedToast": "Paiement confirmé"
+    "paymentConfirmedToast": "Paiement confirmé",
+    "mobileMoney": "Mobile money",
+    "amountReceived": "Espèces reçues (facultatif — pour la monnaie)",
+    "receivedTooLow": "Les espèces reçues sont inférieures au total.",
+    "splitPayment": "Paiement fractionné",
+    "singlePayment": "Paiement unique",
+    "splitPayments": "Paiements",
+    "addTender": "Ajouter un paiement",
+    "amount": "Montant",
+    "remaining": "Reste à payer",
+    "addDiscount": "Remise",
+    "removeDiscount": "Retirer",
+    "discountType": "Type",
+    "fixedAmount": "Montant fixe",
+    "discountValue": "Valeur",
+    "discountReason": "Motif (affiché sur le reçu)",
+    "applyDiscount": "Appliquer la remise",
+    "approvalNeeded": "Cette remise dépasse ce qu'un caissier peut accorder seul. Un gérant ou un administrateur doit l'approuver.",
+    "managerEmail": "E-mail du gérant",
+    "managerPassword": "Mot de passe du gérant",
+    "park": "Mettre en attente",
+    "parkPrompt": "Nommez cette vente en attente pour la retrouver (ex. nom du client) :",
+    "parkedDefault": "Vente en attente",
+    "parkedToast": "Vente mise en attente — reprenez-la depuis la liste ci-dessous.",
+    "quickPicks": "Meilleures ventes",
+    "removeItem": "Retirer l'article",
+    "shortcutsHint": "Raccourcis : F2 recherche · Entrée ajoute un code-barres scanné · F4 payer · Échap efface la recherche.",
+    "loyaltyMember": "Membre fidélité (facultatif)",
+    "noMember": "— Aucun —",
+    "memberPoints": "{{points}} points (valeur {{value}})",
+    "usePoints": "Utiliser les points",
+    "pointsApplied": "{{count}} points appliqués"
   },
   "products": {
     "title": "Gestion des produits",
@@ -230,7 +285,24 @@
     "archive": "Archiver",
     "productCreatedToast": "Produit créé",
     "createError": "Échec de la création du produit",
-    "archiveConfirm": "Archiver ce produit ? Son historique est conservé et il pourra être restauré plus tard."
+    "archiveConfirm": "Archiver ce produit ? Son historique est conservé et il pourra être restauré plus tard.",
+    "import": "Importer",
+    "labels": "Étiquettes",
+    "barcode": "Code-barres",
+    "barcodePlaceholder": "Scanner ou saisir (facultatif)",
+    "variantOf": "Variante de",
+    "notAVariant": "— Pas une variante —",
+    "variantLabel": "Variante (taille / couleur)",
+    "variantLabelPlaceholder": "ex. Grand / Rouge",
+    "packSize": "Unités par paquet / carton",
+    "packSizeHelp": "Permet de recevoir le stock par carton. Laissez 1 si vous n'achetez qu'à l'unité.",
+    "packUnit": "Nom du paquet",
+    "packUnitPlaceholder": "ex. carton, caisse",
+    "pack": "paquet",
+    "searchPlaceholder": "Rechercher par nom, SKU, code-barres ou catégorie",
+    "sellingPrice": "Prix de vente",
+    "markupHelp": "Marge : {{pct}} % sur le coût",
+    "enterCostFirst": "Saisissez d'abord le prix de revient"
   },
   "stockArrivalPage": {
     "title": "Réception de stock",
@@ -249,7 +321,8 @@
     "batch": "Lot",
     "date": "Date",
     "recordedToast": "Réception de stock enregistrée",
-    "recordError": "Échec de l'enregistrement de la réception"
+    "recordError": "Échec de l'enregistrement de la réception",
+    "packsReceived": "{{unit}}s reçus ({{size}} chacun)"
   },
   "movementsPage": {
     "title": "Mouvements de stock",
@@ -362,7 +435,19 @@
     "paymentRecordedToast": "Paiement enregistré",
     "paymentError": "Échec de l'enregistrement du paiement",
     "whatsappReminder": "Bonjour {{name}}, ceci est un rappel amical concernant votre solde impayé de {{amount}} auprès de {{store}}. Merci !",
-    "us": "nous"
+    "us": "nous",
+    "email": "E-mail (facultatif)",
+    "birthday": "Anniversaire (facultatif)",
+    "statement": "Relevé",
+    "charges": "Débits",
+    "payments": "Paiements",
+    "birthdaysSoon": "Anniversaires cette semaine",
+    "today": "aujourd'hui",
+    "inDays": "dans {{count}} jours",
+    "sendWish": "Envoyer des vœux",
+    "birthdayMessage": "Joyeux anniversaire, {{name}} ! 🎉 Toute l'équipe de {{store}} vous souhaite une merveilleuse journée. Passez cette semaine pour une petite surprise !",
+    "pointsBalance": "Points fidélité : {{points}} (valeur {{value}})",
+    "pointsExpiring": "{{count}} expirent dans les 30 jours"
   },
   "cycleCountingPage": {
     "title": "⏱️ Comptage tournant",
@@ -457,7 +542,9 @@
     "enable": "Activer",
     "remove": "Supprimer",
     "removeConfirm": "Supprimer cet utilisateur ?",
-    "statusChanged": "{{name}} est maintenant {{status}}"
+    "statusChanged": "{{name}} est maintenant {{status}}",
+    "setPassword": "Définir le mot de passe",
+    "setPasswordPrompt": "Nouveau mot de passe pour {{name}} (au moins 8 caractères) :"
   },
   "cameraPage": {
     "title": "Caméra et scanner QR",
@@ -662,7 +749,14 @@
     "actions": "Actions",
     "send": "Envoyer",
     "cancel": "Annuler",
-    "markReceived": "Marquer comme reçu"
+    "markReceived": "Marquer comme reçu",
+    "poGreeting": "Bonjour {{supplier}}, merci de nous livrer ce qui suit :",
+    "poFrom": "De",
+    "poThanks": "Merci.",
+    "purchaseOrder": "Bon de commande",
+    "unitCost": "Coût unitaire",
+    "printPo": "Imprimer / PDF",
+    "whatsappPo": "Envoyer sur WhatsApp"
   },
   "expiryPage": {
     "title": "Suivi des dates d'expiration",
@@ -872,7 +966,19 @@
     "fulfill": "Traiter",
     "orderFulfilled": "Commande traitée — stock mis à jour",
     "fulfillFailed": "Échec du traitement de la commande",
-    "noOrdersYet": "Aucune commande du marché pour l'instant."
+    "noOrdersYet": "Aucune commande du marché pour l'instant.",
+    "paidOnline": "Payé en ligne",
+    "awaitingPayment": "En attente de paiement",
+    "payOnDelivery": "Paiement à la livraison",
+    "cancel": "Annuler",
+    "cancelPrompt": "Annuler cette commande ? Ajoutez un court motif pour le client (facultatif) :",
+    "orderCancelled": "Commande annulée",
+    "cancelFailed": "Impossible de mettre à jour la commande",
+    "refundDueToast": "Commande annulée. Elle a été payée en ligne : veuillez rembourser {{amount}} au client depuis votre tableau de bord Paystack. La commission de la plateforme a été reversée sur votre solde de règlement.",
+    "refundDue": "Remboursement dû",
+    "refunded": "Remboursé",
+    "markRefunded": "Marquer comme remboursé",
+    "confirmRefunded": "Confirmez-vous avoir remboursé intégralement ce client ?"
   },
   "storefrontPage": {
     "title": "🛍️ Boutique",
@@ -898,7 +1004,23 @@
     "somethingWentWrong": "Une erreur s'est produite",
     "orderPlaced": "Commande passée !",
     "trackBelow": "Vous pouvez la suivre ci-dessous.",
-    "orderFailed": "Échec de la commande"
+    "orderFailed": "Échec de la commande",
+    "searchPlaceholder": "Rechercher des produits",
+    "share": "Partager la boutique",
+    "linkCopied": "Lien de la boutique copié",
+    "trackOrder": "Suivre votre commande →",
+    "remove": "Retirer",
+    "payOnCollection": "Payez au retrait ou à la livraison.",
+    "orderOnWhatsApp": "Commander sur WhatsApp",
+    "waGreeting": "Bonjour {{store}}, je souhaite commander :",
+    "metaDescription": "Achetez chez {{name}} {{city}} en ligne — commandez maintenant, payez au retrait ou à la livraison.",
+    "howToPay": "Comment souhaitez-vous payer ?",
+    "payOnline": "Payer maintenant en ligne (carte, virement, USSD)",
+    "payOnlineOnly": "Le paiement se fait en ligne lors de la commande.",
+    "securePayNote": "Paiement sécurisé par Paystack, versé directement à {{store}}.",
+    "emailForPayment": "Saisissez votre e-mail pour recevoir votre reçu de paiement.",
+    "payNow": "Payer {{amount}}",
+    "notTakingOrders": "Ce magasin ne prend pas de commandes en ligne pour le moment. Veuillez passer ou appeler le magasin."
   },
   "marketplaceHomePage": {
     "title": "🏪 Marché SAFE Stores",
@@ -1001,7 +1123,9 @@
     "tierMegaLabel": "Méga Magasin",
     "tierMegaDesc": "Produits et utilisateurs illimités — idéal pour les grands magasins ou à plusieurs emplacements",
     "heading": "Enregistrez votre magasin",
-    "confirmPasswordLabel": "Confirmer le mot de passe"
+    "confirmPasswordLabel": "Confirmer le mot de passe",
+    "agreePrefix": "J'accepte les",
+    "agreeAnd": "et la"
   },
   "setupPage": {
     "title": "👋 Bienvenue sur SAFE Stores",
@@ -1021,5 +1145,519 @@
     "loginFailed": "Échec de la connexion",
     "submit": "⭐ Accéder au Super Admin",
     "backToStore": "← Retour à la connexion magasin"
+  },
+  "forgotPage": {
+    "title": "Réinitialiser votre mot de passe",
+    "subtitle": "Saisissez l'e-mail avec lequel vous vous connectez. Nous vous enverrons un lien pour choisir un nouveau mot de passe.",
+    "send": "Envoyer le lien",
+    "sending": "Envoi…",
+    "backToLogin": "Retour à la connexion",
+    "noEmailHint": "Personnel sans adresse e-mail : demandez à l'administrateur du magasin de définir un nouveau mot de passe depuis la page Utilisateurs."
+  },
+  "resetPage": {
+    "title": "Choisissez un nouveau mot de passe",
+    "newPassword": "Nouveau mot de passe",
+    "confirmPassword": "Confirmer le nouveau mot de passe",
+    "mismatch": "Les deux mots de passe ne correspondent pas.",
+    "save": "Enregistrer le mot de passe",
+    "missingToken": "Ce lien est incomplet. Ouvrez à nouveau le lien de votre e-mail ou demandez-en un nouveau.",
+    "done": "Mot de passe mis à jour. Vous pouvez vous connecter.",
+    "goToLogin": "Aller à la connexion"
+  },
+  "verifyPage": {
+    "title": "Confirmez votre e-mail",
+    "working": "Confirmation…",
+    "continue": "Continuer"
+  },
+  "passwordHint": "Au moins 8 caractères. Une courte phrase est plus facile à retenir et plus difficile à deviner.",
+  "accountPage": {
+    "title": "Mon compte",
+    "profile": "Profil",
+    "emailNotVerified": "Votre e-mail n'est pas encore confirmé. Le confirmer vous permet de réinitialiser votre mot de passe en cas d'oubli.",
+    "resend": "Renvoyer l'e-mail de confirmation",
+    "changePassword": "Changer le mot de passe",
+    "currentPassword": "Mot de passe actuel",
+    "newPassword": "Nouveau mot de passe",
+    "updatePassword": "Mettre à jour le mot de passe",
+    "twoFactor": "Connexion à deux facteurs",
+    "twoFactorIntro": "Ajoutez une deuxième étape à la connexion avec une application d'authentification gratuite (Google Authenticator, Microsoft Authenticator, Authy…). Même si quelqu'un connaît votre mot de passe, il ne peut pas se connecter sans votre téléphone.",
+    "twoFactorOn": "La connexion à deux facteurs est ACTIVÉE.",
+    "twoFactorOff": "La connexion à deux facteurs est désactivée.",
+    "turnOn": "Configurer la double authentification",
+    "turnOff": "Désactiver la double authentification",
+    "scanQr": "1. Scannez ce code QR avec votre application d'authentification (ou saisissez la clé ci-dessous).",
+    "enterCode": "2. Saisissez le code à 6 chiffres affiché :",
+    "confirmCode": "Confirmer et activer",
+    "codeLabel": "Code à 6 chiffres",
+    "passwordLabel": "Mot de passe",
+    "notAvailableDesktop": "La connexion à deux facteurs est disponible dans l'édition en ligne (web).",
+    "sessions": "Appareils et sessions",
+    "sessionsIntro": "Téléphone perdu ou ordinateur partagé ? Déconnectez-vous partout ailleurs.",
+    "logoutAll": "Déconnecter tous les autres appareils",
+    "yourData": "Vos données",
+    "yourDataIntro": "Téléchargez une copie des données personnelles que SAFE Stores détient sur vous.",
+    "download": "Télécharger mes données",
+    "deleteAccount": "Supprimer mon compte",
+    "deleteAccountIntro": "Supprime votre nom, votre e-mail et votre identifiant. Les ventes que vous avez enregistrées restent dans les comptes du magasin sous « Utilisateur supprimé ».",
+    "deleteConfirm": "Supprimer définitivement votre compte ? Cette action est irréversible.",
+    "closeStore": "Fermer le magasin et supprimer toutes les données",
+    "closeStoreIntro": "Supprime définitivement ce magasin et tout son contenu après un délai de grâce de 30 jours. Vous pouvez annuler pendant ces 30 jours.",
+    "typeStoreName": "Saisissez le nom du magasin pour confirmer",
+    "scheduledFor": "Ce magasin sera définitivement supprimé le {{date}}.",
+    "cancelDeletion": "Annuler la suppression",
+    "requestDeletion": "Programmer la suppression"
+  },
+  "activityPage": {
+    "title": "Journal d'activité",
+    "subtitle": "Qui a fait quoi, et quand — changements de prix, remboursements, remises, utilisateurs, sécurité.",
+    "when": "Quand",
+    "who": "Qui",
+    "action": "Action",
+    "details": "Détails",
+    "store": "Magasin",
+    "filter": "Filtrer",
+    "all": "Toutes les actions",
+    "empty": "Rien d'enregistré pour l'instant.",
+    "loadMore": "Charger plus"
+  },
+  "receipt": {
+    "subtotal": "Sous-total",
+    "discount": "Remise",
+    "tax": "Taxe",
+    "inclusive": "(incluse)",
+    "change": "Monnaie",
+    "refunded": "Remboursé",
+    "returned": "{{count}} retourné(s)",
+    "pdf": "Enregistrer en PDF",
+    "copyLink": "Copier le lien",
+    "linkCopied": "Lien du reçu copié",
+    "share": "Partager",
+    "customerPhone": "Numéro WhatsApp du client",
+    "customerPhonePlaceholder": "N° WhatsApp du client",
+    "printerType": "Connexion de l'imprimante de reçus",
+    "thermalChoose": "Imprimante thermique…",
+    "thermalPrint": "Imprimer sur l'imprimante de reçus",
+    "thermalPick": "Choisir l'imprimante",
+    "sentToPrinter": "Envoyé à l'imprimante de reçus",
+    "printerFailed": "Impossible de joindre l'imprimante de reçus",
+    "qrAlt": "Code QR menant à ce reçu numérique",
+    "scanForDigital": "Scannez pour votre reçu numérique",
+    "notFound": "Reçu introuvable. Le lien est peut-être incomplet."
+  },
+  "shift": {
+    "title": "Services",
+    "subtitle": "Le service de chaque caissier : fonds de caisse, espèces encaissées et espèces comptées à la clôture.",
+    "onShift": "En service depuis {{time}}",
+    "noShift": "Vous n'êtes pas en service.",
+    "start": "Commencer le service",
+    "end": "Terminer le service",
+    "startTitle": "Commencer votre service",
+    "endTitle": "Terminer le service et compter la caisse",
+    "openingFloat": "Fonds de caisse (espèces dans le tiroir maintenant)",
+    "countedCash": "Espèces comptées",
+    "expectedCash": "Espèces attendues",
+    "notes": "Notes (facultatif)",
+    "openedToast": "Service commencé",
+    "closedToast": "Service clôturé. Écart : {{variance}}",
+    "cashier": "Caissier",
+    "started": "Début",
+    "ended": "Fin",
+    "status": "Statut",
+    "variance": "Écart",
+    "zReport": "Rapport Z",
+    "empty": "Aucun service pour l'instant. Commencez-en un depuis la caisse.",
+    "stillOpen": "toujours ouvert",
+    "sales": "Ventes",
+    "salesCount": "Ventes",
+    "unitsSold": "Articles vendus",
+    "gross": "Ventes brutes",
+    "net": "Net (après remboursements)",
+    "byMethod": "Par moyen de paiement",
+    "cashDrawer": "Tiroir-caisse",
+    "cashSales": "Ventes en espèces",
+    "cashRefunds": "Remboursements en espèces",
+    "openingFloatShort": "Fonds de caisse"
+  },
+  "salesPage": {
+    "title": "Ventes et remboursements",
+    "subtitle": "Retrouvez toute vente, réimprimez ou partagez son reçu et traitez les retours.",
+    "search": "Numéro de reçu",
+    "searchPlaceholder": "N° de reçu (ex. 4 derniers caractères)",
+    "from": "Du",
+    "to": "Au",
+    "empty": "Aucune vente trouvée.",
+    "receipt": "Reçu",
+    "when": "Quand",
+    "cashier": "Caissier",
+    "method": "Payé par",
+    "items": "Articles",
+    "view": "Voir",
+    "refund": "Rembourser / retourner des articles",
+    "refundHistory": "Remboursements sur cette vente",
+    "refundIntro": "Choisissez combien de chaque article reviennent. Décochez « Remettre en stock » pour les produits abîmés — ils seront passés en perte au lieu de retourner en rayon.",
+    "canReturn": "jusqu'à {{count}}",
+    "qtyToReturn": "Quantité à retourner",
+    "restock": "Remettre en stock",
+    "refundMethod": "Remboursement versé en",
+    "storeCredit": "Avoir (réduit ce que le client doit)",
+    "reason": "Motif",
+    "reasonPlaceholder": "ex. mauvaise taille, défectueux",
+    "confirmRefund": "Confirmer le remboursement",
+    "pickItems": "Saisissez une quantité pour au moins un article.",
+    "refunded": "Remboursé {{amount}}"
+  },
+  "dailyPage": {
+    "title": "Clôture de journée",
+    "subtitle": "Jour calendaire dans le fuseau horaire du magasin ({{tz}}).",
+    "date": "Date",
+    "gross": "Ventes brutes",
+    "orders": "Ventes",
+    "average": "Vente moyenne",
+    "net": "Net après remboursements",
+    "refunds": "Remboursements ({{count}})",
+    "noSales": "Aucune vente ce jour.",
+    "byCashier": "Par caissier",
+    "byHour": "Par heure",
+    "topItems": "Meilleurs articles"
+  },
+  "settingsPage": {
+    "title": "Paramètres du magasin",
+    "subtitle": "Devise, fuseau horaire, taxe et informations du reçu pour ce magasin.",
+    "saved": "Paramètres enregistrés",
+    "store": "Informations du magasin",
+    "storeName": "Nom du magasin",
+    "phone": "Téléphone (imprimé sur les reçus)",
+    "address": "Adresse",
+    "city": "Ville",
+    "region": "Devise et fuseau horaire",
+    "currency": "Devise",
+    "platformDefault": "Valeur par défaut de la plateforme ({{code}})",
+    "preview": "Exemple",
+    "currencyNote": "Changer de devise modifie l'affichage des montants à partir de maintenant ; les montants passés ne sont pas convertis.",
+    "timezone": "Fuseau horaire",
+    "timezoneNote": "Détermine ce que signifie « aujourd'hui » pour les rapports, alertes d'expiration et reçus.",
+    "tax": "Taxe",
+    "taxLabel": "Nom de la taxe",
+    "taxRate": "Taux (%)",
+    "taxInclusive": "Les prix incluent déjà la taxe",
+    "inclusiveHelp": "Les prix en rayon restent identiques ; les reçus indiquent la part de taxe de chaque vente.",
+    "exclusiveHelp": "La taxe s'ajoute aux prix en rayon à la caisse.",
+    "taxNumber": "Numéro d'identification fiscale (facultatif)",
+    "taxNote": "Indiquez le taux exigé par votre administration fiscale. 0 désactive la taxe.",
+    "till": "Caisse et reçus",
+    "maxDiscount": "Remise maximale qu'un caissier peut accorder sans gérant (%)",
+    "maxDiscountHelp": "Au-delà, un gérant ou un administrateur approuve avec son e-mail et son mot de passe.",
+    "requireShift": "Les caissiers doivent commencer un service (avec fonds de caisse) avant d'encaisser",
+    "receiptHeader": "En-tête du reçu",
+    "receiptFooter": "Pied du reçu",
+    "receiptFooterPlaceholder": "ex. Merci ! Les articles peuvent être retournés sous 7 jours avec ce reçu.",
+    "loyalty": "Points fidélité",
+    "loyaltyIntro": "Les clients liés à une vente gagnent des points utilisables en caisse. Mettez 0 point pour désactiver.",
+    "pointsPer100": "Points gagnés par tranche de 100 dépensés",
+    "pointValue": "Valeur d'un point (dans votre devise)",
+    "pointsExpiry": "Les points expirent après (mois)",
+    "pointsExpiryHelp": "0 = n'expirent jamais.",
+    "loyaltyExample": "Exemple : dépenser {{spend}} rapporte {{points}} points, d'une valeur de {{worth}}.",
+    "dailySummary": "Envoyer aux administrateurs un résumé des ventes du jour à 21 h"
+  },
+  "importPage": {
+    "title": "Importer des produits",
+    "subtitle": "Importez toute votre liste de produits depuis un tableur (CSV ou Excel).",
+    "step1": "Téléchargez le modèle ou utilisez votre propre feuille — les noms de colonnes courants (Nom, SKU, Code-barres, Coût, Prix, Stock…) sont reconnus automatiquement.",
+    "step2": "Choisissez le fichier ci-dessous. Nous vérifions chaque ligne avant tout enregistrement.",
+    "step3": "Vérifiez le contrôle, puis importez. Les SKU existants sont mis à jour (le stock n'est jamais écrasé) ; les nouveaux sont créés avec leur stock initial.",
+    "template": "Télécharger le modèle",
+    "chooseFile": "Fichier tableur (.csv ou .xlsx)",
+    "rowsFound": "{{count}} lignes trouvées",
+    "emptyFile": "Ce fichier ne contient aucune ligne.",
+    "checkTitle": "Vérifier avant l'import",
+    "willCreate": "{{count}} nouveaux",
+    "willUpdate": "{{count}} à mettre à jour",
+    "skipped": "{{count}} lignes avec des problèmes (ignorées)",
+    "row": "Ligne",
+    "problem": "Problème",
+    "preview": "Aperçu (20 premières lignes)",
+    "importNow": "Importer {{count}} produits",
+    "done": "Terminé : {{created}} créés, {{updated}} mis à jour.",
+    "viewProducts": "Voir les produits"
+  },
+  "labelsPage": {
+    "title": "Étiquettes et codes-barres",
+    "subtitle": "Imprimez des étiquettes de prix et des autocollants code-barres sur n'importe quelle imprimante.",
+    "missing": "{{count}} produits n'ont pas encore de code-barres.",
+    "generate": "Créer des codes-barres internes pour eux",
+    "generated": "{{count}} codes-barres créés",
+    "size": "Taille d'étiquette",
+    "oneEach": "1 de chaque",
+    "print": "Imprimer les étiquettes",
+    "copies": "Copies",
+    "pickSome": "Indiquez combien d'étiquettes vous voulez pour au moins un produit."
+  },
+  "insightsPage": {
+    "title": "Analyses",
+    "subtitle": "Ce qui vous rapporte, ce qui ne rapporte pas, et quoi recommander.",
+    "period": "Période",
+    "lastDays": "{{count}} derniers jours",
+    "tabs": {
+      "profit": "Bénéfice et marge",
+      "abc": "Analyse ABC",
+      "deadStock": "Stock dormant",
+      "forecast": "Prévision",
+      "heatmap": "Heures de pointe"
+    },
+    "revenue": "Chiffre d'affaires",
+    "cost": "Coût des marchandises",
+    "grossProfit": "Marge brute",
+    "margin": "Marge",
+    "units": "Unités",
+    "profitNote": "Le chiffre d'affaires est ce que les clients ont payé après remises et remboursements ; le coût utilise le prix de revient actuel de chaque produit.",
+    "noSales": "Aucune vente sur cette période.",
+    "class": "Classe",
+    "classA": "A — meilleures ventes (80 % du chiffre d'affaires)",
+    "classB": "B — régulières (15 % suivants)",
+    "classC": "C — lentes (5 % restants)",
+    "share": "Part",
+    "abcNote": "Gardez toujours les articles A en stock et bien exposés ; réexaminez les articles C — ils immobilisent trésorerie et rayonnage.",
+    "idleItems": "Articles inactifs depuis {{days}}+ jours",
+    "cashTiedUp": "Trésorerie immobilisée (au coût)",
+    "deadNote": "Produits en stock sans vente sur la période. Envisagez une promotion, un lot ou un retour au fournisseur.",
+    "noDead": "Rien ne dort en stock. 👍",
+    "onHand": "En stock",
+    "daysIdle": "Jours d'inactivité",
+    "valueAtCost": "Valeur au coût",
+    "forecastNote": "Basé sur les ventes quotidiennes moyennes des {{days}} derniers jours.",
+    "avgDaily": "Moy. / jour",
+    "next30": "30 prochains jours",
+    "daysCover": "Jours de stock restants",
+    "suggested": "Commande suggérée",
+    "reorderNow": "Recommander maintenant",
+    "heatmapNote": "Ventes par jour et par heure ({{tz}}). Plus foncé = plus actif — planifiez personnel et livraisons en conséquence."
+  },
+  "transfersPage": {
+    "title": "Transferts entre succursales",
+    "subtitle": "Déplacez du stock entre vos succursales. Il quitte votre réserve maintenant et arrive quand l'autre succursale confirme.",
+    "noBranches": "Pour transférer du stock, il vous faut un compte administrateur ou gérant avec la même adresse e-mail dans une autre succursale.",
+    "new": "Nouveau transfert",
+    "to": "Envoyer à",
+    "product": "Produit",
+    "qty": "Qté",
+    "inBackroom": "{{count}} en réserve",
+    "addLine": "Ajouter un produit",
+    "note": "Note (facultatif)",
+    "send": "Envoyer le stock",
+    "sent": "Transfert envoyé",
+    "history": "Transferts",
+    "empty": "Aucun transfert pour l'instant.",
+    "when": "Quand",
+    "direction": "Succursale",
+    "items": "Articles",
+    "status": "Statut",
+    "receive": "Recevoir"
+  },
+  "trackPage": {
+    "notFound": "Commande introuvable. Vérifiez le lien.",
+    "reference": "Commande",
+    "cancelled": "Cette commande a été annulée.",
+    "steps": {
+      "placed": "Commande reçue",
+      "fulfilled": "Prête / livrée"
+    },
+    "questions": "Des questions ? Appelez le magasin :",
+    "paid": "Payé",
+    "awaitingPayment": "En attente de paiement",
+    "payOnDelivery": "Paiement au retrait / à la livraison",
+    "payNow": "Payer maintenant",
+    "paymentReceived": "Paiement reçu — merci !",
+    "paymentNotConfirmed": "Nous n'avons pas encore pu confirmer le paiement. Si vous avez été débité, cela se mettra à jour sous peu.",
+    "emailPrompt": "Votre adresse e-mail pour le reçu de paiement :",
+    "refundPending": "Vous avez payé en ligne, le magasin va donc vous rembourser. Contactez le magasin si vous n'avez rien reçu d'ici quelques jours.",
+    "refundDone": "Le magasin a indiqué que votre remboursement a été envoyé."
+  },
+  "onboarding": {
+    "title": "Préparez votre magasin",
+    "hide": "Masquer",
+    "go": "Commencer",
+    "samplesHint": "Vous découvrez ? Ajoutez une douzaine de produits d'exemple pour essayer la caisse tout de suite.",
+    "loadSamples": "Ajouter des produits d'exemple",
+    "steps": {
+      "settings": {
+        "title": "Configurez votre magasin",
+        "hint": "Devise, fuseau horaire, taxe et informations du reçu."
+      },
+      "products": {
+        "title": "Ajoutez vos produits",
+        "hint": "Importez un tableur ou ajoutez-les un par un."
+      },
+      "shelf": {
+        "title": "Mettez du stock en rayon",
+        "hint": "Déplacez le stock de la réserve pour pouvoir le vendre."
+      },
+      "staff": {
+        "title": "Invitez votre équipe",
+        "hint": "Envoyez aux caissiers et au personnel un code d'invitation par WhatsApp ou SMS."
+      },
+      "sale": {
+        "title": "Faites votre première vente",
+        "hint": "Ouvrez la caisse, scannez ou touchez les articles, encaissez."
+      }
+    }
+  },
+  "help": {
+    "title": "Aide",
+    "subtitle": "Réponses rapides pour les tâches quotidiennes.",
+    "searchPlaceholder": "Que voulez-vous faire ?",
+    "noMatch": "Aucune réponse ne correspond.",
+    "askSupport": "Demandez à notre équipe d'assistance →",
+    "goThere": "Y aller",
+    "shortcutsTitle": "Raccourcis clavier de la caisse",
+    "firstSteps": {
+      "q": "Comment démarrer ?",
+      "a": "Suivez la liste du tableau de bord : configurez le magasin, ajoutez des produits, mettez du stock en rayon, invitez le personnel, puis faites une vente test."
+    },
+    "importProducts": {
+      "q": "Comment ajouter beaucoup de produits d'un coup ?",
+      "a": "Produits → Importer. Téléchargez le modèle ou utilisez votre propre tableur (CSV ou Excel). Nous vérifions chaque ligne avant tout enregistrement."
+    },
+    "receiveStock": {
+      "q": "Comment enregistrer une livraison ?",
+      "a": "Arrivée de stock → choisissez le produit et la quantité. Si le produit arrive en cartons, saisissez le nombre de cartons et nous calculons les unités. Ajoutez lot et date d'expiration pour les denrées périssables."
+    },
+    "moveToShelf": {
+      "q": "Pourquoi ne puis-je pas vendre un article que je viens de recevoir ?",
+      "a": "Le nouveau stock va en réserve. Utilisez Mouvements de stock → Transférer en rayon pour le rendre disponible en caisse."
+    },
+    "sell": {
+      "q": "Comment faire une vente ?",
+      "a": "Caisse → Nouvelle commande. Scannez les codes-barres avec un lecteur ou l'appareil photo, touchez une meilleure vente ou recherchez. Choisissez ensuite le mode de paiement et confirmez."
+    },
+    "shift": {
+      "q": "Qu'est-ce qu'un service ?",
+      "a": "Le temps d'un caissier à la caisse. Commencez un service avec les espèces du tiroir, terminez-le en comptant les espèces. Le rapport Z montre tout excédent ou manque."
+    },
+    "discount": {
+      "q": "Comment accorder une remise ?",
+      "a": "Dans une commande ouverte, touchez Remise et saisissez un % ou un montant. Les caissiers peuvent aller jusqu'à la limite du magasin ; au-delà, il faut l'e-mail et le mot de passe d'un gérant."
+    },
+    "splitPay": {
+      "q": "Le client veut payer en partie en espèces, en partie par carte ?",
+      "a": "Touchez Paiement fractionné, ajoutez chaque moyen de paiement et son montant. Les espèces peuvent dépasser le dû — nous affichons la monnaie."
+    },
+    "refund": {
+      "q": "Comment rembourser ou reprendre un article ?",
+      "a": "Ventes et remboursements → trouvez le reçu → Voir → Rembourser / retourner des articles. Choisissez les quantités ; décochez Remettre en stock pour les produits abîmés. Seuls les gérants et administrateurs peuvent rembourser."
+    },
+    "receipts": {
+      "q": "Comment réimprimer ou envoyer un reçu ?",
+      "a": "Ventes et remboursements → Voir. Imprimez, enregistrez en PDF, envoyez sur WhatsApp ou partagez le lien. Chaque reçu a aussi un code QR vers une copie numérique."
+    },
+    "thermal": {
+      "q": "Puis-je imprimer sur une imprimante de reçus ?",
+      "a": "Oui, dans Chrome ou Edge. Sur un reçu, choisissez la connexion de l'imprimante (USB, série ou Bluetooth), puis Imprimer sur l'imprimante de reçus. Votre navigateur mémorise l'imprimante."
+    },
+    "labels": {
+      "q": "Comment imprimer des étiquettes de prix et des codes-barres ?",
+      "a": "Étiquettes et codes-barres → indiquez le nombre de copies par produit, choisissez une taille, Imprimer. Les produits sans code-barres peuvent recevoir un code interne en un clic."
+    },
+    "credit": {
+      "q": "Comment vendre à crédit (payer plus tard) ?",
+      "a": "Ajoutez le client dans Clients, puis choisissez Crédit à la caisse. Son solde se met à jour automatiquement ; enregistrez les paiements et envoyez des rappels WhatsApp depuis la page Clients."
+    },
+    "loyalty": {
+      "q": "Comment fonctionnent les points fidélité ?",
+      "a": "Activez-les dans Paramètres du magasin. Choisissez le client comme membre fidélité à la caisse pour qu'il gagne des points ; utilisez Utiliser les points pour les dépenser en remise."
+    },
+    "tax": {
+      "q": "Comment configurer la TVA ou la taxe de vente ?",
+      "a": "Paramètres du magasin → Taxe. Saisissez le taux et indiquez si vos prix en rayon incluent déjà la taxe. Les reçus et rapports affichent alors la taxe."
+    },
+    "staff": {
+      "q": "Comment ajouter un caissier ?",
+      "a": "Invitations → créez une invitation avec son rôle et partagez le code par WhatsApp, SMS ou e-mail. Les administrateurs peuvent définir ou réinitialiser le mot de passe d'un employé depuis Utilisateurs."
+    },
+    "offline": {
+      "q": "Que se passe-t-il quand internet est coupé ?",
+      "a": "Continuez à vendre. Les ventes et mouvements de stock sont enregistrés sur l'appareil et envoyés automatiquement au retour de la connexion. La barre du haut indique combien sont en attente."
+    },
+    "endOfDay": {
+      "q": "Où voir la recette du jour ?",
+      "a": "Clôture de journée montre ventes, moyens de paiement, remboursements, meilleurs articles et heures de pointe pour toute date, dans le fuseau horaire du magasin."
+    },
+    "insights": {
+      "q": "Quels produits me rapportent le plus ?",
+      "a": "Analyses → Bénéfice et marge, Analyse ABC et Stock dormant montrent ce qui rapporte, ce qui est lent et ce qui immobilise la trésorerie."
+    },
+    "reorder": {
+      "q": "Que dois-je recommander ?",
+      "a": "Réapprovisionnement suggère des quantités à partir de vos ventes. Créez un bon de commande et envoyez-le au fournisseur en PDF ou sur WhatsApp."
+    },
+    "security": {
+      "q": "Comment sécuriser mon compte ?",
+      "a": "Mon compte → activez la connexion à deux facteurs avec une application d'authentification. En cas de perte de téléphone, utilisez Déconnecter tous les autres appareils et changez votre mot de passe."
+    },
+    "export": {
+      "q": "Comment télécharger mes données ?",
+      "a": "Les administrateurs peuvent exporter les données du magasin (CSV/JSON) depuis Exporter. Chacun peut télécharger ses données personnelles depuis Mon compte."
+    },
+    "support": {
+      "q": "Comment contacter l'assistance ?",
+      "a": "Assistance → Nouveau ticket. Notre équipe répond dans l'application."
+    },
+    "settlements": {
+      "q": "Comment fonctionnent les commissions et règlements ?",
+      "a": "Les paiements en ligne de la boutique arrivent directement sur votre compte bancaire, la commission de la plateforme étant prélevée à la source. Pour les commandes payées à la livraison, c'est vous qui encaissez : la commission est ajoutée à votre solde et réglée automatiquement sur vos prochains paiements en ligne — ou vous pouvez la payer à tout moment depuis Règlements."
+    }
+  },
+  "paymentsCard": {
+    "title": "Paiements en ligne",
+    "intro": "Permettez aux clients de payer en ligne sur votre boutique. Les paiements sont traités par Paystack et versés directement sur VOTRE compte bancaire — SAFE Stores ne détient jamais l'argent de vos clients. Les frais Paystack sont prélevés sur chaque paiement.",
+    "commission": "Une commission de plateforme de {{pct}} % est déduite automatiquement de chaque paiement en ligne.",
+    "notConfigured": "Les paiements en ligne ne sont pas encore activés sur cette plateforme. Vous pouvez toujours prendre des commandes payées à la livraison.",
+    "currencyUnsupported": "Les paiements en ligne ne sont pas encore disponibles en {{currency}}. Le paiement à la livraison fonctionne toujours.",
+    "linkedTo": "Les paiements vont à {{name}} — {{bank}} ••••{{last4}}",
+    "change": "Changer de compte",
+    "linkAccount": "Lier un compte bancaire",
+    "bank": "Banque",
+    "accountNumber": "Numéro de compte",
+    "accountName": "Titulaire du compte : {{name}}",
+    "check": "Vérifier le compte",
+    "confirmLink": "Oui, payer sur ce compte",
+    "privacy": "Nous transmettons le numéro de compte à Paystack et ne conservons que ses 4 derniers chiffres.",
+    "linked": "Compte bancaire lié — paiements en ligne activés",
+    "acceptOnline": "Accepter les paiements en ligne sur ma boutique",
+    "acceptOnDelivery": "Accepter le paiement au retrait / à la livraison"
+  },
+  "settlementsPage": {
+    "title": "Règlements",
+    "subtitle": "Votre solde avec SAFE Stores pour les commandes passées via votre boutique en ligne.",
+    "youOwe": "Vous devez",
+    "balanceClear": "Solde — tout est réglé",
+    "credit": "En crédit",
+    "appSalesMonth": "Ventes de la boutique en ligne ce mois-ci",
+    "commissionMonth": "Commission ce mois-ci ({{pct}} %)",
+    "payPrompt": "Votre solde est de {{amount}}. Payez-le quand vous voulez — ou il sera réglé automatiquement sur vos prochaines commandes en ligne.",
+    "payNow": "Payer {{amount}} maintenant",
+    "payByTransfer": "Demandez à votre administrateur de payer, ou payez par virement et la plateforme l'enregistrera.",
+    "paidThanks": "Paiement reçu — merci. Votre solde a été mis à jour.",
+    "notConfirmed": "Nous n'avons pas encore pu confirmer le paiement. Si vous avez été débité, cela se mettra à jour sous peu.",
+    "cashPaused": "Votre solde dépasse {{limit}}, le paiement à la livraison est donc suspendu sur votre boutique. Les clients peuvent toujours payer en ligne. Réglez votre solde pour le réactiver.",
+    "howTitle": "Fonctionnement des règlements",
+    "howOnline": "Les paiements en ligne vont directement de Paystack à votre compte bancaire. Notre commission de {{pct}} % est prélevée automatiquement avant qu'ils ne vous parviennent.",
+    "howCash": "Commandes payées à la livraison : vous encaissez le montant total auprès du client, la commission de {{pct}} % est donc ajoutée à votre solde lorsque vous marquez la commande comme exécutée.",
+    "howNetting": "Votre solde est réglé automatiquement sur vos prochains paiements en ligne — jusqu'à {{pct}} % de chacun — vous avez donc rarement besoin de payer séparément.",
+    "howLimit": "Si votre solde dépasse {{limit}}, le paiement à la livraison est suspendu jusqu'au règlement.",
+    "howPos": "Les ventes en magasin à votre caisse ne sont jamais soumises à commission.",
+    "statement": "Relevé",
+    "empty": "Aucune commande de la boutique en ligne pour l'instant.",
+    "entry": "Écriture",
+    "orderTotal": "Commande",
+    "commission": "Commission",
+    "balanceChange": "Variation du solde",
+    "types": {
+      "cash_commission": "Commande payée à la livraison — commission due",
+      "online_commission": "Commande en ligne — commission prélevée au paiement",
+      "debt_recovered": "Solde réglé sur un paiement en ligne",
+      "settlement_payment": "Paiement reçu",
+      "adjustment": "Ajustement"
+    }
   }
 }
