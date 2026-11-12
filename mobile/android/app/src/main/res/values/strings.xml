@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">SAFE Stores</string>
+    <string name="title_activity_main">SAFE Stores</string>
+    <string name="package_name">com.safestores.app</string>
+    <string name="custom_url_scheme">com.safestores.app</string>
+</resources>

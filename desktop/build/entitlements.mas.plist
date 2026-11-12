@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <!-- Mac App Store builds MUST be sandboxed -->
+  <key>com.apple.security.app-sandbox</key>
+  <true/>
+
+  <!-- The embedded server listens on the LAN (peer sync) and talks to the
+       cloud (Tesseract's first-run language-model download, cloud sync) -->
+  <key>com.apple.security.network.client</key>
+  <true/>
+  <key>com.apple.security.network.server</key>
+  <true/>
+
+  <!-- Barcode/QR scanning and receipt photo capture use the camera -->
+  <key>com.apple.security.device.camera</key>
+  <true/>
+
+  <!-- SQLite database and uploaded receipt/camera images are stored under
+       the app's own sandboxed container (Application Support) — no
+       broader file-system entitlement is needed for that. -->
+  <key>com.apple.security.files.user-selected.read-write</key>
+  <true/>
+</dict>
+</plist>
