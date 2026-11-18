@@ -172,6 +172,32 @@ async function myDashboard(req, res) {
        WHERE mo.store_id = $1 AND mo.status IN ('placed','confirmed','ready_for_pickup','out_for_delivery') ORDER BY mo.created_at ASC LIMIT 8`, [storeId]
     );
     Object.assign(out, { openOrders: Object.fromEntries(by.rows.map((r) => [r.status, r.n])), fulfilledToday: fulfilled.rows[0].n, queue: newest.rows });
+  } else if (role === 'store_manager') {
+    const deliveries = await db.query(
+      `SELECT COUNT(*)::int AS n, COALESCE(SUM(quantity), 0)::int AS units FROM stock_arrivals WHERE store_id = $1 AND ${isToday('created_at')}`, [storeId]
+    );
+    const recent = await db.query(
+      `SELECT a.quantity, a.invoice_number, a.created_at, p.name FROM stock_arrivals a JOIN products p ON p.id = a.product_id
+       WHERE a.store_id = $1 ORDER BY a.created_at DESC LIMIT 6`, [storeId]
+    );
+    const low = await db.query(
+      `SELECT id, name, backroom_qty, reorder_level FROM products WHERE store_id = $1 AND archived_at IS NULL AND backroom_qty <= reorder_level
+       ORDER BY backroom_qty ASC, name LIMIT 8`, [storeId]
+    );
+    const open = await db.query(`SELECT COUNT(*)::int AS n FROM stock_handovers WHERE store_id = $1 AND status = 'issued'`, [storeId]);
+    const short = await db.query(`SELECT COUNT(*)::int AS n FROM stock_handovers WHERE store_id = $1 AND status = 'short' AND received_at > now() - INTERVAL '7 days'`, [storeId]);
+    Object.assign(out, { deliveriesToday: deliveries.rows[0], recentDeliveries: recent.rows, storeRoomLow: low.rows, handoversOpen: open.rows[0].n, handoversShort: short.rows[0].n });
+  } else if (role === 'shelf_manager') {
+    const waiting = await db.query(
+      `SELECT h.id, h.issued_at, u.name AS issued_by_name, COUNT(i.id)::int AS lines, COALESCE(SUM(i.qty_issued), 0)::int AS units
+       FROM stock_handovers h LEFT JOIN users u ON u.id = h.issued_by LEFT JOIN stock_handover_items i ON i.handover_id = h.id
+       WHERE h.store_id = $1 AND h.status = 'issued' GROUP BY h.id, u.name ORDER BY h.issued_at`, [storeId]
+    );
+    const low = await db.query(
+      `SELECT id, name, shelf_qty, backroom_qty, reorder_level FROM products WHERE store_id = $1 AND archived_at IS NULL AND shelf_qty <= reorder_level
+       ORDER BY shelf_qty ASC, name LIMIT 8`, [storeId]
+    );
+    Object.assign(out, { handoversWaiting: waiting.rows, shelfToRefill: low.rows });
   } else if (role === 'security') {
     const c = await db.query(`SELECT COUNT(*)::int AS n FROM orders WHERE store_id = $1 AND exit_checked_by = $2 AND ${isToday('exit_checked_at')}`, [storeId, sub]);
     const recent = await db.query(

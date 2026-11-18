@@ -22,7 +22,7 @@ export default function ShelfAudit() {
   const [locationFilter, setLocationFilter] = useState('');
   const [form, setForm] = useState({
     productId: '', countedQty: '', confidenceSource: 'manual_count', autoAdjust: true,
-    area: 'shelf', floorNumber: '', shelfNumber: '', rowNumber: '', zone: '',
+    area: user?.role === 'store_manager' ? 'backroom' : 'shelf', floorNumber: '', shelfNumber: '', rowNumber: '', zone: '',
   });
   const [error, setError] = useState('');
   const [noEngagement, setNoEngagement] = useState(false);

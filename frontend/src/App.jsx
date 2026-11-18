@@ -61,6 +61,7 @@ const CycleCounting = lazy(() => import('./pages/CycleCounting.jsx'));
 const AuditorSignup = lazy(() => import('./pages/AuditorSignup.jsx'));
 const AuditorLogin = lazy(() => import('./pages/AuditorLogin.jsx'));
 const AuditorDashboard = lazy(() => import('./pages/AuditorDashboard.jsx'));
+const Handovers = lazy(() => import('./pages/Handovers.jsx'));
 const ExitCheck = lazy(() => import('./pages/ExitCheck.jsx'));
 const PartnerLogin = lazy(() => import('./pages/PartnerLogin.jsx'));
 const PartnerPortal = lazy(() => import('./pages/PartnerPortal.jsx'));
@@ -78,7 +79,7 @@ const Referrals = lazy(() => import('./pages/super/Referrals.jsx'));
 const SupportTickets = lazy(() => import('./pages/super/SupportTickets.jsx'));
 const LendingPartnersAdmin = lazy(() => import('./pages/super/LendingPartnersAdmin.jsx'));
 
-const STORE_ROLES = ['admin', 'manager', 'staff', 'cashier', 'checkout', 'stock_taker', 'marketplace_manager', 'store_auditor', 'security'];
+const STORE_ROLES = ['admin', 'manager', 'staff', 'cashier', 'checkout', 'stock_taker', 'marketplace_manager', 'store_auditor', 'security', 'store_manager', 'shelf_manager'];
 
 // Baked in at build time (see desktop/package.json's build:win:admin vs
 // build:win:superadmin scripts). 'superadmin' (the default) is today's full
@@ -219,6 +220,7 @@ export default function App() {
       >
         <Route path="/" element={<Dashboard />} />
         <Route path="/exit-check" element={<ExitCheck />} />
+        <Route path="/handovers" element={<Handovers />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/products" element={<Products />} />
         <Route path="/products/import" element={<ImportProducts />} />

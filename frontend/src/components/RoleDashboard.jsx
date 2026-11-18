@@ -28,6 +28,8 @@ export default function RoleDashboard() {
     stock_taker: [['/shelf-audit', `📋 ${t('roleDash.countShelf')}`], ['/audit-report', `📑 ${t('roleDash.auditReport')}`]],
     marketplace_manager: [['/marketplace', `🛍️ ${t('roleDash.reviewOrders')}`]],
     security: [['/exit-check', `🛡️ ${t('roleDash.checkReceipt')}`]],
+    store_manager: [['/stock-arrival', `🚚 ${t('roleDash.receiveSupply')}`], ['/handovers', `🔀 ${t('roleDash.sendToShelf')}`], ['/shelf-audit', `📋 ${t('roleDash.countStoreRoom')}`]],
+    shelf_manager: [['/handovers', `🔀 ${t('roleDash.confirmHandover')}`], ['/shelf-audit', `📋 ${t('roleDash.countShelf')}`], ['/labels', `🏷️ ${t('roleDash.labels')}`]],
   }[role] || [];
 
   return (
@@ -102,6 +104,46 @@ export default function RoleDashboard() {
               <div className="card"><h3>{t('roleDash.queue')}</h3>
                 {d.queue.length === 0 ? <p className="muted">{t('roleDash.noOrders')}</p> : (
                   <table><tbody>{d.queue.map((o) => <tr key={o.id}><td>{o.customer_name}</td><td>{t(`marketplacePage.method_${o.fulfilment_method}`, { defaultValue: o.fulfilment_method || '—' })}</td><td>{o.status.replace(/_/g, ' ')}</td><td style={{ textAlign: 'right' }}>{formatCurrency(o.total)}</td></tr>)}</tbody></table>
+                )}
+              </div>
+            </>
+          )}
+          {role === 'store_manager' && (
+            <>
+              <div className="grid grid-4">
+                <Metric value={d.deliveriesToday?.n ?? 0} label={t('roleDash.deliveriesToday')} />
+                <Metric value={d.deliveriesToday?.units ?? 0} label={t('roleDash.unitsReceived')} />
+                <Metric value={d.handoversOpen} label={t('roleDash.handoversOpen')} />
+                <Metric value={d.handoversShort} label={t('roleDash.handoversShort')} />
+              </div>
+              <div className="card"><h3>{t('roleDash.storeRoomLow')}</h3>
+                {d.storeRoomLow.length === 0 ? <p className="muted">{t('roleDash.storeRoomOk')}</p> : (
+                  <table><thead><tr><th>{t('roleDash.product')}</th><th>{t('roleDash.inBackroom')}</th><th>{t('roleDash.reorderAt')}</th></tr></thead>
+                    <tbody>{d.storeRoomLow.map((p) => <tr key={p.id}><td>{p.name}</td><td>{p.backroom_qty}</td><td>{p.reorder_level}</td></tr>)}</tbody></table>
+                )}
+              </div>
+              <div className="card"><h3>{t('roleDash.recentDeliveries')}</h3>
+                {d.recentDeliveries.length === 0 ? <p className="muted">{t('roleDash.noneYet')}</p> : (
+                  <table><tbody>{d.recentDeliveries.map((a, i) => <tr key={i}><td>{a.name}</td><td>× {a.quantity}</td><td>{a.invoice_number || '—'}</td><td>{when(a.created_at)}</td></tr>)}</tbody></table>
+                )}
+              </div>
+            </>
+          )}
+          {role === 'shelf_manager' && (
+            <>
+              <div className="grid grid-2">
+                <Metric value={d.handoversWaiting.length} label={t('roleDash.handoversToConfirm')} />
+                <Metric value={d.shelfToRefill.length} label={t('roleDash.shelvesToRefill')} />
+              </div>
+              <div className="card"><h3>{t('roleDash.handoversToConfirm')}</h3>
+                {d.handoversWaiting.length === 0 ? <p className="muted">{t('roleDash.nothingWaiting')}</p> : (
+                  <table><tbody>{d.handoversWaiting.map((h) => <tr key={h.id}><td>{h.issued_by_name || '—'}</td><td>{t('roleDash.linesUnits', { lines: h.lines, units: h.units })}</td><td>{when(h.issued_at)}</td><td><Link to="/handovers" className="btn small">{t('roleDash.confirmHandover')}</Link></td></tr>)}</tbody></table>
+                )}
+              </div>
+              <div className="card"><h3>{t('roleDash.refillThese')}</h3>
+                {d.shelfToRefill.length === 0 ? <p className="muted">{t('roleDash.allStocked')}</p> : (
+                  <table><thead><tr><th>{t('roleDash.product')}</th><th>{t('roleDash.onShelf')}</th><th>{t('roleDash.inBackroom')}</th></tr></thead>
+                    <tbody>{d.shelfToRefill.map((p) => <tr key={p.id}><td>{p.name}</td><td>{p.shelf_qty}</td><td>{p.backroom_qty}</td></tr>)}</tbody></table>
                 )}
               </div>
             </>

@@ -19,7 +19,7 @@ async function authenticateJwt(req) {
   }
 
   try {
-    const storeUserRoles = ['admin', 'manager', 'staff', 'cashier', 'checkout', 'stock_taker', 'marketplace_manager', 'security'];
+    const storeUserRoles = ['admin', 'manager', 'staff', 'cashier', 'checkout', 'stock_taker', 'marketplace_manager', 'security', 'store_manager', 'shelf_manager'];
     // An 'auditor' with a storeId is a store's own audit staff (users table);
     // without one it is an independent auditor firm (auditors table).
     if (storeUserRoles.includes(user.role) || (user.role === 'auditor' && user.storeId)) {

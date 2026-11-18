@@ -202,10 +202,16 @@ router.get('/replenishment/purchase-orders', requireRole('admin', 'manager'), re
 router.post('/replenishment/purchase-orders', requireRole('admin', 'manager'), replenishmentCtrl.createPurchaseOrder);
 router.patch('/replenishment/purchase-orders/:id/send', requireRole('admin', 'manager'), replenishmentCtrl.sendPurchaseOrder);
 router.patch('/replenishment/purchase-orders/:id/cancel', requireRole('admin', 'manager'), replenishmentCtrl.cancelPurchaseOrder);
-router.post('/replenishment/purchase-orders/:id/receive', requireRole('admin', 'manager', 'staff'), replenishmentCtrl.receivePurchaseOrder);
+router.post('/replenishment/purchase-orders/:id/receive', requireRole('admin', 'manager', 'staff', 'store_manager'), replenishmentCtrl.receivePurchaseOrder);
 
 router.get('/arrivals', inventoryCtrl.listArrivals);
-router.post('/arrivals', requireRole('admin', 'manager', 'staff'), inventoryCtrl.createArrival);
+// Store room → shelf handovers (store manager issues, shelf manager confirms).
+const handoverCtrl = require('../controllers/handoverController');
+router.get('/handovers', requireRole('admin', 'manager', 'staff', 'store_manager', 'shelf_manager'), handoverCtrl.listHandovers);
+router.post('/handovers', requireRole('admin', 'manager', 'store_manager'), handoverCtrl.issueHandover);
+router.post('/handovers/:id/receive', requireRole('admin', 'manager', 'staff', 'shelf_manager'), handoverCtrl.receiveHandover);
+router.post('/handovers/:id/cancel', requireRole('admin', 'manager', 'store_manager'), handoverCtrl.cancelHandover);
+router.post('/arrivals', requireRole('admin', 'manager', 'staff', 'store_manager'), inventoryCtrl.createArrival);
 
 // Expiry & Batch Tracking.
 router.get('/batches', requireRole('admin', 'manager'), batchesCtrl.listBatches);
@@ -269,8 +275,8 @@ router.post('/movements', requireRole('admin', 'manager', 'staff'), inventoryCtr
 // engagement itself is how an auditor got invited into the store at all.
 router.get('/audits', inventoryCtrl.listAudits);
 router.get('/audits/report', inventoryCtrl.auditReport);
-router.post('/audits', requireRole('admin', 'manager', 'staff', 'auditor', 'stock_taker'), requireActiveEngagement, inventoryCtrl.createAudit);
-router.get('/audits/conflicts', requireRole('admin', 'manager', 'staff', 'auditor', 'stock_taker'), inventoryCtrl.listConflicts);
+router.post('/audits', requireRole('admin', 'manager', 'staff', 'auditor', 'stock_taker', 'store_manager', 'shelf_manager'), requireActiveEngagement, inventoryCtrl.createAudit);
+router.get('/audits/conflicts', requireRole('admin', 'manager', 'staff', 'auditor', 'stock_taker', 'store_manager', 'shelf_manager'), inventoryCtrl.listConflicts);
 router.post('/audits/conflicts/:groupId/accept', requireRole('admin', 'manager', 'staff', 'auditor', 'stock_taker'), requireActiveEngagement, inventoryCtrl.acceptRecount);
 
 // Receipt scanning (OCR).
