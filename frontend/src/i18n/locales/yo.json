@@ -49,7 +49,9 @@
       "applied": "Ti fi ṣiṣẹ́",
       "ready_for_pickup": "Ṣetan fun gbigba",
       "out_for_delivery": "N lọ fun ifijiṣẹ"
-    }
+    },
+    "showPassword": "Fi ọrọ igbaniwọle han",
+    "hidePassword": "Fi ọrọ igbaniwọle pamọ"
   },
   "nav": {
     "dashboard": "Pátákó Ìdarí",
@@ -1027,7 +1029,8 @@
     "markCollected": "A ti gba — pari aṣẹ",
     "trackingPage": "Oju-iwe titele onibara",
     "confirmedToast": "A ti jẹrisi aṣẹ — onibara le ri i",
-    "dispatchedToast": "A ti fi to onibara leti"
+    "dispatchedToast": "A ti fi to onibara leti",
+    "payOnPickup": "San nigba gbigba"
   },
   "storefrontPage": {
     "title": "🛍️ Ilé Ìtajà",
@@ -1073,7 +1076,17 @@
     "categories": "Awọn ẹka",
     "allCategories": "Gbogbo",
     "noMatches": "Ko si ọja to baamu wiwa rẹ.",
-    "viewCart": "Wo agbọn ({{count}})"
+    "viewCart": "Wo agbọn ({{count}})",
+    "confirmPassword": "Jẹrisi ọrọ igbaniwọle",
+    "passwordsDontMatch": "Awọn ọrọ igbaniwọle ko baamu",
+    "howToReceive": "Bawo ni o ṣe fẹ gba a?",
+    "receiveDelivery": "Fi ranṣẹ si mi",
+    "receivePickup": "Emi yoo wa gba a",
+    "pickupFrom": "Gba lati {{place}}",
+    "addressRequired": "Tẹ adirẹsi ifijiṣẹ, tabi yan gbigba",
+    "payNowOnline": "San bayi (kaadi / gbigbe)",
+    "payOnDelivery": "San nigba ifijiṣẹ",
+    "payOnPickup": "San nigba gbigba"
   },
   "marketplaceHomePage": {
     "title": "🏪 Ọjà SAFE Stores",

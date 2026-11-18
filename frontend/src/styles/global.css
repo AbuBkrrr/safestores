@@ -624,3 +624,6 @@ tr:hover td { background: #fafbfc; }
 .pay-choice legend { font-weight: 600; padding: 0 4px; }
 .pay-choice label { display: flex; gap: 8px; align-items: center; cursor: pointer; }
 .pay-choice input { width: auto; }
+.pw-wrap { position: relative; display: block; }
+.pw-wrap input { width: 100%; padding-right: 42px; }
+.pw-toggle { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: transparent; border: 0; cursor: pointer; font-size: 16px; padding: 4px 6px; line-height: 1; }

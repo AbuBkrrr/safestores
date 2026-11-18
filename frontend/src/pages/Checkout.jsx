@@ -8,6 +8,7 @@ import { Alert, Modal, Toast } from '../components/ui.jsx';
 import { useToast } from '../components/useToast.js';
 import { useCurrency } from '../context/CurrencyContext.jsx';
 import ReceiptView from '../components/ReceiptView.jsx';
+import PasswordInput from '../components/PasswordInput.jsx';
 
 const SYNC_EVENTS = ['order:updated', 'order:paid', 'order:cancelled'];
 const CAN_TAKE_PAYMENT = ['admin', 'manager', 'cashier'];
@@ -531,7 +532,7 @@ export default function Checkout() {
                 </div>
                 <div className="form-group">
                   <label htmlFor="disc-appr-pw">{t('checkout.managerPassword')}</label>
-                  <input id="disc-appr-pw" type="password" value={discount.approverPassword} onChange={(e) => setDiscount({ ...discount, approverPassword: e.target.value })} required />
+                  <PasswordInput id="disc-appr-pw" value={discount.approverPassword} onChange={(e) => setDiscount({ ...discount, approverPassword: e.target.value })} required />
                 </div>
               </>
             )}

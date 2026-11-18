@@ -23,7 +23,7 @@ describe('Login page', () => {
     renderWithProviders(<Login />);
 
     await userEvent.type(screen.getByLabelText(/email/i), 'admin@shop.com');
-    await userEvent.type(screen.getByLabelText(/password/i), 'Password123!');
+    await userEvent.type(screen.getByLabelText(/password/i, { selector: 'input' }), 'Password123!');
     await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
 
     await waitFor(() => {
@@ -38,7 +38,7 @@ describe('Login page', () => {
     renderWithProviders(<Login />);
 
     await userEvent.type(screen.getByLabelText(/email/i), 'admin@shop.com');
-    await userEvent.type(screen.getByLabelText(/password/i), 'Password123!');
+    await userEvent.type(screen.getByLabelText(/password/i, { selector: 'input' }), 'Password123!');
     await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
 
     await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/activate-store'));
@@ -49,7 +49,7 @@ describe('Login page', () => {
     renderWithProviders(<Login />);
 
     await userEvent.type(screen.getByLabelText(/email/i), 'admin@shop.com');
-    await userEvent.type(screen.getByLabelText(/password/i), 'wrongpass');
+    await userEvent.type(screen.getByLabelText(/password/i, { selector: 'input' }), 'wrongpass');
     await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
 
     expect(await screen.findByText('Invalid credentials')).toBeInTheDocument();

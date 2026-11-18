@@ -49,7 +49,9 @@
       "applied": "An aiwatar",
       "ready_for_pickup": "A shirye don ɗauka",
       "out_for_delivery": "Ana kan hanyar kawowa"
-    }
+    },
+    "showPassword": "Nuna kalmar sirri",
+    "hidePassword": "Ɓoye kalmar sirri"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -1027,7 +1029,8 @@
     "markCollected": "An ɗauka — kammala oda",
     "trackingPage": "Shafin bin diddigi",
     "confirmedToast": "An tabbatar da oda — abokin ciniki zai gani",
-    "dispatchedToast": "An sanar da abokin ciniki"
+    "dispatchedToast": "An sanar da abokin ciniki",
+    "payOnPickup": "Biya idan ka ɗauka"
   },
   "storefrontPage": {
     "title": "🛍️ Shago",
@@ -1073,7 +1076,17 @@
     "categories": "Rukunoni",
     "allCategories": "Duka",
     "noMatches": "Babu kayan da ya dace da bincikenka.",
-    "viewCart": "Duba kwando ({{count}})"
+    "viewCart": "Duba kwando ({{count}})",
+    "confirmPassword": "Tabbatar da kalmar sirri",
+    "passwordsDontMatch": "Kalmomin sirri ba su yi daidai ba",
+    "howToReceive": "Ta yaya kake so ka samu?",
+    "receiveDelivery": "A kawo mini",
+    "receivePickup": "Zan je in ɗauka",
+    "pickupFrom": "Ɗauka daga {{place}}",
+    "addressRequired": "Shigar da adireshin kawowa, ko zaɓi ɗauka",
+    "payNowOnline": "Biya yanzu (kati / tura kuɗi)",
+    "payOnDelivery": "Biya idan an kawo",
+    "payOnPickup": "Biya idan ka ɗauka"
   },
   "marketplaceHomePage": {
     "title": "🏪 Kasuwar SAFE Stores",

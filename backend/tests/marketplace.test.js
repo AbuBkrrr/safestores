@@ -261,3 +261,21 @@ describe('Marketplace order review flow', () => {
     expect(d.body.status).toBe('ready_for_pickup');
   });
 });
+
+describe('Checkout: delivery or pickup, pay now or on receipt', () => {
+  it('pay on pickup records the choice; delivery needs an address; cash commission recorded at fulfilment', async () => {
+    const { store, token } = await createActiveStoreWithAdmin();
+    await enableMarketplace(store.id);
+    const product = await createProduct(store.id, { shelfQty: 5 });
+    const items = [{ productId: product.id, quantity: 1 }];
+    const pick = await request().post(`/api/marketplace/${store.id}/orders`).send({ items, guestName: 'G', fulfilmentMethod: 'pickup', paymentMethod: 'cash', deliveryAddress: 'ignored' });
+    expect(pick.status).toBe(201);
+    expect(pick.body).toMatchObject({ payment_method: 'on_pickup', fulfilment_method: 'pickup', delivery_address: null });
+    const noAddr = await request().post(`/api/marketplace/${store.id}/orders`).send({ items, guestName: 'G', fulfilmentMethod: 'delivery' });
+    expect(noAddr.status).toBe(400);
+    await readyOrder(store.id, pick.body.id, `Bearer ${token}`, 'pickup');
+    expect((await request().patch(`/api/stores/${store.id}/marketplace/orders/${pick.body.id}/fulfill`).set('Authorization', `Bearer ${token}`)).status).toBe(200);
+    const { rows } = await pool.query('SELECT payment_status FROM marketplace_orders WHERE id = $1', [pick.body.id]);
+    expect(rows[0].payment_status).toBe('paid');
+  });
+});

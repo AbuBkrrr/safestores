@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import { Alert, BrandFooter } from '../components/ui.jsx';
+import PasswordInput from '../components/PasswordInput.jsx';
 
 export default function AuditorSignup() {
   const { t } = useTranslation();
@@ -34,7 +35,7 @@ export default function AuditorSignup() {
         <form onSubmit={handleSubmit}>
           <div className="form-group"><label>{t('auditorSignupPage.fullName')}</label><input value={form.name} onChange={update('name')} required /></div>
           <div className="form-group"><label>{t('auditorDashPage.email')}</label><input type="email" value={form.email} onChange={update('email')} required /></div>
-          <div className="form-group"><label>{t('login.password')}</label><input type="password" value={form.password} onChange={update('password')} required minLength={6} /></div>
+          <div className="form-group"><label>{t('login.password')}</label><PasswordInput value={form.password} onChange={update('password')} required minLength={6} /></div>
           <button className="btn" style={{ width: '100%' }}>{t('auditorSignupPage.apply')}</button>
         </form>
         <div className="auth-links">{t('auditorSignupPage.alreadyAuditor')} <Link to="/auditor-login">{t('auditorLoginPage.logIn')}</Link></div>

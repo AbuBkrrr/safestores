@@ -49,7 +49,9 @@
       "applied": "Etinyere",
       "ready_for_pickup": "Dị njikere ịnara",
       "out_for_delivery": "Na-ebuga ugbu a"
-    }
+    },
+    "showPassword": "Gosi okwuntughe",
+    "hidePassword": "Zoo okwuntughe"
   },
   "nav": {
     "dashboard": "Ogel Njikwa",
@@ -1027,7 +1029,8 @@
     "markCollected": "Anarala — mechaa iwu",
     "trackingPage": "Ibe nleba anya onye ahịa",
     "confirmedToast": "Akwadoola iwu — onye ahịa ga-ahụ ya",
-    "dispatchedToast": "E mere ka onye ahịa mara"
+    "dispatchedToast": "E mere ka onye ahịa mara",
+    "payOnPickup": "Kwụọ mgbe ị naara"
   },
   "storefrontPage": {
     "title": "🛍️ Ụlọ Ahịa",
@@ -1073,7 +1076,17 @@
     "categories": "Ụdị",
     "allCategories": "Niile",
     "noMatches": "Enweghị ngwa ahịa dabara ọchụchọ gị.",
-    "viewCart": "Lee nkata ({{count}})"
+    "viewCart": "Lee nkata ({{count}})",
+    "confirmPassword": "Kwado okwuntughe",
+    "passwordsDontMatch": "Okwuntughe adabaghị",
+    "howToReceive": "Kedu ka ịchọrọ isi nweta ya?",
+    "receiveDelivery": "Bugara m ya",
+    "receivePickup": "Aga m abịa nara ya",
+    "pickupFrom": "Nara na {{place}}",
+    "addressRequired": "Tinye adreesị nnyefe, ma ọ bụ họrọ ịnara",
+    "payNowOnline": "Kwụọ ugbu a (kaadị / nnyefe)",
+    "payOnDelivery": "Kwụọ mgbe e bugara",
+    "payOnPickup": "Kwụọ mgbe ị naara"
   },
   "marketplaceHomePage": {
     "title": "🏪 Ahịa SAFE Stores",

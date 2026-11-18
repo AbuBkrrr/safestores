@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { Alert, BrandFooter } from '../components/ui.jsx';
+import PasswordInput from '../components/PasswordInput.jsx';
 
 export default function AuditorLogin() {
   const { t } = useTranslation();
@@ -31,7 +32,7 @@ export default function AuditorLogin() {
         <Alert type="error">{error}</Alert>
         <form onSubmit={handleSubmit}>
           <div className="form-group"><label>{t('auditorDashPage.email')}</label><input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required /></div>
-          <div className="form-group"><label>{t('login.password')}</label><input type="password" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required /></div>
+          <div className="form-group"><label>{t('login.password')}</label><PasswordInput value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required /></div>
           <button className="btn" style={{ width: '100%' }}>{t('auditorLoginPage.logIn')}</button>
         </form>
         <div className="auth-links">{t('auditorLoginPage.notAuditorYet')} <Link to="/auditor-signup">{t('auditorLoginPage.applyHere')}</Link></div>

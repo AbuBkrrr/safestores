@@ -49,7 +49,9 @@
       "applied": "Imetekelezwa",
       "ready_for_pickup": "Tayari kuchukuliwa",
       "out_for_delivery": "Inasafirishwa"
-    }
+    },
+    "showPassword": "Onyesha nenosiri",
+    "hidePassword": "Ficha nenosiri"
   },
   "nav": {
     "dashboard": "Dashibodi",
@@ -1027,7 +1029,8 @@
     "markCollected": "Imechukuliwa — kamilisha",
     "trackingPage": "Ukurasa wa ufuatiliaji",
     "confirmedToast": "Agizo limethibitishwa — mteja anaona kwenye ufuatiliaji",
-    "dispatchedToast": "Mteja amejulishwa"
+    "dispatchedToast": "Mteja amejulishwa",
+    "payOnPickup": "Lipa ukichukua"
   },
   "storefrontPage": {
     "title": "🛍️ Duka",
@@ -1073,7 +1076,17 @@
     "categories": "Aina",
     "allCategories": "Zote",
     "noMatches": "Hakuna bidhaa inayolingana na utafutaji wako.",
-    "viewCart": "Tazama kikapu ({{count}})"
+    "viewCart": "Tazama kikapu ({{count}})",
+    "confirmPassword": "Thibitisha nenosiri",
+    "passwordsDontMatch": "Manenosiri hayalingani",
+    "howToReceive": "Ungependa kuipata vipi?",
+    "receiveDelivery": "Niletee",
+    "receivePickup": "Nitaichukua dukani",
+    "pickupFrom": "Chukua kutoka {{place}}",
+    "addressRequired": "Weka anwani ya usafirishaji, au chagua kuchukua",
+    "payNowOnline": "Lipa sasa (kadi / uhamisho)",
+    "payOnDelivery": "Lipa ukifikishiwa",
+    "payOnPickup": "Lipa ukichukua"
   },
   "marketplaceHomePage": {
     "title": "🏪 Soko la SAFE Stores",

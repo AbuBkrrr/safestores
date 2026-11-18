@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import { Alert, AuthBrand, BrandFooter } from '../components/ui.jsx';
+import PasswordInput from '../components/PasswordInput.jsx';
 
 export default function ResetPassword() {
   const { t } = useTranslation();
@@ -41,12 +42,12 @@ export default function ResetPassword() {
           <form onSubmit={submit}>
             <div className="form-group">
               <label htmlFor="reset-pw">{t('resetPage.newPassword')}</label>
-              <input id="reset-pw" type="password" autoComplete="new-password" minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <PasswordInput id="reset-pw" autoComplete="new-password" minLength={8} value={password} onChange={(e) => setPassword(e.target.value)} required />
               <span className="help-text">{t('passwordHint')}</span>
             </div>
             <div className="form-group">
               <label htmlFor="reset-pw2">{t('resetPage.confirmPassword')}</label>
-              <input id="reset-pw2" type="password" autoComplete="new-password" minLength={8} value={confirm} onChange={(e) => setConfirm(e.target.value)} required />
+              <PasswordInput id="reset-pw2" autoComplete="new-password" minLength={8} value={confirm} onChange={(e) => setConfirm(e.target.value)} required />
             </div>
             <button className="btn" style={{ width: '100%' }} disabled={loading}>{t('resetPage.save')}</button>
           </form>

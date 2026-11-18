@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import { Alert, AuthBrand, BrandFooter } from '../components/ui.jsx';
+import PasswordInput from '../components/PasswordInput.jsx';
 
 export default function Signup() {
   const { t } = useTranslation();
@@ -63,11 +64,11 @@ export default function Signup() {
           </div>
           <div className="form-group">
             <label>{t('login.password')}</label>
-            <input type="password" value={form.password} onChange={update('password')} required minLength={8} autoComplete="new-password" placeholder={t('passwordHint')} />
+            <PasswordInput value={form.password} onChange={update('password')} required minLength={8} autoComplete="new-password" placeholder={t('passwordHint')} />
           </div>
           <div className="form-group">
             <label>{t('signupPage.confirmPasswordLabel')}</label>
-            <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={8} autoComplete="new-password" placeholder={t('signupPage.confirmPasswordPh')} />
+            <PasswordInput value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={8} autoComplete="new-password" placeholder={t('signupPage.confirmPasswordPh')} />
           </div>
           <div className="form-group">
             <label>{t('signupPage.storeSize')}</label>

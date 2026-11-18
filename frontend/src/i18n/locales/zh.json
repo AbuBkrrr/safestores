@@ -49,7 +49,9 @@
       "applied": "已应用",
       "ready_for_pickup": "待取货",
       "out_for_delivery": "配送中"
-    }
+    },
+    "showPassword": "显示密码",
+    "hidePassword": "隐藏密码"
   },
   "nav": {
     "dashboard": "仪表盘",
@@ -1027,7 +1029,8 @@
     "markCollected": "已取货——完成订单",
     "trackingPage": "顾客追踪页面",
     "confirmedToast": "订单已确认——顾客可在追踪页面看到",
-    "dispatchedToast": "已通知顾客"
+    "dispatchedToast": "已通知顾客",
+    "payOnPickup": "自取时付款"
   },
   "storefrontPage": {
     "title": "🛍️ 商店",
@@ -1073,7 +1076,17 @@
     "categories": "分类",
     "allCategories": "全部",
     "noMatches": "没有符合搜索的商品。",
-    "viewCart": "查看购物车（{{count}}）"
+    "viewCart": "查看购物车（{{count}}）",
+    "confirmPassword": "确认密码",
+    "passwordsDontMatch": "两次密码不一致",
+    "howToReceive": "您想如何收货？",
+    "receiveDelivery": "送货上门",
+    "receivePickup": "我到店自取",
+    "pickupFrom": "取货地点：{{place}}",
+    "addressRequired": "请填写送货地址，或选择自取",
+    "payNowOnline": "立即支付（银行卡/转账）",
+    "payOnDelivery": "货到付款",
+    "payOnPickup": "自取时付款"
   },
   "marketplaceHomePage": {
     "title": "🏪 SAFE Stores 市场",

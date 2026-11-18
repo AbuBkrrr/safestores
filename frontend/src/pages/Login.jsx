@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { Alert, AuthBrand, BrandFooter } from '../components/ui.jsx';
+import PasswordInput from '../components/PasswordInput.jsx';
 
 export default function Login() {
   const { t } = useTranslation();
@@ -88,7 +89,7 @@ export default function Login() {
             </div>
             <div className="form-group">
               <label htmlFor="login-password">{t('login.password')}</label>
-              <input id="login-password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <PasswordInput id="login-password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
               <span className="help-text"><Link to="/forgot-password">{t('login.forgotPassword')}</Link></span>
             </div>
             {storeChoices && (

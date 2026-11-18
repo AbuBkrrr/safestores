@@ -49,7 +49,9 @@
       "applied": "Applied",
       "ready_for_pickup": "Ready for pickup",
       "out_for_delivery": "Out for delivery"
-    }
+    },
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -1027,7 +1029,8 @@
     "markCollected": "Collected — fulfil order",
     "trackingPage": "Customer tracking page",
     "confirmedToast": "Order confirmed — the customer can see it on their tracking page",
-    "dispatchedToast": "Customer updated"
+    "dispatchedToast": "Customer updated",
+    "payOnPickup": "Pay on pickup"
   },
   "storefrontPage": {
     "title": "🛍️ Shop",
@@ -1073,7 +1076,17 @@
     "categories": "Categories",
     "allCategories": "All",
     "noMatches": "No products match your search.",
-    "viewCart": "View cart ({{count}})"
+    "viewCart": "View cart ({{count}})",
+    "confirmPassword": "Confirm password",
+    "passwordsDontMatch": "Passwords don't match",
+    "howToReceive": "How do you want to get it?",
+    "receiveDelivery": "Deliver to me",
+    "receivePickup": "I'll pick it up",
+    "pickupFrom": "Pick up from {{place}}",
+    "addressRequired": "Enter a delivery address, or choose pickup",
+    "payNowOnline": "Pay now (card / transfer)",
+    "payOnDelivery": "Pay on delivery",
+    "payOnPickup": "Pay on pickup"
   },
   "marketplaceHomePage": {
     "title": "🏪 SAFE Stores Marketplace",

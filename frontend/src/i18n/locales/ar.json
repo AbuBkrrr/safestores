@@ -49,7 +49,9 @@
       "applied": "تم التطبيق",
       "ready_for_pickup": "جاهز للاستلام",
       "out_for_delivery": "قيد التوصيل"
-    }
+    },
+    "showPassword": "إظهار كلمة المرور",
+    "hidePassword": "إخفاء كلمة المرور"
   },
   "nav": {
     "dashboard": "لوحة التحكم",
@@ -1027,7 +1029,8 @@
     "markCollected": "تم الاستلام — إتمام الطلب",
     "trackingPage": "صفحة تتبع العميل",
     "confirmedToast": "تم تأكيد الطلب — يراه العميل في صفحة التتبع",
-    "dispatchedToast": "تم تحديث العميل"
+    "dispatchedToast": "تم تحديث العميل",
+    "payOnPickup": "الدفع عند الاستلام"
   },
   "storefrontPage": {
     "title": "🛍️ تسوق",
@@ -1073,7 +1076,17 @@
     "categories": "الفئات",
     "allCategories": "الكل",
     "noMatches": "لا توجد منتجات تطابق بحثك.",
-    "viewCart": "عرض السلة ({{count}})"
+    "viewCart": "عرض السلة ({{count}})",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "passwordsDontMatch": "كلمتا المرور غير متطابقتين",
+    "howToReceive": "كيف تريد استلامه؟",
+    "receiveDelivery": "توصيل إليّ",
+    "receivePickup": "سأستلمه من المتجر",
+    "pickupFrom": "الاستلام من {{place}}",
+    "addressRequired": "أدخل عنوان التوصيل أو اختر الاستلام",
+    "payNowOnline": "ادفع الآن (بطاقة / تحويل)",
+    "payOnDelivery": "الدفع عند التوصيل",
+    "payOnPickup": "الدفع عند الاستلام"
   },
   "marketplaceHomePage": {
     "title": "🏪 سوق SAFE Stores",

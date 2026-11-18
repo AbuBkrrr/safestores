@@ -49,7 +49,9 @@
       "applied": "Appliqué",
       "ready_for_pickup": "Prête au retrait",
       "out_for_delivery": "En livraison"
-    }
+    },
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe"
   },
   "nav": {
     "dashboard": "Tableau de bord",
@@ -1027,7 +1029,8 @@
     "markCollected": "Retirée — clôturer",
     "trackingPage": "Page de suivi client",
     "confirmedToast": "Commande confirmée — le client la voit dans son suivi",
-    "dispatchedToast": "Client informé"
+    "dispatchedToast": "Client informé",
+    "payOnPickup": "Payer au retrait"
   },
   "storefrontPage": {
     "title": "🛍️ Boutique",
@@ -1073,7 +1076,17 @@
     "categories": "Catégories",
     "allCategories": "Tout",
     "noMatches": "Aucun produit ne correspond à votre recherche.",
-    "viewCart": "Voir le panier ({{count}})"
+    "viewCart": "Voir le panier ({{count}})",
+    "confirmPassword": "Confirmer le mot de passe",
+    "passwordsDontMatch": "Les mots de passe ne correspondent pas",
+    "howToReceive": "Comment souhaitez-vous la recevoir ?",
+    "receiveDelivery": "Me la livrer",
+    "receivePickup": "Je la retire en boutique",
+    "pickupFrom": "À retirer à {{place}}",
+    "addressRequired": "Saisissez une adresse de livraison, ou choisissez le retrait",
+    "payNowOnline": "Payer maintenant (carte / virement)",
+    "payOnDelivery": "Payer à la livraison",
+    "payOnPickup": "Payer au retrait"
   },
   "marketplaceHomePage": {
     "title": "🏪 Marché SAFE Stores",

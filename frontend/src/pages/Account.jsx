@@ -6,6 +6,7 @@ import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { Alert, Toast } from '../components/ui.jsx';
 import { useToast } from '../components/useToast.js';
+import PasswordInput from '../components/PasswordInput.jsx';
 
 const IS_DESKTOP = import.meta.env.VITE_EDITION === 'desktop';
 
@@ -118,11 +119,11 @@ export default function Account() {
               <h4>{t('accountPage.changePassword')}</h4>
               <div className="form-group">
                 <label htmlFor="acct-cur">{t('accountPage.currentPassword')}</label>
-                <input id="acct-cur" type="password" autoComplete="current-password" value={pw.current} onChange={(e) => setPw({ ...pw, current: e.target.value })} required />
+                <PasswordInput id="acct-cur" autoComplete="current-password" value={pw.current} onChange={(e) => setPw({ ...pw, current: e.target.value })} required />
               </div>
               <div className="form-group">
                 <label htmlFor="acct-new">{t('accountPage.newPassword')}</label>
-                <input id="acct-new" type="password" autoComplete="new-password" minLength={8} value={pw.next} onChange={(e) => setPw({ ...pw, next: e.target.value })} required />
+                <PasswordInput id="acct-new" autoComplete="new-password" minLength={8} value={pw.next} onChange={(e) => setPw({ ...pw, next: e.target.value })} required />
                 <span className="help-text">{t('passwordHint')}</span>
               </div>
               <button className="btn">{t('accountPage.updatePassword')}</button>
@@ -139,7 +140,7 @@ export default function Account() {
                 <form onSubmit={turnOffTfa}>
                   <Alert type="success">{t('accountPage.twoFactorOn')}</Alert>
                   <div className="form-group"><label htmlFor="tfa-off-pw">{t('accountPage.passwordLabel')}</label>
-                    <input id="tfa-off-pw" type="password" value={disable.password} onChange={(e) => setDisable({ ...disable, password: e.target.value })} required /></div>
+                    <PasswordInput id="tfa-off-pw" value={disable.password} onChange={(e) => setDisable({ ...disable, password: e.target.value })} required /></div>
                   <div className="form-group"><label htmlFor="tfa-off-code">{t('accountPage.codeLabel')}</label>
                     <input id="tfa-off-code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={disable.code} onChange={(e) => setDisable({ ...disable, code: e.target.value.replace(/\D/g, '') })} required /></div>
                   <button className="btn danger">{t('accountPage.turnOff')}</button>
@@ -196,7 +197,7 @@ export default function Account() {
                 <div className="form-group"><label htmlFor="close-name">{t('accountPage.typeStoreName')}{user.storeName ? ` ("${user.storeName}")` : ''}</label>
                   <input id="close-name" value={closeForm.confirmName} onChange={(e) => setCloseForm({ ...closeForm, confirmName: e.target.value })} required /></div>
                 <div className="form-group"><label htmlFor="close-pw">{t('accountPage.passwordLabel')}</label>
-                  <input id="close-pw" type="password" value={closeForm.password} onChange={(e) => setCloseForm({ ...closeForm, password: e.target.value })} required /></div>
+                  <PasswordInput id="close-pw" value={closeForm.password} onChange={(e) => setCloseForm({ ...closeForm, password: e.target.value })} required /></div>
                 <button className="btn danger">{t('accountPage.requestDeletion')}</button>
               </form>
             )}

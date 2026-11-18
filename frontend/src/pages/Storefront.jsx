@@ -5,6 +5,7 @@ import axios from 'axios';
 import { formatCurrency as format } from '../utils/currency.js';
 import { LanguageSwitcher } from '../components/Layout.jsx';
 import { BrandFooter } from '../components/ui.jsx';
+import PasswordInput from '../components/PasswordInput.jsx';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 const client = axios.create({ baseURL: API_BASE });
@@ -29,6 +30,7 @@ export default function Storefront() {
   const [authMode, setAuthMode] = useState('login'); // login | signup
   const [showAuth, setShowAuth] = useState(false);
   const [authForm, setAuthForm] = useState({ name: '', email: '', phone: '', password: '' });
+  const [confirmPw, setConfirmPw] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -42,7 +44,10 @@ export default function Storefront() {
   const currency = store ? { code: store.currency_code, symbol: store.currency_symbol } : undefined;
   const canPayOnline = !!store?.payments?.online;
   const canPayOnDelivery = store ? store.payments?.payOnDelivery !== false : true;
-  const method = payMethod || (canPayOnline ? 'online' : 'on_delivery');
+  // payMethod: 'online' (pay now) or 'cash' (pay when delivered / collected).
+  const [receive, setReceive] = useState('delivery');
+  const payChoice = payMethod || (canPayOnline ? 'online' : 'cash');
+  const method = payChoice === 'online' ? 'online' : receive === 'pickup' ? 'on_pickup' : 'on_delivery';
   const formatCurrency = (n) => format(n, currency);
 
   useEffect(() => {
@@ -66,6 +71,10 @@ export default function Storefront() {
   const handleAuth = async (e) => {
     e.preventDefault();
     setError('');
+    if (authMode === 'signup' && authForm.password !== confirmPw) {
+      setError(t('storefrontPage.passwordsDontMatch'));
+      return;
+    }
     try {
       const path = authMode === 'login' ? 'login' : 'signup';
       const { data } = await client.post(`/marketplace/${storeId}/${path}`, authForm);
@@ -115,12 +124,16 @@ export default function Storefront() {
       setError(t('storefrontPage.pleaseEnterNameGuest'));
       return;
     }
+    if (receive === 'delivery' && !deliveryAddress.trim()) {
+      setError(t('storefrontPage.addressRequired'));
+      return;
+    }
     if (method === 'online' && !customer && !guestEmail) {
       setError(t('storefrontPage.emailForPayment'));
       return;
     }
     try {
-      const body = { items: cartItems.map((i) => ({ productId: i.id, quantity: i.quantity })), deliveryAddress, paymentMethod: method };
+      const body = { items: cartItems.map((i) => ({ productId: i.id, quantity: i.quantity })), deliveryAddress: receive === 'delivery' ? deliveryAddress : undefined, paymentMethod: method, fulfilmentMethod: receive };
       const config = {};
       if (customer) {
         config.headers = { Authorization: `Bearer ${customer.token}` };
@@ -196,7 +209,8 @@ export default function Storefront() {
             {authMode === 'signup' && <div className="form-group"><input aria-label={t('storefrontPage.fullName')} placeholder={t('storefrontPage.fullName')} value={authForm.name} onChange={(e) => setAuthForm({ ...authForm, name: e.target.value })} required /></div>}
             <div className="form-group"><input type="email" aria-label={t('storefrontPage.email')} placeholder={t('storefrontPage.email')} value={authForm.email} onChange={(e) => setAuthForm({ ...authForm, email: e.target.value })} required /></div>
             {authMode === 'signup' && <div className="form-group"><input aria-label={t('storefrontPage.phoneOptional')} placeholder={t('storefrontPage.phoneOptional')} value={authForm.phone} onChange={(e) => setAuthForm({ ...authForm, phone: e.target.value })} /></div>}
-            <div className="form-group"><input type="password" aria-label={t('storefrontPage.password')} placeholder={t('storefrontPage.password')} value={authForm.password} onChange={(e) => setAuthForm({ ...authForm, password: e.target.value })} required /></div>
+            <div className="form-group"><PasswordInput aria-label={t('storefrontPage.password')} placeholder={t('storefrontPage.password')} value={authForm.password} onChange={(e) => setAuthForm({ ...authForm, password: e.target.value })} required /></div>
+            {authMode === 'signup' && <div className="form-group"><PasswordInput aria-label={t('storefrontPage.confirmPassword')} placeholder={t('storefrontPage.confirmPassword')} value={confirmPw} onChange={(e) => setConfirmPw(e.target.value)} autoComplete="new-password" required /></div>}
             <button className="btn" type="submit">{authMode === 'login' ? t('storefrontPage.logIn') : t('storefrontPage.signUp')}</button>
           </form>
         </div>
@@ -260,7 +274,14 @@ export default function Storefront() {
           {cartItems.length > 0 && (
             <div className="mt-1">
               <div style={{ fontWeight: 700, fontSize: 18 }}>{t('storefrontPage.total')} {formatCurrency(cartTotal)}</div>
-              <div className="form-group mt-1"><input aria-label={t('storefrontPage.deliveryAddress')} placeholder={t('storefrontPage.deliveryAddress')} value={deliveryAddress} onChange={(e) => setDeliveryAddress(e.target.value)} /></div>
+              <fieldset className="pay-choice mt-1">
+                <legend>{t('storefrontPage.howToReceive')}</legend>
+                <label><input type="radio" name="receive" checked={receive === 'delivery'} onChange={() => setReceive('delivery')} /> 🚚 {t('storefrontPage.receiveDelivery')}</label>
+                <label><input type="radio" name="receive" checked={receive === 'pickup'} onChange={() => setReceive('pickup')} /> 🏪 {t('storefrontPage.receivePickup')}</label>
+              </fieldset>
+              {receive === 'delivery'
+                ? <div className="form-group"><input aria-label={t('storefrontPage.deliveryAddress')} placeholder={t('storefrontPage.deliveryAddress')} value={deliveryAddress} onChange={(e) => setDeliveryAddress(e.target.value)} required /></div>
+                : <p className="muted" style={{ fontSize: 13 }}>📍 {t('storefrontPage.pickupFrom', { place: [store?.address, store?.city].filter(Boolean).join(', ') || store?.name || '' })}</p>}
               {!customer && (
                 <>
                   <div className="form-group"><input aria-label={t('storefrontPage.yourNameGuest')} placeholder={t('storefrontPage.yourNameGuest')} value={guestName} onChange={(e) => setGuestName(e.target.value)} /></div>
@@ -273,10 +294,10 @@ export default function Storefront() {
               ) : canPayOnline && canPayOnDelivery ? (
                 <fieldset className="pay-choice">
                   <legend>{t('storefrontPage.howToPay')}</legend>
-                  <label><input type="radio" name="pay" checked={method === 'online'} onChange={() => setPayMethod('online')} /> {t('storefrontPage.payOnline')}</label>
-                  <label><input type="radio" name="pay" checked={method === 'on_delivery'} onChange={() => setPayMethod('on_delivery')} /> {t('storefrontPage.payOnCollection')}</label>
+                  <label><input type="radio" name="pay" checked={payChoice === 'online'} onChange={() => setPayMethod('online')} /> 💳 {t('storefrontPage.payNowOnline')}</label>
+                  <label><input type="radio" name="pay" checked={payChoice === 'cash'} onChange={() => setPayMethod('cash')} /> 💵 {receive === 'pickup' ? t('storefrontPage.payOnPickup') : t('storefrontPage.payOnDelivery')}</label>
                 </fieldset>
-              ) : <p className="muted">{canPayOnline ? t('storefrontPage.payOnlineOnly') : t('storefrontPage.payOnCollection')}</p>}
+              ) : <p className="muted">{canPayOnline ? t('storefrontPage.payOnlineOnly') : (receive === 'pickup' ? t('storefrontPage.payOnPickup') : t('storefrontPage.payOnDelivery'))}</p>}
               {method === 'online' && <p className="muted" style={{ fontSize: 12 }}>🔒 {t('storefrontPage.securePayNote', { store: store?.name || '' })}</p>}
               <div className="flex">
                 <button className="btn" disabled={!canPayOnline && !canPayOnDelivery} onClick={placeOrder}>{method === 'online' ? t('storefrontPage.payNow', { amount: formatCurrency(cartTotal) }) : t('storefrontPage.placeOrder')}</button>
