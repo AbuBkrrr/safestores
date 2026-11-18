@@ -15,6 +15,7 @@ export default function StockArrival() {
   const [products, setProducts] = useState([]);
   const [arrivals, setArrivals] = useState([]);
   const [form, setForm] = useState({ productId: '', quantity: '', invoiceNumber: '', expiryDate: '', batchNumber: '' });
+  const [noExpiry, setNoExpiry] = useState(false);
   const [error, setError] = useState('');
   const [toast, showToast] = useToast();
 
@@ -35,7 +36,7 @@ export default function StockArrival() {
     setError('');
     try {
       await api.post(`/stores/${user.storeId}/arrivals`, {
-        ...form, quantity: Number(form.quantity),
+        ...form, expiryDate: noExpiry ? '' : form.expiryDate, quantity: Number(form.quantity),
       });
       setForm({ productId: '', quantity: '', invoiceNumber: '', expiryDate: '', batchNumber: '' });
       showToast(t('stockArrivalPage.recordedToast'), 'success');
@@ -75,7 +76,9 @@ export default function StockArrival() {
             })()}
             <div className="form-group"><label>{t('stockArrivalPage.quantityReceived')}</label><input type="number" min="1" value={form.quantity} onChange={update('quantity')} required /></div>
             <div className="form-group"><label>{t('stockArrivalPage.invoiceNumber')}</label><input value={form.invoiceNumber} onChange={update('invoiceNumber')} /></div>
-            <div className="form-group"><label>{t('stockArrivalPage.expiryDate')}</label><input type="date" value={form.expiryDate} onChange={update('expiryDate')} /></div>
+            <div className="form-group"><label htmlFor="arr-exp">{t('stockArrivalPage.expiryDate')} *</label>
+              <input id="arr-exp" type="date" value={noExpiry ? '' : form.expiryDate} onChange={update('expiryDate')} required={!noExpiry} disabled={noExpiry} />
+              <label style={{ fontSize: 12, display: 'block', marginTop: 4 }}><input type="checkbox" checked={noExpiry} onChange={(e) => setNoExpiry(e.target.checked)} /> {t('receiptsPage.noExpiry')}</label></div>
             <div className="form-group"><label>{t('stockArrivalPage.batchNumber')}</label><input value={form.batchNumber} onChange={update('batchNumber')} placeholder={t('stockArrivalPage.batchPlaceholder')} /></div>
           </div>
           <button className="btn">{t('stockArrivalPage.recordArrival')}</button>

@@ -13,7 +13,9 @@ function inviteLink(code) {
 }
 
 // Every role a store user can hold (the store auditor is time-boxed to an audit engagement).
-const INVITE_ROLES = ['staff', 'cashier', 'checkout', 'store_manager', 'shelf_manager', 'marketplace_manager', 'security', 'manager', 'admin'];
+// Desktop has no auditor marketplace, so an outside auditor joins by invite there.
+const INVITE_ROLES = ['staff', 'cashier', 'checkout', 'store_manager', 'shelf_manager', 'marketplace_manager', 'security', 'manager', 'admin',
+  ...(import.meta.env.VITE_EDITION === 'desktop' ? ['auditor'] : [])];
 
 export default function Invites() {
   const { t } = useTranslation();

@@ -280,11 +280,11 @@ router.post('/movements', requireRole('admin', 'manager', 'staff'), inventoryCtr
 // engaged external 'auditor', matching desktop's role list exactly),
 // not gated behind a separate engagement check on every call — the
 // engagement itself is how an auditor got invited into the store at all.
-router.get('/audits', inventoryCtrl.listAudits);
-router.get('/audits/report', inventoryCtrl.auditReport);
-router.post('/audits', requireRole('admin', 'manager', 'staff', 'auditor', 'stock_taker', 'store_manager', 'shelf_manager'), requireActiveEngagement, inventoryCtrl.createAudit);
-router.get('/audits/conflicts', requireRole('admin', 'manager', 'staff', 'auditor', 'stock_taker', 'store_manager', 'shelf_manager'), inventoryCtrl.listConflicts);
-router.post('/audits/conflicts/:groupId/accept', requireRole('admin', 'manager', 'staff', 'auditor', 'stock_taker'), requireActiveEngagement, inventoryCtrl.acceptRecount);
+router.get('/audits', requireRole('auditor', 'stock_taker'), inventoryCtrl.listAudits);
+router.get('/audits/report', requireRole('auditor', 'stock_taker'), inventoryCtrl.auditReport);
+router.post('/audits', requireRole('auditor', 'stock_taker'), requireActiveEngagement, inventoryCtrl.createAudit);
+router.get('/audits/conflicts', requireRole('auditor', 'stock_taker'), inventoryCtrl.listConflicts);
+router.post('/audits/conflicts/:groupId/accept', requireRole('auditor', 'stock_taker'), requireActiveEngagement, inventoryCtrl.acceptRecount);
 
 // Receipt scanning (OCR).
 router.get('/receipts', receiptsCtrl.listReceipts);

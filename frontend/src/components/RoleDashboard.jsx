@@ -28,8 +28,8 @@ export default function RoleDashboard() {
     stock_taker: [['/shelf-audit', `📋 ${t('roleDash.countShelf')}`], ['/audit-report', `📑 ${t('roleDash.auditReport')}`]],
     marketplace_manager: [['/marketplace', `🛍️ ${t('roleDash.reviewOrders')}`]],
     security: [['/exit-check', `🛡️ ${t('roleDash.checkReceipt')}`]],
-    store_manager: [['/receipts', `🧾 ${t('roleDash.scanInvoice')}`], ['/stock-arrival', `🚚 ${t('roleDash.receiveSupply')}`], ['/handovers', `🔀 ${t('roleDash.sendToShelf')}`], ['/shelf-audit', `📋 ${t('roleDash.countStoreRoom')}`]],
-    shelf_manager: [['/handovers', `🔀 ${t('roleDash.confirmHandover')}`], ['/shelf-audit', `📋 ${t('roleDash.countShelf')}`], ['/labels', `🏷️ ${t('roleDash.labels')}`]],
+    store_manager: [['/receipts', `🧾 ${t('roleDash.scanInvoice')}`], ['/stock-arrival', `🚚 ${t('roleDash.receiveSupply')}`], ['/handovers', `🔀 ${t('roleDash.sendToShelf')}`]],
+    shelf_manager: [['/handovers', `🔀 ${t('roleDash.confirmHandover')}`], ['/labels', `🏷️ ${t('roleDash.labels')}`]],
   }[role] || [];
 
   return (

@@ -43,11 +43,21 @@ export default function Receipts() {
   };
 
   const [arrivalDateOverrides, setArrivalDateOverrides] = useState({});
+  // Per-line expiry / batch captured on the invoice: { [receiptId]: [{ expiryDate, batchNumber, noExpiry }] }
+  const [lineInfo, setLineInfo] = useState({});
+  const setLine = (rid, i, patch) => setLineInfo((prev) => {
+    const arr = [...(prev[rid] || [])];
+    arr[i] = { ...(arr[i] || {}), ...patch };
+    return { ...prev, [rid]: arr };
+  });
+  const lineReady = (rid, i) => { const l = (lineInfo[rid] || [])[i] || {}; return l.noExpiry || /^\d{4}-\d{2}-\d{2}$/.test(l.expiryDate || ''); };
 
   const applyReceipt = async (id, defaultDate) => {
     const arrivalDate = arrivalDateOverrides[id] || defaultDate || undefined;
     try {
-      await api.post(`/stores/${user.storeId}/receipts/${id}/apply`, { arrivalDate });
+      const r = receipts.find((x) => x.id === id);
+      const items = (r?.parsed_items || []).map((_, i) => (lineInfo[id] || [])[i] || {});
+      await api.post(`/stores/${user.storeId}/receipts/${id}/apply`, { arrivalDate, items });
       showToast(t('receiptsPage.appliedToStock'), 'success');
       load();
     } catch (err) {
@@ -84,11 +94,23 @@ export default function Receipts() {
               <Badge status={r.status} />
             </div>
             <table className="mt-1">
-              <thead><tr><th>{t('receiptsPage.item')}</th><th>{t('receiptsPage.qty')}</th><th>{t('receiptsPage.price')}</th></tr></thead>
+              <thead><tr><th>{t('receiptsPage.item')}</th><th>{t('receiptsPage.qty')}</th><th>{t('receiptsPage.price')}</th>{r.status === 'pending' && <><th>{t('receiptsPage.expiry')} *</th><th>{t('receiptsPage.batch')}</th></>}</tr></thead>
               <tbody>
-                {r.parsed_items.map((it, i) => (
-                  <tr key={i}><td>{it.name}</td><td>{it.quantity}</td><td>{formatCurrency(it.price)}</td></tr>
-                ))}
+                {r.parsed_items.map((it, i) => {
+                  const l = (lineInfo[r.id] || [])[i] || {};
+                  return (
+                    <tr key={i} style={r.status === 'pending' && !lineReady(r.id, i) ? { background: 'var(--offline-bg)' } : undefined}>
+                      <td>{it.name}</td><td>{it.quantity}</td><td>{formatCurrency(it.price)}</td>
+                      {r.status === 'pending' && <>
+                        <td style={{ whiteSpace: 'nowrap' }}>
+                          <input type="date" aria-label={t('receiptsPage.expiryFor', { name: it.name })} disabled={l.noExpiry} value={l.expiryDate || ''} onChange={(e) => setLine(r.id, i, { expiryDate: e.target.value })} />
+                          <label style={{ fontSize: 12, marginLeft: 6 }}><input type="checkbox" checked={!!l.noExpiry} onChange={(e) => setLine(r.id, i, { noExpiry: e.target.checked })} /> {t('receiptsPage.noExpiry')}</label>
+                        </td>
+                        <td><input aria-label={t('receiptsPage.batchFor', { name: it.name })} value={l.batchNumber || ''} onChange={(e) => setLine(r.id, i, { batchNumber: e.target.value })} style={{ width: 110 }} /></td>
+                      </>}
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
             {r.status === 'pending' && (
@@ -104,7 +126,8 @@ export default function Receipts() {
                   />
                 </div>
                 <div className="flex mt-1">
-                  <button className="btn small" onClick={() => applyReceipt(r.id, r.document_date)}>{t('receiptsPage.applyToStock')}</button>
+                  <button className="btn small" disabled={!r.parsed_items.every((_, i) => lineReady(r.id, i))} title={t('receiptsPage.expiryNeeded')} onClick={() => applyReceipt(r.id, r.document_date)}>{t('receiptsPage.applyToStock')}</button>
+                  {!r.parsed_items.every((_, i) => lineReady(r.id, i)) && <span className="muted" style={{ fontSize: 12, alignSelf: 'center' }}>{t('receiptsPage.expiryNeeded')}</span>}
                   <button className="btn secondary small" onClick={() => rejectReceipt(r.id)}>{t('receiptsPage.reject')}</button>
                 </div>
               </>

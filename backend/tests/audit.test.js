@@ -198,12 +198,12 @@ describe('stock_taker shelf-audit access is time-boxed to an active engagement',
     expect(res.body.code).toBe('NO_ACTIVE_ENGAGEMENT');
   });
 
-  it("a store's own admin can always audit, with no engagement at all", async () => {
+  it("a store's own admin cannot record shelf audits: only the requested auditor's stock takers can", async () => {
     const { store, token } = await createActiveStoreWithAdmin();
     const product = await createProduct(store.id);
     const res = await request().post(`/api/stores/${store.id}/audits`).set('Authorization', `Bearer ${token}`)
       .send({ productId: product.id, countedQty: 1, area: 'shelf' });
-    expect(res.status).toBe(201);
+    expect(res.status).toBe(403);
   });
 });
 

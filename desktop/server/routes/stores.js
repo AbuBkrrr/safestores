@@ -149,11 +149,12 @@ router.post('/customers/:customerId/adjustments', requireRole('admin', 'manager'
 router.get('/movements', inventoryCtrl.listMovements);
 router.post('/movements', requireRole('admin', 'manager', 'staff'), inventoryCtrl.createMovement);
 
-router.get('/audits', inventoryCtrl.listAudits);
-router.get('/audits/report', inventoryCtrl.auditReport);
-router.post('/audits', requireRole('admin', 'manager', 'staff', 'auditor'), inventoryCtrl.createAudit);
-router.get('/audits/conflicts', requireRole('admin', 'manager', 'staff', 'auditor'), inventoryCtrl.listConflicts);
-router.post('/audits/conflicts/:groupId/accept', requireRole('admin', 'manager', 'staff', 'auditor'), inventoryCtrl.acceptRecount);
+// Shelf audits are done and seen only by the auditor the store brought in.
+router.get('/audits', requireRole('auditor', 'stock_taker'), inventoryCtrl.listAudits);
+router.get('/audits/report', requireRole('auditor', 'stock_taker'), inventoryCtrl.auditReport);
+router.post('/audits', requireRole('auditor', 'stock_taker'), inventoryCtrl.createAudit);
+router.get('/audits/conflicts', requireRole('auditor', 'stock_taker'), inventoryCtrl.listConflicts);
+router.post('/audits/conflicts/:groupId/accept', requireRole('auditor', 'stock_taker'), inventoryCtrl.acceptRecount);
 
 router.get('/receipts', receiptsCtrl.listReceipts);
 router.post('/receipts', requireRole('admin', 'manager', 'staff'), upload.single('receipt'), receiptsCtrl.uploadReceipt);

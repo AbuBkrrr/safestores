@@ -34,7 +34,7 @@ describe('Receipts: apply', () => {
     const { store, token } = await createActiveStoreWithAdmin();
     const receipt = await seedReceipt(store.id, [{ name: 'New Item From Receipt', quantity: 6, price: 3.5 }]);
 
-    const res = await request().post(`/api/stores/${store.id}/receipts/${receipt.id}/apply`).set('Authorization', `Bearer ${token}`).send({});
+    const res = await request().post(`/api/stores/${store.id}/receipts/${receipt.id}/apply`).set('Authorization', `Bearer ${token}`).send({ items: Array(5).fill({ noExpiry: true }) });
     expect(res.status).toBe(200);
     expect(res.body.results).toHaveLength(1);
 
@@ -50,7 +50,7 @@ describe('Receipts: apply', () => {
     const existing = await createProduct(store.id, { name: 'Milk 1L', backroomQty: 0, shelfQty: 0 });
     const receipt = await seedReceipt(store.id, [{ name: 'milk 1l', quantity: 4 }]);
 
-    await request().post(`/api/stores/${store.id}/receipts/${receipt.id}/apply`).set('Authorization', `Bearer ${token}`).send({});
+    await request().post(`/api/stores/${store.id}/receipts/${receipt.id}/apply`).set('Authorization', `Bearer ${token}`).send({ items: Array(5).fill({ noExpiry: true }) });
 
     const products = await request().get(`/api/stores/${store.id}/products`).set('Authorization', `Bearer ${token}`);
     expect(products.body.filter((p) => p.id === existing.id || p.name.toLowerCase() === 'milk 1l')).toHaveLength(1);
@@ -60,9 +60,9 @@ describe('Receipts: apply', () => {
   it('cannot re-apply an already-applied receipt', async () => {
     const { store, token } = await createActiveStoreWithAdmin();
     const receipt = await seedReceipt(store.id, [{ name: 'X', quantity: 1 }]);
-    await request().post(`/api/stores/${store.id}/receipts/${receipt.id}/apply`).set('Authorization', `Bearer ${token}`).send({});
+    await request().post(`/api/stores/${store.id}/receipts/${receipt.id}/apply`).set('Authorization', `Bearer ${token}`).send({ items: Array(5).fill({ noExpiry: true }) });
 
-    const res = await request().post(`/api/stores/${store.id}/receipts/${receipt.id}/apply`).set('Authorization', `Bearer ${token}`).send({});
+    const res = await request().post(`/api/stores/${store.id}/receipts/${receipt.id}/apply`).set('Authorization', `Bearer ${token}`).send({ items: Array(5).fill({ noExpiry: true }) });
     expect(res.status).toBe(409);
   });
 

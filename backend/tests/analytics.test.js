@@ -1,5 +1,6 @@
 const { request } = require('./helpers/app');
 const { createActiveStoreWithAdmin, createProduct, createUser, tokenFor } = require('./helpers/factories');
+const { createAuditStockTaker } = require('./helpers/factories');
 
 describe('Analytics', () => {
   it('summary reflects product count, stock value, and low-stock count', async () => {
@@ -65,7 +66,7 @@ describe('Shrinkage Report', () => {
     const { store, token } = await createActiveStoreWithAdmin();
     const product = await createProduct(store.id, { costPrice: 5, shelfQty: 10, backroomQty: 0 });
 
-    await request().post(`/api/stores/${store.id}/audits`).set('Authorization', `Bearer ${token}`)
+    await request().post(`/api/stores/${store.id}/audits`).set('Authorization', `Bearer ${(await createAuditStockTaker(store.id)).token}`)
       .send({ productId: product.id, countedQty: 7, area: 'shelf' }); // 3 missing
 
     const res = await request().get(`/api/stores/${store.id}/analytics/shrinkage`).set('Authorization', `Bearer ${token}`);
@@ -79,7 +80,7 @@ describe('Shrinkage Report', () => {
     const { store, token } = await createActiveStoreWithAdmin();
     const product = await createProduct(store.id, { costPrice: 5, shelfQty: 10, backroomQty: 0 });
 
-    await request().post(`/api/stores/${store.id}/audits`).set('Authorization', `Bearer ${token}`)
+    await request().post(`/api/stores/${store.id}/audits`).set('Authorization', `Bearer ${(await createAuditStockTaker(store.id)).token}`)
       .send({ productId: product.id, countedQty: 12, area: 'shelf' }); // found extra, not missing
 
     const res = await request().get(`/api/stores/${store.id}/analytics/shrinkage`).set('Authorization', `Bearer ${token}`);
@@ -91,7 +92,7 @@ describe('Shrinkage Report', () => {
     const { store, token } = await createActiveStoreWithAdmin();
     const product = await createProduct(store.id, { costPrice: 2, shelfQty: 10, backroomQty: 10 });
 
-    await request().post(`/api/stores/${store.id}/audits`).set('Authorization', `Bearer ${token}`)
+    await request().post(`/api/stores/${store.id}/audits`).set('Authorization', `Bearer ${(await createAuditStockTaker(store.id)).token}`)
       .send({ productId: product.id, countedQty: 8, area: 'shelf' }); // shelf: 10 expected, 8 found -> -2
     await request().post(`/api/stores/${store.id}/cycle-counts`).set('Authorization', `Bearer ${token}`)
       .send({ productId: product.id, countedQty: 18 }); // total on-hand 20 expected, 18 found -> -2

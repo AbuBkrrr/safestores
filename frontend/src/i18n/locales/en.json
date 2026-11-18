@@ -726,7 +726,13 @@
     "arrivalDateFound": "Arrival date (found on receipt):",
     "arrivalDateNotFound": "Arrival date (not found on receipt — defaults to today):",
     "applyToStock": "Apply to Stock",
-    "reject": "Reject"
+    "reject": "Reject",
+    "expiry": "Expiry date",
+    "batch": "Batch no.",
+    "noExpiry": "No expiry",
+    "expiryFor": "Expiry date for {{name}}",
+    "batchFor": "Batch number for {{name}}",
+    "expiryNeeded": "Enter an expiry date (or tick No expiry) for every line before applying."
   },
   "replenishmentPage": {
     "loadingTitle": "Replenishment",

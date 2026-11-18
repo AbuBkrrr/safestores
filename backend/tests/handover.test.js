@@ -39,9 +39,6 @@ describe('Store room → shelf chain of custody', () => {
     expect(n.rows.length).toBe(2);
     expect(n.rows[0].message).toMatch(/sent 12, received 10/);
 
-    // Each confirms their own area with a count.
-    expect((await request().post(`/api/stores/${store.id}/audits`).set('Authorization', S).send({ productId: product.id, countedQty: 10, area: 'backroom', zone: 'Bay A' })).status).toBe(201);
-    expect((await request().post(`/api/stores/${store.id}/audits`).set('Authorization', H).send({ productId: product.id, countedQty: 10, area: 'shelf', shelfNumber: '3' })).status).toBe(201);
 
     const sd = await request().get(`/api/stores/${store.id}/my-dashboard`).set('Authorization', S);
     expect(sd.body.deliveriesToday).toMatchObject({ n: 1, units: 20 });
@@ -59,10 +56,13 @@ describe('Supplier invoice scan and customer returns', () => {
       `INSERT INTO receipts (store_id, raw_ocr_text, parsed_items, status) VALUES ($1, 'INVOICE', $2, 'pending') RETURNING id`,
       [store.id, JSON.stringify([{ name: 'Golden Penny Semovita 1kg', quantity: 40, unitPrice: 1500 }])]
     );
-    const r = await request().post(`/api/stores/${store.id}/receipts/${rows[0].id}/apply`).set('Authorization', S).send({});
+    expect((await request().post(`/api/stores/${store.id}/receipts/${rows[0].id}/apply`).set('Authorization', S).send({})).body.code).toBe('EXPIRY_REQUIRED');
+    const r = await request().post(`/api/stores/${store.id}/receipts/${rows[0].id}/apply`).set('Authorization', S).send({ items: [{ expiryDate: '2027-06-30', batchNumber: 'GP-118' }] });
     expect(r.status).toBe(200);
     const p = (await pool.query(`SELECT backroom_qty, shelf_qty FROM products WHERE store_id = $1 AND name ILIKE 'Golden Penny%'`, [store.id])).rows[0];
     expect(p).toEqual({ backroom_qty: 40, shelf_qty: 0 });
+    const b = (await pool.query(`SELECT b.batch_number, to_char(b.expiry_date, 'YYYY-MM-DD') AS exp, b.quantity_received FROM batches b JOIN products p ON p.id = b.product_id WHERE p.store_id = $1`, [store.id])).rows;
+    expect(b).toEqual([{ batch_number: 'GP-118', exp: '2027-06-30', quantity_received: 40 }]);
     // Cashiers can't apply invoices.
     const cashier = await createUser(store.id, { role: 'cashier' });
     expect((await request().post(`/api/stores/${store.id}/receipts`).set('Authorization', `Bearer ${tokenFor(cashier)}`)).status).toBe(403);

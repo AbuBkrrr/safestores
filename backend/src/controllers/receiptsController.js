@@ -60,6 +60,19 @@ async function applyReceipt(req, res) {
 
   const items = receipt.parsed_items; // already a parsed array — JSONB column
 
+  // Expiry dates are captured at the start, on the invoice, for every line:
+  // body.items[i] = { expiryDate: 'YYYY-MM-DD', batchNumber?, noExpiry? }.
+  const lineInfo = Array.isArray(req.body?.items) ? req.body.items : [];
+  const missingExpiry = [];
+  items.forEach((it, i) => {
+    const li = lineInfo[i] || {};
+    const valid = li.expiryDate && /^\d{4}-\d{2}-\d{2}$/.test(li.expiryDate);
+    if (!valid && li.noExpiry !== true) missingExpiry.push(it.name);
+  });
+  if (missingExpiry.length) {
+    return res.status(400).json({ error: `Enter the expiry date (or tick "No expiry") for: ${missingExpiry.join(', ')}`, code: 'EXPIRY_REQUIRED', missing: missingExpiry });
+  }
+
   // Stores running the store-room flow (store manager / shelf manager) keep
   // supplier stock in the store room; it reaches the shelf only through a
   // confirmed handover. Other stores keep the old straight-to-shelf behaviour.
@@ -71,7 +84,10 @@ async function applyReceipt(req, res) {
   try {
     await client.query('BEGIN');
     const out = [];
-    for (const item of items) {
+    for (const [idx, item] of items.entries()) {
+      const li = lineInfo[idx] || {};
+      const expiryDate = li.noExpiry === true ? null : li.expiryDate;
+      const batchNumber = String(li.batchNumber || '').trim().slice(0, 60) || null;
       let { rows: productRows } = await client.query(
         `SELECT * FROM products WHERE store_id = $1 AND (LOWER(name) = LOWER($2) OR sku = $3) LIMIT 1`,
         [storeId, item.name, item.sku || '']
@@ -91,10 +107,17 @@ async function applyReceipt(req, res) {
       // here directly — see stockMath.js.
 
       const { rows: arrivalRows } = await client.query(
-        `INSERT INTO stock_arrivals (store_id, product_id, quantity, receipt_id, received_by, created_at)
-         VALUES ($1,$2,$3,$4,$5,$6) RETURNING id`,
-        [storeId, product.id, item.quantity, receipt.id, req.user.sub, arrivalTimestamp]
+        `INSERT INTO stock_arrivals (store_id, product_id, quantity, receipt_id, received_by, created_at, expiry_date, batch_number)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id`,
+        [storeId, product.id, item.quantity, receipt.id, req.user.sub, arrivalTimestamp, expiryDate || null, batchNumber]
       );
+      if (expiryDate) {
+        await client.query(
+          `INSERT INTO batches (store_id, product_id, batch_number, expiry_date, quantity_received, arrival_id)
+           VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT (arrival_id) DO NOTHING`,
+          [storeId, product.id, batchNumber, expiryDate, item.quantity, arrivalRows[0].id]
+        );
+      }
 
       await client.query(
         `INSERT INTO stock_movements (store_id, product_id, type, quantity, note, performed_by, created_at)

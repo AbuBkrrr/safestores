@@ -1,5 +1,6 @@
 const { request } = require('./helpers/app');
 const { createActiveStoreWithAdmin, createProduct, createUser, tokenFor } = require('./helpers/factories');
+const { createAuditStockTaker } = require('./helpers/factories');
 
 describe('Stock Arrivals', () => {
   it('records an arrival and increases backroom quantity', async () => {
@@ -117,7 +118,8 @@ describe('Stock Movements', () => {
 
 describe('Shelf Audits', () => {
   it('records a matching count as confirmed (no conflict)', async () => {
-    const { store, token } = await createActiveStoreWithAdmin();
+    const { store } = await createActiveStoreWithAdmin();
+    const { token } = await createAuditStockTaker(store.id);
     const product = await createProduct(store.id, { shelfQty: 5 });
 
     const res = await request()
@@ -131,8 +133,9 @@ describe('Shelf Audits', () => {
   });
 
   it('flags a conflict when two different stocktakers disagree at the same location', async () => {
-    const { store, token } = await createActiveStoreWithAdmin();
-    const staff2 = await createUser(store.id, { role: 'staff' });
+    const { store } = await createActiveStoreWithAdmin();
+    const { token } = await createAuditStockTaker(store.id);
+    const staff2 = await createUser(store.id, { role: 'stock_taker' });
     const product = await createProduct(store.id, { shelfQty: 5 });
 
     const first = await request()
@@ -156,8 +159,9 @@ describe('Shelf Audits', () => {
   });
 
   it('the submitter of the latest count cannot accept their own recount', async () => {
-    const { store, token } = await createActiveStoreWithAdmin();
-    const staff2 = await createUser(store.id, { role: 'staff' });
+    const { store } = await createActiveStoreWithAdmin();
+    const { token } = await createAuditStockTaker(store.id);
+    const staff2 = await createUser(store.id, { role: 'stock_taker' });
     const product = await createProduct(store.id, { shelfQty: 5 });
 
     await request().post(`/api/stores/${store.id}/audits`).set('Authorization', `Bearer ${token}`)
@@ -173,3 +177,19 @@ describe('Shelf Audits', () => {
     expect(res.status).toBe(400);
   });
 });
+
+describe('Shelf audits are for requested auditors only', () => {
+  it('store roles cannot record or read shelf audits, even with an audit job running', async () => {
+    const { store, token } = await createActiveStoreWithAdmin();
+    await createAuditStockTaker(store.id);
+    const product = await createProduct(store.id, { shelfQty: 5 });
+    for (const role of ['admin', 'manager', 'staff', 'store_manager', 'shelf_manager']) {
+      const u = role === 'admin' ? null : await createUser(store.id, { role });
+      const T = `Bearer ${u ? tokenFor(u) : token}`;
+      expect([role, (await request().post(`/api/stores/${store.id}/audits`).set('Authorization', T).send({ productId: product.id, countedQty: 5, area: 'shelf' })).status]).toEqual([role, 403]);
+      expect([role, (await request().get(`/api/stores/${store.id}/audits`).set('Authorization', T)).status]).toEqual([role, 403]);
+      expect([role, (await request().get(`/api/stores/${store.id}/audits/report`).set('Authorization', T)).status]).toEqual([role, 403]);
+    }
+  });
+});
+
