@@ -157,10 +157,12 @@ describe('Invites', () => {
 describe('Invite roles', () => {
   it('accepts every store role and rejects unknown ones', async () => {
     const { store, token } = await createActiveStoreWithAdmin();
-    for (const role of ['admin', 'manager', 'cashier', 'checkout', 'staff', 'stock_taker', 'auditor']) {
+    for (const role of ['admin', 'manager', 'cashier', 'checkout', 'staff', 'store_manager', 'shelf_manager', 'marketplace_manager', 'security']) {
       const res = await request().post(`/api/stores/${store.id}/invites`).set('Authorization', `Bearer ${token}`).send({ name: `P ${role}`, role });
       expect(res.status).toBe(201);
     }
+    // Auditors are an outside service requested by admin/manager, not a store role you invite.
+    expect((await request().post(`/api/stores/${store.id}/invites`).set('Authorization', `Bearer ${token}`).send({ name: 'A', role: 'auditor' })).status).toBe(400);
     const bad = await request().post(`/api/stores/${store.id}/invites`).set('Authorization', `Bearer ${token}`).send({ name: 'X', role: 'owner' });
     expect(bad.status).toBe(400);
   });

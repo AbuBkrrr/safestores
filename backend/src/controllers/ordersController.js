@@ -484,6 +484,16 @@ async function refundOrder(req, res) {
         `INSERT INTO refund_items (refund_id, order_item_id, product_id, quantity, amount, restocked) VALUES ($1,$2,$3,$4,$5,$6)`,
         [refundId, line.id, line.product_id, qty, amount, restock]
       );
+      if (hasSecurity) {
+        // The goods are with security; the store manager receives them into the
+        // store room (as customer returns) from Shelf Handovers → Returns.
+        await client.query(
+          `INSERT INTO stock_movements (store_id, product_id, type, quantity, note, performed_by) VALUES ($1,$2,'refund_out',$3,$4,$5)`,
+          [storeId, line.product_id, qty, `Refund on ${order.receipt_number} (goods held by security)`, req.user.sub]
+        );
+        await recomputeProductQuantities(client, line.product_id);
+        continue;
+      }
       await client.query(
         `INSERT INTO stock_movements (store_id, product_id, type, quantity, note, performed_by) VALUES ($1,$2,'return',$3,$4,$5)`,
         [storeId, line.product_id, qty, `Refund on ${order.receipt_number}`, req.user.sub]

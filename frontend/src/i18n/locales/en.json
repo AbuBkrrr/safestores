@@ -122,7 +122,7 @@
     "textSize": "Text size",
     "settlements": "Settlements",
     "exitCheck": "Exit Check",
-    "handovers": "Shelf Handovers"
+    "handovers": "Handovers & Returns"
   },
   "login": {
     "welcomeBack": "Welcome Back",
@@ -2067,7 +2067,8 @@
     "recentDeliveries": "Recent supplier deliveries",
     "handoversToConfirm": "Handovers to confirm",
     "nothingWaiting": "Nothing waiting from the store room.",
-    "linesUnits": "{{lines}} product(s), {{units}} units"
+    "linesUnits": "{{lines}} product(s), {{units}} units",
+    "scanInvoice": "Scan supplier invoice"
   },
   "handover": {
     "title": "Shelf handovers",
@@ -2104,7 +2105,28 @@
     "issued": "Sent. The shelf manager will confirm it.",
     "received": "Confirmed. Shelf stock updated.",
     "cancelled": "Handover cancelled.",
-    "failed": "Something went wrong"
+    "failed": "Something went wrong",
+    "scanTitle": "Scan the handover slip",
+    "scanSlip": "Scan slip QR",
+    "stopCamera": "Stop camera",
+    "slipCode": "Or type the slip code (8 characters)",
+    "find": "Find",
+    "slipFound": "Slip {{code}} found. Count the goods and confirm below.",
+    "slipNotFound": "No waiting handover with that slip. Check the code or ask the store manager.",
+    "cameraError": "Camera not available. Type the slip code instead.",
+    "printSlip": "Print slip",
+    "returnsTitle": "Returns from security",
+    "returnsHelp": "Goods customers brought back, checked by security. Receive them into the store room: resellable units are kept as customer returns (separate from supplier stock); damaged units are written off.",
+    "noReturns": "No returned goods waiting.",
+    "receipt": "Receipt",
+    "returnedQty": "Returned",
+    "fromSecurity": "Checked by security",
+    "intoStore": "Into store room",
+    "resellable": "Resellable",
+    "damaged": "Damaged",
+    "receiveReturn": "Receive",
+    "returnDone": "{{ok}} resellable, {{bad}} damaged (by {{name}})",
+    "returnReceived": "Return received into the store room."
   },
   "creditKyc": {
     "title": "Finish your credit application",

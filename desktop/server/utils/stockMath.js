@@ -11,6 +11,7 @@ function recomputeProductQuantities(db, productId) {
                           WHEN type = 'transfer_to_shelf' THEN -quantity
                           WHEN type = 'backroom_adjustment' THEN quantity
                           WHEN type = 'transfer_out' THEN -quantity
+                          WHEN type = 'customer_return' THEN quantity
                           ELSE 0 END), 0) AS backroom_qty,
        COALESCE(SUM(CASE WHEN type = 'transfer_to_shelf' THEN quantity
                           WHEN type IN ('sale', 'damage', 'expiry') THEN -quantity
@@ -18,9 +19,9 @@ function recomputeProductQuantities(db, productId) {
                           WHEN type = 'return' THEN quantity
                           ELSE 0 END), 0) AS shelf_qty,
        COALESCE(SUM(CASE WHEN type = 'sale' THEN quantity
-                          WHEN type = 'return' THEN -quantity
+                          WHEN type IN ('return', 'refund_out') THEN -quantity
                           ELSE 0 END), 0) AS sold_qty,
-       COALESCE(SUM(CASE WHEN type IN ('damage', 'expiry') THEN quantity ELSE 0 END), 0) AS damaged_qty
+       COALESCE(SUM(CASE WHEN type IN ('damage', 'expiry', 'return_damaged') THEN quantity ELSE 0 END), 0) AS damaged_qty
      FROM stock_movements WHERE product_id = ?`
   ).get(productId);
 

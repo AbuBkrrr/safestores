@@ -132,4 +132,65 @@ async function cancelHandover(req, res) {
   res.json({ id: rows[0].id, status: 'cancelled' });
 }
 
-module.exports = { listHandovers, issueHandover, receiveHandover, cancelHandover };
+// GET /api/stores/:storeId/returns — goods security received back from customers
+async function listReturns(req, res) {
+  const { rows } = await db.query(
+    `SELECT sr.id, sr.quantity, sr.note, sr.created_at, sr.received_at, sr.qty_resellable, sr.qty_damaged, sr.receive_note,
+            p.name AS product_name, o.receipt_number, ck.name AS checked_by_name, rb.name AS received_by_name
+     FROM security_returns sr JOIN order_items oi ON oi.id = sr.order_item_id JOIN products p ON p.id = oi.product_id
+     JOIN orders o ON o.id = sr.order_id LEFT JOIN users ck ON ck.id = sr.checked_by LEFT JOIN users rb ON rb.id = sr.received_by
+     WHERE sr.store_id = $1 AND (sr.received_at IS NULL OR sr.received_at > now() - INTERVAL '14 days')
+     ORDER BY (sr.received_at IS NULL) DESC, sr.created_at DESC LIMIT 100`, [req.params.storeId]
+  );
+  res.json(rows);
+}
+
+// POST /api/stores/:storeId/returns/:id/receive  { resellable, damaged, note? }
+// Store manager takes the returned goods from security into the store room.
+async function receiveReturn(req, res) {
+  const { storeId, id } = req.params;
+  const resellable = parseInt(req.body?.resellable, 10);
+  const damaged = parseInt(req.body?.damaged, 10);
+  const client = await db.pool.connect();
+  try {
+    await client.query('BEGIN');
+    const r = (await client.query(
+      `SELECT sr.*, oi.product_id, o.receipt_number FROM security_returns sr JOIN order_items oi ON oi.id = sr.order_item_id
+       JOIN orders o ON o.id = sr.order_id WHERE sr.id = $1 AND sr.store_id = $2 FOR UPDATE OF sr`, [id, storeId]
+    )).rows[0];
+    if (!r || r.received_at) { await client.query('ROLLBACK'); return res.status(400).json({ error: 'This return is not waiting to be received' }); }
+    if (!(resellable >= 0) || !(damaged >= 0) || resellable + damaged !== r.quantity) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({ error: `Split all ${r.quantity} returned unit(s) into resellable and damaged` });
+    }
+    if (r.checked_by && r.checked_by === req.user.sub && req.user.role !== 'admin') {
+      await client.query('ROLLBACK');
+      return res.status(403).json({ error: 'The person who took the return from the customer cannot also receive it into the store room' });
+    }
+    const note = `Customer return, receipt ${r.receipt_number}`;
+    if (resellable > 0) {
+      await client.query(`INSERT INTO stock_movements (store_id, product_id, type, quantity, note, performed_by) VALUES ($1,$2,'customer_return',$3,$4,$5)`,
+        [storeId, r.product_id, resellable, note, req.user.sub || null]);
+    }
+    if (damaged > 0) {
+      await client.query(`INSERT INTO stock_movements (store_id, product_id, type, quantity, note, performed_by) VALUES ($1,$2,'return_damaged',$3,$4,$5)`,
+        [storeId, r.product_id, damaged, `${note} (damaged, written off)`, req.user.sub || null]);
+    }
+    await recomputeProductQuantities(client, r.product_id);
+    await client.query(
+      `UPDATE security_returns SET received_by = $1, received_at = now(), qty_resellable = $2, qty_damaged = $3, receive_note = $4 WHERE id = $5`,
+      [req.user.sub || null, resellable, damaged, String(req.body?.note || '').trim().slice(0, 300) || null, id]
+    );
+    await client.query('COMMIT');
+    emitToStore(storeId, 'handover:received', { id });
+    res.json({ id, resellable, damaged });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error(err);
+    res.status(500).json({ error: 'Could not receive the return' });
+  } finally {
+    client.release();
+  }
+}
+
+module.exports = { listHandovers, issueHandover, receiveHandover, cancelHandover, listReturns, receiveReturn };

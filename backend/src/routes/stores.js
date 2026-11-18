@@ -215,6 +215,9 @@ router.get('/handovers', requireRole('admin', 'manager', 'staff', 'store_manager
 router.post('/handovers', requireRole('admin', 'manager', 'store_manager'), handoverCtrl.issueHandover);
 router.post('/handovers/:id/receive', requireRole('admin', 'manager', 'staff', 'shelf_manager'), handoverCtrl.receiveHandover);
 router.post('/handovers/:id/cancel', requireRole('admin', 'manager', 'store_manager'), handoverCtrl.cancelHandover);
+// Customer returns: security → store manager → store room (kept apart from supplier stock).
+router.get('/returns', requireRole('admin', 'manager', 'store_manager', 'security'), handoverCtrl.listReturns);
+router.post('/returns/:id/receive', requireRole('admin', 'manager', 'store_manager'), handoverCtrl.receiveReturn);
 router.post('/arrivals', requireRole('admin', 'manager', 'staff', 'store_manager'), inventoryCtrl.createArrival);
 
 // Expiry & Batch Tracking.
@@ -285,9 +288,9 @@ router.post('/audits/conflicts/:groupId/accept', requireRole('admin', 'manager',
 
 // Receipt scanning (OCR).
 router.get('/receipts', receiptsCtrl.listReceipts);
-router.post('/receipts', requireRole('admin', 'manager', 'staff'), upload.single('receipt'), receiptsCtrl.uploadReceipt);
-router.post('/receipts/:receiptId/apply', requireRole('admin', 'manager'), receiptsCtrl.applyReceipt);
-router.post('/receipts/:receiptId/reject', requireRole('admin', 'manager'), receiptsCtrl.rejectReceipt);
+router.post('/receipts', requireRole('admin', 'manager', 'staff', 'store_manager'), upload.single('receipt'), receiptsCtrl.uploadReceipt);
+router.post('/receipts/:receiptId/apply', requireRole('admin', 'manager', 'store_manager'), receiptsCtrl.applyReceipt);
+router.post('/receipts/:receiptId/reject', requireRole('admin', 'manager', 'store_manager'), receiptsCtrl.rejectReceipt);
 
 // Camera/gallery images + barcode-to-product lookup.
 router.get('/images', imagesCtrl.listImages);

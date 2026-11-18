@@ -60,6 +60,13 @@ async function applyReceipt(req, res) {
 
   const items = receipt.parsed_items; // already a parsed array — JSONB column
 
+  // Stores running the store-room flow (store manager / shelf manager) keep
+  // supplier stock in the store room; it reaches the shelf only through a
+  // confirmed handover. Other stores keep the old straight-to-shelf behaviour.
+  const storeRoomFlow = (await db.query(
+    `SELECT 1 FROM users WHERE store_id = $1 AND role IN ('store_manager', 'shelf_manager') AND status = 'active' LIMIT 1`, [storeId]
+  )).rowCount > 0;
+
   const client = await db.pool.connect();
   try {
     await client.query('BEGIN');
@@ -99,11 +106,13 @@ async function applyReceipt(req, res) {
       // is) by the time it reaches here, so the cashier/POS should be
       // able to sell it immediately rather than needing a separate manual
       // transfer-to-shelf step first.
-      await client.query(
-        `INSERT INTO stock_movements (store_id, product_id, type, quantity, note, performed_by)
-         VALUES ($1,$2,'transfer_to_shelf',$3,'Auto-transferred to shelf on receipt apply',$4)`,
-        [storeId, product.id, item.quantity, req.user.sub]
-      );
+      if (!storeRoomFlow) {
+        await client.query(
+          `INSERT INTO stock_movements (store_id, product_id, type, quantity, note, performed_by)
+           VALUES ($1,$2,'transfer_to_shelf',$3,'Auto-transferred to shelf on receipt apply',$4)`,
+          [storeId, product.id, item.quantity, req.user.sub]
+        );
+      }
       await recomputeProductQuantities(client, product.id);
 
       out.push({ item, productId: product.id, arrivalId: arrivalRows[0].id });
