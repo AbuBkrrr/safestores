@@ -542,7 +542,8 @@
     "bulkCreated": "{{count}} invites created",
     "bulkCreationFailed": "Bulk creation failed",
     "allPendingCopied": "All pending codes copied to clipboard",
-    "inviteMessageCopied": "Invite message copied"
+    "inviteMessageCopied": "Invite message copied",
+    "miniNote": "Mini store: you run the shop, with up to 2 helpers (a manager, cashier or shop assistant). Upgrade to Midi to add store and shelf managers, security and an online market manager."
   },
   "usersPage": {
     "title": "User Management",
@@ -2152,5 +2153,13 @@
     "s4Done": "Verified.",
     "uploaded": "Letter uploaded. The store will verify it with your guarantor.",
     "failed": "Upload failed. Try again."
+  },
+  "miniShop": {
+    "today": "Today's sales",
+    "sales": "{{count}} sale(s)",
+    "sell": "Start a sale",
+    "scanInvoice": "Scan invoice",
+    "receive": "Receive stock",
+    "salesRefunds": "Sales & refunds"
   }
 }

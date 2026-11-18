@@ -104,7 +104,7 @@ async function adminLogin(req, res) {
   // of two shops). Try each one whose password matches; if more than one
   // matches and the client didn't say which store, ask it to choose.
   const { rows } = await db.query(
-    `SELECT u.*, s.subscription_status, s.name AS store_name, s.sync_key, s.locked
+    `SELECT u.*, s.subscription_status, s.name AS store_name, s.sync_key, s.locked, s.store_tier
      FROM users u JOIN stores s ON s.id = u.store_id
      WHERE lower(u.email) = lower($1) AND u.password_hash IS NOT NULL
      ORDER BY u.created_at ASC`,
@@ -148,7 +148,7 @@ async function adminLogin(req, res) {
     token,
     user: {
       id: user.id, name: user.name, email: user.email, role: user.role,
-      storeId: user.store_id, storeName: user.store_name, subscriptionStatus: user.subscription_status,
+      storeId: user.store_id, storeName: user.store_name, storeTier: user.store_tier, subscriptionStatus: user.subscription_status,
       syncKey: user.sync_key, locked: !!user.locked,
       emailVerified: !!user.email_verified_at, twoFactorEnabled: !!user.totp_enabled,
     },

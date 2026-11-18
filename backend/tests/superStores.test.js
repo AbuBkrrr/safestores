@@ -274,7 +274,7 @@ describe('Super Admin: Cross-store user management', () => {
       expect(res.body.max_users).toBeNull();
       const bad = await request().put('/api/super/tiers/mini').set('Authorization', auth).send({ maxProducts: -2 });
       expect(bad.status).toBe(400);
-      await request().put('/api/super/tiers/mini').set('Authorization', auth).send({ label: 'Mini Store', maxProducts: 200, maxUsers: 5 });
+      await request().put('/api/super/tiers/mini').set('Authorization', auth).send({ label: 'Mini Store', maxProducts: 200, maxUsers: 3 });
     });
   });
 });

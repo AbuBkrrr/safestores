@@ -3,7 +3,7 @@ const { createActiveStoreWithAdmin, createProduct, createUser, tokenFor, createA
 const { pool } = require('../src/config/db');
 
 // Every feature works the same in mini, midi and mega stores; size only sets limits.
-describe.each(['mini', 'midi', 'mega'])('%s store: all features', (tier) => {
+describe.each(['midi', 'mega'])('%s store: all features', (tier) => {
   it('roles, invoice to store room, handover, sale, exit check, returns, credit KYC, audits', async () => {
     const { store, token } = await createActiveStoreWithAdmin();
     await pool.query('UPDATE stores SET store_tier = $1, marketplace_enabled = true WHERE id = $2', [tier, store.id]);
@@ -59,3 +59,39 @@ describe.each(['mini', 'midi', 'mega'])('%s store: all features', (tier) => {
     expect((await request().post(`/api/stores/${store.id}/audits`).set('Authorization', `Bearer ${st.token}`).send({ productId: milk.id, countedQty: 4, area: 'shelf' })).status).toBe(201);
   });
 });
+
+describe('Mini store: the owner with up to 2 helpers', () => {
+  it('only helper roles, at most 3 people, stock goes straight to the shelf, returns straight back', async () => {
+    const { store, token } = await createActiveStoreWithAdmin(); // new stores are Mini
+    const A = `Bearer ${token}`;
+    for (const role of ['store_manager', 'shelf_manager', 'security', 'marketplace_manager', 'checkout']) {
+      const r = await request().post(`/api/stores/${store.id}/invites`).set('Authorization', A).send({ name: role, role });
+      expect([role, r.status, r.body.code]).toEqual([role, 400, 'TEAM_LIMIT']);
+    }
+    expect((await request().post(`/api/stores/${store.id}/invites`).set('Authorization', A).send({ name: 'Shop boy', role: 'staff' })).status).toBe(201);
+    expect((await request().post(`/api/stores/${store.id}/invites`).set('Authorization', A).send({ name: 'Sister', role: 'cashier' })).status).toBe(201);
+    const third = await request().post(`/api/stores/${store.id}/invites`).set('Authorization', A).send({ name: 'One more', role: 'cashier' });
+    expect(third.status).toBe(400);
+    expect(third.body.error).toMatch(/allows 3 people/);
+    expect((await request().post(`/api/stores/${store.id}/invites/bulk`).set('Authorization', A).send({ names: 'X, Y', role: 'staff' })).status).toBe(400);
+
+    // Owner scans an invoice: stock is sellable straight away.
+    const rec = (await pool.query(`INSERT INTO receipts (store_id, raw_ocr_text, parsed_items, status) VALUES ($1,'INV',$2,'pending') RETURNING id`,
+      [store.id, JSON.stringify([{ name: 'Indomie', quantity: 40, price: 250 }])])).rows[0];
+    expect((await request().post(`/api/stores/${store.id}/receipts/${rec.id}/apply`).set('Authorization', A).send({ items: [{ expiryDate: '2027-02-28' }] })).status).toBe(200);
+    const p = (await pool.query(`SELECT id, shelf_qty, backroom_qty FROM products WHERE store_id = $1 AND name = 'Indomie'`, [store.id])).rows[0];
+    expect([p.shelf_qty, p.backroom_qty]).toEqual([40, 0]);
+
+    // Owner sells and refunds: no security post, so the item goes straight back on the shelf.
+    const order = await request().post(`/api/stores/${store.id}/orders`).set('Authorization', A).send({});
+    const line = await request().post(`/api/stores/${store.id}/orders/${order.body.id}/items`).set('Authorization', A).send({ productId: p.id, quantity: 2 });
+    await request().post(`/api/stores/${store.id}/orders/${order.body.id}/pay`).set('Authorization', A).send({ paymentMethod: 'cash' });
+    expect((await request().post(`/api/stores/${store.id}/orders/${order.body.id}/refunds`).set('Authorization', A).send({ items: [{ orderItemId: line.body.item.id, quantity: 1 }] })).status).toBe(201);
+    expect((await pool.query('SELECT shelf_qty FROM products WHERE id = $1', [p.id])).rows[0].shelf_qty).toBe(39);
+
+    // Owner's dashboard knows it's a Mini store and shows today's takings.
+    const d = await request().get(`/api/stores/${store.id}/my-dashboard`).set('Authorization', A);
+    expect(d.body).toMatchObject({ storeTier: 'mini', storeSalesToday: { count: 1 } });
+  });
+});
+

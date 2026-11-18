@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { Alert, Badge, Toast } from '../components/ui.jsx';
 import { useToast } from '../components/useToast.js';
 import InviteShareModal from '../components/InviteShareModal.jsx';
+import { useStoreTier, MINI_ROLES } from '../utils/useStoreTier.js';
 
 const APP_BASE_URL = window.location.origin;
 
@@ -26,6 +27,8 @@ export default function Invites() {
   const [error, setError] = useState('');
   const [toast, showToast] = useToast();
 
+  const storeTier = useStoreTier();
+  const roleOptions = storeTier === 'mini' ? INVITE_ROLES.filter((r) => MINI_ROLES.includes(r)) : INVITE_ROLES;
   const [sharing, setSharing] = useState(null); // invite whose share card is open
   const load = () => api.get(`/stores/${user.storeId}/invites`).then((r) => setInvites(r.data));
   useEffect(() => { load(); }, [user.storeId]);
@@ -86,6 +89,7 @@ export default function Invites() {
   return (
     <div>
       <div className="topbar"><h1>{t('invitesPage.title')}</h1></div>
+      {storeTier === 'mini' && <div className="alert info">🏪 {t('invitesPage.miniNote')}</div>}
       <Alert type="error">{error}</Alert>
 
       <div className="grid grid-2">
@@ -97,7 +101,7 @@ export default function Invites() {
             <div className="form-group">
               <label>{t('invitesPage.role')}</label>
               <select value={single.role} onChange={(e) => setSingle({ ...single, role: e.target.value })}>
-                {INVITE_ROLES.map((r) => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}
+                {roleOptions.map((r) => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}
               </select>
             </div>
             <button className="btn">{t('invitesPage.createInvite')}</button>
@@ -118,7 +122,7 @@ export default function Invites() {
             <div className="form-group">
               <label>{t('invitesPage.roleAppliedToAll')}</label>
               <select value={bulk.role} onChange={(e) => setBulk({ ...bulk, role: e.target.value })}>
-                {INVITE_ROLES.map((r) => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}
+                {roleOptions.map((r) => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}
               </select>
             </div>
             <button className="btn">{t('invitesPage.createBulkInvites')}</button>

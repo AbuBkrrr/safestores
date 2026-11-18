@@ -39,7 +39,7 @@ const FIELDS = {
 
 async function readSettings(storeId) {
   const { rows } = await db.query(
-    `SELECT s.id, s.name, s.timezone, s.tax_rate_pct, s.tax_inclusive, s.tax_label, s.tax_number, s.phone, s.address, s.city,
+    `SELECT s.id, s.name, s.store_tier, s.timezone, s.tax_rate_pct, s.tax_inclusive, s.tax_label, s.tax_number, s.phone, s.address, s.city,
             s.receipt_header, s.receipt_footer, s.max_cashier_discount_pct, s.require_shift,
             s.points_per_100, s.point_value, s.points_expiry_months, s.daily_summary_enabled,
             s.currency_code AS store_currency_code, s.currency_symbol AS store_currency_symbol,

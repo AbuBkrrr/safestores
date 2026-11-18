@@ -6,6 +6,8 @@ import { Metric, Alert } from '../components/ui.jsx';
 import { useCurrency } from '../context/CurrencyContext.jsx';
 import GettingStarted from '../components/GettingStarted.jsx';
 import RoleDashboard from '../components/RoleDashboard.jsx';
+import { Link } from 'react-router-dom';
+import { useStoreTier } from '../utils/useStoreTier.js';
 
 export default function Dashboard() {
   const { user: who } = useAuth();
@@ -17,6 +19,11 @@ function StoreDashboard() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { formatCurrency } = useCurrency();
+  const storeTier = useStoreTier();
+  const [today, setToday] = useState(null);
+  useEffect(() => {
+    if (storeTier === 'mini') api.get(`/stores/${user.storeId}/my-dashboard`).then((r) => setToday(r.data.storeSalesToday)).catch(() => {});
+  }, [storeTier, user.storeId]);
   const [summary, setSummary] = useState(null);
   const [products, setProducts] = useState([]);
   const [notifications, setNotifications] = useState([]);
@@ -71,6 +78,22 @@ function StoreDashboard() {
         <button className="btn secondary" onClick={shareSummary} disabled={!summary}>{t('dashboard.shareSummary')}</button>
       </div>
       <GettingStarted />
+      {storeTier === 'mini' && (
+        <div className="card">
+          <div className="flex" style={{ justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10 }}>
+            <div>
+              <div className="muted" style={{ fontSize: 13 }}>{t('miniShop.today')}</div>
+              <div style={{ fontSize: 26, fontWeight: 800 }}>{today ? formatCurrency(today.total) : '—'} <span className="muted" style={{ fontSize: 14, fontWeight: 400 }}>{today ? t('miniShop.sales', { count: today.count }) : ''}</span></div>
+            </div>
+            <div className="flex" style={{ gap: 8, flexWrap: 'wrap' }}>
+              <Link to="/checkout" className="btn">🛒 {t('miniShop.sell')}</Link>
+              <Link to="/receipts" className="btn secondary">🧾 {t('miniShop.scanInvoice')}</Link>
+              <Link to="/stock-arrival" className="btn secondary">🚚 {t('miniShop.receive')}</Link>
+              <Link to="/sales" className="btn secondary">🧮 {t('miniShop.salesRefunds')}</Link>
+            </div>
+          </div>
+        </div>
+      )}
 
       {notifications.length > 0 && (
         <div className="card">

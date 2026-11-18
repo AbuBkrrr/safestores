@@ -1,5 +1,6 @@
 import { Suspense, useEffect, useState } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { useStoreTier, MINI_HIDDEN } from '../utils/useStoreTier.js';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useSocket } from '../context/SocketContext.jsx';
@@ -134,6 +135,7 @@ export function DisplayPrefs() {
 export default function Layout() {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
+  const storeTier = useStoreTier();
   const { connected, peers } = useSocket();
   const { isOnline, queuedCount } = useOffline();
   const navigate = useNavigate();
@@ -144,7 +146,7 @@ export default function Layout() {
   const nav = (isSuperAdmin
     ? (isDesktop ? superNav : [...superNav, ...superMarketplaceNav])
     : (isDesktop ? storeNav : [...storeNav, ...marketplaceNav])
-  ).filter((item) => !item.roles || item.roles.includes(user?.role));
+  ).filter((item) => (!item.roles || item.roles.includes(user?.role)) && !(storeTier === 'mini' && MINI_HIDDEN.includes(item.to)));
 
   const groups = [];
   for (const item of nav) {

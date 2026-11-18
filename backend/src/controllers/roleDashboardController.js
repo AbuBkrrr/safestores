@@ -128,7 +128,14 @@ async function myDashboard(req, res) {
   const isToday = (col) => `(${col} AT TIME ZONE '${tz.replace(/'/g, '')}')::date = ${today}`;
   const out = { role };
 
-  if (['cashier', 'checkout'].includes(role)) {
+  if (['admin', 'manager'].includes(role)) {
+    const s = await db.query(
+      `SELECT COUNT(*)::int AS count, COALESCE(SUM(total - refunded_total), 0) AS total
+       FROM orders WHERE store_id = $1 AND status = 'paid' AND ${isToday('paid_at')}`, [storeId]
+    );
+    const tier = (await db.query('SELECT store_tier FROM stores WHERE id = $1', [storeId])).rows[0]?.store_tier;
+    Object.assign(out, { storeSalesToday: s.rows[0], storeTier: tier });
+  } else if (['cashier', 'checkout'].includes(role)) {
     const s = await db.query(
       `SELECT COUNT(*)::int AS count, COALESCE(SUM(total - refunded_total), 0) AS total
        FROM orders WHERE store_id = $1 AND status = 'paid' AND (paid_by = $2 OR created_by = $2) AND ${isToday('paid_at')}`, [storeId, sub]
