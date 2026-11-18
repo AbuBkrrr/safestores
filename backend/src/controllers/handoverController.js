@@ -26,7 +26,7 @@ async function listHandovers(req, res) {
 async function issueHandover(req, res) {
   const { storeId } = req.params;
   const items = (Array.isArray(req.body?.items) ? req.body.items : [])
-    .map((i) => ({ productId: i.productId, quantity: parseInt(i.quantity, 10) })).filter((i) => i.productId && i.quantity > 0);
+    .map((i) => ({ productId: i.productId, quantity: Math.round(Number(i.quantity) * 1000) / 1000 })).filter((i) => i.productId && i.quantity > 0);
   if (!items.length) return res.status(400).json({ error: 'Add at least one product and quantity' });
   const client = await db.pool.connect();
   try {
@@ -66,7 +66,7 @@ async function issueHandover(req, res) {
 // POST /api/stores/:storeId/handovers/:id/receive  { items: [{ itemId, qtyReceived }], note? }
 async function receiveHandover(req, res) {
   const { storeId, id } = req.params;
-  const given = new Map((Array.isArray(req.body?.items) ? req.body.items : []).map((i) => [i.itemId, parseInt(i.qtyReceived, 10)]));
+  const given = new Map((Array.isArray(req.body?.items) ? req.body.items : []).map((i) => [i.itemId, i.qtyReceived === '' || i.qtyReceived === undefined ? NaN : Math.round(Number(i.qtyReceived) * 1000) / 1000]));
   const note = String(req.body?.note || '').trim().slice(0, 300) || null;
   const client = await db.pool.connect();
   try {
@@ -149,8 +149,8 @@ async function listReturns(req, res) {
 // Store manager takes the returned goods from security into the store room.
 async function receiveReturn(req, res) {
   const { storeId, id } = req.params;
-  const resellable = parseInt(req.body?.resellable, 10);
-  const damaged = parseInt(req.body?.damaged, 10);
+  const resellable = Math.round(Number(req.body?.resellable) * 1000) / 1000;
+  const damaged = Math.round(Number(req.body?.damaged) * 1000) / 1000;
   const client = await db.pool.connect();
   try {
     await client.query('BEGIN');
@@ -159,7 +159,7 @@ async function receiveReturn(req, res) {
        JOIN orders o ON o.id = sr.order_id WHERE sr.id = $1 AND sr.store_id = $2 FOR UPDATE OF sr`, [id, storeId]
     )).rows[0];
     if (!r || r.received_at) { await client.query('ROLLBACK'); return res.status(400).json({ error: 'This return is not waiting to be received' }); }
-    if (!(resellable >= 0) || !(damaged >= 0) || resellable + damaged !== r.quantity) {
+    if (!(resellable >= 0) || !(damaged >= 0) || Math.abs(resellable + damaged - Number(r.quantity)) > 0.0005) {
       await client.query('ROLLBACK');
       return res.status(400).json({ error: `Split all ${r.quantity} returned unit(s) into resellable and damaged` });
     }

@@ -1,4 +1,8 @@
-const { Pool } = require('pg');
+const { Pool, types } = require('pg');
+
+// NUMERIC columns (money, and quantities sold by weight) come back as JS
+// numbers rather than strings. Values stay well inside double precision.
+types.setTypeParser(1700, (v) => (v === null ? null : parseFloat(v)));
 require('dotenv').config();
 
 // Most hosted Postgres providers (Render, Railway, Supabase, Neon, RDS) require

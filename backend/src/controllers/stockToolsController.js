@@ -143,7 +143,7 @@ async function createTransfer(req, res) {
       [transferId, storeId, toStoreId, note ? String(note).slice(0, 300) : null, req.user.sub]
     );
     for (const it of items) {
-      const qty = parseInt(it.quantity, 10);
+      const qty = Math.round(Number(it.quantity) * 1000) / 1000;
       const { rows: p } = await client.query('SELECT * FROM products WHERE id = $1 AND store_id = $2 FOR UPDATE', [it.productId, storeId]);
       if (!p[0]) { await client.query('ROLLBACK'); return res.status(404).json({ error: 'Product not found' }); }
       if (!(qty > 0) || qty > p[0].backroom_qty) {

@@ -69,7 +69,7 @@ async function listReferrals(req, res) {
 async function createStore(req, res) {
   const {
     storeName, adminName, adminEmail, password,
-    storeTier, billingModel, dailyRatePercent, gracePeriodMinutes, customBillingNotes,
+    storeTier, billingModel, dailyRatePercent, gracePeriodMinutes, customBillingNotes, businessType,
   } = req.body;
 
   if (!storeName || !adminName || !adminEmail || !password) {
@@ -93,7 +93,10 @@ async function createStore(req, res) {
        VALUES ($1, $2, 'active', $3, $4, $5, $6) RETURNING *`,
       [storeName, storeTier || 'mini', billingModel || 'daily_percentage', dailyRatePercent ?? 1.0, gracePeriodMinutes ?? 5, customBillingNotes || null]
     );
-    const store = storeRes.rows[0];
+    let store = storeRes.rows[0];
+    if (require('../utils/businessTypes').TYPE_KEYS.includes(businessType)) {
+      store = (await client.query('UPDATE stores SET business_type = $1 WHERE id = $2 RETURNING *', [businessType, store.id])).rows[0];
+    }
     // Created already active, so its code is recorded as used.
     await issueStoreCode(client, { storeId: store.id, tier: store.store_tier, issuedBy: req.user.sub, used: true });
 

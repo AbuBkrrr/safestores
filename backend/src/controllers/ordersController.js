@@ -13,6 +13,7 @@
 const crypto = require('crypto');
 const db = require('../config/db');
 const { recomputeProductQuantities } = require('../utils/stockMath');
+const { parseQty, roundQty } = require('../utils/qty');
 const { dispatchEvent } = require('../utils/webhooks');
 const { emitToStore } = require('../realtime');
 const bcrypt = require('bcryptjs');
@@ -133,7 +134,7 @@ async function recalcOrderTotals(client, orderId) {
 async function addItem(req, res) {
   const { storeId, orderId } = req.params;
   const { id, productId, quantity, addedVia } = req.body;
-  if (!productId || !quantity || quantity <= 0) return res.status(400).json({ error: 'productId and a positive quantity are required' });
+  if (!productId || !quantity || Number(quantity) <= 0) return res.status(400).json({ error: 'productId and a positive quantity are required' });
 
   if (id) {
     const { rows: existing } = await db.query('SELECT * FROM order_items WHERE id = $1', [id]);
@@ -151,10 +152,13 @@ async function addItem(req, res) {
   const { rows: productRows } = await db.query('SELECT * FROM products WHERE id = $1 AND store_id = $2', [productId, storeId]);
   const product = productRows[0];
   if (!product) return res.status(404).json({ error: 'Product not found' });
-  if (product.shelf_qty < quantity) return res.status(400).json({ error: `Only ${product.shelf_qty} on the shelf — not enough stock for this quantity` });
+  const pq = parseQty(quantity, product);
+  if (pq.error) return res.status(400).json({ error: pq.error });
+  const qtyIn = pq.value;
+  if (product.shelf_qty < qtyIn) return res.status(400).json({ error: `Only ${product.shelf_qty} ${product.unit || ''} on the shelf — not enough stock for this quantity` });
 
   const unitPrice = Number(product.cost_price) * Number(product.price_multiplier);
-  const lineTotal = Math.round(unitPrice * quantity * 100) / 100;
+  const lineTotal = Math.round(unitPrice * qtyIn * 100) / 100;
   const movementId = crypto.randomUUID();
   const itemId = id || crypto.randomUUID();
 
@@ -163,13 +167,13 @@ async function addItem(req, res) {
     await client.query('BEGIN');
     await client.query(
       `INSERT INTO stock_movements (id, store_id, product_id, type, quantity, note, performed_by) VALUES ($1,$2,$3,'sale',$4,'POS checkout',$5)`,
-      [movementId, storeId, productId, quantity, req.user.sub]
+      [movementId, storeId, productId, qtyIn, req.user.sub]
     );
     await recomputeProductQuantities(client, productId);
     const { rows: itemRows } = await client.query(
       `INSERT INTO order_items (id, order_id, product_id, quantity, unit_price, line_total, added_via, movement_id)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
-      [itemId, orderId, productId, quantity, unitPrice, lineTotal, addedVia || 'scan', movementId]
+      [itemId, orderId, productId, qtyIn, unitPrice, lineTotal, addedVia || 'scan', movementId]
     );
     await recalcOrderTotals(client, orderId);
     await client.query('COMMIT');
@@ -441,7 +445,7 @@ async function refundOrder(req, res) {
     let total = 0;
     const lines = [];
     for (const it of items) {
-      const qty = parseInt(it.quantity, 10);
+      const qty = roundQty(it.quantity);
       if (!(qty > 0)) { await client.query('ROLLBACK'); return res.status(400).json({ error: 'Each refund quantity must be at least 1' }); }
       const { rows: lineRows } = await client.query(
         `SELECT oi.*, COALESCE((SELECT SUM(ri.quantity) FROM refund_items ri WHERE ri.order_item_id = oi.id), 0)::int AS refunded_qty

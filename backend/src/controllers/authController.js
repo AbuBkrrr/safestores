@@ -45,7 +45,7 @@ async function superAdminLogin(req, res) {
 // the signer-up was referred by — see 023_referral_tracking.sql for why.
 // ------------------------------------------------------------
 async function storeSignup(req, res) {
-  const { storeName, adminName, adminEmail, password, referralContact, storeTier, timezone } = req.body;
+  const { storeName, adminName, adminEmail, password, referralContact, storeTier, timezone, businessType } = req.body;
   if (!storeName || !adminName || !adminEmail || !password) {
     return res.status(400).json({ error: 'All fields are required' });
   }
@@ -57,11 +57,12 @@ async function storeSignup(req, res) {
     await client.query('BEGIN');
 
     const storeResult = await client.query(
-      `INSERT INTO stores (name, subscription_status, referral_contact, requested_tier, timezone)
-       VALUES ($1, 'pending', $2, $3, $4) RETURNING id, name, subscription_status, store_tier, requested_tier, referral_contact, timezone`,
+      `INSERT INTO stores (name, subscription_status, referral_contact, requested_tier, timezone, business_type)
+       VALUES ($1, 'pending', $2, $3, $4, $5) RETURNING id, name, subscription_status, store_tier, requested_tier, referral_contact, timezone`,
       [storeName, referralContact || null, ['mini', 'midi', 'mega'].includes(storeTier) ? storeTier : null,
         // The owner's own device time zone, so "today" is right from day one.
-        require('./storeSettingsController').isValidTimezone(timezone) ? timezone : 'UTC']
+        require('./storeSettingsController').isValidTimezone(timezone) ? timezone : 'UTC',
+        require('../utils/businessTypes').TYPE_KEYS.includes(businessType) ? businessType : 'general']
     );
     const store = storeResult.rows[0];
     // Every new store gets its own access code (visible to Super Admin on Manage Stores → Connect).
@@ -104,7 +105,7 @@ async function adminLogin(req, res) {
   // of two shops). Try each one whose password matches; if more than one
   // matches and the client didn't say which store, ask it to choose.
   const { rows } = await db.query(
-    `SELECT u.*, s.subscription_status, s.name AS store_name, s.sync_key, s.locked, s.store_tier
+    `SELECT u.*, s.subscription_status, s.name AS store_name, s.sync_key, s.locked, s.store_tier, s.business_type
      FROM users u JOIN stores s ON s.id = u.store_id
      WHERE lower(u.email) = lower($1) AND u.password_hash IS NOT NULL
      ORDER BY u.created_at ASC`,
@@ -148,7 +149,7 @@ async function adminLogin(req, res) {
     token,
     user: {
       id: user.id, name: user.name, email: user.email, role: user.role,
-      storeId: user.store_id, storeName: user.store_name, storeTier: user.store_tier, subscriptionStatus: user.subscription_status,
+      storeId: user.store_id, storeName: user.store_name, storeTier: user.store_tier, businessType: user.business_type, subscriptionStatus: user.subscription_status,
       syncKey: user.sync_key, locked: !!user.locked,
       emailVerified: !!user.email_verified_at, twoFactorEnabled: !!user.totp_enabled,
     },

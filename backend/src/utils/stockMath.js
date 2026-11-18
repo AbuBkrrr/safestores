@@ -24,11 +24,15 @@ async function recomputeProductQuantities(client, productId) {
                           WHEN type = 'backroom_adjustment' THEN quantity
                           WHEN type = 'transfer_out' THEN -quantity
                           WHEN type = 'customer_return' THEN quantity
+                          WHEN type = 'production_output' THEN quantity
+                          WHEN type = 'production_use' THEN -quantity
                           ELSE 0 END), 0) AS backroom_qty,
        COALESCE(SUM(CASE WHEN type = 'transfer_to_shelf' THEN quantity
                           WHEN type IN ('sale', 'damage', 'expiry') THEN -quantity
                           WHEN type = 'adjustment' THEN quantity
                           WHEN type = 'return' THEN quantity
+                          WHEN type = 'production_output_shelf' THEN quantity
+                          WHEN type = 'production_use_shelf' THEN -quantity
                           ELSE 0 END), 0) AS shelf_qty,
        COALESCE(SUM(CASE WHEN type = 'sale' THEN quantity
                           WHEN type IN ('return', 'refund_out') THEN -quantity

@@ -32,7 +32,7 @@ describe('Marketplace: public browsing', () => {
 
     const res = await request().get(`/api/marketplace/${store.id}/products`);
     expect(res.status).toBe(200);
-    expect(res.body[0].price).toBe('15.00');
+    expect(res.body[0].price).toBe(15);
     expect(res.body[0].in_stock).toBe(true);
   });
 

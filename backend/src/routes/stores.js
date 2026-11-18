@@ -209,6 +209,27 @@ router.patch('/replenishment/purchase-orders/:id/cancel', requireRole('admin', '
 router.post('/replenishment/purchase-orders/:id/receive', requireRole('admin', 'manager', 'staff', 'store_manager'), replenishmentCtrl.receivePurchaseOrder);
 
 router.get('/arrivals', inventoryCtrl.listArrivals);
+// Business-type tools: production (recipes / break-downs), waste log, job orders.
+const productionCtrl = require('../controllers/productionController');
+const PROD_ROLES = ['admin', 'manager', 'staff', 'store_manager'];
+router.get('/production/recipes', requireRole(...PROD_ROLES), productionCtrl.listRecipes);
+router.post('/production/recipes', requireRole('admin', 'manager', 'store_manager'), productionCtrl.saveRecipe);
+router.delete('/production/recipes/:id', requireRole('admin', 'manager', 'store_manager'), productionCtrl.archiveRecipe);
+router.get('/production/runs', requireRole(...PROD_ROLES), productionCtrl.listRuns);
+router.post('/production/runs', requireRole(...PROD_ROLES), productionCtrl.runProduction);
+router.get('/waste', requireRole('admin', 'manager', 'staff', 'store_manager', 'shelf_manager'), productionCtrl.wasteSummary);
+const jobsCtrl = require('../controllers/jobsController');
+const JOB_ROLES = ['admin', 'manager', 'staff', 'cashier', 'checkout'];
+router.get('/jobs/customers', requireRole(...JOB_ROLES), jobsCtrl.findCustomers);
+router.patch('/jobs/customers/:customerId/measurements', requireRole(...JOB_ROLES), jobsCtrl.saveMeasurements);
+router.get('/jobs', requireRole(...JOB_ROLES), jobsCtrl.listJobs);
+router.post('/jobs', requireRole(...JOB_ROLES), jobsCtrl.createJob);
+router.get('/jobs/:id', requireRole(...JOB_ROLES), jobsCtrl.getJob);
+router.patch('/jobs/:id/status', requireRole(...JOB_ROLES), jobsCtrl.setStatus);
+router.post('/jobs/:id/payments', requireRole(...JOB_ROLES), jobsCtrl.addPayment);
+router.post('/jobs/:id/collect', requireRole(...JOB_ROLES), jobsCtrl.collect);
+router.post('/jobs/:id/materials', requireRole('admin', 'manager', 'staff'), jobsCtrl.addMaterial);
+
 // Store room → shelf handovers (store manager issues, shelf manager confirms).
 const handoverCtrl = require('../controllers/handoverController');
 router.get('/handovers', requireRole('admin', 'manager', 'staff', 'store_manager', 'shelf_manager'), handoverCtrl.listHandovers);
@@ -274,7 +295,7 @@ router.delete('/webhooks/:id', requireRole('admin'), webhooksCtrl.deleteWebhook)
 router.post('/webhooks/:id/test', requireRole('admin'), webhooksCtrl.testWebhook);
 
 router.get('/movements', inventoryCtrl.listMovements);
-router.post('/movements', requireRole('admin', 'manager', 'staff'), inventoryCtrl.createMovement);
+router.post('/movements', requireRole('admin', 'manager', 'staff', 'store_manager', 'shelf_manager'), inventoryCtrl.createMovement);
 
 // Shelf Audits — a standing feature for a store's own staff (and an
 // engaged external 'auditor', matching desktop's role list exactly),

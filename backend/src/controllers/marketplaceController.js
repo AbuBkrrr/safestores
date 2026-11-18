@@ -123,8 +123,8 @@ async function placeOrder(req, res) {
     return res.status(400).json({ error: 'A delivery address is required for delivery' });
   }
   if (!Array.isArray(items) || items.length === 0) return res.status(400).json({ error: 'At least one item is required' });
-  if (items.some((i) => !Number.isInteger(Number(i.quantity)) || Number(i.quantity) < 1 || Number(i.quantity) > 1000)) {
-    return res.status(400).json({ error: 'Each quantity must be a whole number from 1 to 1000' });
+  if (items.some((i) => !(Number(i.quantity) > 0) || Number(i.quantity) > 1000)) {
+    return res.status(400).json({ error: 'Each quantity must be more than 0 and at most 1000' });
   }
   const options = await require('./storePaymentsController').paymentOptionsFor(storeId);
   if (paymentMethod === 'online' && !options.online) return res.status(400).json({ error: 'This store does not take online payments' });
@@ -159,6 +159,8 @@ async function placeOrder(req, res) {
     for (const { productId, quantity } of items) {
       const prod = (await client.query('SELECT * FROM products WHERE id = $1 AND store_id = $2', [productId, storeId])).rows[0];
       if (!prod) { await client.query('ROLLBACK'); return res.status(404).json({ error: `Product ${productId} not found` }); }
+      const pq = require('../utils/qty').parseQty(quantity, prod);
+      if (pq.error) { await client.query('ROLLBACK'); return res.status(400).json({ error: pq.error }); }
       const unitPrice = Number(prod.cost_price) * Number(prod.price_multiplier);
       const lineTotal = Math.round(unitPrice * quantity * 100) / 100;
       subtotal += lineTotal;

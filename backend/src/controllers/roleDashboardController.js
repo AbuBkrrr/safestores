@@ -81,7 +81,7 @@ async function markChecked(req, res) {
 // Security confirms the goods physically came back before any refund.
 async function confirmReturn(req, res) {
   const { storeId, orderId } = req.params;
-  const items = Array.isArray(req.body?.items) ? req.body.items.filter((i) => parseInt(i.quantity, 10) > 0) : [];
+  const items = Array.isArray(req.body?.items) ? req.body.items.filter((i) => Number(i.quantity) > 0) : [];
   const note = String(req.body?.note || '').trim().slice(0, 500) || null;
   if (!items.length) return res.status(400).json({ error: 'Enter how many of each item came back' });
   const client = await db.pool.connect();
@@ -90,7 +90,7 @@ async function confirmReturn(req, res) {
     const o = (await client.query(`SELECT id, status FROM orders WHERE id = $1 AND store_id = $2 FOR UPDATE`, [orderId, storeId])).rows[0];
     if (!o || o.status !== 'paid') { await client.query('ROLLBACK'); return res.status(400).json({ error: 'Only a paid sale can have returns' }); }
     for (const it of items) {
-      const qty = parseInt(it.quantity, 10);
+      const qty = Math.round(Number(it.quantity) * 1000) / 1000;
       const line = (await client.query(
         `SELECT oi.quantity, COALESCE((SELECT SUM(sr.quantity) FROM security_returns sr WHERE sr.order_item_id = oi.id), 0)::int AS returned
          FROM order_items oi WHERE oi.id = $1 AND oi.order_id = $2`, [it.orderItemId, orderId]

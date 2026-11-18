@@ -93,6 +93,13 @@ async function createProduct(req, res) {
     );
     let product = inserted[0];
     // v26 fields (barcode, pack size, variants) — optional, set in one go.
+    if (req.body.soldBy || req.body.shelfLifeDays) {
+      const { rows: m } = await client.query(
+        'UPDATE products SET sold_by = COALESCE($1, sold_by), shelf_life_days = $2 WHERE id = $3 RETURNING *',
+        [req.body.soldBy || null, req.body.shelfLifeDays ? parseInt(req.body.shelfLifeDays, 10) : null, product.id]
+      );
+      product = m[0];
+    }
     const { barcode, packSize, packUnit, variantOf, variantLabel } = req.body;
     if (barcode || packSize || packUnit || variantOf || variantLabel) {
       const { rows: extra } = await client.query(
@@ -130,12 +137,12 @@ async function createProduct(req, res) {
 const UPDATABLE_FIELDS = [
   'name', 'sku', 'category', 'supplier', 'unit', 'location', 'cost_price', 'price_multiplier', 'reorder_level',
   'lead_time_days', 'min_order_qty', 'auto_reorder', 'brand', 'image_url', 'storage_type',
-  'barcode', 'pack_size', 'pack_unit', 'variant_of', 'variant_label',
+  'barcode', 'pack_size', 'pack_unit', 'variant_of', 'variant_label', 'sold_by', 'shelf_life_days',
 ];
 const CAMEL_TO_SNAKE = {
   costPrice: 'cost_price', priceMultiplier: 'price_multiplier', reorderLevel: 'reorder_level',
   leadTimeDays: 'lead_time_days', minOrderQty: 'min_order_qty', autoReorder: 'auto_reorder', imageUrl: 'image_url',
-  storageType: 'storage_type', packSize: 'pack_size', packUnit: 'pack_unit', variantOf: 'variant_of', variantLabel: 'variant_label',
+  storageType: 'storage_type', packSize: 'pack_size', packUnit: 'pack_unit', variantOf: 'variant_of', variantLabel: 'variant_label', soldBy: 'sold_by', shelfLifeDays: 'shelf_life_days',
 };
 
 // PUT /api/stores/:storeId/products/:productId
