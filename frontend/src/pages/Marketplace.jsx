@@ -7,6 +7,7 @@ import { Alert, Badge, Modal, Toast } from '../components/ui.jsx';
 import { useToast } from '../components/useToast.js';
 import { useCurrency } from '../context/CurrencyContext.jsx';
 import CreditPanel from '../components/CreditPanel.jsx';
+import CouriersPanel from '../components/CouriersPanel.jsx';
 
 const SYNC_EVENTS = ['marketplace:order_placed', 'marketplace:order_updated', 'marketplace:order_fulfilled', 'marketplace:order_cancelled', 'marketplace:order_paid'];
 
@@ -53,6 +54,15 @@ export default function Marketplace() {
   // Review flow: View → Confirm (pickup/delivery) → Ready / Out for delivery → Fulfill.
   const [viewing, setViewing] = useState(null); // full order with items
   const [reviewMethod, setReviewMethod] = useState('delivery');
+  const [couriers, setCouriers] = useState([]);
+  useEffect(() => { api.get(`/stores/${user.storeId}/couriers`).then((r) => setCouriers(r.data)).catch(() => {}); }, [user.storeId]);
+  const assignCourier = async (courierId) => {
+    try {
+      await api.patch(`/stores/${user.storeId}/marketplace/orders/${viewing.id}/courier`, { courierId: courierId || null });
+      setViewing({ ...viewing, courier_id: courierId || null, courier_picked_at: null });
+      showToast(t('marketplacePage.courierSet'), 'success');
+    } catch (err) { showToast(err.response?.data?.error || t('creditPanel.failed'), 'error'); }
+  };
   const [statusNote, setStatusNote] = useState('');
   const [busy, setBusy] = useState(false);
   const openOrder = async (o) => {
@@ -179,6 +189,7 @@ export default function Marketplace() {
         {orders.length === 0 && <p className="muted">{t('marketplacePage.noOrdersYet')}</p>}
       </div>
       <CreditPanel onToast={showToast} />
+      <CouriersPanel couriers={couriers} reload={() => api.get(`/stores/${user.storeId}/couriers`).then((r) => setCouriers(r.data))} onToast={showToast} />
 
       {viewing && (
         <Modal title={t('marketplacePage.orderTitle', { ref: viewing.id.slice(0, 8).toUpperCase() })} onClose={() => setViewing(null)}>
@@ -191,12 +202,16 @@ export default function Marketplace() {
           </table>
           <p className="mt-1"><strong>{t('marketplacePage.total')}: {formatCurrency(viewing.total)}</strong> · <Badge status={viewing.status} /></p>
 
-          {viewing.status === 'placed' && (
-            <fieldset className="pay-choice mt-1">
-              <legend>{t('marketplacePage.howFulfil')}</legend>
-              <label><input type="radio" name="fm" checked={reviewMethod === 'delivery'} onChange={() => setReviewMethod('delivery')} /> {t('marketplacePage.method_delivery')}</label>
-              <label><input type="radio" name="fm" checked={reviewMethod === 'pickup'} onChange={() => setReviewMethod('pickup')} /> {t('marketplacePage.method_pickup')}</label>
-            </fieldset>
+          <p className="mt-1">{t('marketplacePage.customerChose')}: <strong>{reviewMethod === 'delivery' ? `🚚 ${t('marketplacePage.method_delivery')}` : `🏪 ${t('marketplacePage.method_pickup')}`}</strong></p>
+          {reviewMethod === 'delivery' && ['confirmed', 'out_for_delivery'].includes(viewing.status) && couriers.length > 0 && (
+            <div className="form-group">
+              <label htmlFor="mp-courier">🛵 {t('marketplacePage.courier')}</label>
+              <select id="mp-courier" value={viewing.courier_id || ''} onChange={(e) => assignCourier(e.target.value)}>
+                <option value="">{t('marketplacePage.ownRider')}</option>
+                {couriers.filter((c) => c.active).map((c) => <option key={c.partner_id} value={c.partner_id}>{c.name}{c.phone ? ` · ${c.phone}` : ''}</option>)}
+              </select>
+              {viewing.courier_picked_at && <p className="muted" style={{ fontSize: 12 }}>✅ {t('marketplacePage.courierPicked')}</p>}
+            </div>
           )}
           {['placed', 'confirmed'].includes(viewing.status) && (
             <div className="form-group mt-1">

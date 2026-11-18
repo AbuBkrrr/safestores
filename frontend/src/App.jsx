@@ -61,6 +61,8 @@ const CycleCounting = lazy(() => import('./pages/CycleCounting.jsx'));
 const AuditorSignup = lazy(() => import('./pages/AuditorSignup.jsx'));
 const AuditorLogin = lazy(() => import('./pages/AuditorLogin.jsx'));
 const AuditorDashboard = lazy(() => import('./pages/AuditorDashboard.jsx'));
+const PartnerLogin = lazy(() => import('./pages/PartnerLogin.jsx'));
+const PartnerPortal = lazy(() => import('./pages/PartnerPortal.jsx'));
 const Storefront = lazy(() => import('./pages/Storefront.jsx'));
 const MarketplaceHome = lazy(() => import('./pages/MarketplaceHome.jsx'));
 
@@ -157,6 +159,9 @@ export default function App() {
       {APP_VARIANT === 'superadmin' && <Route path="/super-login" element={<SuperLogin />} />}
       <Route path="/auditor-signup" element={<AuditorSignup />} />
       <Route path="/auditor-login" element={<AuditorLogin />} />
+      <Route path="/partner-login" element={<PartnerLogin />} />
+      <Route path="/partner/accept" element={<PartnerLogin />} />
+      <Route path="/partner" element={<ProtectedRoute roles={['guarantor', 'courier']}><PartnerPortal /></ProtectedRoute>} />
 
       {/* Public customer storefront — no staff login involved */}
       <Route path="/shop/:storeId" element={<Storefront />} />

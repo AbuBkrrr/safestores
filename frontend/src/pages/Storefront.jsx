@@ -311,12 +311,26 @@ export default function Storefront() {
               )}
               {payOptions.length === 0 ? (
                 <div className="alert warning">{t('storefrontPage.notTakingOrders')}</div>
-              ) : payOptions.length > 1 ? (
+              ) : (
                 <fieldset className="pay-choice">
                   <legend>{t('storefrontPage.howToPay')}</legend>
-                  {payOptions.map((o) => <label key={o}><input type="radio" name="pay" checked={payChoice === o} onChange={() => setPayMethod(o)} /> {payLabel(o)}</label>)}
+                  {['online', 'cash', 'credit'].map((o) => {
+                    const ok = payOptions.includes(o);
+                    const why = o === 'online' ? t('storefrontPage.onlineOff')
+                      : o === 'cash' ? t('storefrontPage.cashOff')
+                        : !customer ? t('storefrontPage.creditLogin')
+                          : credit.account?.status === 'pending' ? t('storefrontPage.creditAwaiting')
+                            : credit.guarantors.length ? t('storefrontPage.creditApplyBelow') : t('storefrontPage.creditOff');
+                    return (
+                      <label key={o} style={ok ? undefined : { opacity: 0.55 }}>
+                        <input type="radio" name="pay" disabled={!ok} checked={ok && payChoice === o} onChange={() => setPayMethod(o)} />{' '}
+                        {o === 'credit' && !ok ? `🤝 ${t('storefrontPage.payOnCredit')}` : payLabel(o)}
+                        {!ok && <span className="muted" style={{ display: 'block', fontSize: 11, marginLeft: 24 }}>{why}</span>}
+                      </label>
+                    );
+                  })}
                 </fieldset>
-              ) : <p className="muted">{payLabel(payOptions[0])}</p>}
+              )}
               {credit.guarantors.length > 0 && !creditOk && (
                 customer
                   ? (credit.account?.status === 'pending'

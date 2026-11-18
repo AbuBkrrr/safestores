@@ -123,7 +123,7 @@ async function statement(req, res) {
   let where = '';
   if (req.query.guarantorId) { params.push(req.query.guarantorId); where = 'AND g.id = $2'; }
   const { rows } = await db.query(
-    `SELECT mo.id, mo.total, mo.status, mo.created_at, mo.fulfilled_at, c.name AS customer_name, ca.member_ref, g.id AS guarantor_id, g.name AS guarantor_name
+    `SELECT mo.id, mo.total, mo.status, mo.created_at, mo.fulfilled_at, mo.guarantor_paid_ref, mo.guarantor_paid_reported_at, c.name AS customer_name, ca.member_ref, g.id AS guarantor_id, g.name AS guarantor_name
      FROM marketplace_orders mo JOIN credit_accounts ca ON ca.id = mo.credit_account_id
      JOIN credit_guarantors g ON g.id = ca.guarantor_id JOIN customers c ON c.id = ca.customer_id
      WHERE mo.store_id = $1 AND mo.payment_method = 'credit' AND mo.status = 'fulfilled' AND mo.payment_status <> 'paid' ${where}

@@ -143,7 +143,8 @@
     "twoFactorCode": "Authenticator code",
     "twoFactorHelp": "Open your authenticator app and enter the 6-digit code for SAFE Stores.",
     "chooseStore": "Which store?",
-    "chooseStoreHelp": "This email is used at more than one store. Pick the one to sign in to."
+    "chooseStoreHelp": "This email is used at more than one store. Pick the one to sign in to.",
+    "partnerLogin": "Delivery or credit partner? Log in"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -1031,7 +1032,12 @@
     "confirmedToast": "Order confirmed — the customer can see it on their tracking page",
     "dispatchedToast": "Customer updated",
     "payOnPickup": "Pay on pickup",
-    "onCredit": "On credit"
+    "onCredit": "On credit",
+    "customerChose": "Customer chose",
+    "courier": "Delivery company / rider",
+    "ownRider": "Our own rider",
+    "courierSet": "Courier updated",
+    "courierPicked": "Courier has picked it up"
   },
   "storefrontPage": {
     "title": "🛍️ Shop",
@@ -1102,7 +1108,13 @@
     "gKind_other": "Other",
     "memberRef": "Member / staff / account number",
     "creditAmount": "Credit amount requested",
-    "sendApplication": "Send application"
+    "sendApplication": "Send application",
+    "onlineOff": "Not available — this shop hasn't turned on online payment yet.",
+    "cashOff": "Not offered by this shop.",
+    "creditAwaiting": "Your credit application is awaiting approval.",
+    "creditApplyBelow": "Apply for credit below to use this.",
+    "creditOff": "This shop doesn't offer credit yet.",
+    "payOnCredit": "Buy on credit"
   },
   "marketplaceHomePage": {
     "title": "🏪 SAFE Stores Marketplace",
@@ -1794,5 +1806,62 @@
     "amount": "Amount",
     "markSettled": "Mark settled",
     "print": "Print statement"
+  },
+  "partnerInvite": {
+    "sendLink": "Send this link to the partner. It works once and expires in 14 days:",
+    "copyShare": "Copy / share link",
+    "couriersTitle": "Delivery partners",
+    "couriersIntro": "Invite delivery companies or riders. They log in, see the jobs you give them, and mark orders picked up and delivered.",
+    "openJobs": "Open jobs",
+    "courierEmail": "Courier's email",
+    "inviteCourier": "Invite courier",
+    "onPortal": "On portal",
+    "invitePortal": "Invite to portal",
+    "guarantorEmail": "Email of the person at {{name}} who will manage credit:",
+    "reportedPaid": "Guarantor reports paid: {{ref}}"
+  },
+  "partnerPage": {
+    "loginTitle": "Partner login",
+    "invited_courier": "{{store}} invited you to deliver its orders.",
+    "invited_guarantor": "{{store}} invited you to manage customer credit for {{guarantor}}.",
+    "email": "Email",
+    "orgName": "Company / organisation name",
+    "phone": "Phone",
+    "choosePassword": "Choose a password (8+ characters)",
+    "createAccept": "Create account & accept",
+    "loginAccept": "Log in & accept",
+    "logIn": "Log in",
+    "failed": "Something went wrong",
+    "logOut": "Log out",
+    "jobs": "Delivery jobs",
+    "noJobs": "No jobs yet. Stores will assign deliveries to you here.",
+    "pickupFrom": "Pick up from",
+    "deliverTo": "Deliver to",
+    "collect": "Collect {{amount}} from the customer",
+    "noCash": "Already paid — collect nothing",
+    "pickedUp": "Picked up",
+    "delivered": "Delivered",
+    "pickedUpOk": "Marked as picked up",
+    "deliveredOk": "Delivered — thank you!",
+    "members": "Members asking for credit",
+    "noMembers": "No members have applied yet.",
+    "member": "Member",
+    "store": "Store",
+    "ref": "Member ref",
+    "limit": "Limit",
+    "used": "Used",
+    "status": "Status",
+    "isMember": "Is this your member?",
+    "yes": "Yes",
+    "no": "No",
+    "saved": "Saved",
+    "toSettle": "To settle",
+    "nothingOwed": "Nothing to settle right now.",
+    "amount": "Amount",
+    "payment": "Payment",
+    "payRef": "Payment reference",
+    "paid": "I've paid",
+    "reported": "Reported ({{ref}}) — awaiting store",
+    "reportedOk": "Payment reported. The store will confirm it."
   }
 }

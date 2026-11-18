@@ -9,7 +9,7 @@ export default function ProtectedRoute({ children, roles }) {
   if (roles && !roles.includes(user.role)) {
     // Send each role to its own home; redirecting everyone to "/" left
     // auditors (and the super admin) on a blank page that redirected to itself.
-    const home = { auditor: '/auditor', super_admin: '/super' }[user.role] || '/';
+    const home = { auditor: '/auditor', super_admin: '/super', guarantor: '/partner', courier: '/partner' }[user.role] || '/';
     if (home === pathname) return <Navigate to="/login" replace />;
     return <Navigate to={home} replace />;
   }

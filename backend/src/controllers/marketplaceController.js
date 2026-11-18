@@ -248,8 +248,9 @@ async function listStoreOrders(req, res) {
   const { rows } = await db.query(
     `SELECT mo.*, COALESCE(c.name, mo.guest_name) AS customer_name,
             COALESCE(c.phone, mo.guest_phone) AS customer_phone,
-            (mo.customer_id IS NULL) AS is_guest
+            (mo.customer_id IS NULL) AS is_guest, cp.name AS courier_name
      FROM marketplace_orders mo LEFT JOIN customers c ON c.id = mo.customer_id
+     LEFT JOIN partners cp ON cp.id = mo.courier_id
      WHERE mo.store_id = $1 ORDER BY mo.created_at DESC LIMIT 300`,
     [storeId]
   );
@@ -263,8 +264,9 @@ async function getStoreOrder(req, res) {
     `SELECT mo.*, COALESCE(c.name, mo.guest_name) AS customer_name,
             COALESCE(c.phone, mo.guest_phone) AS customer_phone,
             COALESCE(c.email, mo.guest_email) AS customer_email,
-            (mo.customer_id IS NULL) AS is_guest
+            (mo.customer_id IS NULL) AS is_guest, cp.name AS courier_name
      FROM marketplace_orders mo LEFT JOIN customers c ON c.id = mo.customer_id
+     LEFT JOIN partners cp ON cp.id = mo.courier_id
      WHERE mo.id = $1 AND mo.store_id = $2`,
     [orderId, storeId]
   );

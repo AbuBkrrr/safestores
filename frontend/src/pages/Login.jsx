@@ -127,6 +127,7 @@ export default function Login() {
 
         <div className="auth-links">
           {t('login.newStore')} <Link to="/signup">{t('login.registerStore')}</Link><br />
+          <Link to="/partner-login">{t('login.partnerLogin')}</Link><br />
           <Link to="/super-login">{t('login.superAdminLogin')}</Link>
         </div>
       <BrandFooter />

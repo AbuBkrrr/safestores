@@ -14,5 +14,6 @@ router.post('/email/verify', accountCtrl.verifyEmail);
 
 router.post('/auditor/signup', auditCtrl.auditorSignup);
 router.post('/auditor/login', auditCtrl.auditorLogin);
+router.post('/partner/login', require('../controllers/partnerController').partnerLogin);
 
 module.exports = router;

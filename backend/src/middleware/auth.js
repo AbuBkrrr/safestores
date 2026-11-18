@@ -34,6 +34,11 @@ async function authenticateJwt(req) {
       if (!rows[0] || (user.tv || 0) !== (rows[0].token_version || 0)) {
         return { ok: false, status: 401, body: { error: 'Your session has ended. Please sign in again.', code: 'SESSION_REVOKED' } };
       }
+    } else if (user.role === 'guarantor' || user.role === 'courier') {
+      const { rows } = await db.query('SELECT status, token_version FROM partners WHERE id = $1', [user.sub]);
+      if (!rows[0] || rows[0].status !== 'active' || (user.tv || 0) !== (rows[0].token_version || 0)) {
+        return { ok: false, status: 401, body: { error: 'This partner account is no longer active.', code: 'ACCOUNT_DISABLED' } };
+      }
     } else if (user.role === 'auditor') {
       const { rows } = await db.query('SELECT status FROM auditors WHERE id = $1', [user.sub]);
       if (!rows[0] || rows[0].status !== 'active') {

@@ -146,6 +146,11 @@ router.post('/payouts/resolve', requireRole('admin'), storePaymentsCtrl.resolveA
 router.put('/payouts', requireRole('admin'), storePaymentsCtrl.connectPayouts);
 const creditCtrl = require('../controllers/creditController');
 const CREDIT_ROLES = ['admin', 'manager', 'marketplace_manager'];
+const partnerCtrl = require('../controllers/partnerController');
+router.post('/partner-invites', requireRole('admin', 'manager'), partnerCtrl.createInvite);
+router.get('/couriers', requireRole('admin', 'manager', 'marketplace_manager'), partnerCtrl.listCouriers);
+router.patch('/couriers/:courierId', requireRole('admin', 'manager'), partnerCtrl.setCourierActive);
+router.patch('/marketplace/orders/:orderId/courier', requireRole('admin', 'manager', 'marketplace_manager'), partnerCtrl.assignCourier);
 router.get('/credit/guarantors', requireRole(...CREDIT_ROLES), creditCtrl.listGuarantors);
 router.post('/credit/guarantors', requireRole('admin', 'manager'), creditCtrl.saveGuarantor);
 router.patch('/credit/guarantors/:guarantorId', requireRole('admin', 'manager'), creditCtrl.saveGuarantor);

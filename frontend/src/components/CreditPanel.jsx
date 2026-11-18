@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { useRealtimeEvents } from '../context/SocketContext.jsx';
 import { useCurrency } from '../context/CurrencyContext.jsx';
 import { Alert, Badge } from './ui.jsx';
+import { InviteLink } from './CouriersPanel.jsx';
 
 const KINDS = ['bank', 'cooperative', 'pfa', 'employer', 'other'];
 
@@ -21,6 +22,8 @@ export default function CreditPanel({ onToast }) {
   const [gForm, setGForm] = useState({ name: '', kind: 'cooperative', contactName: '', phone: '', email: '' });
   const [limits, setLimits] = useState({});
   const [error, setError] = useState('');
+  const [inviteLink, setInviteLink] = useState('');
+  const canManage = ['admin', 'manager'].includes(user.role);
 
   const load = () => Promise.all([
     api.get(`${base}/guarantors`).then((r) => setGuarantors(r.data)),
@@ -36,6 +39,10 @@ export default function CreditPanel({ onToast }) {
   };
   const addGuarantor = (e) => { e.preventDefault(); act(async () => { await api.post(`${base}/guarantors`, gForm); setGForm({ ...gForm, name: '', contactName: '', phone: '', email: '' }); }, 'creditPanel.saved'); };
   const review = (a, status) => act(() => api.patch(`${base}/accounts/${a.id}`, { status, creditLimit: status === 'approved' ? Number(limits[a.id] ?? a.requested_limit) : undefined }), 'creditPanel.saved');
+  const invitePortal = (g) => {
+    const email = window.prompt(t('partnerInvite.guarantorEmail', { name: g.name }), g.email || '');
+    if (email) act(async () => { const { data } = await api.post(`/stores/${user.storeId}/partner-invites`, { kind: 'guarantor', email, guarantorId: g.id }); setInviteLink(data.link); });
+  };
   const settle = (o) => act(() => api.patch(`/stores/${user.storeId}/marketplace/orders/${o.id}/credit-settled`), 'creditPanel.settled');
 
   const byGuarantor = statement.reduce((m, o) => { (m[o.guarantor_name] ||= []).push(o); return m; }, {});
@@ -52,9 +59,12 @@ export default function CreditPanel({ onToast }) {
         <tbody>{guarantors.map((g) => (
           <tr key={g.id}><td>{g.name}</td><td>{t(`storefrontPage.gKind_${g.kind}`)}</td><td>{[g.contact_name, g.phone, g.email].filter(Boolean).join(' · ') || '—'}</td>
             <td>{formatCurrency(g.outstanding)}</td>
-            <td><button className="btn small secondary" onClick={() => act(() => api.patch(`${base}/guarantors/${g.id}`, { active: !g.active }))}>{g.active ? t('creditPanel.pause') : t('creditPanel.resume')}</button></td></tr>
+            <td style={{ whiteSpace: 'nowrap' }}>{g.partner_id ? <span className="muted" style={{ fontSize: 12 }}>✅ {t('partnerInvite.onPortal')} </span>
+              : canManage && <button className="btn small" onClick={() => invitePortal(g)}>{t('partnerInvite.invitePortal')}</button>}{' '}
+              <button className="btn small secondary" onClick={() => act(() => api.patch(`${base}/guarantors/${g.id}`, { active: !g.active }))}>{g.active ? t('creditPanel.pause') : t('creditPanel.resume')}</button></td></tr>
         ))}</tbody>
       </table>
+      <InviteLink link={inviteLink} />
       <form onSubmit={addGuarantor} className="grid grid-2 mt-1">
         <div className="form-group"><label htmlFor="g-name">{t('creditPanel.name')}</label><input id="g-name" value={gForm.name} onChange={(e) => setGForm({ ...gForm, name: e.target.value })} placeholder="Unity Cooperative Society" required /></div>
         <div className="form-group"><label htmlFor="g-kind">{t('creditPanel.kind')}</label>
@@ -71,7 +81,7 @@ export default function CreditPanel({ onToast }) {
           <tbody>{accounts.map((a) => (
             <tr key={a.id}>
               <td>{a.customer_name}<div className="muted" style={{ fontSize: 11 }}>{a.customer_phone || a.customer_email}</div></td>
-              <td>{a.guarantor_name}</td><td>{a.member_ref}</td>
+              <td>{a.guarantor_name}</td><td>{a.member_ref}{a.member_verified === true ? ' ✅' : a.member_verified === false ? ' ❌' : ''}</td>
               <td>{a.status === 'pending'
                 ? <input type="number" min="1" style={{ width: 110 }} aria-label={t('creditPanel.limit')} value={limits[a.id] ?? a.requested_limit} onChange={(e) => setLimits({ ...limits, [a.id]: e.target.value })} />
                 : formatCurrency(a.credit_limit)}</td>
@@ -94,7 +104,7 @@ export default function CreditPanel({ onToast }) {
           <table className="mt-1">
             <thead><tr><th>{t('creditPanel.customer')}</th><th>{t('creditPanel.memberRef')}</th><th>{t('creditPanel.delivered')}</th><th>{t('creditPanel.amount')}</th><th></th></tr></thead>
             <tbody>{rows.map((o) => (
-              <tr key={o.id}><td>{o.customer_name}</td><td>{o.member_ref}</td><td>{new Date(o.fulfilled_at).toLocaleDateString()}</td><td>{formatCurrency(o.total)}</td>
+              <tr key={o.id}><td>{o.customer_name}</td><td>{o.member_ref}</td><td>{new Date(o.fulfilled_at).toLocaleDateString()}</td><td>{formatCurrency(o.total)}{o.guarantor_paid_reported_at && <div className="muted" style={{ fontSize: 11 }}>💸 {t('partnerInvite.reportedPaid', { ref: o.guarantor_paid_ref })}</div>}</td>
                 <td><button className="btn small" onClick={() => settle(o)}>{t('creditPanel.markSettled')}</button></td></tr>
             ))}</tbody>
           </table>

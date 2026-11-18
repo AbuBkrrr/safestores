@@ -123,6 +123,7 @@ function createApp() {
   app.use('/api/marketplace', marketplaceRoutes);
   app.use('/api/push', pushRoutes);
   app.use('/api/lending', lendingRoutes);
+  app.use('/api/partner', require('./routes/partner'));
   // No auth — Paystack calls this directly and doesn't have our JWTs;
   // see paymentWebhookController.js's header for how it's secured instead.
   app.post('/api/webhooks/paystack', require('./controllers/paymentWebhookController').handlePaystackWebhook);
