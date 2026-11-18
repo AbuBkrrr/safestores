@@ -28,6 +28,9 @@ export function SocketProvider({ children }) {
 
     const socket = io(SOCKET_ORIGIN, {
       auth: { token },
+      // WebSocket only: with several API copies behind the load balancer,
+      // long-polling would need sticky sessions; a websocket stays on one copy.
+      transports: ['websocket'],
       reconnectionDelay: 1000,
       reconnectionDelayMax: 5000,
     });

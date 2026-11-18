@@ -43,6 +43,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 4000
+      DB_POOL_MAX: ${DB_POOL_MAX:-10}
       DATABASE_URL: postgres://safestores:${POSTGRES_PASSWORD}@postgres:5432/safestores
       DATABASE_SSL: disable
       JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in .env — see .env.staging.example for how to generate one}
@@ -70,8 +71,14 @@ services:
       # switch to S3_BUCKET (+ S3_* env vars) instead for real production,
       # per the app's own startup warning when object storage isn't set.
       - backend_uploads:/app/uploads
-    ports:
-      - '4000:4000'
+    # Load balancing: run several copies of the API. nginx (frontend)
+    # spreads requests across them; scheduled jobs run on one elected copy;
+    # live updates are shared through Postgres. Set BACKEND_REPLICAS in .env.
+    # (No fixed host port, so the copies don't clash.)
+    deploy:
+      replicas: ${BACKEND_REPLICAS:-2}
+    expose:
+      - '4000'
     # Migrations run once, before the app starts serving traffic — safer
     # than running them on every container start, which breaks with more
     # than one replica.

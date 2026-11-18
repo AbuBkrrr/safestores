@@ -8,12 +8,18 @@ require('dotenv').config();
 const useSSL = process.env.DATABASE_SSL === 'require'
   || (process.env.NODE_ENV === 'production' && process.env.DATABASE_SSL !== 'disable');
 
+function buildPoolConfig() {
+  return {
+    connectionString: process.env.DATABASE_URL,
+    ssl: useSSL ? { rejectUnauthorized: false } : false,
+    connectionTimeoutMillis: 10000,
+  };
+}
+
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: useSSL ? { rejectUnauthorized: false } : false,
+  ...buildPoolConfig(),
   max: parseInt(process.env.DB_POOL_MAX || '10', 10),
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000,
 });
 
 pool.on('error', (err) => {
@@ -25,4 +31,5 @@ pool.on('error', (err) => {
 module.exports = {
   query: (text, params) => pool.query(text, params),
   pool,
+  buildPoolConfig,
 };
