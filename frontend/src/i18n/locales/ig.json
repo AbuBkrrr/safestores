@@ -501,7 +501,9 @@
     "manager": "Onye njikwa",
     "staff": "Onye ọrụ",
     "auditor": "Onye nyocha",
-    "cashier": "Onye na-anata ego"
+    "cashier": "Onye na-anata ego",
+    "checkout": "Ebe ịkwụ ụgwọ",
+    "stock_taker": "Onye na-agụ ngwa ahịa"
   },
   "invitesPage": {
     "title": "Njikwa Ọkpụkpọ",
@@ -978,7 +980,21 @@
     "refundDue": "Nkwụghachi dị",
     "refunded": "Ekwụghachiri",
     "markRefunded": "Kaa akara na ekwụghachiri",
-    "confirmRefunded": "Kwado na ị kwụghachiri onye ahịa a ego ya niile?"
+    "confirmRefunded": "Kwado na ị kwụghachiri onye ahịa a ego ya niile?",
+    "copyLink": "Detuo njikọ",
+    "linkCopied": "E detuola njikọ ụlọ ahịa",
+    "notListed": "Edebeghị ụlọ ahịa gị n'ahịa — rịọ ndị nkwado SAFE Stores ka ha gbanye ya.",
+    "shopProfile": "Ibe ụlọ ahịa gị",
+    "shopAddress": "Adreesị ụlọ ahịa",
+    "shopAddressHelp": "Mkpụrụedemede, nọmba na akara, dịka mama-ngozi-lekki. Hapụ ya efu iji njikọ ogologo.",
+    "tagline": "Ahịrịokwu",
+    "taglinePlaceholder": "Nri ọhụrụ, anyị na-ebuga na Lekki niile",
+    "category": "Ụdị",
+    "city": "Obodo",
+    "address": "Adreesị",
+    "saveProfile": "Chekwaa ibe ụlọ ahịa",
+    "profileSaved": "E chekwala ibe ụlọ ahịa",
+    "profileFailed": "Enweghị ike ichekwa ibe ụlọ ahịa"
   },
   "storefrontPage": {
     "title": "🛍️ Ụlọ Ahịa",
@@ -1020,7 +1036,11 @@
     "securePayNote": "Ịkwụ ụgwọ echekwara site na Paystack, a na-akwụ {{store}} ozugbo.",
     "emailForPayment": "Tinye email gị ka anyị ziga gị rasiti ịkwụ ụgwọ.",
     "payNow": "Kwụọ {{amount}}",
-    "notTakingOrders": "Ụlọ ahịa a anaghị anabata iwu ịntanetị ugbu a. Biko gaa ma ọ bụ kpọọ ụlọ ahịa ahụ."
+    "notTakingOrders": "Ụlọ ahịa a anaghị anabata iwu ịntanetị ugbu a. Biko gaa ma ọ bụ kpọọ ụlọ ahịa ahụ.",
+    "categories": "Ụdị",
+    "allCategories": "Niile",
+    "noMatches": "Enweghị ngwa ahịa dabara ọchụchọ gị.",
+    "viewCart": "Lee nkata ({{count}})"
   },
   "marketplaceHomePage": {
     "title": "🏪 Ahịa SAFE Stores",
@@ -1379,7 +1399,11 @@
     "preview": "Nlele (ahịrị 20 mbụ)",
     "importNow": "Bubata ngwa ahịa {{count}}",
     "done": "Emechara: e mepụtara {{created}}, e melitere {{updated}}.",
-    "viewProducts": "Lee ngwa ahịa"
+    "viewProducts": "Lee ngwa ahịa",
+    "scanTitle": "Nyochaa ngwa ahịa otu otu",
+    "scanHelp": "Nyochaa koodu ngwa ahịa site na igwefoto ma ọ bụ USB. Koodu ọhụrụ na-emepe fọm ngwa ahịa; nke ịnwere na-eduga gị ịnata ngwa ahịa.",
+    "scanExisting": "{{name}} adịlarịrị na ngwa ahịa gị.",
+    "receiveStock": "Nata ngwa ahịa →"
   },
   "labelsPage": {
     "title": "Akara na Barcode",
@@ -1659,5 +1683,13 @@
       "settlement_payment": "A natara ịkwụ ụgwọ",
       "adjustment": "Mgbazi"
     }
+  },
+  "scanProduct": {
+    "scan": "Nyochaa koodu",
+    "stop": "Gbanyụọ igwefoto",
+    "typeCode": "…ma ọ bụ dee / nyochaa koodu ma ọ bụ SKU",
+    "found": "Ahọrọla: {{name}}",
+    "notFound": "Enweghị ngwa ahịa dabara {{code}}",
+    "cameraError": "Enweghị ike imepe igwefoto — kwe ka ọ rụọ ọrụ, ma ọ bụ dee koodu ahụ."
   }
 }

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -50,6 +50,16 @@ export default function Products() {
 
   const load = () => api.get(`/stores/${user.storeId}/products${showArchived ? '?includeArchived=true' : ''}`).then((r) => setProducts(r.data));
   useEffect(() => { load(); }, [user.storeId, showArchived]);
+  // Arriving from a scan (Import Products → Scan): open the new-product form with the barcode filled in.
+  const [params, setParams] = useSearchParams();
+  useEffect(() => {
+    const code = params.get('barcode');
+    if (!code) return;
+    setForm((f) => ({ ...f, barcode: code, sku: f.sku || code }));
+    setShowForm(true);
+    setParams({}, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   useRealtimeEvents(SYNC_EVENTS, () => load());
 
   const update = (key) => (e) => setForm({ ...form, [key]: e.target.value });

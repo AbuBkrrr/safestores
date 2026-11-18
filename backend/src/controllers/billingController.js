@@ -60,7 +60,8 @@ async function claimPayment(req, res) {
 async function getPaymentSettings(req, res) {
   const { rows } = await db.query('SELECT * FROM payment_settings WHERE id = $1', ['default']);
   if (!rows[0]) return res.status(404).json({ error: 'Payment settings not configured' });
-  res.json(rows[0]);
+  // Whether the server actually holds a Paystack secret key — the switch alone isn't enough.
+  res.json({ ...rows[0], gateway_key_present: require('../utils/paystack').isConfigured });
 }
 
 // PATCH /api/super/payment-settings  { accountNumber, accountName, bankOrProvider, methods, instructions, gatewayProvider, gatewayEnabled }

@@ -41,7 +41,7 @@ async function listStores(req, res) {
   if (city) { params.push(city); conditions.push(`city = $${params.length}`); }
 
   const { rows } = await db.query(
-    `SELECT id, name, category, city, address FROM stores WHERE ${conditions.join(' AND ')} ORDER BY name ASC`,
+    `SELECT id, name, category, city, address, shop_slug FROM stores WHERE ${conditions.join(' AND ')} ORDER BY name ASC`,
     params
   );
   res.json(rows);

@@ -419,7 +419,7 @@ async function deleteAnyUser(req, res) {
 async function getMarketplaceProfile(req, res) {
   const { storeId } = req.params;
   const { rows } = await db.query(
-    'SELECT id, name, category, address, city, marketplace_enabled FROM stores WHERE id = $1', [storeId]
+    'SELECT id, name, category, address, city, marketplace_enabled, shop_slug, shop_tagline FROM stores WHERE id = $1', [storeId]
   );
   if (!rows[0]) return res.status(404).json({ error: 'Store not found' });
   res.json(rows[0]);
@@ -427,12 +427,27 @@ async function getMarketplaceProfile(req, res) {
 
 async function updateMarketplaceProfile(req, res) {
   const { storeId } = req.params;
-  const { category, address, city } = req.body;
+  const { category, address, city, shopSlug, shopTagline } = req.body;
+  // shopSlug/shopTagline: undefined = leave as is, '' = clear.
+  let slug;
+  if (shopSlug !== undefined) {
+    const parsed = require('../utils/shopSlug').parseShopSlug(shopSlug);
+    if (parsed.error) return res.status(400).json({ error: parsed.error });
+    slug = parsed.value;
+    if (slug) {
+      const taken = await db.query('SELECT 1 FROM stores WHERE shop_slug = $1 AND id <> $2', [slug, storeId]);
+      if (taken.rowCount) return res.status(409).json({ error: 'That shop address is already taken — try adding your area, e.g. -lekki' });
+    }
+  }
+  const tagline = shopTagline === undefined ? undefined : (String(shopTagline).trim().slice(0, 140) || null);
   const { rows } = await db.query(
     `UPDATE stores SET category = COALESCE($1, category), address = COALESCE($2, address),
-            city = COALESCE($3, city), updated_at = now()
-     WHERE id = $4 RETURNING id, name, category, address, city, marketplace_enabled`,
-    [category ?? null, address ?? null, city ?? null, storeId]
+            city = COALESCE($3, city),
+            shop_slug = CASE WHEN $5 THEN $6 ELSE shop_slug END,
+            shop_tagline = CASE WHEN $7 THEN $8 ELSE shop_tagline END,
+            updated_at = now()
+     WHERE id = $4 RETURNING id, name, category, address, city, marketplace_enabled, shop_slug, shop_tagline`,
+    [category ?? null, address ?? null, city ?? null, storeId, slug !== undefined, slug ?? null, tagline !== undefined, tagline ?? null]
   );
   if (!rows[0]) return res.status(404).json({ error: 'Store not found' });
   res.json(rows[0]);

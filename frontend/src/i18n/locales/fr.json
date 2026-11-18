@@ -501,7 +501,9 @@
     "manager": "Gérant",
     "staff": "Personnel",
     "auditor": "Auditeur",
-    "cashier": "Caissier"
+    "cashier": "Caissier",
+    "checkout": "Caisse",
+    "stock_taker": "Inventoriste"
   },
   "invitesPage": {
     "title": "Gestion des invitations",
@@ -978,7 +980,21 @@
     "refundDue": "Remboursement dû",
     "refunded": "Remboursé",
     "markRefunded": "Marquer comme remboursé",
-    "confirmRefunded": "Confirmez-vous avoir remboursé intégralement ce client ?"
+    "confirmRefunded": "Confirmez-vous avoir remboursé intégralement ce client ?",
+    "copyLink": "Copier le lien",
+    "linkCopied": "Lien de la boutique copié",
+    "notListed": "Votre boutique n'est pas encore listée — demandez au support SAFE Stores de l'activer.",
+    "shopProfile": "Votre page boutique",
+    "shopAddress": "Adresse de la boutique",
+    "shopAddressHelp": "Lettres, chiffres et tirets, ex. mama-ngozi-lekki. Laissez vide pour le lien long. Les anciens liens restent valides.",
+    "tagline": "Slogan",
+    "taglinePlaceholder": "Épicerie fraîche, livrée à Lekki",
+    "category": "Catégorie",
+    "city": "Ville",
+    "address": "Adresse",
+    "saveProfile": "Enregistrer",
+    "profileSaved": "Page boutique enregistrée",
+    "profileFailed": "Impossible d'enregistrer la page"
   },
   "storefrontPage": {
     "title": "🛍️ Boutique",
@@ -1020,7 +1036,11 @@
     "securePayNote": "Paiement sécurisé par Paystack, versé directement à {{store}}.",
     "emailForPayment": "Saisissez votre e-mail pour recevoir votre reçu de paiement.",
     "payNow": "Payer {{amount}}",
-    "notTakingOrders": "Ce magasin ne prend pas de commandes en ligne pour le moment. Veuillez passer ou appeler le magasin."
+    "notTakingOrders": "Ce magasin ne prend pas de commandes en ligne pour le moment. Veuillez passer ou appeler le magasin.",
+    "categories": "Catégories",
+    "allCategories": "Tout",
+    "noMatches": "Aucun produit ne correspond à votre recherche.",
+    "viewCart": "Voir le panier ({{count}})"
   },
   "marketplaceHomePage": {
     "title": "🏪 Marché SAFE Stores",
@@ -1379,7 +1399,11 @@
     "preview": "Aperçu (20 premières lignes)",
     "importNow": "Importer {{count}} produits",
     "done": "Terminé : {{created}} créés, {{updated}} mis à jour.",
-    "viewProducts": "Voir les produits"
+    "viewProducts": "Voir les produits",
+    "scanTitle": "Scanner les produits un par un",
+    "scanHelp": "Scannez le code-barres avec la caméra ou un lecteur USB. Un nouveau code ouvre un formulaire pré-rempli ; un produit existant vous mène à la réception de stock.",
+    "scanExisting": "{{name}} est déjà dans vos produits.",
+    "receiveStock": "Recevoir du stock →"
   },
   "labelsPage": {
     "title": "Étiquettes et codes-barres",
@@ -1659,5 +1683,13 @@
       "settlement_payment": "Paiement reçu",
       "adjustment": "Ajustement"
     }
+  },
+  "scanProduct": {
+    "scan": "Scanner le code-barres",
+    "stop": "Arrêter la caméra",
+    "typeCode": "…ou saisissez / scannez un code-barres ou SKU",
+    "found": "Sélectionné : {{name}}",
+    "notFound": "Aucun produit ne correspond à {{code}}",
+    "cameraError": "Impossible d'ouvrir la caméra — autorisez l'accès ou saisissez le code."
   }
 }

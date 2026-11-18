@@ -5,6 +5,9 @@ const bcrypt = require('bcryptjs');
 const { checkPassword } = require('../utils/passwordPolicy');
 const { logActivity } = require('../utils/activityLog');
 
+// Every role a store user can be invited as.
+const INVITE_ROLES = ['admin', 'manager', 'cashier', 'checkout', 'staff', 'stock_taker', 'auditor'];
+
 // GET /api/stores/:storeId/users
 function listUsers(req, res) {
   const { storeId } = req.params;
@@ -59,6 +62,7 @@ function createInvite(req, res) {
   const { storeId } = req.params;
   const { name, email, role } = req.body;
   if (!name || !role) return res.status(400).json({ error: 'name and role are required' });
+  if (!INVITE_ROLES.includes(role)) return res.status(400).json({ error: `role must be one of: ${INVITE_ROLES.join(', ')}` });
 
   const id = crypto.randomUUID();
   const code = generateInviteCode();
@@ -74,6 +78,7 @@ function createBulkInvites(req, res) {
   const { storeId } = req.params;
   const { names, emailDomain, role } = req.body;
   if (!names || !role) return res.status(400).json({ error: 'names and role are required' });
+  if (!INVITE_ROLES.includes(role)) return res.status(400).json({ error: `role must be one of: ${INVITE_ROLES.join(', ')}` });
 
   const nameList = names.split(',').map((n) => n.trim()).filter(Boolean);
   if (nameList.length === 0) return res.status(400).json({ error: 'No valid names provided' });

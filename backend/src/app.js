@@ -100,7 +100,8 @@ function createApp() {
   app.get('/api/public/receipts/:token', require('./controllers/ordersController').publicReceipt);
   const publicCtrl = require('./controllers/publicController');
   app.get('/api/public/marketplace-orders/:token', publicCtrl.trackOrder);
-  app.get('/api/public/stores/:storeId', publicCtrl.storeInfo);
+  const { shopParam } = require('./utils/shopSlug');
+  app.get('/api/public/stores/:storeId', (req, res, next) => shopParam(req, res, next, req.params.storeId), publicCtrl.storeInfo);
   app.get('/share/shop/:storeId', publicCtrl.shareShop);
   app.get('/sitemap.xml', publicCtrl.sitemap);
   app.get('/robots.txt', publicCtrl.robots);

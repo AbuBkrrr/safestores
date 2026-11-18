@@ -33,10 +33,10 @@ async function trackOrder(req, res) {
 }
 
 async function shareShop(req, res) {
-  const { storeId } = req.params;
-  const target = `${frontendBase()}/shop/${encodeURIComponent(storeId)}`;
+  const target = `${frontendBase()}/shop/${encodeURIComponent(req.params.storeId)}`;
   let store = null;
-  if (UUID.test(storeId)) {
+  const storeId = await require('../utils/shopSlug').resolveShopId(req.params.storeId);
+  if (storeId) {
     const { rows } = await db.query(
       `SELECT name, category, city FROM stores WHERE id = $1 AND subscription_status = 'active' AND marketplace_enabled = true`, [storeId]
     );
@@ -58,10 +58,10 @@ async function shareShop(req, res) {
 async function sitemap(req, res) {
   const base = frontendBase();
   const { rows } = await db.query(
-    `SELECT id, updated_at FROM stores WHERE subscription_status = 'active' AND marketplace_enabled = true ORDER BY name LIMIT 45000`
+    `SELECT id, shop_slug, updated_at FROM stores WHERE subscription_status = 'active' AND marketplace_enabled = true ORDER BY name LIMIT 45000`
   );
   const urls = [`<url><loc>${esc(`${base}/marketplace-home`)}</loc><changefreq>daily</changefreq></url>`,
-    ...rows.map((r) => `<url><loc>${esc(`${base}/shop/${r.id}`)}</loc><lastmod>${new Date(r.updated_at).toISOString().slice(0, 10)}</lastmod></url>`)];
+    ...rows.map((r) => `<url><loc>${esc(`${base}/shop/${r.shop_slug || r.id}`)}</loc><lastmod>${new Date(r.updated_at).toISOString().slice(0, 10)}</lastmod></url>`)];
   res.set('Cache-Control', 'public, max-age=3600').type('application/xml')
     .send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.join('')}</urlset>`);
 }
@@ -74,7 +74,7 @@ function robots(req, res) {
 async function storeInfo(req, res) {
   if (!UUID.test(req.params.storeId)) return res.status(404).json({ error: 'Store not found' });
   const { rows } = await db.query(
-    `SELECT s.id, s.name, s.category, s.city, s.address, s.phone,
+    `SELECT s.id, s.name, s.category, s.city, s.address, s.phone, s.shop_slug, s.shop_tagline,
             COALESCE(s.currency_code, c.code) AS currency_code, COALESCE(s.currency_symbol, c.symbol) AS currency_symbol
      FROM stores s LEFT JOIN currency_settings c ON c.id = 'default'
      WHERE s.id = $1 AND s.subscription_status = 'active' AND s.marketplace_enabled = true`,

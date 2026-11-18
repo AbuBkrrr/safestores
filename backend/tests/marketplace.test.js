@@ -154,3 +154,31 @@ describe('Marketplace: admin order management', () => {
     expect(res.status).toBe(400);
   });
 });
+
+describe('Custom shop address (shop_slug)', () => {
+  it('a store sets a slug; the storefront and its API answer at /shop/<slug>; bad or taken slugs are refused', async () => {
+    const a = await createActiveStoreWithAdmin();
+    const b = await createActiveStoreWithAdmin();
+    await pool.query('UPDATE stores SET marketplace_enabled = true WHERE id = ANY($1)', [[a.store.id, b.store.id]]);
+    const patch = (s, body) => request().patch(`/api/stores/${s.store.id}/marketplace-profile`).set('Authorization', `Bearer ${s.token}`).send(body);
+
+    const ok = await patch(a, { shopSlug: 'Mama Ngozi Lekki', shopTagline: 'Fresh food daily' });
+    expect(ok.status).toBe(200);
+    expect(ok.body.shop_slug).toBe('mama-ngozi-lekki');
+
+    const info = await request().get('/api/public/stores/mama-ngozi-lekki');
+    expect(info.status).toBe(200);
+    expect(info.body.id).toBe(a.store.id);
+    expect(info.body.shop_tagline).toBe('Fresh food daily');
+    expect((await request().get('/api/marketplace/mama-ngozi-lekki/products')).status).toBe(200);
+    expect((await request().get(`/api/public/stores/${a.store.id}`)).status).toBe(200); // old link still works
+
+    expect((await patch(b, { shopSlug: 'mama-ngozi-lekki' })).status).toBe(409);
+    expect((await patch(b, { shopSlug: 'ab' })).status).toBe(400);
+    expect((await patch(b, { shopSlug: 'admin' })).status).toBe(400);
+    expect((await request().get('/api/public/stores/no-such-shop')).status).toBe(404);
+
+    const cleared = await patch(a, { shopSlug: '' });
+    expect(cleared.body.shop_slug).toBeNull();
+  });
+});

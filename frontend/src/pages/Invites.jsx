@@ -11,6 +11,9 @@ function inviteLink(code) {
   return `${APP_BASE_URL}/login?invite=${code}`;
 }
 
+// Every role a store user can hold (the store auditor is time-boxed to an audit engagement).
+const INVITE_ROLES = ['staff', 'cashier', 'checkout', 'stock_taker', 'manager', 'admin', 'auditor'];
+
 export default function Invites() {
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -89,7 +92,7 @@ export default function Invites() {
             <div className="form-group">
               <label>{t('invitesPage.role')}</label>
               <select value={single.role} onChange={(e) => setSingle({ ...single, role: e.target.value })}>
-                <option value="staff">{t('roles.staff')}</option><option value="manager">{t('roles.manager')}</option><option value="auditor">{t('roles.auditor')}</option>
+                {INVITE_ROLES.map((r) => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}
               </select>
             </div>
             <button className="btn">{t('invitesPage.createInvite')}</button>
@@ -110,7 +113,7 @@ export default function Invites() {
             <div className="form-group">
               <label>{t('invitesPage.roleAppliedToAll')}</label>
               <select value={bulk.role} onChange={(e) => setBulk({ ...bulk, role: e.target.value })}>
-                <option value="staff">{t('roles.staff')}</option><option value="manager">{t('roles.manager')}</option><option value="auditor">{t('roles.auditor')}</option>
+                {INVITE_ROLES.map((r) => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}
               </select>
             </div>
             <button className="btn">{t('invitesPage.createBulkInvites')}</button>

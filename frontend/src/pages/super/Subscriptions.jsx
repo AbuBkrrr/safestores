@@ -176,6 +176,13 @@ export default function Subscriptions() {
             />
             Enable online payment for stores
           </label>
+          {settings.gateway_provider === 'paystack' && settings.gateway_key_present === false && (
+            <div className="alert error mt-1" role="alert">
+              Paystack's secret key isn't set on the server, so stores still can't take online payments.
+              Add <code>PAYSTACK_SECRET_KEY=sk_live_…</code> (from your Paystack dashboard → Settings → API Keys)
+              to the server's <code>.env</code> and restart the backend.
+            </div>
+          )}
           <button className="btn mt-1" onClick={saveSettings}>Save Gateway Selection</button>
         </div>
       )}

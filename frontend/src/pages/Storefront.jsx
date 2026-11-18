@@ -88,10 +88,18 @@ export default function Storefront() {
     return next;
   });
 
+  const [category, setCategory] = useState('');
+  const categories = useMemo(() => [...new Set(products.map((p) => p.category).filter(Boolean))].sort(), [products]);
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return products.filter((p) => !q || [p.name, p.category, p.brand].some((v) => v && String(v).toLowerCase().includes(q)));
-  }, [products, query]);
+    return products.filter((p) => (!category || p.category === category)
+      && (!q || [p.name, p.category, p.brand].some((v) => v && String(v).toLowerCase().includes(q))));
+  }, [products, query, category]);
+  const cartCount = Object.values(cart).reduce((n, q) => n + q, 0);
+  // Opened via the long /shop/<id> link but the store has a custom address: show the nicer one.
+  useEffect(() => {
+    if (store?.shop_slug && storeId !== store.shop_slug) window.history.replaceState(null, '', `/shop/${store.shop_slug}`);
+  }, [store, storeId]);
 
   const cartItems = Object.entries(cart).map(([productId, quantity]) => {
     const product = products.find((p) => p.id === productId);
@@ -138,7 +146,7 @@ export default function Storefront() {
     }
   };
 
-  const shareUrl = `${SHARE_BASE}/share/shop/${storeId}`;
+  const shareUrl = `${SHARE_BASE}/share/shop/${store?.shop_slug || storeId}`;
   const shareShop = async () => {
     if (navigator.share) { try { await navigator.share({ title: store?.name, url: shareUrl }); } catch { /* cancelled */ } return; }
     try { await navigator.clipboard.writeText(shareUrl); setMessage(t('storefrontPage.linkCopied')); } catch { /* ignore */ }
@@ -153,11 +161,21 @@ export default function Storefront() {
   return (
     <div className="storefront">
       <header className="storefront-header">
-        <div>
-          <h1>{store?.name || t('storefrontPage.title')}</h1>
-          {store && <p className="muted">{[store.category, store.city].filter(Boolean).join(' · ')}{store.phone ? ` · ${store.phone}` : ''}</p>}
+        <div className="sf-hero">
+          <div className="sf-avatar" aria-hidden="true">{(store?.name || 'S').trim().charAt(0).toUpperCase()}</div>
+          <div>
+            <h1>{store?.name || t('storefrontPage.title')}</h1>
+            {store?.shop_tagline && <p className="sf-tagline">{store.shop_tagline}</p>}
+            {store && (
+              <div className="sf-chips">
+                {store.category && <span className="sf-chip">🏷️ {store.category}</span>}
+                {(store.city || store.address) && <span className="sf-chip">📍 {[store.address, store.city].filter(Boolean).join(', ')}</span>}
+                {store.phone && <a className="sf-chip" href={`tel:${store.phone}`}>📞 {store.phone}</a>}
+              </div>
+            )}
+          </div>
         </div>
-        <div className="flex">
+        <div className="flex sf-actions">
           <div style={{ width: 140 }}><LanguageSwitcher /></div>
           <button className="btn small secondary" onClick={shareShop}>{t('storefrontPage.share')}</button>
           {customer
@@ -187,25 +205,42 @@ export default function Storefront() {
       <div className="storefront-grid">
         <section>
           <input className="storefront-search" aria-label={t('common.search')} placeholder={t('storefrontPage.searchPlaceholder')} value={query} onChange={(e) => setQuery(e.target.value)} />
+          {categories.length > 1 && (
+            <div className="sf-cats" role="tablist" aria-label={t('storefrontPage.categories')}>
+              <button type="button" className={!category ? 'active' : ''} onClick={() => setCategory('')}>{t('storefrontPage.allCategories')}</button>
+              {categories.map((c) => <button type="button" key={c} className={category === c ? 'active' : ''} onClick={() => setCategory(c)}>{c}</button>)}
+            </div>
+          )}
+          {products.length > 0 && visible.length === 0 && <p className="muted sf-empty">{t('storefrontPage.noMatches')}</p>}
           <div className="product-grid">
             {visible.map((p) => (
-              <div key={p.id} className="product-tile">
-                {p.image_url && <img src={p.image_url} alt="" loading="lazy" />}
+              <div key={p.id} className={`product-tile${p.in_stock ? '' : ' out'}`}>
+                {p.image_url
+                  ? <img src={p.image_url} alt="" loading="lazy" />
+                  : <div className="pt-ph" aria-hidden="true">{p.name.trim().charAt(0).toUpperCase()}</div>}
                 <div className="pt-name">{p.name}</div>
-                <div className="muted">{p.category}</div>
+                {p.category && <div className="muted pt-cat">{p.category}</div>}
                 <div className="pt-foot">
                   <strong>{formatCurrency(p.price)}</strong>
-                  {p.in_stock
-                    ? <button className="btn small" onClick={() => addToCart(p.id)}>{cart[p.id] ? `+ (${cart[p.id]})` : t('storefrontPage.add')}</button>
-                    : <span className="muted">{t('storefrontPage.outOfStockTag')}</span>}
+                  {!p.in_stock
+                    ? <span className="muted">{t('storefrontPage.outOfStockTag')}</span>
+                    : cart[p.id]
+                      ? (
+                        <span className="pt-step">
+                          <button type="button" aria-label={`${t('storefrontPage.remove')} ${p.name}`} onClick={() => removeFromCart(p.id)}>−</button>
+                          <span aria-live="polite">{cart[p.id]}</span>
+                          <button type="button" aria-label={`${t('storefrontPage.add')} ${p.name}`} onClick={() => addToCart(p.id)}>+</button>
+                        </span>
+                      )
+                      : <button className="btn small" onClick={() => addToCart(p.id)}>{t('storefrontPage.add')}</button>}
                 </div>
               </div>
             ))}
           </div>
         </section>
 
-        <aside className="card storefront-cart">
-          <h2>{t('storefrontPage.yourCart')}</h2>
+        <aside className="card storefront-cart" id="sf-cart">
+          <h2>{t('storefrontPage.yourCart')}{cartCount > 0 && <span className="sf-count">{cartCount}</span>}</h2>
           {placed && (
             <div className="alert success">
               {message}{' '}
@@ -261,6 +296,11 @@ export default function Storefront() {
           )}
         </aside>
       </div>
+      {cartCount > 0 && (
+        <a className="sf-cartbar" href="#sf-cart">
+          🛒 {t('storefrontPage.viewCart', { count: cartCount })} · <strong>{formatCurrency(cartTotal)}</strong>
+        </a>
+      )}
       <BrandFooter />
     </div>
   );

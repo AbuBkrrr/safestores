@@ -501,7 +501,9 @@
     "manager": "Meneja",
     "staff": "Mfanyakazi",
     "auditor": "Mkaguzi",
-    "cashier": "Mtoza pesa"
+    "cashier": "Mtoza pesa",
+    "checkout": "Malipo",
+    "stock_taker": "Mhesabu bidhaa"
   },
   "invitesPage": {
     "title": "Usimamizi wa Mialiko",
@@ -978,7 +980,21 @@
     "refundDue": "Marejesho yanadaiwa",
     "refunded": "Imerejeshwa",
     "markRefunded": "Weka alama imerejeshwa",
-    "confirmRefunded": "Thibitisha kuwa umemrudishia mteja huyu pesa zote?"
+    "confirmRefunded": "Thibitisha kuwa umemrudishia mteja huyu pesa zote?",
+    "copyLink": "Nakili kiungo",
+    "linkCopied": "Kiungo cha duka kimenakiliwa",
+    "notListed": "Duka lako bado halijaorodheshwa — omba msaada wa SAFE Stores kuliwasha.",
+    "shopProfile": "Ukurasa wa duka lako",
+    "shopAddress": "Anwani ya duka mtandaoni",
+    "shopAddressHelp": "Herufi, nambari na vistari, mf. mama-ngozi-lekki. Acha wazi kutumia kiungo kirefu.",
+    "tagline": "Kauli mbiu",
+    "taglinePlaceholder": "Vyakula vibichi, tunaleta Lekki kote",
+    "category": "Aina",
+    "city": "Mji",
+    "address": "Anwani",
+    "saveProfile": "Hifadhi ukurasa",
+    "profileSaved": "Ukurasa wa duka umehifadhiwa",
+    "profileFailed": "Imeshindwa kuhifadhi ukurasa"
   },
   "storefrontPage": {
     "title": "🛍️ Duka",
@@ -1020,7 +1036,11 @@
     "securePayNote": "Malipo salama kupitia Paystack, yanalipwa moja kwa moja kwa {{store}}.",
     "emailForPayment": "Weka barua pepe yako ili tukutumie risiti ya malipo.",
     "payNow": "Lipa {{amount}}",
-    "notTakingOrders": "Duka hili halipokei maagizo ya mtandaoni kwa sasa. Tafadhali tembelea au piga simu dukani."
+    "notTakingOrders": "Duka hili halipokei maagizo ya mtandaoni kwa sasa. Tafadhali tembelea au piga simu dukani.",
+    "categories": "Aina",
+    "allCategories": "Zote",
+    "noMatches": "Hakuna bidhaa inayolingana na utafutaji wako.",
+    "viewCart": "Tazama kikapu ({{count}})"
   },
   "marketplaceHomePage": {
     "title": "🏪 Soko la SAFE Stores",
@@ -1379,7 +1399,11 @@
     "preview": "Hakiki (safu 20 za kwanza)",
     "importNow": "Ingiza bidhaa {{count}}",
     "done": "Imekamilika: {{created}} zimeundwa, {{updated}} zimesasishwa.",
-    "viewProducts": "Tazama bidhaa"
+    "viewProducts": "Tazama bidhaa",
+    "scanTitle": "Changanua bidhaa moja moja",
+    "scanHelp": "Changanua msimbopau kwa kamera au skana ya USB. Msimbo mpya hufungua fomu ya bidhaa; uliopo hukupeleka kupokea mzigo.",
+    "scanExisting": "{{name}} tayari iko kwenye bidhaa zako.",
+    "receiveStock": "Pokea mzigo →"
   },
   "labelsPage": {
     "title": "Lebo na Misimbopau",
@@ -1659,5 +1683,13 @@
       "settlement_payment": "Malipo yamepokelewa",
       "adjustment": "Marekebisho"
     }
+  },
+  "scanProduct": {
+    "scan": "Changanua msimbopau",
+    "stop": "Zima kamera",
+    "typeCode": "…au andika / changanua msimbopau au SKU",
+    "found": "Imechaguliwa: {{name}}",
+    "notFound": "Hakuna bidhaa inayolingana na {{code}}",
+    "cameraError": "Imeshindwa kufungua kamera — ruhusu kamera, au andika msimbo."
   }
 }

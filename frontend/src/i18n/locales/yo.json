@@ -501,7 +501,9 @@
     "manager": "Alákóso",
     "staff": "Òṣìṣẹ́",
     "auditor": "Olùṣàyẹ̀wò",
-    "cashier": "Olùgba owó"
+    "cashier": "Olùgba owó",
+    "checkout": "Ibi isanwo",
+    "stock_taker": "Oluka ọja"
   },
   "invitesPage": {
     "title": "Ìṣàkóso Ìpè",
@@ -978,7 +980,21 @@
     "refundDue": "Ìdápadà ń bẹ",
     "refunded": "A ti dá padà",
     "markRefunded": "Sàmì sí pé a ti dá padà",
-    "confirmRefunded": "Ṣé o jẹ́rìí pé o ti dá gbogbo owó oníbàárà yìí padà?"
+    "confirmRefunded": "Ṣé o jẹ́rìí pé o ti dá gbogbo owó oníbàárà yìí padà?",
+    "copyLink": "Daakọ ọna asopọ",
+    "linkCopied": "A ti daakọ ọna asopọ ṣọọbu",
+    "notListed": "A ko tii ṣe atokọ ṣọọbu rẹ — beere lọwọ atilẹyin SAFE Stores lati tan-an.",
+    "shopProfile": "Oju-iwe ṣọọbu rẹ",
+    "shopAddress": "Adirẹsi ṣọọbu",
+    "shopAddressHelp": "Lẹta, nọmba ati ila, f.a. mama-ngozi-lekki. Fi silẹ ofo lati lo ọna asopọ gigun.",
+    "tagline": "Ọrọ akọle",
+    "taglinePlaceholder": "Ounjẹ tuntun, a n fi jiṣẹ kaakiri Lekki",
+    "category": "Ẹka",
+    "city": "Ilu",
+    "address": "Adirẹsi",
+    "saveProfile": "Fi oju-iwe pamọ",
+    "profileSaved": "A ti fi oju-iwe ṣọọbu pamọ",
+    "profileFailed": "Ko le fi oju-iwe pamọ"
   },
   "storefrontPage": {
     "title": "🛍️ Ilé Ìtajà",
@@ -1020,7 +1036,11 @@
     "securePayNote": "Ìsanwó tó ní ààbò nípasẹ̀ Paystack, a san án tààrà fún {{store}}.",
     "emailForPayment": "Tẹ ímeèlì rẹ kí a lè fi rìsíìtì ìsanwó ránṣẹ́ sí ọ.",
     "payNow": "San {{amount}}",
-    "notTakingOrders": "Ṣọ́ọ̀bù yìí kò gba àṣẹ lórí ayélujára báyìí. Jọ̀wọ́ ṣèbẹ̀wò tàbí pe ṣọ́ọ̀bù náà."
+    "notTakingOrders": "Ṣọ́ọ̀bù yìí kò gba àṣẹ lórí ayélujára báyìí. Jọ̀wọ́ ṣèbẹ̀wò tàbí pe ṣọ́ọ̀bù náà.",
+    "categories": "Awọn ẹka",
+    "allCategories": "Gbogbo",
+    "noMatches": "Ko si ọja to baamu wiwa rẹ.",
+    "viewCart": "Wo agbọn ({{count}})"
   },
   "marketplaceHomePage": {
     "title": "🏪 Ọjà SAFE Stores",
@@ -1379,7 +1399,11 @@
     "preview": "Àyẹ̀wò ṣáájú (ìlà 20 àkọ́kọ́)",
     "importNow": "Kó ọjà {{count}} wọlé",
     "done": "Ó ti parí: a ṣẹ̀dá {{created}}, a ṣe àtúnṣe {{updated}}.",
-    "viewProducts": "Wo ọjà"
+    "viewProducts": "Wo ọjà",
+    "scanTitle": "Ṣayẹwo ọja ni ọkọọkan",
+    "scanHelp": "Ṣayẹwo koodu ọja pẹlu kamẹra tabi ẹrọ USB. Koodu tuntun ṣii fọọmu ọja; eyi ti o ti ni mu ọ lọ si gbigba ọja.",
+    "scanExisting": "{{name}} ti wa ninu awọn ọja rẹ.",
+    "receiveStock": "Gba ọja →"
   },
   "labelsPage": {
     "title": "Àmì àti Barcode",
@@ -1659,5 +1683,13 @@
       "settlement_payment": "A ti gba ìsanwó",
       "adjustment": "Àtúnṣe"
     }
+  },
+  "scanProduct": {
+    "scan": "Ṣe ayẹwo koodu",
+    "stop": "Pa kamẹra",
+    "typeCode": "…tabi tẹ / ṣayẹwo koodu tabi SKU",
+    "found": "A ti yan: {{name}}",
+    "notFound": "Ko si ọja to baamu {{code}}",
+    "cameraError": "Ko le ṣii kamẹra — gba aaye laaye, tabi tẹ koodu naa."
   }
 }

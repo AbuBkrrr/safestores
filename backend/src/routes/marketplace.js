@@ -8,6 +8,9 @@ const storePaymentsCtrl = require('../controllers/storePaymentsController');
 router.post('/orders/:token/pay', storePaymentsCtrl.startOrderPayment);
 router.post('/orders/:token/verify', storePaymentsCtrl.verifyOrderPayment);
 
+// A shop can be addressed by its custom slug as well as its id.
+router.param('storeId', require('../utils/shopSlug').shopParam);
+
 // Public — a shopper can browse without an account
 router.get('/stores', ctrl.listStores);
 router.get('/search-products', ctrl.searchProducts);

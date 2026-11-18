@@ -501,7 +501,9 @@
     "manager": "Manager",
     "staff": "Staff",
     "auditor": "Auditor",
-    "cashier": "Cashier"
+    "cashier": "Cashier",
+    "checkout": "Checkout",
+    "stock_taker": "Stock taker"
   },
   "invitesPage": {
     "title": "Invite Management",
@@ -978,7 +980,21 @@
     "refundDue": "Refund due",
     "refunded": "Refunded",
     "markRefunded": "Mark refunded",
-    "confirmRefunded": "Confirm you have refunded this customer in full?"
+    "confirmRefunded": "Confirm you have refunded this customer in full?",
+    "copyLink": "Copy link",
+    "linkCopied": "Shop link copied",
+    "notListed": "Your shop isn't listed on the marketplace yet — ask SAFE Stores support to switch it on. The link still works once it's on.",
+    "shopProfile": "Your shop page",
+    "shopAddress": "Shop address",
+    "shopAddressHelp": "Letters, numbers and hyphens, e.g. mama-ngozi-lekki. Leave blank to use the long link. Old links keep working.",
+    "tagline": "Tagline",
+    "taglinePlaceholder": "Fresh groceries, delivered across Lekki",
+    "category": "Category",
+    "city": "City",
+    "address": "Address",
+    "saveProfile": "Save shop page",
+    "profileSaved": "Shop page saved",
+    "profileFailed": "Couldn't save the shop page"
   },
   "storefrontPage": {
     "title": "🛍️ Shop",
@@ -1020,7 +1036,11 @@
     "securePayNote": "Secure payment by Paystack, paid directly to {{store}}.",
     "emailForPayment": "Enter your email so we can send your payment receipt.",
     "payNow": "Pay {{amount}}",
-    "notTakingOrders": "This store isn't taking online orders right now. Please visit or call the store."
+    "notTakingOrders": "This store isn't taking online orders right now. Please visit or call the store.",
+    "categories": "Categories",
+    "allCategories": "All",
+    "noMatches": "No products match your search.",
+    "viewCart": "View cart ({{count}})"
   },
   "marketplaceHomePage": {
     "title": "🏪 SAFE Stores Marketplace",
@@ -1379,7 +1399,11 @@
     "preview": "Preview (first 20 rows)",
     "importNow": "Import {{count}} products",
     "done": "Done: {{created}} created, {{updated}} updated.",
-    "viewProducts": "View products"
+    "viewProducts": "View products",
+    "scanTitle": "Scan products in one at a time",
+    "scanHelp": "Scan a product's barcode with the camera or a USB scanner. A new barcode opens a product form with it filled in; one you already sell takes you to receive stock.",
+    "scanExisting": "{{name}} is already in your products.",
+    "receiveStock": "Receive stock →"
   },
   "labelsPage": {
     "title": "Labels & Barcodes",
@@ -1659,5 +1683,13 @@
       "settlement_payment": "Payment received",
       "adjustment": "Adjustment"
     }
+  },
+  "scanProduct": {
+    "scan": "Scan barcode",
+    "stop": "Stop camera",
+    "typeCode": "…or type / scan a barcode or SKU",
+    "found": "Selected: {{name}}",
+    "notFound": "No product matches {{code}}",
+    "cameraError": "Couldn't open the camera — allow camera access, or type the code instead."
   }
 }

@@ -501,7 +501,9 @@
     "manager": "经理",
     "staff": "员工",
     "auditor": "审计员",
-    "cashier": "收银员"
+    "cashier": "收银员",
+    "checkout": "收银台",
+    "stock_taker": "盘点员"
   },
   "invitesPage": {
     "title": "邀请管理",
@@ -978,7 +980,21 @@
     "refundDue": "待退款",
     "refunded": "已退款",
     "markRefunded": "标记为已退款",
-    "confirmRefunded": "确认已向该顾客全额退款？"
+    "confirmRefunded": "确认已向该顾客全额退款？",
+    "copyLink": "复制链接",
+    "linkCopied": "店铺链接已复制",
+    "notListed": "您的店铺尚未在市场上线——请联系 SAFE Stores 支持开启。",
+    "shopProfile": "您的店铺页面",
+    "shopAddress": "店铺网址",
+    "shopAddressHelp": "字母、数字和连字符，如 mama-ngozi-lekki。留空则使用长链接。旧链接仍有效。",
+    "tagline": "店铺标语",
+    "taglinePlaceholder": "新鲜食品，配送至 Lekki 全区",
+    "category": "类别",
+    "city": "城市",
+    "address": "地址",
+    "saveProfile": "保存店铺页面",
+    "profileSaved": "店铺页面已保存",
+    "profileFailed": "无法保存店铺页面"
   },
   "storefrontPage": {
     "title": "🛍️ 商店",
@@ -1020,7 +1036,11 @@
     "securePayNote": "由 Paystack 安全支付，款项直接付给 {{store}}。",
     "emailForPayment": "请输入邮箱，以便我们发送付款收据。",
     "payNow": "支付 {{amount}}",
-    "notTakingOrders": "本店目前不接受在线订单。请到店或致电门店。"
+    "notTakingOrders": "本店目前不接受在线订单。请到店或致电门店。",
+    "categories": "分类",
+    "allCategories": "全部",
+    "noMatches": "没有符合搜索的商品。",
+    "viewCart": "查看购物车（{{count}}）"
   },
   "marketplaceHomePage": {
     "title": "🏪 SAFE Stores 市场",
@@ -1379,7 +1399,11 @@
     "preview": "预览（前 20 行）",
     "importNow": "导入 {{count}} 个商品",
     "done": "完成：新增 {{created}} 个，更新 {{updated}} 个。",
-    "viewProducts": "查看商品"
+    "viewProducts": "查看商品",
+    "scanTitle": "逐个扫描商品",
+    "scanHelp": "用摄像头或USB扫描枪扫描商品条码。新条码会打开已填好的商品表单；已有商品则转到入库。",
+    "scanExisting": "{{name}} 已在您的商品中。",
+    "receiveStock": "入库 →"
   },
   "labelsPage": {
     "title": "标签与条码",
@@ -1659,5 +1683,13 @@
       "settlement_payment": "已收到付款",
       "adjustment": "调整"
     }
+  },
+  "scanProduct": {
+    "scan": "扫描条码",
+    "stop": "关闭摄像头",
+    "typeCode": "…或输入/扫描条码或SKU",
+    "found": "已选择：{{name}}",
+    "notFound": "没有与 {{code}} 匹配的商品",
+    "cameraError": "无法打开摄像头——请允许访问摄像头，或直接输入代码。"
   }
 }

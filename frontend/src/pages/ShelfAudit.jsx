@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { useRealtimeEvents, useSocket } from '../context/SocketContext.jsx';
 import { Alert, Toast } from '../components/ui.jsx';
 import { useToast } from '../components/useToast.js';
+import ScanProductButton from '../components/ScanProductButton.jsx';
 
 const SYNC_EVENTS = ['audit:created', 'product:created', 'product:updated', 'product:deleted'];
 const CLAIM_REFRESH_MS = 25 * 1000; // re-announce periodically so the claim doesn't look stale to others
@@ -272,6 +273,7 @@ export default function ShelfAudit() {
             </div>
             <div className="form-group">
               <label>{t('shelfAuditPage.product')}</label>
+              <ScanProductButton products={products} onFound={(p) => setForm((f) => ({ ...f, productId: p.id }))} />
               <select value={form.productId} onChange={(e) => setForm({ ...form, productId: e.target.value })} required>
                 <option value="">{t('shelfAuditPage.selectProduct')}</option>
                 {visibleProducts.map((p) => {

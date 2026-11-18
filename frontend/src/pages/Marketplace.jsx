@@ -19,6 +19,27 @@ export default function Marketplace() {
 
   const load = () => api.get(`/stores/${user.storeId}/marketplace/orders`).then((r) => setOrders(r.data));
   useEffect(() => { load(); }, [user.storeId]);
+
+  // Shop profile: custom address (/shop/<slug>), tagline, category, location.
+  const [profile, setProfile] = useState(null);
+  const [savingProfile, setSavingProfile] = useState(false);
+  const toForm = (p) => ({ shopSlug: p.shop_slug || '', shopTagline: p.shop_tagline || '', category: p.category || '', city: p.city || '', address: p.address || '', enabled: p.marketplace_enabled });
+  useEffect(() => {
+    api.get(`/stores/${user.storeId}/marketplace-profile`).then((r) => setProfile(toForm(r.data))).catch(() => {});
+  }, [user.storeId]);
+  const saveProfile = async (e) => {
+    e.preventDefault();
+    setSavingProfile(true); setError('');
+    try {
+      const { enabled, ...body } = profile;
+      const { data } = await api.patch(`/stores/${user.storeId}/marketplace-profile`, body);
+      setProfile(toForm(data));
+      showToast(t('marketplacePage.profileSaved'), 'success');
+    } catch (err) {
+      setError(err.response?.data?.error || t('marketplacePage.profileFailed'));
+    } finally { setSavingProfile(false); }
+  };
+  const setP = (k) => (e) => setProfile({ ...profile, [k]: e.target.value });
   useRealtimeEvents(SYNC_EVENTS, () => load());
 
   const fulfill = async (orderId) => {
@@ -55,7 +76,7 @@ export default function Marketplace() {
     }
   };
 
-  const storefrontUrl = `${window.location.origin}/shop/${user.storeId}`;
+  const storefrontUrl = `${window.location.origin}/shop/${profile?.shopSlug || user.storeId}`;
 
   return (
     <div>
@@ -63,7 +84,33 @@ export default function Marketplace() {
       <Alert type="error">{error}</Alert>
 
       <div className="card">
-        <p className="muted">{t('marketplacePage.storefrontLine')} <a href={storefrontUrl} target="_blank" rel="noreferrer">{storefrontUrl}</a></p>
+        <p className="muted">{t('marketplacePage.storefrontLine')} <a href={storefrontUrl} target="_blank" rel="noreferrer">{storefrontUrl}</a>{' '}
+          <button type="button" className="btn small secondary" onClick={() => navigator.clipboard?.writeText(storefrontUrl).then(() => showToast(t('marketplacePage.linkCopied'), 'success'))}>{t('marketplacePage.copyLink')}</button>
+        </p>
+        {profile && profile.enabled === false && <Alert type="warning">{t('marketplacePage.notListed')}</Alert>}
+        {profile && (
+          <form onSubmit={saveProfile} className="mt-1">
+            <h3 style={{ marginBottom: 8 }}>{t('marketplacePage.shopProfile')}</h3>
+            <div className="grid grid-2">
+              <div className="form-group">
+                <label htmlFor="mp-slug">{t('marketplacePage.shopAddress')}</label>
+                <div className="flex" style={{ gap: 4, alignItems: 'center' }}>
+                  <span className="muted" style={{ fontSize: 13, whiteSpace: 'nowrap' }}>{window.location.host}/shop/</span>
+                  <input id="mp-slug" value={profile.shopSlug} onChange={setP('shopSlug')} placeholder="mama-ngozi-lekki" maxLength={40} style={{ flex: 1 }} />
+                </div>
+                <span className="help-text">{t('marketplacePage.shopAddressHelp')}</span>
+              </div>
+              <div className="form-group">
+                <label htmlFor="mp-tag">{t('marketplacePage.tagline')}</label>
+                <input id="mp-tag" value={profile.shopTagline} onChange={setP('shopTagline')} maxLength={140} placeholder={t('marketplacePage.taglinePlaceholder')} />
+              </div>
+              <div className="form-group"><label htmlFor="mp-cat">{t('marketplacePage.category')}</label><input id="mp-cat" value={profile.category} onChange={setP('category')} /></div>
+              <div className="form-group"><label htmlFor="mp-city">{t('marketplacePage.city')}</label><input id="mp-city" value={profile.city} onChange={setP('city')} /></div>
+              <div className="form-group"><label htmlFor="mp-addr">{t('marketplacePage.address')}</label><input id="mp-addr" value={profile.address} onChange={setP('address')} /></div>
+            </div>
+            <button className="btn" type="submit" disabled={savingProfile}>{t('marketplacePage.saveProfile')}</button>
+          </form>
+        )}
       </div>
 
       <div className="card">

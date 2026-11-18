@@ -501,7 +501,9 @@
     "manager": "Manaja",
     "staff": "Ma'aikaci",
     "auditor": "Mai bincike",
-    "cashier": "Mai karɓar kuɗi"
+    "cashier": "Mai karɓar kuɗi",
+    "checkout": "Wurin biya",
+    "stock_taker": "Mai ƙidaya kaya"
   },
   "invitesPage": {
     "title": "Sarrafa Gayyata",
@@ -978,7 +980,21 @@
     "refundDue": "Ana bin mayarwa",
     "refunded": "An mayar",
     "markRefunded": "Yi alama an mayar",
-    "confirmRefunded": "Ka tabbatar ka mayar wa wannan abokin ciniki duka kuɗinsa?"
+    "confirmRefunded": "Ka tabbatar ka mayar wa wannan abokin ciniki duka kuɗinsa?",
+    "copyLink": "Kwafi hanyar haɗi",
+    "linkCopied": "An kwafi hanyar shago",
+    "notListed": "Ba a jera shagonka a kasuwa ba tukuna — nemi taimakon SAFE Stores su kunna.",
+    "shopProfile": "Shafin shagonka",
+    "shopAddress": "Adireshin shago",
+    "shopAddressHelp": "Haruffa, lambobi da layi, misali mama-ngozi-lekki. Bar shi babu komai don amfani da dogon hanyar.",
+    "tagline": "Taken shago",
+    "taglinePlaceholder": "Kayan abinci sabo, ana kawo ko'ina a Lekki",
+    "category": "Rukuni",
+    "city": "Gari",
+    "address": "Adireshi",
+    "saveProfile": "Ajiye shafin shago",
+    "profileSaved": "An ajiye shafin shago",
+    "profileFailed": "An kasa ajiye shafin shago"
   },
   "storefrontPage": {
     "title": "🛍️ Shago",
@@ -1020,7 +1036,11 @@
     "securePayNote": "Biya mai tsaro ta Paystack, ana biyan {{store}} kai tsaye.",
     "emailForPayment": "Shigar da imel ɗinka don mu aiko maka da rasit ɗin biya.",
     "payNow": "Biya {{amount}}",
-    "notTakingOrders": "Wannan shagon ba ya karɓar odar yanar gizo a yanzu. Don Allah ka ziyarci ko ka kira shagon."
+    "notTakingOrders": "Wannan shagon ba ya karɓar odar yanar gizo a yanzu. Don Allah ka ziyarci ko ka kira shagon.",
+    "categories": "Rukunoni",
+    "allCategories": "Duka",
+    "noMatches": "Babu kayan da ya dace da bincikenka.",
+    "viewCart": "Duba kwando ({{count}})"
   },
   "marketplaceHomePage": {
     "title": "🏪 Kasuwar SAFE Stores",
@@ -1379,7 +1399,11 @@
     "preview": "Samfoti (layi 20 na farko)",
     "importNow": "Shigo da kaya {{count}}",
     "done": "An gama: an ƙirƙiri {{created}}, an sabunta {{updated}}.",
-    "viewProducts": "Duba kaya"
+    "viewProducts": "Duba kaya",
+    "scanTitle": "Duba kaya ɗaya bayan ɗaya",
+    "scanHelp": "Duba lambar kaya da kyamara ko na USB. Sabuwar lamba tana buɗe fom ɗin kaya; wadda kake da ita tana kai ka karɓar kaya.",
+    "scanExisting": "{{name}} yana cikin kayayyakinka tuni.",
+    "receiveStock": "Karɓi kaya →"
   },
   "labelsPage": {
     "title": "Lambobi da Barcode",
@@ -1659,5 +1683,13 @@
       "settlement_payment": "An karɓi biya",
       "adjustment": "Gyara"
     }
+  },
+  "scanProduct": {
+    "scan": "Duba lambar kaya",
+    "stop": "Kashe kyamara",
+    "typeCode": "…ko rubuta / duba lambar kaya ko SKU",
+    "found": "An zaɓa: {{name}}",
+    "notFound": "Babu kaya da ya dace da {{code}}",
+    "cameraError": "An kasa buɗe kyamara — ba da izini, ko rubuta lambar."
   }
 }
