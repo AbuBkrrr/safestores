@@ -31,8 +31,11 @@ export default function Login() {
     if (inviteFromLink) {
       setTab('invite');
       setCode(inviteFromLink.toUpperCase());
+      // Opening the link (or scanning the QR code) signs the person straight
+      // in — no extra tap. If the code is bad, the error shows on this tab.
+      joinWithCode(inviteFromLink.toUpperCase());
     }
-  }, [inviteFromLink]);
+  }, [inviteFromLink]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleAdminLogin = async (e) => {
     e.preventDefault();
@@ -54,11 +57,10 @@ export default function Login() {
     }
   };
 
-  const handleInviteLogin = async (e) => {
-    e.preventDefault();
+  const joinWithCode = async (inviteCode) => {
     setError(''); setLoading(true);
     try {
-      const { data } = await api.post('/auth/invite/login', { code });
+      const { data } = await api.post('/auth/invite/login', { code: inviteCode });
       login(data.token, data.user);
       navigate('/');
     } catch (err) {
@@ -67,6 +69,7 @@ export default function Login() {
       setLoading(false);
     }
   };
+  const handleInviteLogin = (e) => { e.preventDefault(); joinWithCode(code); };
 
   return (
     <div className="auth-screen">
