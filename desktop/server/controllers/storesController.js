@@ -13,7 +13,10 @@ function listStores(req, res) {
   const rows = db.prepare(
     `SELECT s.*, t.label AS tier_label,
             (SELECT COUNT(*) FROM users u WHERE u.store_id = s.id) AS user_count,
-            (SELECT COUNT(*) FROM products pr WHERE pr.store_id = s.id) AS product_count
+            (SELECT COUNT(*) FROM products pr WHERE pr.store_id = s.id) AS product_count,
+            (SELECT ac.code FROM access_codes ac WHERE ac.issued_for_store = s.id OR ac.used_by_store = s.id ORDER BY ac.created_at DESC LIMIT 1) AS access_code,
+            (SELECT ac.status FROM access_codes ac WHERE ac.issued_for_store = s.id OR ac.used_by_store = s.id ORDER BY ac.created_at DESC LIMIT 1) AS access_code_status,
+            (SELECT ac.expires_at FROM access_codes ac WHERE ac.issued_for_store = s.id OR ac.used_by_store = s.id ORDER BY ac.created_at DESC LIMIT 1) AS access_code_expires_at
      FROM stores s LEFT JOIN store_tiers t ON t.tier = s.store_tier
      ORDER BY s.created_at DESC`
   ).all();
@@ -89,6 +92,8 @@ async function createStore(req, res) {
         customBillingNotes || null, syncKey, referralContact || null
       );
       const store = db.prepare('SELECT * FROM stores WHERE id = ?').get(storeId);
+      // Created already active, so its code is recorded as used.
+      issueStoreCode({ storeId, tier: store.store_tier, issuedBy: req.user.sub, used: true });
 
       const userId = crypto.randomUUID();
       db.prepare(
@@ -203,7 +208,12 @@ function suspendStore(req, res) {
 // DELETE /api/super/stores/:id
 function deleteStore(req, res) {
   const { id } = req.params;
-  const result = db.prepare('DELETE FROM stores WHERE id = ?').run(id);
+  const result = db.transaction(() => {
+    // Codes a store redeemed shouldn't block deleting it (cloud: ON DELETE SET NULL).
+    db.prepare('UPDATE access_codes SET used_by_store = NULL WHERE used_by_store = ?').run(id);
+    db.prepare('DELETE FROM access_codes WHERE issued_for_store = ?').run(id);
+    return db.prepare('DELETE FROM stores WHERE id = ?').run(id);
+  })();
   if (result.changes === 0) return res.status(404).json({ error: 'Store not found' });
   res.status(204).end();
 }
@@ -213,16 +223,54 @@ function listPlans(req, res) {
   res.json(db.prepare('SELECT * FROM store_tiers ORDER BY tier ASC').all());
 }
 
+const { parseExpiryDays, parseTierLimits } = require('../utils/codeRules');
+
+// Creates the access code that belongs to one store (runs inside the caller's transaction when there is one).
+function issueStoreCode({ storeId, tier, issuedBy = null, used = false, days = 30 }) {
+  const id = crypto.randomUUID();
+  db.prepare(
+    `INSERT INTO access_codes (id, code, intended_tier, issued_by, status, used_by_store, issued_for_store, expires_at)
+     VALUES (?,?,?,?,?,?,?,?)`
+  ).run(id, generateAccessCode(), VALID_TIERS.includes(tier) ? tier : null, issuedBy,
+    used ? 'used' : 'active', used ? storeId : null, storeId, new Date(Date.now() + days * 86400000).toISOString());
+  return db.prepare('SELECT * FROM access_codes WHERE id = ?').get(id);
+}
+
+// PUT /api/super/tiers/:tier  { label?, maxProducts, maxUsers }  (null/'' = unlimited)
+function updateTier(req, res) {
+  const parsed = parseTierLimits(req.body);
+  if (parsed.error) return res.status(400).json({ error: parsed.error });
+  const r = db.prepare('UPDATE store_tiers SET label = COALESCE(?, label), max_products = ?, max_users = ? WHERE tier = ?')
+    .run(parsed.label, parsed.maxProducts, parsed.maxUsers, req.params.tier);
+  if (!r.changes) return res.status(404).json({ error: 'Tier not found' });
+  res.json(db.prepare('SELECT * FROM store_tiers WHERE tier = ?').get(req.params.tier));
+}
+
+// POST /api/super/stores/:id/access-code  { expiresInDays? } — a fresh code for one store
+function issueCodeForStore(req, res) {
+  const days = parseExpiryDays(req.body.expiresInDays);
+  if (days.error) return res.status(400).json({ error: days.error });
+  const store = db.prepare('SELECT id, store_tier FROM stores WHERE id = ?').get(req.params.id);
+  if (!store) return res.status(404).json({ error: 'Store not found' });
+  const code = db.transaction(() => {
+    db.prepare(`UPDATE access_codes SET status = 'revoked' WHERE issued_for_store = ? AND status = 'active'`).run(store.id);
+    return issueStoreCode({ storeId: store.id, tier: store.store_tier, issuedBy: req.user.sub, days: days.value });
+  })();
+  res.status(201).json(code);
+}
+
 // POST /api/super/access-codes  { intendedTier? }
 function generateCode(req, res) {
   const { intendedTier } = req.body;
   if (intendedTier && !VALID_TIERS.includes(intendedTier)) {
     return res.status(400).json({ error: 'intendedTier must be mini, midi, or mega' });
   }
+  const days = parseExpiryDays(req.body.expiresInDays);
+  if (days.error) return res.status(400).json({ error: days.error });
 
   const code = generateAccessCode();
   const id = crypto.randomUUID();
-  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+  const expiresAt = new Date(Date.now() + days.value * 24 * 60 * 60 * 1000).toISOString();
 
   db.prepare(
     `INSERT INTO access_codes (id, code, intended_tier, issued_by, expires_at) VALUES (?,?,?,?,?)`
@@ -236,7 +284,7 @@ function listCodes(req, res) {
   const rows = db.prepare(
     `SELECT ac.*, s.name AS store_name
      FROM access_codes ac
-     LEFT JOIN stores s ON s.id = ac.used_by_store
+     LEFT JOIN stores s ON s.id = COALESCE(ac.used_by_store, ac.issued_for_store)
      ORDER BY ac.created_at DESC`
   ).all();
   res.json(rows);
@@ -261,6 +309,7 @@ function redeemCode(req, res) {
       const ac = db.prepare('SELECT * FROM access_codes WHERE code = ?').get(code);
       if (!ac) return { error: [404, 'Access code not found'] };
       if (ac.status !== 'active') return { error: [410, `Code is ${ac.status}`] };
+      if (ac.issued_for_store && ac.issued_for_store !== storeId) return { error: [403, 'This access code was issued for a different store'] };
       if (new Date(ac.expires_at) < new Date()) {
         db.prepare(`UPDATE access_codes SET status = 'expired' WHERE id = ?`).run(ac.id);
         return { error: [410, 'Code has expired'] };
@@ -397,7 +446,7 @@ function listReferrals(req, res) {
 }
 
 module.exports = {
-  listStores, listReferrals, createStore, updateStore, activateStore, suspendStore, deleteStore, listPlans,
+  listStores, listReferrals, createStore, updateStore, activateStore, suspendStore, deleteStore, listPlans, updateTier, issueCodeForStore, issueStoreCode,
   generateCode, listCodes, revokeCode, redeemCode,
   listAllUsers, updateAnyUserStatus, deleteAnyUser,
   getMarketplaceProfile, updateMarketplaceProfile,

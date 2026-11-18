@@ -32,6 +32,8 @@ router.delete('/stores/:id', ctrl.deleteStore);
 
 // Store size tiers (mini/midi/mega) and their limits
 router.get('/tiers', ctrl.listPlans);
+router.put('/tiers/:tier', ctrl.updateTier);
+router.post('/stores/:id/access-code', ctrl.issueCodeForStore);
 
 router.get('/access-codes', ctrl.listCodes);
 router.post('/access-codes', ctrl.generateCode);

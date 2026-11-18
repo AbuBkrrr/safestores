@@ -41,6 +41,8 @@ async function storeSignup(req, res) {
         `INSERT INTO stores (id, name, store_tier, subscription_status, sync_key) VALUES (?, ?, ?, 'pending', ?)`
       ).run(storeId, storeName, storeTier || 'mini', crypto.randomUUID());
       const store = db.prepare('SELECT * FROM stores WHERE id = ?').get(storeId);
+      // Every new store gets its own access code (visible to Super Admin on Manage Stores → Connect).
+      require('./storesController').issueStoreCode({ storeId, tier: store.store_tier });
 
       const userId = crypto.randomUUID();
       db.prepare(

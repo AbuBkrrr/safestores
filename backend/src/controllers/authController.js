@@ -64,6 +64,8 @@ async function storeSignup(req, res) {
         require('./storeSettingsController').isValidTimezone(timezone) ? timezone : 'UTC']
     );
     const store = storeResult.rows[0];
+    // Every new store gets its own access code (visible to Super Admin on Manage Stores → Connect).
+    await require('./storesController').issueStoreCode(client, { storeId: store.id, tier: store.requested_tier });
 
     const passwordHash = await bcrypt.hash(password, 10);
     const userResult = await client.query(

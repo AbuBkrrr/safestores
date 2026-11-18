@@ -10,7 +10,10 @@ async function listStores(req, res) {
   const { rows } = await db.query(
     `SELECT s.*, t.label AS tier_label,
             (SELECT COUNT(*) FROM users u WHERE u.store_id = s.id) AS user_count,
-            (SELECT COUNT(*) FROM products pr WHERE pr.store_id = s.id) AS product_count
+            (SELECT COUNT(*) FROM products pr WHERE pr.store_id = s.id) AS product_count,
+            (SELECT ac.code FROM access_codes ac WHERE ac.issued_for_store = s.id OR ac.used_by_store = s.id ORDER BY ac.created_at DESC LIMIT 1) AS access_code,
+            (SELECT ac.status FROM access_codes ac WHERE ac.issued_for_store = s.id OR ac.used_by_store = s.id ORDER BY ac.created_at DESC LIMIT 1) AS access_code_status,
+            (SELECT ac.expires_at FROM access_codes ac WHERE ac.issued_for_store = s.id OR ac.used_by_store = s.id ORDER BY ac.created_at DESC LIMIT 1) AS access_code_expires_at
      FROM stores s LEFT JOIN store_tiers t ON t.tier = s.store_tier
      ORDER BY s.created_at DESC`
   );
@@ -91,6 +94,8 @@ async function createStore(req, res) {
       [storeName, storeTier || 'mini', billingModel || 'daily_percentage', dailyRatePercent ?? 1.0, gracePeriodMinutes ?? 5, customBillingNotes || null]
     );
     const store = storeRes.rows[0];
+    // Created already active, so its code is recorded as used.
+    await issueStoreCode(client, { storeId: store.id, tier: store.store_tier, issuedBy: req.user.sub, used: true });
 
     const userRes = await client.query(
       `INSERT INTO users (store_id, name, email, password_hash, role) VALUES ($1, $2, $3, $4, 'admin')
@@ -220,9 +225,50 @@ async function listPlans(req, res) {
   res.json(rows);
 }
 
+// PUT /api/super/tiers/:tier  { label?, maxProducts, maxUsers }  (null/'' = unlimited)
+async function updateTier(req, res) {
+  const parsed = parseTierLimits(req.body);
+  if (parsed.error) return res.status(400).json({ error: parsed.error });
+  const { rows } = await db.query(
+    `UPDATE store_tiers SET label = COALESCE($1, label), max_products = $2, max_users = $3 WHERE tier = $4 RETURNING *`,
+    [parsed.label, parsed.maxProducts, parsed.maxUsers, req.params.tier]
+  );
+  if (!rows[0]) return res.status(404).json({ error: 'Tier not found' });
+  res.json(rows[0]);
+}
+
+// POST /api/super/stores/:id/access-code  { expiresInDays? } — a fresh code for one store
+async function issueCodeForStore(req, res) {
+  const days = parseExpiryDays(req.body.expiresInDays);
+  if (days.error) return res.status(400).json({ error: days.error });
+  const { rows } = await db.query('SELECT id, store_tier, requested_tier, subscription_status FROM stores WHERE id = $1', [req.params.id]);
+  const store = rows[0];
+  if (!store) return res.status(404).json({ error: 'Store not found' });
+  // Any older unused code for this store stops working.
+  await db.query(`UPDATE access_codes SET status = 'revoked' WHERE issued_for_store = $1 AND status = 'active'`, [store.id]);
+  const code = await issueStoreCode(db, {
+    storeId: store.id, tier: store.requested_tier || store.store_tier, issuedBy: req.user.sub, days: days.value,
+  });
+  res.status(201).json(code);
+}
+
 // ------------------------------------------------------------
 // Access codes
 // ------------------------------------------------------------
+
+const { parseExpiryDays, parseTierLimits } = require('../utils/codeRules');
+
+// Creates the access code that belongs to one store. `q` is the db or a
+// transaction client. `used` marks it redeemed (store created already active).
+async function issueStoreCode(q, { storeId, tier, issuedBy = null, used = false, days = 30 }) {
+  const { rows } = await q.query(
+    `INSERT INTO access_codes (code, intended_tier, issued_by, status, used_by_store, issued_for_store, expires_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+    [generateAccessCode(), ['mini', 'midi', 'mega'].includes(tier) ? tier : null, issuedBy,
+      used ? 'used' : 'active', used ? storeId : null, storeId, new Date(Date.now() + days * 86400000)]
+  );
+  return rows[0];
+}
 
 // POST /api/super/access-codes  { intendedTier? }
 async function generateCode(req, res) {
@@ -230,9 +276,11 @@ async function generateCode(req, res) {
   if (intendedTier && !['mini', 'midi', 'mega'].includes(intendedTier)) {
     return res.status(400).json({ error: 'intendedTier must be mini, midi, or mega' });
   }
+  const days = parseExpiryDays(req.body.expiresInDays);
+  if (days.error) return res.status(400).json({ error: days.error });
 
   const code = generateAccessCode();
-  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+  const expiresAt = new Date(Date.now() + days.value * 24 * 60 * 60 * 1000);
 
   const { rows } = await db.query(
     `INSERT INTO access_codes (code, intended_tier, issued_by, expires_at)
@@ -247,7 +295,7 @@ async function listCodes(req, res) {
   const { rows } = await db.query(
     `SELECT ac.*, s.name AS store_name
      FROM access_codes ac
-     LEFT JOIN stores s ON s.id = ac.used_by_store
+     LEFT JOIN stores s ON s.id = COALESCE(ac.used_by_store, ac.issued_for_store)
      ORDER BY ac.created_at DESC`
   );
   res.json(rows);
@@ -280,6 +328,10 @@ async function redeemCode(req, res) {
     const ac = rows[0];
     if (!ac) { await client.query('ROLLBACK'); return res.status(404).json({ error: 'Access code not found' }); }
     if (ac.status !== 'active') { await client.query('ROLLBACK'); return res.status(410).json({ error: `Code is ${ac.status}` }); }
+    if (ac.issued_for_store && ac.issued_for_store !== storeId) {
+      await client.query('ROLLBACK');
+      return res.status(403).json({ error: 'This access code was issued for a different store' });
+    }
     if (new Date(ac.expires_at) < new Date()) {
       await client.query(`UPDATE access_codes SET status = 'expired' WHERE id = $1`, [ac.id]);
       await client.query('COMMIT');
@@ -422,7 +474,7 @@ async function updateLoyaltySettings(req, res) {
 }
 
 module.exports = {
-  listStores, listReferrals, createStore, updateStore, activateStore, suspendStore, deleteStore, listPlans,
+  listStores, listReferrals, createStore, updateStore, activateStore, suspendStore, deleteStore, listPlans, updateTier, issueCodeForStore, issueStoreCode,
   generateCode, listCodes, revokeCode, redeemCode,
   listAllUsers, updateAnyUserStatus, deleteAnyUser,
   getMarketplaceProfile, updateMarketplaceProfile,

@@ -208,4 +208,73 @@ describe('Super Admin: Cross-store user management', () => {
 
     expect(res.status).toBe(204);
   });
+
+  describe('per-store access codes, custom expiry, editable tiers', () => {
+    const signup = (email) => request().post('/api/auth/store/signup').send({
+      storeName: 'Coded Store', adminName: 'Owner', adminEmail: email, password: 'Password123!',
+    });
+
+    it('a signed-up store gets its own active code, shown on Manage Stores; only that store can redeem it', async () => {
+      const superAdmin = await createSuperAdmin();
+      const a = await signup('codeda@example.com');
+      const b = await signup('codedb@example.com');
+      expect(a.status).toBe(201);
+
+      const list = await request().get('/api/super/stores').set('Authorization', `Bearer ${superToken(superAdmin)}`);
+      const rowA = list.body.find((s) => s.id === a.body.store.id);
+      expect(rowA.access_code).toMatch(/^ACC-/);
+      expect(rowA.access_code_status).toBe('active');
+
+      const tok = (r) => tokenFor({ ...r.body.admin, store_id: r.body.store.id });
+      const tokB = tok(b);
+      const wrong = await request().post(`/api/stores/${b.body.store.id}/redeem-code`)
+        .set('Authorization', `Bearer ${tokB}`).send({ code: rowA.access_code });
+      expect(wrong.status).toBe(403);
+
+      const tokA = tok(a);
+      const ok = await request().post(`/api/stores/${a.body.store.id}/redeem-code`)
+        .set('Authorization', `Bearer ${tokA}`).send({ code: rowA.access_code });
+      expect(ok.status).toBe(200);
+    });
+
+    it('a store created by Super Admin gets a code recorded as used; a new one can be issued with custom expiry', async () => {
+      const superAdmin = await createSuperAdmin();
+      const auth = `Bearer ${superToken(superAdmin)}`;
+      const created = await request().post('/api/super/stores').set('Authorization', auth)
+        .send({ storeName: 'Admin Made', adminName: 'A', adminEmail: 'adminmade@store.com', password: 'Password123!' });
+      let row = (await request().get('/api/super/stores').set('Authorization', auth)).body.find((s) => s.id === created.body.store.id);
+      expect(row.access_code_status).toBe('used');
+
+      const fresh = await request().post(`/api/super/stores/${created.body.store.id}/access-code`).set('Authorization', auth).send({ expiresInDays: 7 });
+      expect(fresh.status).toBe(201);
+      const days = (new Date(fresh.body.expires_at) - Date.now()) / 86400000;
+      expect(days).toBeGreaterThan(6.9);
+      expect(days).toBeLessThan(7.1);
+      row = (await request().get('/api/super/stores').set('Authorization', auth)).body.find((s) => s.id === created.body.store.id);
+      expect(row.access_code).toBe(fresh.body.code);
+    });
+
+    it('generate code honours expiresInDays and rejects out-of-range values', async () => {
+      const superAdmin = await createSuperAdmin();
+      const auth = `Bearer ${superToken(superAdmin)}`;
+      const ok = await request().post('/api/super/access-codes').set('Authorization', auth).send({ expiresInDays: 90 });
+      expect(ok.status).toBe(201);
+      expect((new Date(ok.body.expires_at) - Date.now()) / 86400000).toBeGreaterThan(89.9);
+      const bad = await request().post('/api/super/access-codes').set('Authorization', auth).send({ expiresInDays: 0 });
+      expect(bad.status).toBe(400);
+    });
+
+    it('Super Admin can edit tier limits (blank = unlimited)', async () => {
+      const superAdmin = await createSuperAdmin();
+      const auth = `Bearer ${superToken(superAdmin)}`;
+      const res = await request().put('/api/super/tiers/mini').set('Authorization', auth)
+        .send({ label: 'Mini Store', maxProducts: 300, maxUsers: '' });
+      expect(res.status).toBe(200);
+      expect(res.body.max_products).toBe(300);
+      expect(res.body.max_users).toBeNull();
+      const bad = await request().put('/api/super/tiers/mini').set('Authorization', auth).send({ maxProducts: -2 });
+      expect(bad.status).toBe(400);
+      await request().put('/api/super/tiers/mini').set('Authorization', auth).send({ label: 'Mini Store', maxProducts: 200, maxUsers: 5 });
+    });
+  });
 });

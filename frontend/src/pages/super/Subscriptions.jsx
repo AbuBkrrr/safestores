@@ -18,6 +18,8 @@ export default function Subscriptions() {
   const [tiers, setTiers] = useState([]);
   const [codes, setCodes] = useState([]);
   const [intendedTier, setIntendedTier] = useState('');
+  const [expiresInDays, setExpiresInDays] = useState(30);
+  const [tierEdit, setTierEdit] = useState(null); // { tier, label, maxProducts, maxUsers }
   const [settings, setSettings] = useState(null);
   const [toast, showToast] = useToast();
 
@@ -62,9 +64,26 @@ export default function Subscriptions() {
   };
 
   const generate = async () => {
-    await api.post('/super/access-codes', intendedTier ? { intendedTier } : {});
-    showToast('Access code generated', 'success');
-    load();
+    try {
+      await api.post('/super/access-codes', { ...(intendedTier ? { intendedTier } : {}), expiresInDays: Number(expiresInDays) });
+      showToast('Access code generated', 'success');
+      load();
+    } catch (err) {
+      showToast(err.response?.data?.error || 'Failed to generate code', 'error');
+    }
+  };
+
+  const saveTier = async () => {
+    try {
+      await api.put(`/super/tiers/${tierEdit.tier}`, {
+        label: tierEdit.label, maxProducts: tierEdit.maxProducts, maxUsers: tierEdit.maxUsers,
+      });
+      showToast('Tier limits saved — they apply to every store on this tier', 'success');
+      setTierEdit(null);
+      load();
+    } catch (err) {
+      showToast(err.response?.data?.error || 'Failed to save tier', 'error');
+    }
   };
 
   const revoke = async (id) => {
@@ -166,17 +185,35 @@ export default function Subscriptions() {
         <p className="muted mt-1">
           Store size (Mini/Midi/Mega) and billing (daily % or custom) are assigned per store
           from Manage Stores — these limits apply automatically based on the tier assigned.
+          Leave a limit blank for unlimited.
         </p>
         <table>
-          <thead><tr><th>Tier</th><th>Max Products</th><th>Max Users</th></tr></thead>
+          <thead><tr><th>Tier</th><th>Max Products</th><th>Max Users</th><th></th></tr></thead>
           <tbody>
-            {tiers.map((t) => (
+            {tiers.map((t) => (tierEdit?.tier === t.tier ? (
+              <tr key={t.tier}>
+                <td><input value={tierEdit.label} onChange={(e) => setTierEdit({ ...tierEdit, label: e.target.value })} aria-label="Tier name" /></td>
+                <td><input type="number" min="1" placeholder="Unlimited" value={tierEdit.maxProducts}
+                  onChange={(e) => setTierEdit({ ...tierEdit, maxProducts: e.target.value })} aria-label="Max products" /></td>
+                <td><input type="number" min="1" placeholder="Unlimited" value={tierEdit.maxUsers}
+                  onChange={(e) => setTierEdit({ ...tierEdit, maxUsers: e.target.value })} aria-label="Max users" /></td>
+                <td className="flex" style={{ gap: 6 }}>
+                  <button className="btn small" onClick={saveTier}>Save</button>
+                  <button className="btn small secondary" onClick={() => setTierEdit(null)}>Cancel</button>
+                </td>
+              </tr>
+            ) : (
               <tr key={t.tier}>
                 <td>{t.label}</td>
                 <td>{t.max_products ?? 'Unlimited'}</td>
                 <td>{t.max_users ?? 'Unlimited'}</td>
+                <td>
+                  <button className="btn small secondary" onClick={() => setTierEdit({
+                    tier: t.tier, label: t.label, maxProducts: t.max_products ?? '', maxUsers: t.max_users ?? '',
+                  })}>Edit</button>
+                </td>
               </tr>
-            ))}
+            )))}
           </tbody>
         </table>
       </div>
@@ -191,14 +228,18 @@ export default function Subscriptions() {
             <option value="midi">Midi Store</option>
             <option value="mega">Mega Store</option>
           </select>
-          <button className="btn" onClick={generate}>Generate Code (expires in 30 days)</button>
+          <label style={{ margin: 0 }}>Valid for</label>
+          <input type="number" min="1" max="365" value={expiresInDays} onChange={(e) => setExpiresInDays(e.target.value)}
+            style={{ width: 80 }} aria-label="Days until the code expires" />
+          <span className="muted">days</span>
+          <button className="btn" onClick={generate}>Generate Code</button>
         </div>
       </div>
 
       <div className="card">
         <h3 style={{ marginBottom: 12 }}>All Access Codes</h3>
         <table>
-          <thead><tr><th>Code</th><th>Intended Tier</th><th>Status</th><th>Used By</th><th>Expires</th><th></th></tr></thead>
+          <thead><tr><th>Code</th><th>Intended Tier</th><th>Status</th><th>Store</th><th>Expires</th><th></th></tr></thead>
           <tbody>
             {codes.map((c) => (
               <tr key={c.id}>

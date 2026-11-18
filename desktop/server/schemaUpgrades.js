@@ -109,6 +109,20 @@ function applySchemaUpgrades(db) {
     created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now'))
   )`);
   db.exec('CREATE INDEX IF NOT EXISTS idx_loyalty_points_customer ON loyalty_points(store_customer_id, created_at)');
+  // Per-store access codes (Manage Stores → Connect). Backfill one for every store that has none.
+  ensureColumn(db, 'access_codes', 'issued_for_store', 'TEXT REFERENCES stores(id) ON DELETE CASCADE');
+  {
+    const { generateAccessCode } = require('./utils/codes');
+    const missing = db.prepare(`SELECT id, store_tier, subscription_status FROM stores s
+      WHERE NOT EXISTS (SELECT 1 FROM access_codes a WHERE a.issued_for_store = s.id OR a.used_by_store = s.id)`).all();
+    const ins = db.prepare(`INSERT INTO access_codes (id, code, intended_tier, status, used_by_store, issued_for_store, expires_at)
+      VALUES (?,?,?,?,?,?,?)`);
+    for (const s of missing) {
+      const used = s.subscription_status !== 'pending';
+      ins.run(require('crypto').randomUUID(), generateAccessCode(), s.store_tier, used ? 'used' : 'active',
+        used ? s.id : null, s.id, new Date(Date.now() + 30 * 86400000).toISOString());
+    }
+  }
 }
 
 module.exports = { applySchemaUpgrades, ensureColumn };
