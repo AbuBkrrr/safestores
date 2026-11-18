@@ -302,6 +302,10 @@ describe('Guaranteed credit', () => {
     expect(accts.body[0]).toMatchObject({ customer_name: 'Ada', guarantor_name: 'Unity Cooperative', member_ref: 'COOP-123' });
     const price = (await request().get(`/api/marketplace/${store.id}/products`)).body.find((p) => p.id === product.id).price;
     const limit = Number(price) * 2; // room for exactly two units
+    // KYC first: sealed guarantor letter + verification with the guarantor.
+    expect((await request().patch(`/api/stores/${store.id}/credit/accounts/${apply.body.id}`).set('Authorization', S).send({ status: 'approved', creditLimit: limit })).body.code).toBe('KYC_INCOMPLETE');
+    await request().post(`/api/marketplace/${store.id}/credit/letter`).set('Authorization', C).attach('letter', Buffer.from('%PDF-1.4 sealed'), { filename: 'letter.pdf', contentType: 'application/pdf' });
+    await request().patch(`/api/stores/${store.id}/credit/accounts/${apply.body.id}/verify`).set('Authorization', S).send({ method: 'phone', contact: 'Unity Coop secretary' });
     expect((await request().patch(`/api/stores/${store.id}/credit/accounts/${apply.body.id}`).set('Authorization', S).send({ status: 'approved', creditLimit: limit })).status).toBe(200);
 
     const mine = await request().get(`/api/marketplace/${store.id}/credit`).set('Authorization', C);
@@ -328,3 +332,41 @@ describe('Guaranteed credit', () => {
     expect(Number(after.body.account.available)).toBeCloseTo(limit); // settled → limit free again
   });
 });
+
+describe('Credit KYC', () => {
+  it('needs the sealed letter, the documentation fee and verification with the guarantor before approval', async () => {
+    const { store, token } = await createActiveStoreWithAdmin();
+    await enableMarketplace(store.id);
+    const S = `Bearer ${token}`;
+    expect((await request().patch(`/api/stores/${store.id}/credit/settings`).set('Authorization', S).send({ processingFee: 2500 })).status).toBe(200);
+    const g = await request().post(`/api/stores/${store.id}/credit/guarantors`).set('Authorization', S).send({ name: 'First Bank', kind: 'bank', email: 'hr@firstbank.example' });
+    const signup = await request().post(`/api/marketplace/${store.id}/signup`).send({ name: 'Bayo', email: 'bayo@c.com', password: 'Password123!' });
+    const C = `Bearer ${signup.body.token}`;
+    const apply = await request().post(`/api/marketplace/${store.id}/credit/apply`).set('Authorization', C).send({ guarantorId: g.body.id, memberRef: 'FB-77', requestedLimit: 100000 });
+    const A = `/api/stores/${store.id}/credit/accounts/${apply.body.id}`;
+
+    const mine = await request().get(`/api/marketplace/${store.id}/credit`).set('Authorization', C);
+    expect(mine.body.processingFee).toBe(2500);
+    expect(mine.body.account).toMatchObject({ customer_name: 'Bayo', letter_uploaded_at: null });
+
+    let r = await request().patch(A).set('Authorization', S).send({ status: 'approved', creditLimit: 50000 });
+    expect(r.body.missing).toHaveLength(3);
+    // Can't verify before the letter exists.
+    expect((await request().patch(`${A}/verify`).set('Authorization', S).send({ method: 'email', contact: 'hr@firstbank.example' })).status).toBe(400);
+    // Wrong file type refused; a PDF is accepted.
+    expect((await request().post(`/api/marketplace/${store.id}/credit/letter`).set('Authorization', C).attach('letter', Buffer.from('x'), { filename: 'a.txt', contentType: 'text/plain' })).status).toBe(400);
+    expect((await request().post(`/api/marketplace/${store.id}/credit/letter`).set('Authorization', C).attach('letter', Buffer.from('%PDF-1.4 sealed'), { filename: 'letter.pdf', contentType: 'application/pdf' })).status).toBe(201);
+    // Store downloads it privately; nobody else can.
+    const doc = await request().get(`${A}/letter`).set('Authorization', S);
+    expect(doc.status).toBe(200);
+    expect(doc.headers['content-type']).toMatch(/pdf/);
+    expect((await request().get(`${A}/letter`).set('Authorization', C)).status).toBe(403);
+
+    expect((await request().patch(`${A}/verify`).set('Authorization', S).send({ method: 'email', contact: 'hr@firstbank.example', note: 'HR confirmed by email' })).status).toBe(200);
+    r = await request().patch(A).set('Authorization', S).send({ status: 'approved', creditLimit: 50000 });
+    expect(r.body.missing).toEqual(['the documentation fee']);
+    expect((await request().patch(`${A}/fee`).set('Authorization', S).send({ amount: 2500, reference: 'TRF-55120' })).status).toBe(200);
+    expect((await request().patch(A).set('Authorization', S).send({ status: 'approved', creditLimit: 50000 })).status).toBe(200);
+  });
+});
+

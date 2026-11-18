@@ -152,6 +152,10 @@ router.post('/partner-invites', requireRole('admin', 'manager'), partnerCtrl.cre
 router.get('/couriers', requireRole('admin', 'manager', 'marketplace_manager'), partnerCtrl.listCouriers);
 router.patch('/couriers/:courierId', requireRole('admin', 'manager'), partnerCtrl.setCourierActive);
 router.patch('/marketplace/orders/:orderId/courier', requireRole('admin', 'manager', 'marketplace_manager'), partnerCtrl.assignCourier);
+router.get('/credit/accounts/:accountId/letter', requireRole('admin', 'manager'), creditCtrl.getLetter);
+router.patch('/credit/accounts/:accountId/fee', requireRole('admin', 'manager'), creditCtrl.recordFee);
+router.patch('/credit/accounts/:accountId/verify', requireRole('admin', 'manager'), creditCtrl.verifyWithGuarantor);
+router.patch('/credit/settings', requireRole('admin', 'manager'), creditCtrl.updateCreditSettings);
 router.get('/credit/guarantors', requireRole(...CREDIT_ROLES), creditCtrl.listGuarantors);
 router.post('/credit/guarantors', requireRole('admin', 'manager'), creditCtrl.saveGuarantor);
 router.patch('/credit/guarantors/:guarantorId', requireRole('admin', 'manager'), creditCtrl.saveGuarantor);

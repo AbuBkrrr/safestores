@@ -29,5 +29,13 @@ router.get('/:storeId/my-orders', requireAuth, requireRole('customer'), ctrl.lis
 const creditCtrl = require('../controllers/creditController');
 router.get('/:storeId/credit', optionalAuth, creditCtrl.myCredit);
 router.post('/:storeId/credit/apply', requireAuth, requireRole('customer'), creditCtrl.applyForCredit);
+// Signed and sealed guarantor letter: image or PDF, kept privately in the database.
+const letterUpload = require('multer')({
+  storage: require('multer').memoryStorage(), limits: { fileSize: 5 * 1024 * 1024, files: 1 },
+  fileFilter: (req, file, cb) => (/^(image\/(jpeg|png|webp)|application\/pdf)$/.test(file.mimetype) ? cb(null, true) : cb(new Error('The letter must be a JPG, PNG, WEBP or PDF'))),
+}).single('letter');
+router.post('/:storeId/credit/letter', requireAuth, requireRole('customer'),
+  (req, res, next) => letterUpload(req, res, (err) => (err ? res.status(400).json({ error: err.code === 'LIMIT_FILE_SIZE' ? 'The letter must be 5 MB or smaller' : err.message }) : next())),
+  creditCtrl.uploadLetter);
 
 module.exports = router;

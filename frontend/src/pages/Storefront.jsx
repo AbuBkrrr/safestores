@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { formatCurrency as format } from '../utils/currency.js';
 import { shopThemeVars, useShopTheme } from '../utils/shopTheme.js';
+import CreditKycSteps from '../components/CreditKycSteps.jsx';
 import { LanguageSwitcher } from '../components/Layout.jsx';
 import { BrandFooter } from '../components/ui.jsx';
 import PasswordInput from '../components/PasswordInput.jsx';
@@ -338,7 +339,8 @@ export default function Storefront() {
               {credit.guarantors.length > 0 && !creditOk && (
                 customer
                   ? (credit.account?.status === 'pending'
-                    ? <p className="muted" style={{ fontSize: 12 }}>⏳ {t('storefrontPage.creditPending', { guarantor: credit.account.guarantor_name })}</p>
+                    ? <><p className="muted" style={{ fontSize: 12 }}>⏳ {t('storefrontPage.creditPending', { guarantor: credit.account.guarantor_name })}</p>
+                      <CreditKycSteps storeId={storeId} token={customer.token} credit={credit} formatMoney={formatCurrency} onChange={loadCredit} /></>
                     : !applyForm && <button type="button" className="btn small secondary" onClick={() => setApplyForm({ guarantorId: credit.guarantors[0].id, memberRef: '', requestedLimit: '' })}>🤝 {t('storefrontPage.applyCredit')}</button>)
                   : <p className="muted" style={{ fontSize: 12 }}>🤝 {t('storefrontPage.creditLogin')}</p>
               )}
