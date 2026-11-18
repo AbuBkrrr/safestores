@@ -70,11 +70,11 @@ export default function StockArrival() {
               return (
                 <div className="form-group">
                   <label htmlFor="arr-packs">{t('stockArrivalPage.packsReceived', { unit: sel.pack_unit || t('products.pack'), size: sel.pack_size })}</label>
-                  <input id="arr-packs" type="number" min="0" onChange={(e) => setForm({ ...form, quantity: String((Number(e.target.value) || 0) * sel.pack_size) })} />
+                  <input id="arr-packs" type="number" step="any" min="0" onChange={(e) => setForm({ ...form, quantity: String((Number(e.target.value) || 0) * sel.pack_size) })} />
                 </div>
               );
             })()}
-            <div className="form-group"><label>{t('stockArrivalPage.quantityReceived')}</label><input type="number" min="1" value={form.quantity} onChange={update('quantity')} required /></div>
+            <div className="form-group"><label>{t('stockArrivalPage.quantityReceived')}</label><input type="number" step="any" min="1" value={form.quantity} onChange={update('quantity')} required /></div>
             <div className="form-group"><label>{t('stockArrivalPage.invoiceNumber')}</label><input value={form.invoiceNumber} onChange={update('invoiceNumber')} /></div>
             <div className="form-group"><label htmlFor="arr-exp">{t('stockArrivalPage.expiryDate')} *</label>
               <input id="arr-exp" type="date" value={noExpiry ? '' : form.expiryDate} onChange={update('expiryDate')} required={!noExpiry} disabled={noExpiry} />

@@ -71,7 +71,7 @@ export default function Movements() {
             </div>
             <div className="form-group">
               <label>{t('movementsPage.quantity')} {form.type === 'adjustment' && t('movementsPage.quantityAdjustmentHint')}</label>
-              <input type="number" value={form.quantity} onChange={update('quantity')} required />
+              <input type="number" step="any" value={form.quantity} onChange={update('quantity')} required />
             </div>
             <div className="form-group"><label>{t('movementsPage.note')}</label><input value={form.note} onChange={update('note')} /></div>
           </div>

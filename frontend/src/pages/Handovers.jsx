@@ -127,7 +127,7 @@ export default function Handovers() {
                   <option value="">{t('handover.chooseProduct')}</option>
                   {products.map((p) => <option key={p.id} value={p.id}>{p.name} — {t('handover.inStoreRoom', { n: p.backroom_qty })}</option>)}
                 </select>
-                <input type="number" min="1" aria-label={t('handover.qty')} placeholder={t('handover.qty')} value={l.quantity} onChange={(e) => setLine(i, 'quantity', e.target.value)} style={{ width: 110 }} />
+                <input type="number" step="any" min="1" aria-label={t('handover.qty')} placeholder={t('handover.qty')} value={l.quantity} onChange={(e) => setLine(i, 'quantity', e.target.value)} style={{ width: 110 }} />
                 {lines.length > 1 && <button type="button" className="btn small secondary" onClick={() => setLines(lines.filter((_, j) => j !== i))}>✕</button>}
               </div>
             ))}
@@ -165,7 +165,7 @@ export default function Handovers() {
               <thead><tr><th>{t('handover.product')}</th><th style={{ textAlign: 'right' }}>{t('handover.sent')}</th>{canReceive && <th>{t('handover.receivedCol')}</th>}</tr></thead>
               <tbody>{h.items.map((i) => (
                 <tr key={i.id}><td>{i.name}</td><td style={{ textAlign: 'right', fontWeight: 700 }}>{i.qty_issued}</td>
-                  {canReceive && <td><input type="number" min="0" max={i.qty_issued} aria-label={t('handover.receivedOf', { name: i.name })} value={got[i.id] ?? i.qty_issued} onChange={(e) => setGot({ ...got, [i.id]: e.target.value })} style={{ width: 90 }} /></td>}
+                  {canReceive && <td><input type="number" step="any" min="0" max={i.qty_issued} aria-label={t('handover.receivedOf', { name: i.name })} value={got[i.id] ?? i.qty_issued} onChange={(e) => setGot({ ...got, [i.id]: e.target.value })} style={{ width: 90 }} /></td>}
                 </tr>
               ))}</tbody>
             </table>
@@ -200,8 +200,8 @@ export default function Handovers() {
                       ? <span style={{ fontSize: 12 }}>✅ {t('handover.returnDone', { ok: r.qty_resellable, bad: r.qty_damaged, name: r.received_by_name || '—' })}</span>
                       : canTakeReturns && (
                         <span className="flex" style={{ gap: 4, flexWrap: 'wrap', alignItems: 'center' }}>
-                          <label style={{ fontSize: 12 }}>{t('handover.resellable')} <input type="number" min="0" max={r.quantity} value={sp.resellable} onChange={(e) => setSplit({ ...split, [r.id]: { ...sp, resellable: e.target.value, damaged: Math.max(0, r.quantity - (parseInt(e.target.value, 10) || 0)) } })} style={{ width: 64 }} /></label>
-                          <label style={{ fontSize: 12 }}>{t('handover.damaged')} <input type="number" min="0" max={r.quantity} value={sp.damaged} onChange={(e) => setSplit({ ...split, [r.id]: { ...sp, damaged: e.target.value } })} style={{ width: 64 }} /></label>
+                          <label style={{ fontSize: 12 }}>{t('handover.resellable')} <input type="number" step="any" min="0" max={r.quantity} value={sp.resellable} onChange={(e) => setSplit({ ...split, [r.id]: { ...sp, resellable: e.target.value, damaged: Math.max(0, r.quantity - (parseInt(e.target.value, 10) || 0)) } })} style={{ width: 64 }} /></label>
+                          <label style={{ fontSize: 12 }}>{t('handover.damaged')} <input type="number" step="any" min="0" max={r.quantity} value={sp.damaged} onChange={(e) => setSplit({ ...split, [r.id]: { ...sp, damaged: e.target.value } })} style={{ width: 64 }} /></label>
                           <button className="btn small" onClick={() => run(() => api.post(`/stores/${user.storeId}/returns/${r.id}/receive`, { resellable: Number(sp.resellable), damaged: Number(sp.damaged), note: sp.note }), 'handover.returnReceived')}>{t('handover.receiveReturn')}</button>
                         </span>
                       )}</td>

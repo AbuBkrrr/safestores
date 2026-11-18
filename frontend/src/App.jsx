@@ -61,6 +61,9 @@ const CycleCounting = lazy(() => import('./pages/CycleCounting.jsx'));
 const AuditorSignup = lazy(() => import('./pages/AuditorSignup.jsx'));
 const AuditorLogin = lazy(() => import('./pages/AuditorLogin.jsx'));
 const AuditorDashboard = lazy(() => import('./pages/AuditorDashboard.jsx'));
+const Production = lazy(() => import('./pages/Production.jsx'));
+const Waste = lazy(() => import('./pages/Waste.jsx'));
+const Jobs = lazy(() => import('./pages/Jobs.jsx'));
 const Handovers = lazy(() => import('./pages/Handovers.jsx'));
 const ExitCheck = lazy(() => import('./pages/ExitCheck.jsx'));
 const PartnerLogin = lazy(() => import('./pages/PartnerLogin.jsx'));
@@ -221,6 +224,9 @@ export default function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/exit-check" element={<ExitCheck />} />
         <Route path="/handovers" element={<Handovers />} />
+        <Route path="/production" element={<Production />} />
+        <Route path="/waste" element={<Waste />} />
+        <Route path="/jobs" element={<Jobs />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/products" element={<Products />} />
         <Route path="/products/import" element={<ImportProducts />} />

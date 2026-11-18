@@ -1,22 +1,39 @@
 import { useEffect, useState } from 'react';
 import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
+import { toolsFor } from './businessTypes.js';
 
-// The store's size (mini / midi / mega). Comes with the login; older sessions
-// fetch it once from store settings.
-let cached = { storeId: null, tier: null };
+// The store's size (mini / midi / mega) and business type. Both come with the
+// login; older sessions fetch them once from store settings.
+let cached = { storeId: null, tier: null, businessType: null };
+const listeners = new Set();
+
+/** Call after the admin changes the business type in Store Settings. */
+export function setCachedProfile(storeId, patch) {
+  cached = { ...cached, storeId, ...patch };
+  listeners.forEach((fn) => fn(cached));
+}
+
+export function useStoreProfile() {
+  const { user } = useAuth();
+  const [p, setP] = useState(cached.storeId === user?.storeId ? cached : {});
+  useEffect(() => {
+    const fn = (c) => setP({ ...c });
+    listeners.add(fn);
+    if (user?.storeId && !(cached.storeId === user.storeId && cached.businessType)) {
+      api.get(`/stores/${user.storeId}/settings`).then((r) => {
+        setCachedProfile(user.storeId, { tier: r.data.store_tier || null, businessType: r.data.business_type || 'general' });
+      }).catch(() => {});
+    }
+    return () => listeners.delete(fn);
+  }, [user?.storeId]);
+  const tier = (p.storeId === user?.storeId && p.tier) || user?.storeTier || null;
+  const businessType = (p.storeId === user?.storeId && p.businessType) || user?.businessType || 'general';
+  return { tier, businessType, tools: toolsFor(businessType) };
+}
 
 export function useStoreTier() {
-  const { user } = useAuth();
-  const [tier, setTier] = useState(user?.storeTier || (cached.storeId === user?.storeId ? cached.tier : null));
-  useEffect(() => {
-    if (!user?.storeId || user.storeTier || (cached.storeId === user.storeId && cached.tier)) return;
-    api.get(`/stores/${user.storeId}/settings`).then((r) => {
-      cached = { storeId: user.storeId, tier: r.data.store_tier || null };
-      setTier(cached.tier);
-    }).catch(() => {});
-  }, [user?.storeId, user?.storeTier]);
-  return user?.storeTier || tier;
+  return useStoreProfile().tier;
 }
 
 /** Pages a Mini store (owner + 1–2 helpers) doesn't need. */

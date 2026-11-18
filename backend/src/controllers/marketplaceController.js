@@ -63,7 +63,7 @@ async function searchProducts(req, res) {
   if (storeId) { params.push(storeId); conditions.push(`s.id = $${params.length}`); }
 
   const { rows } = await db.query(
-    `SELECT p.id, p.name, p.brand, p.category, p.unit, p.location, p.image_url,
+    `SELECT p.id, p.name, p.brand, p.category, p.unit, p.sold_by, p.location, p.image_url,
             ROUND(p.cost_price * p.price_multiplier, 2) AS price,
             (p.shelf_qty + p.backroom_qty) > 0 AS in_stock,
             s.id AS store_id, s.name AS store_name, s.city AS store_city

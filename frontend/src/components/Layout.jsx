@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useState } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { useStoreTier, MINI_HIDDEN } from '../utils/useStoreTier.js';
+import { useStoreProfile, MINI_HIDDEN } from '../utils/useStoreTier.js';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useSocket } from '../context/SocketContext.jsx';
@@ -22,6 +22,9 @@ const storeNav = [
   { group: 'overview', to: '/insights', navKey: 'insights', icon: '💡', roles: ['admin', 'manager'] },
   { group: 'storeOperations', to: '/products', navKey: 'products', icon: '📦' },
   { group: 'storeOperations', to: '/stock-arrival', navKey: 'stockArrival', icon: '🚚', roles: ['admin', 'manager', 'staff', 'store_manager'] },
+  { group: 'storeOperations', to: '/jobs', navKey: 'jobs', icon: '🧵', tool: ['jobs'], roles: ['admin', 'manager', 'staff', 'cashier', 'checkout'] },
+  { group: 'storeOperations', to: '/production', navKey: 'production', icon: '🏭', tool: ['production', 'breakdown'], roles: ['admin', 'manager', 'staff', 'store_manager'] },
+  { group: 'storeOperations', to: '/waste', navKey: 'waste', icon: '🥬', tool: ['fresh'], roles: ['admin', 'manager', 'staff', 'store_manager', 'shelf_manager'] },
   { group: 'storeOperations', to: '/handovers', navKey: 'handovers', icon: '🔀', roles: ['admin', 'manager', 'staff', 'store_manager', 'shelf_manager'] },
   { group: 'storeOperations', to: '/movements', navKey: 'movements', icon: '🔁', roles: ['admin', 'manager', 'staff'] },
   { group: 'storeOperations', to: '/labels', navKey: 'labels', icon: '🏷️', roles: ['admin', 'manager', 'staff', 'shelf_manager'] },
@@ -135,7 +138,7 @@ export function DisplayPrefs() {
 export default function Layout() {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
-  const storeTier = useStoreTier();
+  const { tier: storeTier, tools: storeTools } = useStoreProfile();
   const { connected, peers } = useSocket();
   const { isOnline, queuedCount } = useOffline();
   const navigate = useNavigate();
@@ -146,7 +149,7 @@ export default function Layout() {
   const nav = (isSuperAdmin
     ? (isDesktop ? superNav : [...superNav, ...superMarketplaceNav])
     : (isDesktop ? storeNav : [...storeNav, ...marketplaceNav])
-  ).filter((item) => (!item.roles || item.roles.includes(user?.role)) && !(storeTier === 'mini' && MINI_HIDDEN.includes(item.to)));
+  ).filter((item) => (!item.roles || item.roles.includes(user?.role)) && !(storeTier === 'mini' && MINI_HIDDEN.includes(item.to)) && (!item.tool || item.tool.some((x) => storeTools.includes(x))));
 
   const groups = [];
   for (const item of nav) {

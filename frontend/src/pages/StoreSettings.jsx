@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
+import { BUSINESS_TYPES } from '../utils/businessTypes.js';
+import { setCachedProfile } from '../utils/useStoreTier.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useCurrency } from '../context/CurrencyContext.jsx';
 import { Alert, Toast } from '../components/ui.jsx';
@@ -44,11 +46,12 @@ export default function StoreSettings() {
         taxRatePct: Number(s.tax_rate_pct) || 0, taxInclusive: !!s.tax_inclusive, taxLabel: s.tax_label, taxNumber: s.tax_number || '',
         phone: s.phone || '', address: s.address || '', city: s.city || '',
         receiptHeader: s.receipt_header || '', receiptFooter: s.receipt_footer || '',
-        maxCashierDiscountPct: Number(s.max_cashier_discount_pct) || 0, requireShift: !!s.require_shift,
+        maxCashierDiscountPct: Number(s.max_cashier_discount_pct) || 0, requireShift: !!s.require_shift, businessType: s.business_type || 'general',
         ...(s.daily_summary_enabled !== undefined ? { dailySummaryEnabled: s.daily_summary_enabled !== false } : {}),
         pointsPer100: Number(s.points_per_100) || 0, pointValue: Number(s.point_value) || 0, pointsExpiryMonths: Number(s.points_expiry_months) || 0,
       });
       setS(data);
+      setCachedProfile(user.storeId, { tier: data.store_tier, businessType: data.business_type });
       refreshCurrency();
       if (data.name !== user.storeName) updateUser({ storeName: data.name });
       showToast(t('settingsPage.saved'), 'success');
@@ -67,6 +70,11 @@ export default function StoreSettings() {
         <div className="card">
           <h3>🏪 {t('settingsPage.store')}</h3>
           <div className="form-group"><label htmlFor="st-name">{t('settingsPage.storeName')}</label><input id="st-name" value={s.name || ''} onChange={set('name')} required /></div>
+          <div className="form-group"><label htmlFor="st-btype">{t('businessType.label')}</label>
+            <select id="st-btype" value={s.business_type || 'general'} onChange={set('business_type')}>
+              {Object.entries(BUSINESS_TYPES).map(([k, v]) => <option key={k} value={k}>{v.icon} {t(`businessType.t_${k}`)}</option>)}
+            </select>
+            <span className="help-text">{t(`businessType.d_${s.business_type || 'general'}`)}</span></div>
           <div className="form-group"><label htmlFor="st-phone">{t('settingsPage.phone')}</label><input id="st-phone" value={s.phone || ''} onChange={set('phone')} inputMode="tel" /></div>
           <div className="form-group"><label htmlFor="st-addr">{t('settingsPage.address')}</label><input id="st-addr" value={s.address || ''} onChange={set('address')} /></div>
           <div className="form-group"><label htmlFor="st-city">{t('settingsPage.city')}</label><input id="st-city" value={s.city || ''} onChange={set('city')} /></div>

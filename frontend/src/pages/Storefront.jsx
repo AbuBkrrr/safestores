@@ -113,10 +113,12 @@ export default function Storefront() {
     setCustomer(null);
   };
 
-  const addToCart = (productId) => setCart((c) => ({ ...c, [productId]: (c[productId] || 0) + 1 }));
+  const stepFor = (productId) => (['weight', 'volume', 'length'].includes(products.find((x) => x.id === productId)?.sold_by) ? 0.5 : 1);
+  const addToCart = (productId) => setCart((c) => ({ ...c, [productId]: Math.round(((c[productId] || 0) + stepFor(productId)) * 1000) / 1000 }));
   const removeFromCart = (productId) => setCart((c) => {
     const next = { ...c };
-    if (next[productId] > 1) next[productId] -= 1; else delete next[productId];
+    const st = stepFor(productId);
+    if (next[productId] > st) next[productId] = Math.round((next[productId] - st) * 1000) / 1000; else delete next[productId];
     return next;
   });
 
@@ -262,14 +264,14 @@ export default function Storefront() {
                 <div className="pt-name">{p.name}</div>
                 {p.category && <div className="muted pt-cat">{p.category}</div>}
                 <div className="pt-foot">
-                  <strong>{formatCurrency(p.price)}</strong>
+                  <strong>{formatCurrency(p.price)}{p.sold_by && p.sold_by !== 'unit' ? <span className="muted" style={{ fontWeight: 400 }}>/{p.unit}</span> : null}</strong>
                   {!p.in_stock
                     ? <span className="muted">{t('storefrontPage.outOfStockTag')}</span>
                     : cart[p.id]
                       ? (
                         <span className="pt-step">
                           <button type="button" aria-label={`${t('storefrontPage.remove')} ${p.name}`} onClick={() => removeFromCart(p.id)}>−</button>
-                          <span aria-live="polite">{cart[p.id]}</span>
+                          <span aria-live="polite">{cart[p.id]}{p.sold_by && p.sold_by !== 'unit' ? ` ${p.unit}` : ''}</span>
                           <button type="button" aria-label={`${t('storefrontPage.add')} ${p.name}`} onClick={() => addToCart(p.id)}>+</button>
                         </span>
                       )

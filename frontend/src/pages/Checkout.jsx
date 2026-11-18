@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { BrowserMultiFormatReader } from '@zxing/browser';
 import { useTranslation } from 'react-i18next';
+import { isFractional, fmtQty } from '../utils/businessTypes.js';
 import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useRealtimeEvents } from '../context/SocketContext.jsx';
@@ -91,11 +92,14 @@ export default function Checkout() {
 
   const pickUp = (orderId) => refreshOrder(orderId).then(() => setReceipt(null));
 
-  const addProduct = async (productId, addedVia = 'manual_search') => {
+  const [weigh, setWeigh] = useState(null); // { product, addedVia, qty }
+  const addProduct = async (productId, addedVia = 'manual_search', qty) => {
     if (!order) return;
+    const prod = products.find((x) => x.id === productId);
+    if (qty === undefined && isFractional(prod)) { setWeigh({ product: prod, addedVia, qty: '' }); return; }
     setError('');
     try {
-      const { data } = await api.post(`/stores/${user.storeId}/orders/${order.id}/items`, { productId, quantity: 1, addedVia });
+      const { data } = await api.post(`/stores/${user.storeId}/orders/${order.id}/items`, { productId, quantity: qty ?? 1, addedVia });
       setOrder(data.order);
       refreshOrder(order.id);
       setSearch('');
@@ -399,7 +403,7 @@ export default function Checkout() {
           {(!order.items || order.items.length === 0) && <p className="muted">{t('checkout.noItemsYet')}</p>}
           {order.items?.map((item) => (
             <div key={item.id} className="flex" style={{ justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid #eee' }}>
-              <span>{item.product_name} × {item.quantity}</span>
+              <span>{item.product_name} × {fmtQty(item.quantity, products.find((x) => x.id === item.product_id) || {})}</span>
               <span>{formatCurrency(item.line_total)} <button className="btn danger small" aria-label={t('checkout.removeItem')} onClick={() => removeItem(item.id)}>✕</button></span>
             </div>
           ))}
@@ -544,6 +548,18 @@ export default function Checkout() {
         </Modal>
       )}
       {shiftDialog}
+      {weigh && (
+        <div className="modal-overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) setWeigh(null); }}>
+          <form className="modal-card" onSubmit={(e) => { e.preventDefault(); const q = Number(weigh.qty); if (q > 0) { addProduct(weigh.product.id, weigh.addedVia, q); setWeigh(null); } }}>
+            <h3>⚖️ {weigh.product.name}</h3>
+            <p className="muted">{t('checkout.pricePer', { price: formatCurrency(Number(weigh.product.cost_price) * Number(weigh.product.price_multiplier)), unit: weigh.product.unit })}</p>
+            <div className="form-group"><label htmlFor="weigh-qty">{t('checkout.enterAmount', { unit: weigh.product.unit })}</label>
+              <input id="weigh-qty" autoFocus type="number" step="0.001" min="0.001" value={weigh.qty} onChange={(e) => setWeigh({ ...weigh, qty: e.target.value })} /></div>
+            <p><strong>{t('checkout.lineTotal')}: {formatCurrency((Number(weigh.qty) || 0) * Number(weigh.product.cost_price) * Number(weigh.product.price_multiplier))}</strong></p>
+            <div className="modal-actions"><button className="btn" type="submit" disabled={!(Number(weigh.qty) > 0)}>{t('checkout.addToOrder')}</button><button type="button" className="btn secondary" onClick={() => setWeigh(null)}>{t('common.cancel', { defaultValue: 'Cancel' })}</button></div>
+          </form>
+        </div>
+      )}
       <Toast {...(toast || {})} />
     </div>
   );
