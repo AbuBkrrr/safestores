@@ -1911,5 +1911,13 @@
     "uploaded": "Image uploaded. Save to keep other changes.",
     "saved": "Shop look saved",
     "failed": "Could not save. Try again."
+  },
+  "inviteShare": {
+    "title": "Share invite — {{name}}",
+    "qrAlt": "Invite QR code",
+    "scan": "Scan with the phone camera to open the invite",
+    "download": "Download card",
+    "more": "Share card",
+    "qrShare": "QR & share"
   }
 }

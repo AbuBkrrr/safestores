@@ -4,6 +4,7 @@ import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { Alert, Badge, Toast } from '../components/ui.jsx';
 import { useToast } from '../components/useToast.js';
+import InviteShareModal from '../components/InviteShareModal.jsx';
 
 const APP_BASE_URL = window.location.origin;
 
@@ -23,15 +24,17 @@ export default function Invites() {
   const [error, setError] = useState('');
   const [toast, showToast] = useToast();
 
+  const [sharing, setSharing] = useState(null); // invite whose share card is open
   const load = () => api.get(`/stores/${user.storeId}/invites`).then((r) => setInvites(r.data));
   useEffect(() => { load(); }, [user.storeId]);
 
   const createSingle = async (e) => {
     e.preventDefault(); setError('');
     try {
-      await api.post(`/stores/${user.storeId}/invites`, single);
+      const { data } = await api.post(`/stores/${user.storeId}/invites`, single);
       setSingle({ name: '', email: '', role: 'staff' });
       showToast(t('invitesPage.inviteCreated'), 'success');
+      if (data?.code) setSharing(data); // straight to QR / WhatsApp / email / download
       load();
     } catch (err) { setError(err.response?.data?.error || t('invitesPage.createInviteFailed')); }
   };
@@ -137,7 +140,8 @@ export default function Invites() {
                 <td>
                   {i.status === 'pending' && (
                     <div className="flex">
-                      <button className="btn small" onClick={() => share(i, 'whatsapp')}>{t('invitesPage.whatsapp', { defaultValue: 'WhatsApp' })}</button>
+                      <button className="btn small" onClick={() => setSharing(i)}>📱 {t('inviteShare.qrShare')}</button>
+                      <button className="btn small secondary" onClick={() => share(i, 'whatsapp')}>{t('invitesPage.whatsapp', { defaultValue: 'WhatsApp' })}</button>
                       <button className="btn small secondary" onClick={() => share(i, 'email')}>{t('invitesPage.emailAction')}</button>
                       <button className="btn small secondary" onClick={() => share(i, 'sms')}>{t('invitesPage.smsAction')}</button>
                       <button className="btn small secondary" onClick={() => share(i, 'copy')}>{t('invitesPage.copyAction')}</button>
@@ -150,6 +154,10 @@ export default function Invites() {
           </tbody>
         </table>
       </div>
+      {sharing && (
+        <InviteShareModal invite={sharing} link={inviteLink(sharing.code)} storeName={user.storeName || 'Our store'}
+          onClose={() => setSharing(null)} onShare={(ch) => share(sharing, ch)} />
+      )}
       <Toast {...(toast || {})} />
     </div>
   );
