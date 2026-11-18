@@ -46,8 +46,16 @@ export default function Storefront() {
   const canPayOnDelivery = store ? store.payments?.payOnDelivery !== false : true;
   // payMethod: 'online' (pay now) or 'cash' (pay when delivered / collected).
   const [receive, setReceive] = useState('delivery');
-  const payChoice = payMethod || (canPayOnline ? 'online' : 'cash');
-  const method = payChoice === 'online' ? 'online' : receive === 'pickup' ? 'on_pickup' : 'on_delivery';
+  // Guaranteed credit (bank, cooperative, PFA, employer…) — see creditController.
+  const [credit, setCredit] = useState({ guarantors: [], account: null });
+  const [applyForm, setApplyForm] = useState(null); // { guarantorId, memberRef, requestedLimit } while open
+  const creditOk = credit.account?.status === 'approved';
+  const payOptions = [canPayOnline && 'online', canPayOnDelivery && 'cash', creditOk && 'credit'].filter(Boolean);
+  const payChoice = payOptions.includes(payMethod) ? payMethod : payOptions[0];
+  const method = payChoice === 'online' || payChoice === 'credit' ? payChoice : receive === 'pickup' ? 'on_pickup' : 'on_delivery';
+  const payLabel = (o) => (o === 'online' ? `💳 ${t('storefrontPage.payNowOnline')}`
+    : o === 'credit' ? `🤝 ${t('storefrontPage.buyOnCredit', { available: format(credit.account?.available || 0, currency) })}`
+      : `💵 ${receive === 'pickup' ? t('storefrontPage.payOnPickup') : t('storefrontPage.payOnDelivery')}`);
   const formatCurrency = (n) => format(n, currency);
 
   useEffect(() => {
@@ -62,6 +70,17 @@ export default function Storefront() {
     if (!meta) { meta = document.createElement('meta'); meta.name = 'description'; document.head.appendChild(meta); }
     meta.content = t('storefrontPage.metaDescription', { name: store.name, city: store.city || '' });
   }, [store, t]);
+
+  const loadCredit = () => client.get(`/marketplace/${storeId}/credit`, customer ? { headers: { Authorization: `Bearer ${customer.token}` } } : {})
+    .then((r) => setCredit(r.data)).catch(() => {});
+  useEffect(() => { loadCredit(); }, [customer, storeId]); // eslint-disable-line react-hooks/exhaustive-deps
+  const submitCredit = async (e) => {
+    e.preventDefault(); setError('');
+    try {
+      await client.post(`/marketplace/${storeId}/credit/apply`, applyForm, { headers: { Authorization: `Bearer ${customer.token}` } });
+      setApplyForm(null); setMessage(t('storefrontPage.creditApplied')); loadCredit();
+    } catch (err) { setError(err.response?.data?.error || t('storefrontPage.orderFailed')); }
+  };
 
   useEffect(() => {
     if (!customer) return;
@@ -145,6 +164,7 @@ export default function Storefront() {
       const { data } = await client.post(`/marketplace/${storeId}/orders`, body, config);
       setCart({});
       setPlaced(data); // tracking link stays available even if starting payment fails
+      if (method === 'credit') loadCredit();
       if (method === 'online') {
         // Paystack checkout: the money goes straight to this store's bank.
         const pay = await client.post(`/marketplace/orders/${data.tracking_token}/pay`, { email: customer?.email || guestEmail });
@@ -289,18 +309,36 @@ export default function Storefront() {
                   <div className="form-group"><input aria-label={t('storefrontPage.phoneOptional')} placeholder={t('storefrontPage.phoneOptional')} value={guestPhone} onChange={(e) => setGuestPhone(e.target.value)} inputMode="tel" /></div>
                 </>
               )}
-              {!canPayOnline && !canPayOnDelivery ? (
+              {payOptions.length === 0 ? (
                 <div className="alert warning">{t('storefrontPage.notTakingOrders')}</div>
-              ) : canPayOnline && canPayOnDelivery ? (
+              ) : payOptions.length > 1 ? (
                 <fieldset className="pay-choice">
                   <legend>{t('storefrontPage.howToPay')}</legend>
-                  <label><input type="radio" name="pay" checked={payChoice === 'online'} onChange={() => setPayMethod('online')} /> 💳 {t('storefrontPage.payNowOnline')}</label>
-                  <label><input type="radio" name="pay" checked={payChoice === 'cash'} onChange={() => setPayMethod('cash')} /> 💵 {receive === 'pickup' ? t('storefrontPage.payOnPickup') : t('storefrontPage.payOnDelivery')}</label>
+                  {payOptions.map((o) => <label key={o}><input type="radio" name="pay" checked={payChoice === o} onChange={() => setPayMethod(o)} /> {payLabel(o)}</label>)}
                 </fieldset>
-              ) : <p className="muted">{canPayOnline ? t('storefrontPage.payOnlineOnly') : (receive === 'pickup' ? t('storefrontPage.payOnPickup') : t('storefrontPage.payOnDelivery'))}</p>}
+              ) : <p className="muted">{payLabel(payOptions[0])}</p>}
+              {credit.guarantors.length > 0 && !creditOk && (
+                customer
+                  ? (credit.account?.status === 'pending'
+                    ? <p className="muted" style={{ fontSize: 12 }}>⏳ {t('storefrontPage.creditPending', { guarantor: credit.account.guarantor_name })}</p>
+                    : !applyForm && <button type="button" className="btn small secondary" onClick={() => setApplyForm({ guarantorId: credit.guarantors[0].id, memberRef: '', requestedLimit: '' })}>🤝 {t('storefrontPage.applyCredit')}</button>)
+                  : <p className="muted" style={{ fontSize: 12 }}>🤝 {t('storefrontPage.creditLogin')}</p>
+              )}
+              {applyForm && (
+                <form onSubmit={submitCredit} className="card mt-1" style={{ padding: 12 }}>
+                  <p className="muted" style={{ fontSize: 12 }}>{t('storefrontPage.creditExplain')}</p>
+                  <div className="form-group"><label htmlFor="cr-g">{t('storefrontPage.guarantor')}</label>
+                    <select id="cr-g" value={applyForm.guarantorId} onChange={(e) => setApplyForm({ ...applyForm, guarantorId: e.target.value })}>
+                      {credit.guarantors.map((g) => <option key={g.id} value={g.id}>{g.name} ({t(`storefrontPage.gKind_${g.kind}`)})</option>)}
+                    </select></div>
+                  <div className="form-group"><label htmlFor="cr-ref">{t('storefrontPage.memberRef')}</label><input id="cr-ref" value={applyForm.memberRef} onChange={(e) => setApplyForm({ ...applyForm, memberRef: e.target.value })} required /></div>
+                  <div className="form-group"><label htmlFor="cr-amt">{t('storefrontPage.creditAmount')}</label><input id="cr-amt" type="number" min="1" value={applyForm.requestedLimit} onChange={(e) => setApplyForm({ ...applyForm, requestedLimit: e.target.value })} required /></div>
+                  <div className="flex"><button className="btn small" type="submit">{t('storefrontPage.sendApplication')}</button><button type="button" className="btn small secondary" onClick={() => setApplyForm(null)}>{t('common.cancel', { defaultValue: 'Cancel' })}</button></div>
+                </form>
+              )}
               {method === 'online' && <p className="muted" style={{ fontSize: 12 }}>🔒 {t('storefrontPage.securePayNote', { store: store?.name || '' })}</p>}
               <div className="flex">
-                <button className="btn" disabled={!canPayOnline && !canPayOnDelivery} onClick={placeOrder}>{method === 'online' ? t('storefrontPage.payNow', { amount: formatCurrency(cartTotal) }) : t('storefrontPage.placeOrder')}</button>
+                <button className="btn" disabled={payOptions.length === 0} onClick={placeOrder}>{method === 'online' ? t('storefrontPage.payNow', { amount: formatCurrency(cartTotal) }) : t('storefrontPage.placeOrder')}</button>
                 {store?.phone && <button className="btn" style={{ background: '#25D366' }} onClick={whatsappOrder}>{t('storefrontPage.orderOnWhatsApp')}</button>}
               </div>
             </div>

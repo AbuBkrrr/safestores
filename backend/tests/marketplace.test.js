@@ -279,3 +279,52 @@ describe('Checkout: delivery or pickup, pay now or on receipt', () => {
     expect(rows[0].payment_status).toBe('paid');
   });
 });
+
+describe('Guaranteed credit', () => {
+  it('customer applies naming a guarantor; store approves a limit; buys on credit within it; guarantor statement + settlement', async () => {
+    const { store, token } = await createActiveStoreWithAdmin();
+    await enableMarketplace(store.id);
+    const product = await createProduct(store.id, { shelfQty: 50 });
+    const S = `Bearer ${token}`;
+    const g = await request().post(`/api/stores/${store.id}/credit/guarantors`).set('Authorization', S).send({ name: 'Unity Cooperative', kind: 'cooperative' });
+    expect(g.status).toBe(201);
+
+    const signup = await request().post(`/api/marketplace/${store.id}/signup`).send({ name: 'Ada', email: 'ada@c.com', password: 'Password123!' });
+    const C = `Bearer ${signup.body.token}`;
+    const items = (q) => [{ productId: product.id, quantity: q }];
+
+    // Not approved yet → credit refused.
+    expect((await request().post(`/api/marketplace/${store.id}/orders`).set('Authorization', C).send({ items: items(1), paymentMethod: 'credit', fulfilmentMethod: 'pickup' })).status).toBe(403);
+    const apply = await request().post(`/api/marketplace/${store.id}/credit/apply`).set('Authorization', C).send({ guarantorId: g.body.id, memberRef: 'COOP-123', requestedLimit: 50000 });
+    expect(apply.body.status).toBe('pending');
+
+    const accts = await request().get(`/api/stores/${store.id}/credit/accounts`).set('Authorization', S);
+    expect(accts.body[0]).toMatchObject({ customer_name: 'Ada', guarantor_name: 'Unity Cooperative', member_ref: 'COOP-123' });
+    const price = (await request().get(`/api/marketplace/${store.id}/products`)).body.find((p) => p.id === product.id).price;
+    const limit = Number(price) * 2; // room for exactly two units
+    expect((await request().patch(`/api/stores/${store.id}/credit/accounts/${apply.body.id}`).set('Authorization', S).send({ status: 'approved', creditLimit: limit })).status).toBe(200);
+
+    const mine = await request().get(`/api/marketplace/${store.id}/credit`).set('Authorization', C);
+    expect(mine.body.account).toMatchObject({ status: 'approved' });
+    expect(Number(mine.body.account.available)).toBeCloseTo(limit);
+
+    expect((await request().post(`/api/marketplace/${store.id}/orders`).set('Authorization', C).send({ items: items(3), paymentMethod: 'credit', fulfilmentMethod: 'pickup' })).status).toBe(400);
+    const ok = await request().post(`/api/marketplace/${store.id}/orders`).set('Authorization', C).send({ items: items(2), paymentMethod: 'credit', fulfilmentMethod: 'pickup' });
+    expect(ok.status).toBe(201);
+    expect(ok.body.payment_method).toBe('credit');
+    // Limit now used up.
+    expect((await request().post(`/api/marketplace/${store.id}/orders`).set('Authorization', C).send({ items: items(1), paymentMethod: 'credit', fulfilmentMethod: 'pickup' })).status).toBe(400);
+
+    await readyOrder(store.id, ok.body.id, S, 'pickup');
+    await request().patch(`/api/stores/${store.id}/marketplace/orders/${ok.body.id}/fulfill`).set('Authorization', S);
+    let st = await request().get(`/api/stores/${store.id}/credit/statement`).set('Authorization', S);
+    expect(st.body).toHaveLength(1);
+    expect(st.body[0]).toMatchObject({ guarantor_name: 'Unity Cooperative', member_ref: 'COOP-123' });
+
+    expect((await request().patch(`/api/stores/${store.id}/marketplace/orders/${ok.body.id}/credit-settled`).set('Authorization', S)).status).toBe(200);
+    st = await request().get(`/api/stores/${store.id}/credit/statement`).set('Authorization', S);
+    expect(st.body).toHaveLength(0);
+    const after = await request().get(`/api/marketplace/${store.id}/credit`).set('Authorization', C);
+    expect(Number(after.body.account.available)).toBeCloseTo(limit); // settled → limit free again
+  });
+});

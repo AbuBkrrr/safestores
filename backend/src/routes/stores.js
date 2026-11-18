@@ -144,6 +144,15 @@ router.get('/payouts', requireRole('admin', 'manager'), storePaymentsCtrl.getPay
 router.get('/payouts/banks', requireRole('admin'), storePaymentsCtrl.listBanks);
 router.post('/payouts/resolve', requireRole('admin'), storePaymentsCtrl.resolveAccount);
 router.put('/payouts', requireRole('admin'), storePaymentsCtrl.connectPayouts);
+const creditCtrl = require('../controllers/creditController');
+const CREDIT_ROLES = ['admin', 'manager', 'marketplace_manager'];
+router.get('/credit/guarantors', requireRole(...CREDIT_ROLES), creditCtrl.listGuarantors);
+router.post('/credit/guarantors', requireRole('admin', 'manager'), creditCtrl.saveGuarantor);
+router.patch('/credit/guarantors/:guarantorId', requireRole('admin', 'manager'), creditCtrl.saveGuarantor);
+router.get('/credit/accounts', requireRole(...CREDIT_ROLES), creditCtrl.listAccounts);
+router.patch('/credit/accounts/:accountId', requireRole('admin', 'manager'), creditCtrl.reviewAccount);
+router.get('/credit/statement', requireRole(...CREDIT_ROLES), creditCtrl.statement);
+router.patch('/marketplace/orders/:orderId/credit-settled', requireRole('admin', 'manager'), creditCtrl.markCreditSettled);
 router.get('/custom-domain/check', requireRole('admin', 'manager'), storesCtrl.checkCustomDomain);
 router.patch('/payouts', requireRole('admin'), storePaymentsCtrl.updatePaymentOptions);
 const storeSettingsCtrl = require('../controllers/storeSettingsController');

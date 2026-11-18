@@ -118,7 +118,7 @@ async function placeOrder(req, res) {
   // How the shopper gets it (delivery | pickup) and pays (online now, or cash on delivery / pickup).
   const fulfilmentMethod = ['delivery', 'pickup'].includes(req.body.fulfilmentMethod) ? req.body.fulfilmentMethod
     : req.body.paymentMethod === 'on_pickup' ? 'pickup' : null;
-  const paymentMethod = req.body.paymentMethod === 'online' ? 'online' : fulfilmentMethod === 'pickup' ? 'on_pickup' : 'on_delivery';
+  const paymentMethod = ['online', 'credit'].includes(req.body.paymentMethod) ? req.body.paymentMethod : fulfilmentMethod === 'pickup' ? 'on_pickup' : 'on_delivery';
   if (fulfilmentMethod === 'delivery' && !String(deliveryAddress || '').trim()) {
     return res.status(400).json({ error: 'A delivery address is required for delivery' });
   }
@@ -129,11 +129,19 @@ async function placeOrder(req, res) {
   const options = await require('./storePaymentsController').paymentOptionsFor(storeId);
   if (paymentMethod === 'online' && !options.online) return res.status(400).json({ error: 'This store does not take online payments' });
   if (!options.online && !options.payOnDelivery) return res.status(400).json({ error: 'This store is not taking online orders right now' });
-  if (paymentMethod !== 'online' && !options.payOnDelivery) return res.status(400).json({ error: 'This store only takes online payment right now' });
+  if (!['online', 'credit'].includes(paymentMethod) && !options.payOnDelivery) return res.status(400).json({ error: 'This store only takes online payment right now' });
 
   const customerId = req.user?.sub || null;
   if (!customerId && !guestName) {
     return res.status(400).json({ error: 'guestName is required for checkout without an account' });
+  }
+  let creditAccount = null;
+  if (paymentMethod === 'credit') {
+    if (!customerId) return res.status(400).json({ error: 'Log in to buy on credit' });
+    creditAccount = (await db.query(
+      `SELECT * FROM credit_accounts WHERE store_id = $1 AND customer_id = $2 AND status = 'approved'`, [storeId, customerId]
+    )).rows[0];
+    if (!creditAccount) return res.status(403).json({ error: 'You need an approved credit account at this store' });
   }
 
   const client = await db.pool.connect();
@@ -186,6 +194,19 @@ async function placeOrder(req, res) {
           );
         }
       }
+    }
+
+    if (creditAccount) {
+      // Lock the account so two checkouts can't both spend the same limit.
+      await client.query('SELECT id FROM credit_accounts WHERE id = $1 FOR UPDATE', [creditAccount.id]);
+      const { total } = (await client.query('SELECT total FROM marketplace_orders WHERE id = $1', [order.id])).rows[0];
+      const used = await require('./creditController').creditUsed(client, creditAccount.id);
+      if (used + Number(total) > Number(creditAccount.credit_limit) + 0.001) {
+        await client.query('ROLLBACK');
+        const available = Math.max(0, Number(creditAccount.credit_limit) - used);
+        return res.status(400).json({ error: `This order is more than your available credit (${available.toFixed(2)})`, available });
+      }
+      await client.query('UPDATE marketplace_orders SET credit_account_id = $1 WHERE id = $2', [creditAccount.id, order.id]);
     }
 
     await client.query('COMMIT');

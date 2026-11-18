@@ -6,6 +6,7 @@ import { useRealtimeEvents } from '../context/SocketContext.jsx';
 import { Alert, Badge, Modal, Toast } from '../components/ui.jsx';
 import { useToast } from '../components/useToast.js';
 import { useCurrency } from '../context/CurrencyContext.jsx';
+import CreditPanel from '../components/CreditPanel.jsx';
 
 const SYNC_EVENTS = ['marketplace:order_placed', 'marketplace:order_updated', 'marketplace:order_fulfilled', 'marketplace:order_cancelled', 'marketplace:order_paid'];
 
@@ -164,7 +165,7 @@ export default function Marketplace() {
                 <td>{o.customer_name}</td><td>{o.customer_phone || '—'}</td>
                 <td>{formatCurrency(o.total)}</td>
                 <td>{o.delivery_address || '—'}</td>
-                <td><Badge status={o.status} />{o.fulfilment_method && <span className="muted" style={{ fontSize: 12 }}> · {t(`marketplacePage.method_${o.fulfilment_method}`)}</span>} {o.payment_status === 'refund_due' ? <span className="badge pending">{t('marketplacePage.refundDue')}</span> : o.payment_status === 'refunded' ? <span className="badge closed">{t('marketplacePage.refunded')}</span> : o.payment_status === 'paid' ? <span className="badge active">{t('marketplacePage.paidOnline')}</span> : o.payment_method === 'online' ? <span className="badge pending">{t('marketplacePage.awaitingPayment')}</span> : <span className="badge closed">{o.payment_method === 'on_pickup' ? t('marketplacePage.payOnPickup') : t('marketplacePage.payOnDelivery')}</span>}</td>
+                <td><Badge status={o.status} />{o.fulfilment_method && <span className="muted" style={{ fontSize: 12 }}> · {t(`marketplacePage.method_${o.fulfilment_method}`)}</span>} {o.payment_status === 'refund_due' ? <span className="badge pending">{t('marketplacePage.refundDue')}</span> : o.payment_status === 'refunded' ? <span className="badge closed">{t('marketplacePage.refunded')}</span> : o.payment_status === 'paid' ? <span className="badge active">{t('marketplacePage.paidOnline')}</span> : o.payment_method === 'online' ? <span className="badge pending">{t('marketplacePage.awaitingPayment')}</span> : <span className="badge closed">{o.payment_method === 'credit' ? t('marketplacePage.onCredit') : o.payment_method === 'on_pickup' ? t('marketplacePage.payOnPickup') : t('marketplacePage.payOnDelivery')}</span>}</td>
                 <td>{new Date(o.created_at).toLocaleString()}</td>
                 <td style={{ whiteSpace: 'nowrap' }}>
                   <button className={`btn small${o.status === 'placed' ? '' : ' secondary'}`} onClick={() => openOrder(o)}>{o.status === 'placed' ? t('marketplacePage.review') : t('marketplacePage.view')}</button>{' '}
@@ -177,6 +178,8 @@ export default function Marketplace() {
         </table>
         {orders.length === 0 && <p className="muted">{t('marketplacePage.noOrdersYet')}</p>}
       </div>
+      <CreditPanel onToast={showToast} />
+
       {viewing && (
         <Modal title={t('marketplacePage.orderTitle', { ref: viewing.id.slice(0, 8).toUpperCase() })} onClose={() => setViewing(null)}>
           <p><strong>{viewing.customer_name}</strong>{viewing.customer_phone && <> · <a href={`tel:${viewing.customer_phone}`}>{viewing.customer_phone}</a></>}{viewing.customer_email && <> · {viewing.customer_email}</>}</p>

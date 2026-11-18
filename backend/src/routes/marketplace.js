@@ -25,4 +25,9 @@ router.post('/:storeId/orders', optionalAuth, ctrl.placeOrder);
 // Customer-authenticated only — order history needs an account to attach to.
 router.get('/:storeId/my-orders', requireAuth, requireRole('customer'), ctrl.listMyOrders);
 
+// Guaranteed credit — guarantors are public, the account is the logged-in customer's.
+const creditCtrl = require('../controllers/creditController');
+router.get('/:storeId/credit', optionalAuth, creditCtrl.myCredit);
+router.post('/:storeId/credit/apply', requireAuth, requireRole('customer'), creditCtrl.applyForCredit);
+
 module.exports = router;
