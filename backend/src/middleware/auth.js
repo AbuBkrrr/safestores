@@ -19,7 +19,10 @@ async function authenticateJwt(req) {
   }
 
   try {
-    if (['admin', 'manager', 'staff', 'cashier', 'checkout', 'stock_taker', 'marketplace_manager'].includes(user.role)) {
+    const storeUserRoles = ['admin', 'manager', 'staff', 'cashier', 'checkout', 'stock_taker', 'marketplace_manager'];
+    // An 'auditor' with a storeId is a store's own audit staff (users table);
+    // without one it is an independent auditor firm (auditors table).
+    if (storeUserRoles.includes(user.role) || (user.role === 'auditor' && user.storeId)) {
       const { rows } = await db.query('SELECT status, token_version FROM users WHERE id = $1', [user.sub]);
       if (!rows[0] || rows[0].status !== 'active') {
         return { ok: false, status: 401, body: { error: 'This account is no longer active. Contact your store admin.', code: 'ACCOUNT_DISABLED' } };
@@ -39,7 +42,7 @@ async function authenticateJwt(req) {
       if (!rows[0] || rows[0].status !== 'active' || (user.tv || 0) !== (rows[0].token_version || 0)) {
         return { ok: false, status: 401, body: { error: 'This partner account is no longer active.', code: 'ACCOUNT_DISABLED' } };
       }
-    } else if (user.role === 'auditor') {
+    } else if (user.role === 'auditor' && !user.storeId) {
       const { rows } = await db.query('SELECT status FROM auditors WHERE id = $1', [user.sub]);
       if (!rows[0] || rows[0].status !== 'active') {
         return { ok: false, status: 401, body: { error: 'This auditor account is no longer active.', code: 'ACCOUNT_DISABLED' } };

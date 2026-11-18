@@ -1057,7 +1057,9 @@
     "courier": "Delivery company / rider",
     "ownRider": "Our own rider",
     "courierSet": "Courier updated",
-    "courierPicked": "Courier has picked it up"
+    "courierPicked": "Courier has picked it up",
+    "cashCollected": "Cash collected",
+    "paidByGuarantor": "Settled by guarantor"
   },
   "storefrontPage": {
     "title": "🛍️ Shop",

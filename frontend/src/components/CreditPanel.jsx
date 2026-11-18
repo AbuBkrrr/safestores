@@ -61,18 +61,18 @@ export default function CreditPanel({ onToast }) {
             <td>{formatCurrency(g.outstanding)}</td>
             <td style={{ whiteSpace: 'nowrap' }}>{g.partner_id ? <span className="muted" style={{ fontSize: 12 }}>✅ {t('partnerInvite.onPortal')} </span>
               : canManage && <button className="btn small" onClick={() => invitePortal(g)}>{t('partnerInvite.invitePortal')}</button>}{' '}
-              <button className="btn small secondary" onClick={() => act(() => api.patch(`${base}/guarantors/${g.id}`, { active: !g.active }))}>{g.active ? t('creditPanel.pause') : t('creditPanel.resume')}</button></td></tr>
+              {canManage && <button className="btn small secondary" onClick={() => act(() => api.patch(`${base}/guarantors/${g.id}`, { active: !g.active }))}>{g.active ? t('creditPanel.pause') : t('creditPanel.resume')}</button>}</td></tr>
         ))}</tbody>
       </table>
       <InviteLink link={inviteLink} />
-      <form onSubmit={addGuarantor} className="grid grid-2 mt-1">
+      {canManage && <form onSubmit={addGuarantor} className="grid grid-2 mt-1">
         <div className="form-group"><label htmlFor="g-name">{t('creditPanel.name')}</label><input id="g-name" value={gForm.name} onChange={(e) => setGForm({ ...gForm, name: e.target.value })} placeholder="Unity Cooperative Society" required /></div>
         <div className="form-group"><label htmlFor="g-kind">{t('creditPanel.kind')}</label>
           <select id="g-kind" value={gForm.kind} onChange={(e) => setGForm({ ...gForm, kind: e.target.value })}>{KINDS.map((k) => <option key={k} value={k}>{t(`storefrontPage.gKind_${k}`)}</option>)}</select></div>
         <div className="form-group"><label htmlFor="g-cn">{t('creditPanel.contactName')}</label><input id="g-cn" value={gForm.contactName} onChange={(e) => setGForm({ ...gForm, contactName: e.target.value })} /></div>
         <div className="form-group"><label htmlFor="g-ph">{t('creditPanel.phoneEmail')}</label><input id="g-ph" value={gForm.phone} onChange={(e) => setGForm({ ...gForm, phone: e.target.value })} /></div>
         <div><button className="btn small" type="submit">{t('creditPanel.addGuarantor')}</button></div>
-      </form>
+      </form>}
 
       <h4 className="mt-1">{t('creditPanel.accounts')}</h4>
       {accounts.length === 0 ? <p className="muted">{t('creditPanel.noAccounts')}</p> : (
@@ -87,11 +87,11 @@ export default function CreditPanel({ onToast }) {
                 : formatCurrency(a.credit_limit)}</td>
               <td>{formatCurrency(a.used)}</td>
               <td><Badge status={a.status} /></td>
-              <td style={{ whiteSpace: 'nowrap' }}>
+              <td style={{ whiteSpace: 'nowrap' }}>{canManage && <>
                 {a.status !== 'approved' && <button className="btn small" onClick={() => review(a, 'approved')}>{t('creditPanel.approve')}</button>}{' '}
                 {a.status === 'pending' && <button className="btn small secondary" onClick={() => review(a, 'rejected')}>{t('creditPanel.reject')}</button>}
                 {a.status === 'approved' && <button className="btn small secondary" onClick={() => review(a, 'suspended')}>{t('creditPanel.suspend')}</button>}
-              </td>
+              </>}</td>
             </tr>
           ))}</tbody>
         </table>
@@ -105,7 +105,7 @@ export default function CreditPanel({ onToast }) {
             <thead><tr><th>{t('creditPanel.customer')}</th><th>{t('creditPanel.memberRef')}</th><th>{t('creditPanel.delivered')}</th><th>{t('creditPanel.amount')}</th><th></th></tr></thead>
             <tbody>{rows.map((o) => (
               <tr key={o.id}><td>{o.customer_name}</td><td>{o.member_ref}</td><td>{new Date(o.fulfilled_at).toLocaleDateString()}</td><td>{formatCurrency(o.total)}{o.guarantor_paid_reported_at && <div className="muted" style={{ fontSize: 11 }}>💸 {t('partnerInvite.reportedPaid', { ref: o.guarantor_paid_ref })}</div>}</td>
-                <td><button className="btn small" onClick={() => settle(o)}>{t('creditPanel.markSettled')}</button></td></tr>
+                <td>{canManage && <button className="btn small" onClick={() => settle(o)}>{t('creditPanel.markSettled')}</button>}</td></tr>
             ))}</tbody>
           </table>
         </div>

@@ -77,7 +77,7 @@ const Referrals = lazy(() => import('./pages/super/Referrals.jsx'));
 const SupportTickets = lazy(() => import('./pages/super/SupportTickets.jsx'));
 const LendingPartnersAdmin = lazy(() => import('./pages/super/LendingPartnersAdmin.jsx'));
 
-const STORE_ROLES = ['admin', 'manager', 'staff', 'cashier', 'checkout', 'stock_taker', 'marketplace_manager'];
+const STORE_ROLES = ['admin', 'manager', 'staff', 'cashier', 'checkout', 'stock_taker', 'marketplace_manager', 'store_auditor'];
 
 // Baked in at build time (see desktop/package.json's build:win:admin vs
 // build:win:superadmin scripts). 'superadmin' (the default) is today's full

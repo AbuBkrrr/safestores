@@ -82,7 +82,7 @@ router.post('/audit-engagements', requireAuthOrStoreSyncKey('admin', 'manager'),
 // validation step would reject every legitimately-paired key, blocking
 // desktop's cloud-linking setup entirely, not just the marketplace
 // listing management page.
-router.get('/marketplace-profile', requireAuthOrStoreSyncKey('admin', 'manager'), storesCtrl.getMarketplaceProfile);
+router.get('/marketplace-profile', requireAuthOrStoreSyncKey('admin', 'manager', 'marketplace_manager'), storesCtrl.getMarketplaceProfile);
 router.patch('/marketplace-profile', requireAuthOrStoreSyncKey('admin', 'manager'), storesCtrl.updateMarketplaceProfile);
 router.post('/branding/:kind', requireAuth, scopeToOwnStore, requireRole('admin', 'manager'), require('../middleware/upload').upload.single('image'), storesCtrl.uploadBranding);
 
