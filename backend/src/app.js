@@ -103,6 +103,17 @@ function createApp() {
   const { shopParam } = require('./utils/shopSlug');
   app.get('/api/public/stores/:storeId', (req, res, next) => shopParam(req, res, next, req.params.storeId), publicCtrl.storeInfo);
   app.get('/share/shop/:storeId', publicCtrl.shareShop);
+  // Custom domains: Caddy's on-demand TLS "ask" (200 = issue a certificate)…
+  app.get('/api/public/domain-check', async (req, res) => {
+    const store = await require('./utils/customDomain').storeForDomain(req.query.domain);
+    res.status(store ? 200 : 404).end();
+  });
+  // …and the frontend, to know which shop a custom domain belongs to.
+  app.get('/api/public/by-domain/:host', async (req, res) => {
+    const store = await require('./utils/customDomain').storeForDomain(req.params.host);
+    if (!store) return res.status(404).json({ error: 'No shop on this domain' });
+    res.json({ storeId: store.id, shopSlug: store.shop_slug });
+  });
   app.get('/sitemap.xml', publicCtrl.sitemap);
   app.get('/robots.txt', publicCtrl.robots);
   app.use('/api/account', require('./routes/account'));

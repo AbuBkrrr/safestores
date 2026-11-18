@@ -994,7 +994,16 @@
     "address": "Adresse",
     "saveProfile": "Enregistrer",
     "profileSaved": "Page boutique enregistrée",
-    "profileFailed": "Impossible d'enregistrer la page"
+    "profileFailed": "Impossible d'enregistrer la page",
+    "customDomain": "Votre propre domaine (facultatif)",
+    "customDomainHelp": "Un domaine à vous, ex. shop.votreentreprise.com — les visiteurs y verront cette boutique.",
+    "dnsTitle": "Connecter {{domain}} :",
+    "dnsStep1": "Connectez-vous chez votre registraire de domaine (paramètres DNS).",
+    "dnsStep2": "Ajoutez cet enregistrement :",
+    "dnsStep3": "Patientez jusqu’à une heure, puis cliquez sur Vérifier. Le HTTPS est configuré automatiquement.",
+    "checkDns": "Vérifier la connexion",
+    "dnsOk": "{{domain}} est connecté :",
+    "dnsNotYet": "Pas encore dirigé ici — le DNS peut prendre jusqu’à une heure."
   },
   "storefrontPage": {
     "title": "🛍️ Boutique",

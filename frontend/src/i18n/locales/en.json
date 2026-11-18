@@ -994,7 +994,16 @@
     "address": "Address",
     "saveProfile": "Save shop page",
     "profileSaved": "Shop page saved",
-    "profileFailed": "Couldn't save the shop page"
+    "profileFailed": "Couldn't save the shop page",
+    "customDomain": "Your own domain (optional)",
+    "customDomainHelp": "A domain you own, e.g. shop.yourbusiness.com — visitors there see this shop page.",
+    "dnsTitle": "Connect {{domain}}:",
+    "dnsStep1": "Sign in where you bought the domain (your DNS settings).",
+    "dnsStep2": "Add this record:",
+    "dnsStep3": "Wait up to an hour, then press Check. HTTPS is set up automatically.",
+    "checkDns": "Check connection",
+    "dnsOk": "{{domain}} is connected:",
+    "dnsNotYet": "Not pointing here yet — DNS can take up to an hour. Also make sure your shop is listed on the marketplace."
   },
   "storefrontPage": {
     "title": "🛍️ Shop",

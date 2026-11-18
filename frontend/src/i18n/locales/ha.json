@@ -994,7 +994,16 @@
     "address": "Adireshi",
     "saveProfile": "Ajiye shafin shago",
     "profileSaved": "An ajiye shafin shago",
-    "profileFailed": "An kasa ajiye shafin shago"
+    "profileFailed": "An kasa ajiye shafin shago",
+    "customDomain": "Naka sunan yanki (na zaɓi)",
+    "customDomainHelp": "Yankin da kake da shi, misali shop.kasuwancinka.com — masu ziyara za su ga wannan shafin.",
+    "dnsTitle": "Haɗa {{domain}}:",
+    "dnsStep1": "Shiga inda ka sayi yankin (saitin DNS).",
+    "dnsStep2": "Ƙara wannan rikodin:",
+    "dnsStep3": "Jira har awa ɗaya, sannan danna Duba. Ana saita HTTPS kai tsaye.",
+    "checkDns": "Duba haɗi",
+    "dnsOk": "An haɗa {{domain}}:",
+    "dnsNotYet": "Bai nuna nan ba tukuna — DNS na iya ɗaukar awa ɗaya."
   },
   "storefrontPage": {
     "title": "🛍️ Shago",

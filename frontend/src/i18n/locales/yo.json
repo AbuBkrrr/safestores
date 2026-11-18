@@ -994,7 +994,16 @@
     "address": "Adirẹsi",
     "saveProfile": "Fi oju-iwe pamọ",
     "profileSaved": "A ti fi oju-iwe ṣọọbu pamọ",
-    "profileFailed": "Ko le fi oju-iwe pamọ"
+    "profileFailed": "Ko le fi oju-iwe pamọ",
+    "customDomain": "Orukọ aaye tirẹ (iyan)",
+    "customDomainHelp": "Aaye ti o ni, f.a. shop.owore.com — awọn alejo yoo ri oju-iwe ṣọọbu yii.",
+    "dnsTitle": "So {{domain}} pọ:",
+    "dnsStep1": "Wọle si ibi ti o ti ra aaye naa (eto DNS).",
+    "dnsStep2": "Ṣafikun igbasilẹ yii:",
+    "dnsStep3": "Duro to wakati kan, lẹhinna tẹ Ṣayẹwo. HTTPS yoo ṣeto funrararẹ.",
+    "checkDns": "Ṣayẹwo asopọ",
+    "dnsOk": "{{domain}} ti sopọ:",
+    "dnsNotYet": "Ko tii tọka sibi — DNS le gba to wakati kan."
   },
   "storefrontPage": {
     "title": "🛍️ Ilé Ìtajà",

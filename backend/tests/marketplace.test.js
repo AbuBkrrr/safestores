@@ -182,3 +182,32 @@ describe('Custom shop address (shop_slug)', () => {
     expect(cleared.body.shop_slug).toBeNull();
   });
 });
+
+describe('Custom domains', () => {
+  it('a store connects its own domain; TLS ask + by-domain lookup recognise it; CORS allows it; bad/taken/platform domains refused', async () => {
+    const a = await createActiveStoreWithAdmin();
+    const b = await createActiveStoreWithAdmin();
+    await pool.query('UPDATE stores SET marketplace_enabled = true WHERE id = ANY($1)', [[a.store.id, b.store.id]]);
+    const patch = (s, body) => request().patch(`/api/stores/${s.store.id}/marketplace-profile`).set('Authorization', `Bearer ${s.token}`).send(body);
+
+    const ok = await patch(a, { customDomain: 'https://Shop.MamaNgozi.com/' });
+    expect(ok.status).toBe(200);
+    expect(ok.body.custom_domain).toBe('shop.mamangozi.com');
+
+    expect((await request().get('/api/public/domain-check').query({ domain: 'shop.mamangozi.com' })).status).toBe(200);
+    expect((await request().get('/api/public/domain-check').query({ domain: 'evil.example.com' })).status).toBe(404);
+    const by = await request().get('/api/public/by-domain/shop.mamangozi.com');
+    expect(by.body.storeId).toBe(a.store.id);
+
+    const cors = await request().get('/api/public/by-domain/shop.mamangozi.com').set('Origin', 'https://shop.mamangozi.com');
+    expect(cors.headers['access-control-allow-origin']).toBe('https://shop.mamangozi.com');
+
+    expect((await patch(b, { customDomain: 'shop.mamangozi.com' })).status).toBe(409);
+    expect((await patch(b, { customDomain: 'not a domain' })).status).toBe(400);
+
+    // Unlisted shops don't get certificates.
+    await pool.query('UPDATE stores SET marketplace_enabled = false WHERE id = $1', [a.store.id]);
+    await patch(a, { customDomain: 'shop.mamangozi.com' }); // clears the lookup cache
+    expect((await request().get('/api/public/domain-check').query({ domain: 'shop.mamangozi.com' })).status).toBe(404);
+  });
+});

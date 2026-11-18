@@ -386,3 +386,30 @@ Every bundled dependency uses a permissive open-source licence (MIT, ISC,
 BSD, Apache-2.0). Their notices ship with the app at `/licenses`, generated
 on every build by `frontend/scripts/licenses.mjs`. Map tiles, SMS gateways
 and paid barcode databases were deliberately not used.
+
+## Store custom domains
+
+A store can connect its own domain (e.g. `shop.mamangozi.com`) on **Marketplace → Your shop page**. Visitors to that domain see only that store's storefront.
+
+Server setup (once), in the Caddyfile:
+
+1. At the very top, in the global options block (create it if there is none):
+   ```
+   {
+       on_demand_tls {
+           ask http://ssapp-backend-1:4000/api/public/domain-check
+       }
+   }
+   ```
+2. At the bottom, a catch-all site for shop domains:
+   ```
+   https:// {
+       tls {
+           on_demand
+       }
+       reverse_proxy ssapp-frontend-1:80
+   }
+   ```
+3. Reload Caddy. Certificates are only issued for domains a listed, active store has saved, so nobody can point random domains at the server.
+
+The store adds a DNS `CNAME` for its domain to `app.safestores.name.ng` (an apex domain needs an `A` record to the server IP instead). Set `CUSTOM_DOMAIN_TARGET` if the CNAME target should differ from the `FRONTEND_URL` host.

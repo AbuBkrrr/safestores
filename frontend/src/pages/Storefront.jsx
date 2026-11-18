@@ -15,7 +15,9 @@ const SHARE_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/api\/?$/, '')
 
 export default function Storefront() {
   const { t } = useTranslation();
-  const { storeId } = useParams();
+  const params = useParams();
+  // On a store's custom domain the shop is fixed by the host (see main.jsx).
+  const storeId = window.__SHOP_DOMAIN_STORE__ || params.storeId;
   const [store, setStore] = useState(null);
   const [products, setProducts] = useState([]);
   const [query, setQuery] = useState('');
@@ -98,7 +100,7 @@ export default function Storefront() {
   const cartCount = Object.values(cart).reduce((n, q) => n + q, 0);
   // Opened via the long /shop/<id> link but the store has a custom address: show the nicer one.
   useEffect(() => {
-    if (store?.shop_slug && storeId !== store.shop_slug) window.history.replaceState(null, '', `/shop/${store.shop_slug}`);
+    if (!window.__SHOP_DOMAIN_STORE__ && store?.shop_slug && storeId !== store.shop_slug) window.history.replaceState(null, '', `/shop/${store.shop_slug}`);
   }, [store, storeId]);
 
   const cartItems = Object.entries(cart).map(([productId, quantity]) => {

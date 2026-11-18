@@ -23,7 +23,13 @@ export default function Marketplace() {
   // Shop profile: custom address (/shop/<slug>), tagline, category, location.
   const [profile, setProfile] = useState(null);
   const [savingProfile, setSavingProfile] = useState(false);
-  const toForm = (p) => ({ shopSlug: p.shop_slug || '', shopTagline: p.shop_tagline || '', category: p.category || '', city: p.city || '', address: p.address || '', enabled: p.marketplace_enabled });
+  const toForm = (p) => ({ shopSlug: p.shop_slug || '', shopTagline: p.shop_tagline || '', category: p.category || '', city: p.city || '', address: p.address || '', customDomain: p.custom_domain || '', enabled: p.marketplace_enabled, domainTarget: p.domain_target, savedDomain: p.custom_domain || '' });
+  const [domainCheck, setDomainCheck] = useState(null);
+  const checkDomain = async () => {
+    setDomainCheck({ checking: true });
+    try { const { data } = await api.get(`/stores/${user.storeId}/custom-domain/check`); setDomainCheck(data); }
+    catch { setDomainCheck({ error: true }); }
+  };
   useEffect(() => {
     api.get(`/stores/${user.storeId}/marketplace-profile`).then((r) => setProfile(toForm(r.data))).catch(() => {});
   }, [user.storeId]);
@@ -31,9 +37,10 @@ export default function Marketplace() {
     e.preventDefault();
     setSavingProfile(true); setError('');
     try {
-      const { enabled, ...body } = profile;
+      const { enabled, domainTarget, savedDomain, ...body } = profile;
       const { data } = await api.patch(`/stores/${user.storeId}/marketplace-profile`, body);
       setProfile(toForm(data));
+      setDomainCheck(null);
       showToast(t('marketplacePage.profileSaved'), 'success');
     } catch (err) {
       setError(err.response?.data?.error || t('marketplacePage.profileFailed'));
@@ -107,7 +114,26 @@ export default function Marketplace() {
               <div className="form-group"><label htmlFor="mp-cat">{t('marketplacePage.category')}</label><input id="mp-cat" value={profile.category} onChange={setP('category')} /></div>
               <div className="form-group"><label htmlFor="mp-city">{t('marketplacePage.city')}</label><input id="mp-city" value={profile.city} onChange={setP('city')} /></div>
               <div className="form-group"><label htmlFor="mp-addr">{t('marketplacePage.address')}</label><input id="mp-addr" value={profile.address} onChange={setP('address')} /></div>
+              <div className="form-group">
+                <label htmlFor="mp-domain">{t('marketplacePage.customDomain')}</label>
+                <input id="mp-domain" value={profile.customDomain} onChange={setP('customDomain')} placeholder="shop.yourbusiness.com" />
+                <span className="help-text">{t('marketplacePage.customDomainHelp')}</span>
+              </div>
             </div>
+            {profile.savedDomain && (
+              <div className="alert info" style={{ fontSize: 13 }}>
+                <strong>{t('marketplacePage.dnsTitle', { domain: profile.savedDomain })}</strong>
+                <ol style={{ margin: '6px 0 6px 18px' }}>
+                  <li>{t('marketplacePage.dnsStep1')}</li>
+                  <li>{t('marketplacePage.dnsStep2')} <code>CNAME</code> · <code>{profile.savedDomain.split('.').length > 2 ? profile.savedDomain.split('.')[0] : '@'}</code> → <code>{profile.domainTarget}</code></li>
+                  <li>{t('marketplacePage.dnsStep3')}</li>
+                </ol>
+                <button type="button" className="btn small secondary" onClick={checkDomain} disabled={domainCheck?.checking}>{t('marketplacePage.checkDns')}</button>{' '}
+                {domainCheck && !domainCheck.checking && (domainCheck.pointsHere
+                  ? <span>✅ {t('marketplacePage.dnsOk', { domain: profile.savedDomain })} <a href={`https://${profile.savedDomain}`} target="_blank" rel="noreferrer">https://{profile.savedDomain}</a></span>
+                  : <span>⏳ {t('marketplacePage.dnsNotYet')}</span>)}
+              </div>
+            )}
             <button className="btn" type="submit" disabled={savingProfile}>{t('marketplacePage.saveProfile')}</button>
           </form>
         )}

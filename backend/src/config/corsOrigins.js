@@ -20,7 +20,12 @@ function buildCorsOptions() {
       // Non-browser clients (curl, mobile native shells, server-to-server)
       // send no Origin header at all — allow those through.
       if (!origin || allowed.includes(origin)) return callback(null, true);
-      callback(new Error(`Origin ${origin} not allowed by CORS`));
+      // A store's own custom domain serving its storefront.
+      let host = null;
+      try { host = new URL(origin).hostname; } catch { /* malformed origin */ }
+      require('../utils/customDomain').storeForDomain(host)
+        .then((store) => (store ? callback(null, true) : callback(new Error(`Origin ${origin} not allowed by CORS`))))
+        .catch(() => callback(new Error(`Origin ${origin} not allowed by CORS`)));
     },
     credentials: true,
   };

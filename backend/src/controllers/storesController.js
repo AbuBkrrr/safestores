@@ -419,15 +419,26 @@ async function deleteAnyUser(req, res) {
 async function getMarketplaceProfile(req, res) {
   const { storeId } = req.params;
   const { rows } = await db.query(
-    'SELECT id, name, category, address, city, marketplace_enabled, shop_slug, shop_tagline FROM stores WHERE id = $1', [storeId]
+    'SELECT id, name, category, address, city, marketplace_enabled, shop_slug, shop_tagline, custom_domain FROM stores WHERE id = $1', [storeId]
   );
   if (!rows[0]) return res.status(404).json({ error: 'Store not found' });
-  res.json(rows[0]);
+  res.json({ ...rows[0], domain_target: require('../utils/customDomain').domainTarget() });
 }
 
 async function updateMarketplaceProfile(req, res) {
   const { storeId } = req.params;
-  const { category, address, city, shopSlug, shopTagline } = req.body;
+  const { category, address, city, shopSlug, shopTagline, customDomain } = req.body;
+  const cd = require('../utils/customDomain');
+  let domain;
+  if (customDomain !== undefined) {
+    const parsed = cd.parseCustomDomain(customDomain);
+    if (parsed.error) return res.status(400).json({ error: parsed.error });
+    domain = parsed.value;
+    if (domain) {
+      const taken = await db.query('SELECT 1 FROM stores WHERE custom_domain = $1 AND id <> $2', [domain, storeId]);
+      if (taken.rowCount) return res.status(409).json({ error: 'That domain is already connected to another shop' });
+    }
+  }
   // shopSlug/shopTagline: undefined = leave as is, '' = clear.
   let slug;
   if (shopSlug !== undefined) {
@@ -445,12 +456,25 @@ async function updateMarketplaceProfile(req, res) {
             city = COALESCE($3, city),
             shop_slug = CASE WHEN $5 THEN $6 ELSE shop_slug END,
             shop_tagline = CASE WHEN $7 THEN $8 ELSE shop_tagline END,
+            custom_domain = CASE WHEN $9 THEN $10 ELSE custom_domain END,
             updated_at = now()
-     WHERE id = $4 RETURNING id, name, category, address, city, marketplace_enabled, shop_slug, shop_tagline`,
-    [category ?? null, address ?? null, city ?? null, storeId, slug !== undefined, slug ?? null, tagline !== undefined, tagline ?? null]
+     WHERE id = $4 RETURNING id, name, category, address, city, marketplace_enabled, shop_slug, shop_tagline, custom_domain`,
+    [category ?? null, address ?? null, city ?? null, storeId, slug !== undefined, slug ?? null, tagline !== undefined, tagline ?? null,
+      domain !== undefined, domain ?? null]
   );
+  if (domain !== undefined) cd.clearDomainCache();
+  if (rows[0]) rows[0].domain_target = cd.domainTarget();
   if (!rows[0]) return res.status(404).json({ error: 'Store not found' });
   res.json(rows[0]);
+}
+
+// GET /api/stores/:storeId/custom-domain/check — is the store's domain's DNS pointed here yet?
+async function checkCustomDomain(req, res) {
+  const { rows } = await db.query('SELECT custom_domain FROM stores WHERE id = $1', [req.params.storeId]);
+  const domain = rows[0]?.custom_domain;
+  if (!domain) return res.status(404).json({ error: 'No custom domain set' });
+  const cd = require('../utils/customDomain');
+  res.json({ domain, pointsHere: await cd.dnsPointsHere(domain), target: cd.domainTarget() });
 }
 
 // GET/PATCH /api/stores/:storeId/loyalty-settings
@@ -492,6 +516,6 @@ module.exports = {
   listStores, listReferrals, createStore, updateStore, activateStore, suspendStore, deleteStore, listPlans, updateTier, issueCodeForStore, issueStoreCode,
   generateCode, listCodes, revokeCode, redeemCode,
   listAllUsers, updateAnyUserStatus, deleteAnyUser,
-  getMarketplaceProfile, updateMarketplaceProfile,
+  getMarketplaceProfile, updateMarketplaceProfile, checkCustomDomain,
   getLoyaltySettings, updateLoyaltySettings,
 };

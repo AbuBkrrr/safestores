@@ -52,6 +52,7 @@ services:
       # Email + object storage — optional for staging, required for launch
       # (see LAUNCH_GUIDE.md steps 6–7). Empty values are simply ignored.
       PAYSTACK_SECRET_KEY: ${PAYSTACK_SECRET_KEY:-}
+      CUSTOM_DOMAIN_TARGET: ${CUSTOM_DOMAIN_TARGET:-}
       PAYSTACK_CURRENCIES: ${PAYSTACK_CURRENCIES:-}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-587}

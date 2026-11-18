@@ -125,6 +125,18 @@ export default function App() {
       .finally(() => setChecked(true));
   }, []);
 
+  // A store's custom domain only ever shows that shop (plus order tracking and receipts).
+  if (window.__SHOP_DOMAIN_STORE__) {
+    return (
+      <Suspense fallback={<PageLoading />}>
+        <Routes>
+          <Route path="/track/:token" element={<TrackOrder />} />
+          <Route path="/r/:token" element={<PublicReceipt />} />
+          <Route path="*" element={<Storefront />} />
+        </Routes>
+      </Suspense>
+    );
+  }
   if (!checked) return null;
   if (needsSetup) return <Setup onComplete={() => setNeedsSetup(false)} />;
 

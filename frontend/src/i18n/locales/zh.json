@@ -994,7 +994,16 @@
     "address": "地址",
     "saveProfile": "保存店铺页面",
     "profileSaved": "店铺页面已保存",
-    "profileFailed": "无法保存店铺页面"
+    "profileFailed": "无法保存店铺页面",
+    "customDomain": "自有域名（可选）",
+    "customDomainHelp": "您拥有的域名，如 shop.yourbusiness.com——访问者将看到此店铺页面。",
+    "dnsTitle": "连接 {{domain}}：",
+    "dnsStep1": "登录您购买域名的服务商（DNS 设置）。",
+    "dnsStep2": "添加此记录：",
+    "dnsStep3": "最多等待一小时，然后点击检查。HTTPS 会自动配置。",
+    "checkDns": "检查连接",
+    "dnsOk": "{{domain}} 已连接：",
+    "dnsNotYet": "尚未指向此处——DNS 生效可能需要一小时。"
   },
   "storefrontPage": {
     "title": "🛍️ 商店",

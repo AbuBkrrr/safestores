@@ -994,7 +994,16 @@
     "address": "Adreesị",
     "saveProfile": "Chekwaa ibe ụlọ ahịa",
     "profileSaved": "E chekwala ibe ụlọ ahịa",
-    "profileFailed": "Enweghị ike ichekwa ibe ụlọ ahịa"
+    "profileFailed": "Enweghị ike ichekwa ibe ụlọ ahịa",
+    "customDomain": "Ngalaba nke gị (nhọrọ)",
+    "customDomainHelp": "Ngalaba ị nwere, dịka shop.azụmahịagị.com — ndị ọbịa ga-ahụ ibe a.",
+    "dnsTitle": "Jikọọ {{domain}}:",
+    "dnsStep1": "Banye ebe ị zụtara ngalaba ahụ (ntọala DNS).",
+    "dnsStep2": "Tinye ndekọ a:",
+    "dnsStep3": "Chere ruo otu awa, wee pịa Nyochaa. A na-edozi HTTPS na-akpaghị aka.",
+    "checkDns": "Nyochaa njikọ",
+    "dnsOk": "Ejikọla {{domain}}:",
+    "dnsNotYet": "Ọ katabeghị ebe a — DNS nwere ike iwe otu awa."
   },
   "storefrontPage": {
     "title": "🛍️ Ụlọ Ahịa",

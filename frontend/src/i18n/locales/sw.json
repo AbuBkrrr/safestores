@@ -994,7 +994,16 @@
     "address": "Anwani",
     "saveProfile": "Hifadhi ukurasa",
     "profileSaved": "Ukurasa wa duka umehifadhiwa",
-    "profileFailed": "Imeshindwa kuhifadhi ukurasa"
+    "profileFailed": "Imeshindwa kuhifadhi ukurasa",
+    "customDomain": "Kikoa chako (si lazima)",
+    "customDomainHelp": "Kikoa unachomiliki, mf. shop.biasharayako.com — wageni wataona ukurasa huu.",
+    "dnsTitle": "Unganisha {{domain}}:",
+    "dnsStep1": "Ingia ulipo nunua kikoa (mipangilio ya DNS).",
+    "dnsStep2": "Ongeza rekodi hii:",
+    "dnsStep3": "Subiri hadi saa moja, kisha bonyeza Angalia. HTTPS huwekwa kiotomatiki.",
+    "checkDns": "Angalia muunganisho",
+    "dnsOk": "{{domain}} imeunganishwa:",
+    "dnsNotYet": "Bado haielekei hapa — DNS inaweza kuchukua hadi saa moja."
   },
   "storefrontPage": {
     "title": "🛍️ Duka",

@@ -142,6 +142,7 @@ router.get('/payouts', requireRole('admin', 'manager'), storePaymentsCtrl.getPay
 router.get('/payouts/banks', requireRole('admin'), storePaymentsCtrl.listBanks);
 router.post('/payouts/resolve', requireRole('admin'), storePaymentsCtrl.resolveAccount);
 router.put('/payouts', requireRole('admin'), storePaymentsCtrl.connectPayouts);
+router.get('/custom-domain/check', requireRole('admin', 'manager'), storesCtrl.checkCustomDomain);
 router.patch('/payouts', requireRole('admin'), storePaymentsCtrl.updatePaymentOptions);
 const storeSettingsCtrl = require('../controllers/storeSettingsController');
 router.get('/settings', storeSettingsCtrl.getSettings);

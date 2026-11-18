@@ -994,7 +994,16 @@
     "address": "العنوان",
     "saveProfile": "حفظ صفحة المتجر",
     "profileSaved": "تم حفظ صفحة المتجر",
-    "profileFailed": "تعذر حفظ صفحة المتجر"
+    "profileFailed": "تعذر حفظ صفحة المتجر",
+    "customDomain": "نطاقك الخاص (اختياري)",
+    "customDomainHelp": "نطاق تملكه، مثل shop.yourbusiness.com — سيرى الزوار صفحة المتجر هذه.",
+    "dnsTitle": "ربط {{domain}}:",
+    "dnsStep1": "سجّل الدخول لدى مزوّد النطاق (إعدادات DNS).",
+    "dnsStep2": "أضف هذا السجل:",
+    "dnsStep3": "انتظر حتى ساعة ثم اضغط تحقق. يتم إعداد HTTPS تلقائيًا.",
+    "checkDns": "تحقق من الاتصال",
+    "dnsOk": "{{domain}} متصل:",
+    "dnsNotYet": "لم يُوجَّه بعد — قد يستغرق DNS حتى ساعة."
   },
   "storefrontPage": {
     "title": "🛍️ تسوق",
