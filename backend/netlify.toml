@@ -1,0 +1,39 @@
+# ============================================================
+# Optional deployment path — Netlify Functions + any Postgres (Supabase or
+# otherwise). This is NOT the only way to deploy this service; server.js
+# (a traditional always-on Node process) is equally supported and is what
+# you want if you need the realtime layer (Socket.IO) to actually work —
+# see netlify/functions/api.js's header for why that doesn't run here.
+#
+# Deploy this `backend/` folder as its own Netlify site. The frontend
+# (admin dashboard / marketplace pages) is a separate static site — point
+# its VITE_API_URL at this site's URL once deployed (e.g.
+# https://your-safe-stores-api.netlify.app/api).
+# ============================================================
+
+[build]
+  functions = "netlify/functions"
+  # Nothing to actually build — this site has no static content of its
+  # own, only functions. Netlify still requires a publish directory to
+  # exist; point it at an empty folder.
+  publish = "netlify/public"
+  command = "echo 'No build step — functions only'"
+
+[functions]
+  node_bundler = "esbuild"
+  # tesseract.js ships large language-data files not needed by this
+  # service's cloud endpoints (OCR only ever runs locally on desktop) —
+  # excluded so functions stay well under Netlify's bundle size limit.
+  external_node_modules = ["tesseract.js"]
+
+# Every request to /api/* is handled by the single catch-all function,
+# which internally routes via the same Express app server.js uses.
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/api/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/uploads/*"
+  to = "/.netlify/functions/api/uploads/:splat"
+  status = 200

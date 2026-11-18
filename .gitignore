@@ -1,0 +1,52 @@
+# Dependencies
+node_modules
+
+# Environment files — NEVER commit real secrets. Only .env.example files
+# (with placeholder values) belong in the repo.
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Build output
+frontend/dist/
+desktop/dist/
+desktop/frontend-dist/
+mobile/android/app/build/
+mobile/android/.gradle/
+
+# Runtime data — never belongs in git
+backend/uploads/
+desktop/uploads/
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test/coverage output
+coverage/
+
+# OS/editor cruft
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Electron/desktop packaging output
+desktop/out/
+desktop/release/
+
+# Code-signing material — certificates and private keys must NEVER be
+# committed; they belong in a secrets manager or CI secret store only.
+*.p12
+*.pfx
+*.key
+*.pem
+!desktop/**/*.example.*
+
+# Generated at build time (frontend/scripts/licenses.mjs)
+frontend/public/third-party-licenses.json

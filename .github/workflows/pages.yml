@@ -1,26 +1,43 @@
-name: Deploy static site to GitHub Pages
+name: Deploy landing page to GitHub Pages
 
+# Publishes ONLY the static landing page in website/ (with its CNAME) —
+# never the application source. The app itself is deployed separately
+# (see GO_LIVE.md).
 on:
   push:
-    branches:
-      - main
+    branches: [main]
+    paths:
+      - 'website/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
   pages: write
   id-token: write
 
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Upload artifact for GitHub Pages
-        uses: actions/upload-pages-artifact@v1
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload landing page
+        uses: actions/upload-pages-artifact@v3
         with:
-          path: ./
+          path: ./website
 
       - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v1
+        id: deployment
+        uses: actions/deploy-pages@v4
