@@ -1,12 +1,24 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/client.js';
-import { Badge, Toast } from '../../components/ui.jsx';
+import { Badge, Modal, Toast } from '../../components/ui.jsx';
 import { useToast } from '../../components/useToast.js';
 
 export default function Auditors() {
   const [auditors, setAuditors] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [pick, setPick] = useState({});
+  const [review, setReview] = useState(null);
+  const [rejectNote, setRejectNote] = useState('');
+  const openReview = async (id) => { setRejectNote(''); setReview((await api.get(`/super/auditors/${id}`)).data); };
+  // Documents are private: fetch with the Super Admin token, open as a blob.
+  const openDoc = async (d) => {
+    const w = window.open('', '_blank');
+    const r = await api.get(`/super/auditors/${review.id}/documents/${d.id}`, { responseType: 'blob' });
+    const url = URL.createObjectURL(r.data);
+    if (w) w.location = url; else window.location = url;
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  };
+  const decide = (fn, ok) => run(fn, ok).then(() => setReview(null));
   const [toast, showToast] = useToast();
 
   const load = () => {
@@ -77,18 +89,21 @@ export default function Auditors() {
         <h3>Auditors</h3>
         <p className="muted">
           Auditors are independent stock-taking service providers. They apply at <code>/auditor-signup</code>;
-          activate an applicant so you can assign them to store bookings.
+          review each applicant's KYC details and documents, then approve them so you can assign them to store bookings.
         </p>
         <table className="mt-1">
-          <thead><tr><th>Name</th><th>Email</th><th>Status</th><th>Applied</th><th></th></tr></thead>
+          <thead><tr><th>Name</th><th>Email / phone</th><th>Documents</th><th>Status</th><th>Applied</th><th></th></tr></thead>
           <tbody>
             {auditors.map((a) => (
               <tr key={a.id}>
-                <td>{a.name}</td><td>{a.email}</td>
+                <td>{a.name}{a.company && <div className="muted" style={{ fontSize: 11 }}>{a.company}</div>}</td>
+                <td>{a.email}{a.phone && <div className="muted" style={{ fontSize: 11 }}>{a.phone}</div>}</td>
+                <td>{a.doc_count ? `📎 ${a.doc_count}` : <span className="muted">None</span>}</td>
                 <td><Badge status={a.status} /></td>
                 <td>{new Date(a.created_at).toLocaleDateString()}</td>
                 <td className="flex">
-                  {a.status !== 'active' && <button className="btn small" onClick={() => activate(a.id)}>Activate</button>}
+                  <button className="btn small secondary" onClick={() => openReview(a.id)}>Review</button>
+                  {a.status !== 'active' && a.status !== 'pending' && <button className="btn small" onClick={() => activate(a.id)}>Activate</button>}
                   {a.status === 'active' && <button className="btn secondary small" onClick={() => suspend(a.id)}>Suspend</button>}
                 </td>
               </tr>
@@ -97,6 +112,39 @@ export default function Auditors() {
         </table>
         {auditors.length === 0 && <p className="muted">No auditor applications yet. Share the sign-up link: <code>{window.location.origin}/auditor-signup</code></p>}
       </div>
+      {review && (
+        <Modal title={`KYC review — ${review.name}`} onClose={() => setReview(null)}>
+          <p><Badge status={review.status} /> Applied {new Date(review.created_at).toLocaleString()}</p>
+          <table>
+            <tbody>
+              {[['Email', review.email], ['Phone', review.phone], ['Firm', review.company], ['Address', review.address],
+                ['ID', [review.id_type, review.id_number].filter(Boolean).join(' · ')],
+                ['Professional body', [review.professional_body, review.membership_number].filter(Boolean).join(' · ')],
+                ['Experience', review.years_experience != null ? `${review.years_experience} years` : null]].map(([k, v]) => (
+                <tr key={k}><td className="muted">{k}</td><td>{v || '—'}</td></tr>
+              ))}
+            </tbody>
+          </table>
+          <h4 className="mt-1">Documents</h4>
+          {review.documents.length === 0 ? <p className="muted">No documents uploaded (applied before KYC was required).</p> : (
+            <ul>{review.documents.map((d) => (
+              <li key={d.id}><button type="button" className="btn small secondary" onClick={() => openDoc(d)}>
+                📎 {{ id_document: 'Government ID', certificate: 'Certificate', business_reg: 'Business registration', other: 'Other' }[d.doc_type]}
+              </button> <span className="muted" style={{ fontSize: 11 }}>{d.filename} · {Math.round(d.size_bytes / 1024)} KB</span></li>
+            ))}</ul>
+          )}
+          {review.review_note && <p className="muted">Last review note: {review.review_note}</p>}
+          {review.status === 'pending' && (
+            <div className="form-group mt-1"><label htmlFor="rej-note">Reason if rejecting (the applicant sees this)</label>
+              <input id="rej-note" value={rejectNote} onChange={(e) => setRejectNote(e.target.value)} placeholder="e.g. Certificate is not readable" /></div>
+          )}
+          <div className="modal-actions">
+            {review.status !== 'active' && <button className="btn" onClick={() => decide(() => api.patch(`/super/auditors/${review.id}/activate`), 'Auditor approved')}>✅ Approve & activate</button>}
+            {review.status === 'pending' && <button className="btn secondary" onClick={() => decide(() => api.patch(`/super/auditors/${review.id}/reject`, { note: rejectNote }), 'Application rejected')}>Reject</button>}
+            <button className="btn secondary" onClick={() => setReview(null)}>Close</button>
+          </div>
+        </Modal>
+      )}
       <Toast {...(toast || {})} />
     </div>
   );

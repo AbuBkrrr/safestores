@@ -9,20 +9,83 @@ const { generateInviteCode } = require('../utils/codes');
 
 // POST /api/auth/auditor/signup — public; lands as 'pending' until activated
 async function auditorSignup(req, res) {
-  const { name, email, password } = req.body;
+  const b = req.body || {};
+  const { name, email, password } = b;
   if (!name || !email || !password) return res.status(400).json({ error: 'name, email, and password are required' });
+  if (String(password).length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters' });
+  const files = req.files || {};
+  if (!files.idDocument?.[0] || !files.certificate?.[0]) {
+    return res.status(400).json({ error: 'Upload a government ID and your professional certificate' });
+  }
+  if (!b.phone || !b.idType || !b.idNumber) return res.status(400).json({ error: 'Phone, ID type and ID number are required' });
   const passwordHash = await bcrypt.hash(password, 10);
+  const clip = (v, n) => (v == null || v === '' ? null : String(v).trim().slice(0, n));
+  const client = await db.pool.connect();
   try {
-    const { rows } = await db.query(
-      `INSERT INTO auditors (name, email, password_hash) VALUES ($1,$2,$3) RETURNING id, name, email, status`,
-      [name, email, passwordHash]
+    await client.query('BEGIN');
+    const { rows } = await client.query(
+      `INSERT INTO auditors (name, email, password_hash, phone, company, address, id_type, id_number, professional_body, membership_number, years_experience)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id, name, email, status`,
+      [clip(name, 120), String(email).trim().toLowerCase(), passwordHash, clip(b.phone, 40), clip(b.company, 160), clip(b.address, 1000),
+        clip(b.idType, 40), clip(b.idNumber, 60), clip(b.professionalBody, 120), clip(b.membershipNumber, 60),
+        Number.isFinite(Number(b.yearsExperience)) && b.yearsExperience !== '' ? Math.max(0, Math.min(80, parseInt(b.yearsExperience, 10))) : null]
     );
-    res.status(201).json({ message: 'Application received — a Super Admin will review and activate your account.', auditor: rows[0] });
+    const docs = [['idDocument', 'id_document'], ['certificate', 'certificate'], ['businessReg', 'business_reg'], ['other', 'other']];
+    for (const [field, type] of docs) {
+      for (const f of files[field] || []) {
+        await client.query(
+          `INSERT INTO auditor_documents (auditor_id, doc_type, filename, mime_type, size_bytes, data) VALUES ($1,$2,$3,$4,$5,$6)`,
+          [rows[0].id, type, String(f.originalname).slice(0, 200), f.mimetype, f.size, f.buffer]
+        );
+      }
+    }
+    await client.query('COMMIT');
+    res.status(201).json({ message: 'Application received — we will review your documents and activate your account.', auditor: rows[0] });
   } catch (err) {
+    await client.query('ROLLBACK');
     if (err.code === '23505') return res.status(409).json({ error: 'An auditor account with this email already exists' });
     console.error(err);
     res.status(500).json({ error: 'Signup failed' });
+  } finally {
+    client.release();
   }
+}
+
+// GET /api/super/auditors/:id — full KYC details + document list
+async function getAuditorSuper(req, res) {
+  const { rows } = await db.query(
+    `SELECT id, name, email, status, phone, company, address, id_type, id_number, professional_body, membership_number,
+            years_experience, review_note, reviewed_at, created_at FROM auditors WHERE id = $1`, [req.params.id]
+  );
+  if (!rows[0]) return res.status(404).json({ error: 'Auditor not found' });
+  const docs = await db.query(
+    'SELECT id, doc_type, filename, mime_type, size_bytes, created_at FROM auditor_documents WHERE auditor_id = $1 ORDER BY created_at', [req.params.id]
+  );
+  res.json({ ...rows[0], documents: docs.rows });
+}
+
+// GET /api/super/auditors/:id/documents/:docId — streams the file (Super Admin only)
+async function getAuditorDocumentSuper(req, res) {
+  const { rows } = await db.query(
+    'SELECT filename, mime_type, data FROM auditor_documents WHERE id = $1 AND auditor_id = $2', [req.params.docId, req.params.id]
+  );
+  if (!rows[0]) return res.status(404).json({ error: 'Document not found' });
+  res.set('Content-Type', rows[0].mime_type);
+  res.set('Content-Disposition', `inline; filename="${rows[0].filename.replace(/[^\w.\- ]/g, '_')}"`);
+  res.set('Cache-Control', 'private, no-store');
+  res.set('X-Content-Type-Options', 'nosniff');
+  res.send(rows[0].data);
+}
+
+// PATCH /api/super/auditors/:id/reject  { note }
+async function rejectAuditor(req, res) {
+  const note = String(req.body?.note || '').trim().slice(0, 500) || null;
+  const { rows } = await db.query(
+    `UPDATE auditors SET status = 'rejected', review_note = $1, reviewed_at = now() WHERE id = $2 AND status = 'pending' RETURNING id, name, email, status`,
+    [note, req.params.id]
+  );
+  if (!rows[0]) return res.status(400).json({ error: 'Only a pending application can be rejected' });
+  res.json(rows[0]);
 }
 
 // POST /api/auth/auditor/login
@@ -35,7 +98,11 @@ async function auditorLogin(req, res) {
     return res.status(401).json({ error: 'Invalid credentials' });
   }
   if (auditor.status !== 'active') {
-    return res.status(403).json({ error: `Your auditor account is ${auditor.status}. Contact the platform to activate it.` });
+    return res.status(403).json({ error: auditor.status === 'pending'
+      ? 'Your application is still under review.'
+      : auditor.status === 'rejected'
+        ? `Your application was not approved${auditor.review_note ? `: ${auditor.review_note}` : '.'}`
+        : `Your auditor account is ${auditor.status}. Contact the platform.` });
   }
   const token = signToken({ sub: auditor.id, role: 'auditor', storeId: null });
   res.json({ token, user: { id: auditor.id, name: auditor.name, email: auditor.email, role: 'auditor' } });
@@ -43,7 +110,7 @@ async function auditorLogin(req, res) {
 
 // GET /api/super/auditors
 async function listAuditors(req, res) {
-  const { rows } = await db.query('SELECT id, name, email, status, created_at FROM auditors ORDER BY created_at DESC');
+  const { rows } = await db.query(`SELECT a.id, a.name, a.email, a.status, a.company, a.phone, a.created_at, (SELECT COUNT(*)::int FROM auditor_documents d WHERE d.auditor_id = a.id) AS doc_count FROM auditors a ORDER BY (a.status = 'pending') DESC, a.created_at DESC`);
   res.json(rows);
 }
 
@@ -51,7 +118,7 @@ async function listAuditors(req, res) {
 async function activateAuditor(req, res) {
   const { id } = req.params;
   const { rows } = await db.query(
-    `UPDATE auditors SET status = 'active', activated_by = $1 WHERE id = $2 RETURNING id, name, email, status`,
+    `UPDATE auditors SET status = 'active', activated_by = $1, reviewed_at = now(), review_note = NULL WHERE id = $2 RETURNING id, name, email, status`,
     [req.user.sub, id]
   );
   if (!rows[0]) return res.status(404).json({ error: 'Auditor not found' });
@@ -219,6 +286,7 @@ async function inviteStockTaker(req, res) {
 }
 
 module.exports = {
+  getAuditorSuper, getAuditorDocumentSuper, rejectAuditor,
   declineEngagement, listAllEngagementsSuper, assignEngagementSuper, cancelEngagementSuper,
   auditorSignup, auditorLogin, listAuditors, activateAuditor, suspendAuditor,
   requestEngagement, listStoreEngagements, listAuditorEngagements,

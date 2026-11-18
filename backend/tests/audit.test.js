@@ -16,10 +16,19 @@ async function createActiveAuditor(overrides = {}) {
   return { ...auditor, token: auditorToken(auditor) };
 }
 
+const PNG = Buffer.from('89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c4890000000d4944415478da63f8ffff3f0005fe02fea7d6a4500000000049454e44ae426082', 'hex');
+function applyAsAuditor(name, email, { docs = true } = {}) {
+  let r = request().post('/api/auth/auditor/signup')
+    .field('name', name).field('email', email).field('password', 'Password123!')
+    .field('phone', '08030000000').field('idType', 'NIN').field('idNumber', '12345678901').field('professionalBody', 'ICAN');
+  if (docs) r = r.attach('idDocument', PNG, { filename: 'id.png', contentType: 'image/png' }).attach('certificate', PNG, { filename: 'cert.png', contentType: 'image/png' });
+  return r;
+}
+
 describe('Auditor accounts', () => {
   it('signs up pending, cannot log in until a super admin activates', async () => {
     const email = 'pending@auditor.com';
-    const signup = await request().post('/api/auth/auditor/signup').send({ name: 'Pending Pete', email, password: 'Password123!' });
+    const signup = await applyAsAuditor('Pending Pete', email);
     expect(signup.status).toBe(201);
     expect(signup.body.auditor.status).toBe('pending');
 
@@ -35,15 +44,15 @@ describe('Auditor accounts', () => {
   });
 
   it('rejects duplicate auditor signup email', async () => {
-    await request().post('/api/auth/auditor/signup').send({ name: 'A', email: 'dup@auditor.com', password: 'Password123!' });
-    const res = await request().post('/api/auth/auditor/signup').send({ name: 'B', email: 'dup@auditor.com', password: 'Password123!' });
+    await applyAsAuditor('A', 'dup@auditor.com');
+    const res = await applyAsAuditor('B', 'dup@auditor.com');
     expect(res.status).toBe(409);
   });
 
   it('a suspended auditor is blocked from logging in', async () => {
     const superAdmin = await createSuperAdmin();
     const email = 'susp@auditor.com';
-    const signup = await request().post('/api/auth/auditor/signup').send({ name: 'S', email, password: 'Password123!' });
+    const signup = await applyAsAuditor('S', email);
     await request().patch(`/api/super/auditors/${signup.body.auditor.id}/activate`).set('Authorization', `Bearer ${superToken(superAdmin)}`);
     await request().patch(`/api/super/auditors/${signup.body.auditor.id}/suspend`).set('Authorization', `Bearer ${superToken(superAdmin)}`);
 
@@ -195,5 +204,31 @@ describe('stock_taker shelf-audit access is time-boxed to an active engagement',
     const res = await request().post(`/api/stores/${store.id}/audits`).set('Authorization', `Bearer ${token}`)
       .send({ productId: product.id, countedQty: 1, area: 'shelf' });
     expect(res.status).toBe(201);
+  });
+});
+
+describe('Auditor KYC', () => {
+  it('requires documents; Super Admin reviews details + documents privately, then rejects or activates', async () => {
+    expect((await applyAsAuditor('NoDocs', 'nodocs@a.com', { docs: false })).status).toBe(400);
+    const app = await applyAsAuditor('Jamal', 'jamal@a.com');
+    expect(app.status).toBe(201);
+    const id = app.body.auditor.id;
+    const S = `Bearer ${superToken(await createSuperAdmin())}`;
+
+    const detail = await request().get(`/api/super/auditors/${id}`).set('Authorization', S);
+    expect(detail.body).toMatchObject({ id_type: 'NIN', id_number: '12345678901', professional_body: 'ICAN' });
+    expect(detail.body.documents.map((d) => d.doc_type).sort()).toEqual(['certificate', 'id_document']);
+    const doc = await request().get(`/api/super/auditors/${id}/documents/${detail.body.documents[0].id}`).set('Authorization', S);
+    expect(doc.status).toBe(200);
+    expect(doc.headers['content-type']).toMatch(/image\/png/);
+    // Not public: no token, or an auditor's own token, is refused.
+    expect((await request().get(`/api/super/auditors/${id}/documents/${detail.body.documents[0].id}`)).status).toBe(401);
+
+    expect((await request().patch(`/api/super/auditors/${id}/reject`).set('Authorization', S).send({ note: 'Certificate unreadable' })).status).toBe(200);
+    const login = await request().post('/api/auth/auditor/login').send({ email: 'jamal@a.com', password: 'Password123!' });
+    expect(login.status).toBe(403);
+    expect(login.body.error).toMatch(/Certificate unreadable/);
+    expect((await request().patch(`/api/super/auditors/${id}/activate`).set('Authorization', S)).status).toBe(200);
+    expect((await request().post('/api/auth/auditor/login').send({ email: 'jamal@a.com', password: 'Password123!' })).status).toBe(200);
   });
 });
