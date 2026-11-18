@@ -250,6 +250,42 @@ async function getStoreOrder(req, res) {
   res.json({ ...orderRes.rows[0], items: items.rows });
 }
 
+// Review steps before fulfilment (see migration 043):
+// PATCH …/confirm   { method: 'pickup'|'delivery', note? }  placed → confirmed
+// PATCH …/dispatch  { note? }  confirmed → ready_for_pickup | out_for_delivery
+const STATUS_NOTE = (v) => (v === undefined ? undefined : String(v || '').trim().slice(0, 300) || null);
+
+async function confirmOrder(req, res) {
+  const { storeId, orderId } = req.params;
+  const { method } = req.body || {};
+  if (!['pickup', 'delivery'].includes(method)) return res.status(400).json({ error: "method must be 'pickup' or 'delivery'" });
+  const note = STATUS_NOTE(req.body.note);
+  const { rows } = await db.query(
+    `UPDATE marketplace_orders SET status = 'confirmed', fulfilment_method = $1, reviewed_by = $2, confirmed_at = now(),
+            status_note = COALESCE($3, status_note)
+     WHERE id = $4 AND store_id = $5 AND status = 'placed' RETURNING *`,
+    [method, req.user.sub || null, note ?? null, orderId, storeId]
+  );
+  if (!rows[0]) return res.status(400).json({ error: 'Only a new (placed) order can be confirmed' });
+  emitToStore(storeId, 'marketplace:order_updated', { id: orderId, status: 'confirmed' });
+  res.json(rows[0]);
+}
+
+async function dispatchOrder(req, res) {
+  const { storeId, orderId } = req.params;
+  const note = STATUS_NOTE(req.body?.note);
+  const { rows } = await db.query(
+    `UPDATE marketplace_orders
+        SET status = CASE fulfilment_method WHEN 'delivery' THEN 'out_for_delivery' ELSE 'ready_for_pickup' END,
+            dispatched_at = now(), status_note = COALESCE($1, status_note)
+      WHERE id = $2 AND store_id = $3 AND status = 'confirmed' RETURNING *`,
+    [note ?? null, orderId, storeId]
+  );
+  if (!rows[0]) return res.status(400).json({ error: 'Confirm pickup or delivery first' });
+  emitToStore(storeId, 'marketplace:order_updated', { id: orderId, status: rows[0].status });
+  res.json(rows[0]);
+}
+
 // PATCH /api/stores/:storeId/marketplace/orders/:orderId/fulfill
 // Deducts stock now (a real 'sale' movement per line), same as a POS checkout.
 async function fulfillOrder(req, res) {
@@ -261,9 +297,13 @@ async function fulfillOrder(req, res) {
       `SELECT * FROM marketplace_orders WHERE id = $1 AND store_id = $2 FOR UPDATE`, [orderId, storeId]
     );
     const order = orderRes.rows[0];
-    if (!order || order.status !== 'placed') {
+    if (!order || !['ready_for_pickup', 'out_for_delivery'].includes(order.status)) {
       await client.query('ROLLBACK');
-      return res.status(400).json({ error: 'Order not found or already resolved' });
+      return res.status(400).json({
+        error: order && ['placed', 'confirmed'].includes(order.status)
+          ? 'Review the order first: confirm pickup or delivery, then mark it ready / out for delivery'
+          : 'Order not found or already resolved',
+      });
     }
     const items = await client.query('SELECT * FROM marketplace_order_items WHERE marketplace_order_id = $1', [orderId]);
     for (const item of items.rows) {
@@ -330,7 +370,7 @@ async function cancelOrder(req, res) {
       `SELECT * FROM marketplace_orders WHERE id = $1 AND store_id = $2 FOR UPDATE`, [orderId, storeId]
     );
     const order = rows[0];
-    if (!order || !['placed', 'confirmed'].includes(order.status)) {
+    if (!order || !['placed', 'confirmed', 'ready_for_pickup', 'out_for_delivery'].includes(order.status)) {
       await client.query('ROLLBACK');
       return res.status(400).json({ error: 'Order not found or already resolved' });
     }
@@ -370,6 +410,7 @@ async function markRefunded(req, res) {
 }
 
 module.exports = {
+  confirmOrder, dispatchOrder,
   cancelOrder, markRefunded,
   browseProducts, listStores, searchProducts, customerSignup, customerLogin, placeOrder, listMyOrders,
   listStoreOrders, getStoreOrder, fulfillOrder,

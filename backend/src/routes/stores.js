@@ -87,11 +87,13 @@ router.patch('/marketplace-profile', requireAuthOrStoreSyncKey('admin', 'manager
 
 // Marketplace order management — same dual-mode reasoning as above;
 // desktop's marketplaceController.js proxies all three with the sync key.
-router.get('/marketplace/orders', requireAuthOrStoreSyncKey('admin', 'manager'), marketplaceCtrl.listStoreOrders);
-router.get('/marketplace/orders/:orderId', requireAuthOrStoreSyncKey('admin', 'manager'), marketplaceCtrl.getStoreOrder);
-router.patch('/marketplace/orders/:orderId/fulfill', requireAuthOrStoreSyncKey('admin', 'manager'), marketplaceCtrl.fulfillOrder);
-router.patch('/marketplace/orders/:orderId/cancel', requireAuthOrStoreSyncKey('admin', 'manager'), marketplaceCtrl.cancelOrder);
-router.patch('/marketplace/orders/:orderId/refunded', requireAuthOrStoreSyncKey('admin', 'manager'), marketplaceCtrl.markRefunded);
+router.get('/marketplace/orders', requireAuthOrStoreSyncKey('admin', 'manager', 'marketplace_manager'), marketplaceCtrl.listStoreOrders);
+router.get('/marketplace/orders/:orderId', requireAuthOrStoreSyncKey('admin', 'manager', 'marketplace_manager'), marketplaceCtrl.getStoreOrder);
+router.patch('/marketplace/orders/:orderId/confirm', requireAuthOrStoreSyncKey('admin', 'manager', 'marketplace_manager'), marketplaceCtrl.confirmOrder);
+router.patch('/marketplace/orders/:orderId/dispatch', requireAuthOrStoreSyncKey('admin', 'manager', 'marketplace_manager'), marketplaceCtrl.dispatchOrder);
+router.patch('/marketplace/orders/:orderId/fulfill', requireAuthOrStoreSyncKey('admin', 'manager', 'marketplace_manager'), marketplaceCtrl.fulfillOrder);
+router.patch('/marketplace/orders/:orderId/cancel', requireAuthOrStoreSyncKey('admin', 'manager', 'marketplace_manager'), marketplaceCtrl.cancelOrder);
+router.patch('/marketplace/orders/:orderId/refunded', requireAuthOrStoreSyncKey('admin', 'manager', 'marketplace_manager'), marketplaceCtrl.markRefunded);
 
 // Everything else on this router is a specific staff member's action
 // (or, for the eleven routes above, either that or the store-as-a-whole

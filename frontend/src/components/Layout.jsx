@@ -58,7 +58,7 @@ const storeNav = [
 const marketplaceNav = [
   { group: 'storeOperations', to: '/transfers', navKey: 'transfers', icon: '🚛', roles: ['admin', 'manager'] },
   { group: 'marketplace', to: '/auditor-tab', navKey: 'hireAuditor', icon: '🕵️' },
-  { group: 'marketplace', to: '/marketplace', navKey: 'marketplace', icon: '🛍️' },
+  { group: 'marketplace', to: '/marketplace', navKey: 'marketplace', icon: '🛍️', roles: ['admin', 'manager', 'marketplace_manager'] },
   { group: 'marketplace', to: '/settlements', navKey: 'settlements', icon: '💱', roles: ['admin', 'manager'] },
   { group: 'lending', to: '/lending-partners', navKey: 'lendingPartners', icon: '🏦', roles: ['admin'] },
 ];

@@ -46,7 +46,9 @@
       "used": "已使用",
       "claimed": "已认领",
       "rejected": "已拒绝",
-      "applied": "已应用"
+      "applied": "已应用",
+      "ready_for_pickup": "待取货",
+      "out_for_delivery": "配送中"
     }
   },
   "nav": {
@@ -503,7 +505,8 @@
     "auditor": "审计员",
     "cashier": "收银员",
     "checkout": "收银台",
-    "stock_taker": "盘点员"
+    "stock_taker": "盘点员",
+    "marketplace_manager": "线上商城经理"
   },
   "invitesPage": {
     "title": "邀请管理",
@@ -1003,7 +1006,28 @@
     "dnsStep3": "最多等待一小时，然后点击检查。HTTPS 会自动配置。",
     "checkDns": "检查连接",
     "dnsOk": "{{domain}} 已连接：",
-    "dnsNotYet": "尚未指向此处——DNS 生效可能需要一小时。"
+    "dnsNotYet": "尚未指向此处——DNS 生效可能需要一小时。",
+    "review": "审核",
+    "view": "查看",
+    "orderTitle": "订单 {{ref}}",
+    "customerNote": "顾客备注",
+    "item": "商品",
+    "qty": "数量",
+    "howFulfil": "此订单如何交到顾客手中？",
+    "method_delivery": "配送",
+    "method_pickup": "到店自取",
+    "noteForCustomer": "给顾客的备注（显示在追踪页面）",
+    "notePhDelivery": "如：骑手 Musa，0803…，下午4点前送达",
+    "notePhPickup": "如：下午2点后到前台取货",
+    "confirmDelivery": "确认配送",
+    "confirmPickup": "确认自取",
+    "outForDelivery": "标记为配送中",
+    "readyForPickup": "标记为待取货",
+    "markDelivered": "已送达——完成订单",
+    "markCollected": "已取货——完成订单",
+    "trackingPage": "顾客追踪页面",
+    "confirmedToast": "订单已确认——顾客可在追踪页面看到",
+    "dispatchedToast": "已通知顾客"
   },
   "storefrontPage": {
     "title": "🛍️ 商店",
@@ -1493,7 +1517,12 @@
     "cancelled": "此订单已取消。",
     "steps": {
       "placed": "已收到订单",
-      "fulfilled": "已备好 / 已送达"
+      "fulfilled": "已备好 / 已送达",
+      "confirmed": "商家已确认",
+      "ready_for_pickup": "待取货",
+      "out_for_delivery": "配送中",
+      "fulfilled_pickup": "已取货",
+      "fulfilled_delivery": "已送达"
     },
     "questions": "有疑问？请致电门店：",
     "paid": "已付款",
@@ -1504,7 +1533,8 @@
     "paymentNotConfirmed": "暂时无法确认付款。如已扣款，稍后会自动更新。",
     "emailPrompt": "用于接收付款收据的邮箱：",
     "refundPending": "您已在线付款，门店将为您退款。如几天内仍未收到，请联系门店。",
-    "refundDone": "门店已标记您的退款已发出。"
+    "refundDone": "门店已标记您的退款已发出。",
+    "storeNote": "商家留言"
   },
   "onboarding": {
     "title": "准备好您的门店",

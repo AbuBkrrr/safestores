@@ -46,7 +46,9 @@
       "used": "Used",
       "claimed": "Claimed",
       "rejected": "Rejected",
-      "applied": "Applied"
+      "applied": "Applied",
+      "ready_for_pickup": "Ready for pickup",
+      "out_for_delivery": "Out for delivery"
     }
   },
   "nav": {
@@ -503,7 +505,8 @@
     "auditor": "Auditor",
     "cashier": "Cashier",
     "checkout": "Checkout",
-    "stock_taker": "Stock taker"
+    "stock_taker": "Stock taker",
+    "marketplace_manager": "Online market manager"
   },
   "invitesPage": {
     "title": "Invite Management",
@@ -1003,7 +1006,28 @@
     "dnsStep3": "Wait up to an hour, then press Check. HTTPS is set up automatically.",
     "checkDns": "Check connection",
     "dnsOk": "{{domain}} is connected:",
-    "dnsNotYet": "Not pointing here yet — DNS can take up to an hour. Also make sure your shop is listed on the marketplace."
+    "dnsNotYet": "Not pointing here yet — DNS can take up to an hour. Also make sure your shop is listed on the marketplace.",
+    "review": "Review",
+    "view": "View",
+    "orderTitle": "Order {{ref}}",
+    "customerNote": "Customer note",
+    "item": "Item",
+    "qty": "Qty",
+    "howFulfil": "How will this order reach the customer?",
+    "method_delivery": "Delivery",
+    "method_pickup": "Pickup",
+    "noteForCustomer": "Note for the customer (shows on their tracking page)",
+    "notePhDelivery": "e.g. Rider Musa, 0803…, arriving by 4pm",
+    "notePhPickup": "e.g. Collect from the front desk after 2pm",
+    "confirmDelivery": "Confirm for delivery",
+    "confirmPickup": "Confirm for pickup",
+    "outForDelivery": "Mark out for delivery",
+    "readyForPickup": "Mark ready for pickup",
+    "markDelivered": "Delivered — fulfil order",
+    "markCollected": "Collected — fulfil order",
+    "trackingPage": "Customer tracking page",
+    "confirmedToast": "Order confirmed — the customer can see it on their tracking page",
+    "dispatchedToast": "Customer updated"
   },
   "storefrontPage": {
     "title": "🛍️ Shop",
@@ -1493,7 +1517,12 @@
     "cancelled": "This order was cancelled.",
     "steps": {
       "placed": "Order received",
-      "fulfilled": "Ready / delivered"
+      "fulfilled": "Ready / delivered",
+      "confirmed": "Confirmed by the store",
+      "ready_for_pickup": "Ready for pickup",
+      "out_for_delivery": "Out for delivery",
+      "fulfilled_pickup": "Collected",
+      "fulfilled_delivery": "Delivered"
     },
     "questions": "Questions? Call the store:",
     "paid": "Paid",
@@ -1504,7 +1533,8 @@
     "paymentNotConfirmed": "We couldn't confirm the payment yet. If you were charged, it will update shortly.",
     "emailPrompt": "Your email address for the payment receipt:",
     "refundPending": "You paid online, so the store will refund you. Contact the store if you have not received it within a few days.",
-    "refundDone": "The store has marked your refund as sent."
+    "refundDone": "The store has marked your refund as sent.",
+    "storeNote": "Message from the store"
   },
   "onboarding": {
     "title": "Get your store ready",

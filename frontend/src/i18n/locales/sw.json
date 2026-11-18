@@ -46,7 +46,9 @@
       "used": "Imetumika",
       "claimed": "Imedaiwa",
       "rejected": "Imekataliwa",
-      "applied": "Imetekelezwa"
+      "applied": "Imetekelezwa",
+      "ready_for_pickup": "Tayari kuchukuliwa",
+      "out_for_delivery": "Inasafirishwa"
     }
   },
   "nav": {
@@ -503,7 +505,8 @@
     "auditor": "Mkaguzi",
     "cashier": "Mtoza pesa",
     "checkout": "Malipo",
-    "stock_taker": "Mhesabu bidhaa"
+    "stock_taker": "Mhesabu bidhaa",
+    "marketplace_manager": "Meneja wa soko la mtandaoni"
   },
   "invitesPage": {
     "title": "Usimamizi wa Mialiko",
@@ -1003,7 +1006,28 @@
     "dnsStep3": "Subiri hadi saa moja, kisha bonyeza Angalia. HTTPS huwekwa kiotomatiki.",
     "checkDns": "Angalia muunganisho",
     "dnsOk": "{{domain}} imeunganishwa:",
-    "dnsNotYet": "Bado haielekei hapa — DNS inaweza kuchukua hadi saa moja."
+    "dnsNotYet": "Bado haielekei hapa — DNS inaweza kuchukua hadi saa moja.",
+    "review": "Kagua",
+    "view": "Tazama",
+    "orderTitle": "Agizo {{ref}}",
+    "customerNote": "Ujumbe wa mteja",
+    "item": "Bidhaa",
+    "qty": "Idadi",
+    "howFulfil": "Agizo hili litamfikiaje mteja?",
+    "method_delivery": "Usafirishaji",
+    "method_pickup": "Kuchukua dukani",
+    "noteForCustomer": "Ujumbe kwa mteja (unaonekana kwenye ufuatiliaji)",
+    "notePhDelivery": "mf. Msafirishaji Musa, 0803…, atafika saa 10 jioni",
+    "notePhPickup": "mf. Chukua mapokezi baada ya saa 8 mchana",
+    "confirmDelivery": "Thibitisha kwa usafirishaji",
+    "confirmPickup": "Thibitisha kwa kuchukua",
+    "outForDelivery": "Weka inasafirishwa",
+    "readyForPickup": "Weka tayari kuchukuliwa",
+    "markDelivered": "Imefikishwa — kamilisha",
+    "markCollected": "Imechukuliwa — kamilisha",
+    "trackingPage": "Ukurasa wa ufuatiliaji",
+    "confirmedToast": "Agizo limethibitishwa — mteja anaona kwenye ufuatiliaji",
+    "dispatchedToast": "Mteja amejulishwa"
   },
   "storefrontPage": {
     "title": "🛍️ Duka",
@@ -1493,7 +1517,12 @@
     "cancelled": "Agizo hili limeghairiwa.",
     "steps": {
       "placed": "Agizo limepokelewa",
-      "fulfilled": "Tayari / limeletwa"
+      "fulfilled": "Tayari / limeletwa",
+      "confirmed": "Imethibitishwa na duka",
+      "ready_for_pickup": "Tayari kuchukuliwa",
+      "out_for_delivery": "Inasafirishwa",
+      "fulfilled_pickup": "Imechukuliwa",
+      "fulfilled_delivery": "Imefikishwa"
     },
     "questions": "Maswali? Piga simu dukani:",
     "paid": "Imelipwa",
@@ -1504,7 +1533,8 @@
     "paymentNotConfirmed": "Bado hatujaweza kuthibitisha malipo. Ikiwa umekatwa pesa, itasasishwa hivi karibuni.",
     "emailPrompt": "Barua pepe yako kwa risiti ya malipo:",
     "refundPending": "Ulilipa mtandaoni, kwa hiyo duka litakurudishia pesa. Wasiliana na duka ikiwa hujazipokea ndani ya siku chache.",
-    "refundDone": "Duka limeweka alama kuwa marejesho yako yametumwa."
+    "refundDone": "Duka limeweka alama kuwa marejesho yako yametumwa.",
+    "storeNote": "Ujumbe kutoka dukani"
   },
   "onboarding": {
     "title": "Andaa duka lako",

@@ -3,7 +3,7 @@ const router = require('express').Router();
 const ctrl = require('../controllers/accountController');
 const { requireAuth, requireRole } = require('../middleware/auth');
 
-const PEOPLE = ['super_admin', 'admin', 'manager', 'staff', 'cashier', 'checkout', 'stock_taker'];
+const PEOPLE = ['super_admin', 'admin', 'manager', 'staff', 'cashier', 'checkout', 'stock_taker', 'marketplace_manager'];
 router.use(requireAuth, requireRole(...PEOPLE));
 
 router.get('/me', ctrl.me);

@@ -6,7 +6,7 @@ const { checkPassword } = require('../utils/passwordPolicy');
 const { logActivity } = require('../utils/activityLog');
 
 // Every role a store user can be invited as.
-const INVITE_ROLES = ['admin', 'manager', 'cashier', 'checkout', 'staff', 'stock_taker', 'auditor'];
+const INVITE_ROLES = ['admin', 'manager', 'cashier', 'checkout', 'staff', 'stock_taker', 'marketplace_manager', 'auditor'];
 
 // GET /api/stores/:storeId/users
 function listUsers(req, res) {

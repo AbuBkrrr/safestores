@@ -46,7 +46,9 @@
       "used": "Ti lò",
       "claimed": "Ti béèrè fún",
       "rejected": "Ti kọ̀",
-      "applied": "Ti fi ṣiṣẹ́"
+      "applied": "Ti fi ṣiṣẹ́",
+      "ready_for_pickup": "Ṣetan fun gbigba",
+      "out_for_delivery": "N lọ fun ifijiṣẹ"
     }
   },
   "nav": {
@@ -503,7 +505,8 @@
     "auditor": "Olùṣàyẹ̀wò",
     "cashier": "Olùgba owó",
     "checkout": "Ibi isanwo",
-    "stock_taker": "Oluka ọja"
+    "stock_taker": "Oluka ọja",
+    "marketplace_manager": "Alakoso ọja ori ayelujara"
   },
   "invitesPage": {
     "title": "Ìṣàkóso Ìpè",
@@ -1003,7 +1006,28 @@
     "dnsStep3": "Duro to wakati kan, lẹhinna tẹ Ṣayẹwo. HTTPS yoo ṣeto funrararẹ.",
     "checkDns": "Ṣayẹwo asopọ",
     "dnsOk": "{{domain}} ti sopọ:",
-    "dnsNotYet": "Ko tii tọka sibi — DNS le gba to wakati kan."
+    "dnsNotYet": "Ko tii tọka sibi — DNS le gba to wakati kan.",
+    "review": "Ṣe ayẹwo",
+    "view": "Wo",
+    "orderTitle": "Aṣẹ {{ref}}",
+    "customerNote": "Akọsilẹ onibara",
+    "item": "Ohun kan",
+    "qty": "Iye",
+    "howFulfil": "Bawo ni aṣẹ yii yoo ṣe de ọdọ onibara?",
+    "method_delivery": "Ifijiṣẹ",
+    "method_pickup": "Gbigba ni ṣọọbu",
+    "noteForCustomer": "Akọsilẹ fun onibara (o han lori oju-iwe titele)",
+    "notePhDelivery": "f.a. Olùfijiṣẹ Musa, 0803…, yoo de ṣaaju 4",
+    "notePhPickup": "f.a. Gba ni tabili iwaju lẹhin 2",
+    "confirmDelivery": "Jẹrisi fun ifijiṣẹ",
+    "confirmPickup": "Jẹrisi fun gbigba",
+    "outForDelivery": "Samisi gẹgẹ bi n lọ fun ifijiṣẹ",
+    "readyForPickup": "Samisi gẹgẹ bi ṣetan fun gbigba",
+    "markDelivered": "Ti fi jiṣẹ — pari aṣẹ",
+    "markCollected": "A ti gba — pari aṣẹ",
+    "trackingPage": "Oju-iwe titele onibara",
+    "confirmedToast": "A ti jẹrisi aṣẹ — onibara le ri i",
+    "dispatchedToast": "A ti fi to onibara leti"
   },
   "storefrontPage": {
     "title": "🛍️ Ilé Ìtajà",
@@ -1493,7 +1517,12 @@
     "cancelled": "A ti fagilé àṣẹ yìí.",
     "steps": {
       "placed": "A ti gba àṣẹ",
-      "fulfilled": "Ó ti ṣetán / a ti kó o dé"
+      "fulfilled": "Ó ti ṣetán / a ti kó o dé",
+      "confirmed": "Ṣọọbu ti jẹrisi",
+      "ready_for_pickup": "Ṣetan fun gbigba",
+      "out_for_delivery": "N lọ fun ifijiṣẹ",
+      "fulfilled_pickup": "A ti gba",
+      "fulfilled_delivery": "A ti fi jiṣẹ"
     },
     "questions": "Ìbéèrè? Pe ṣọ́ọ̀bù:",
     "paid": "A ti san",
@@ -1504,7 +1533,8 @@
     "paymentNotConfirmed": "A kò tíì lè jẹ́rìí ìsanwó. Tí a bá ti yọ owó lọ́wọ́ rẹ, yóò ṣe àtúnṣe láìpẹ́.",
     "emailPrompt": "Ímeèlì rẹ fún rìsíìtì ìsanwó:",
     "refundPending": "O sanwó lórí ayélujára, nítorí náà ṣọ́ọ̀bù yóò dá owó rẹ padà. Kàn sí ṣọ́ọ̀bù tí o kò bá rí i gbà láàrin ọjọ́ díẹ̀.",
-    "refundDone": "Ṣọ́ọ̀bù ti sàmì sí pé a ti fi ìdápadà rẹ ránṣẹ́."
+    "refundDone": "Ṣọ́ọ̀bù ti sàmì sí pé a ti fi ìdápadà rẹ ránṣẹ́.",
+    "storeNote": "Ifiranṣẹ lati ṣọọbu"
   },
   "onboarding": {
     "title": "Ṣètò ṣọ́ọ̀bù rẹ",

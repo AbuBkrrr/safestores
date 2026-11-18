@@ -46,7 +46,9 @@
       "used": "Utilisé",
       "claimed": "Réclamé",
       "rejected": "Rejeté",
-      "applied": "Appliqué"
+      "applied": "Appliqué",
+      "ready_for_pickup": "Prête au retrait",
+      "out_for_delivery": "En livraison"
     }
   },
   "nav": {
@@ -503,7 +505,8 @@
     "auditor": "Auditeur",
     "cashier": "Caissier",
     "checkout": "Caisse",
-    "stock_taker": "Inventoriste"
+    "stock_taker": "Inventoriste",
+    "marketplace_manager": "Gestionnaire boutique en ligne"
   },
   "invitesPage": {
     "title": "Gestion des invitations",
@@ -1003,7 +1006,28 @@
     "dnsStep3": "Patientez jusqu’à une heure, puis cliquez sur Vérifier. Le HTTPS est configuré automatiquement.",
     "checkDns": "Vérifier la connexion",
     "dnsOk": "{{domain}} est connecté :",
-    "dnsNotYet": "Pas encore dirigé ici — le DNS peut prendre jusqu’à une heure."
+    "dnsNotYet": "Pas encore dirigé ici — le DNS peut prendre jusqu’à une heure.",
+    "review": "Examiner",
+    "view": "Voir",
+    "orderTitle": "Commande {{ref}}",
+    "customerNote": "Note du client",
+    "item": "Article",
+    "qty": "Qté",
+    "howFulfil": "Comment cette commande parviendra-t-elle au client ?",
+    "method_delivery": "Livraison",
+    "method_pickup": "Retrait",
+    "noteForCustomer": "Note pour le client (visible sur le suivi)",
+    "notePhDelivery": "ex. Livreur Musa, 0803…, arrivée vers 16 h",
+    "notePhPickup": "ex. À retirer à l’accueil après 14 h",
+    "confirmDelivery": "Confirmer pour livraison",
+    "confirmPickup": "Confirmer pour retrait",
+    "outForDelivery": "Marquer en livraison",
+    "readyForPickup": "Marquer prête au retrait",
+    "markDelivered": "Livrée — clôturer",
+    "markCollected": "Retirée — clôturer",
+    "trackingPage": "Page de suivi client",
+    "confirmedToast": "Commande confirmée — le client la voit dans son suivi",
+    "dispatchedToast": "Client informé"
   },
   "storefrontPage": {
     "title": "🛍️ Boutique",
@@ -1493,7 +1517,12 @@
     "cancelled": "Cette commande a été annulée.",
     "steps": {
       "placed": "Commande reçue",
-      "fulfilled": "Prête / livrée"
+      "fulfilled": "Prête / livrée",
+      "confirmed": "Confirmée par la boutique",
+      "ready_for_pickup": "Prête au retrait",
+      "out_for_delivery": "En livraison",
+      "fulfilled_pickup": "Retirée",
+      "fulfilled_delivery": "Livrée"
     },
     "questions": "Des questions ? Appelez le magasin :",
     "paid": "Payé",
@@ -1504,7 +1533,8 @@
     "paymentNotConfirmed": "Nous n'avons pas encore pu confirmer le paiement. Si vous avez été débité, cela se mettra à jour sous peu.",
     "emailPrompt": "Votre adresse e-mail pour le reçu de paiement :",
     "refundPending": "Vous avez payé en ligne, le magasin va donc vous rembourser. Contactez le magasin si vous n'avez rien reçu d'ici quelques jours.",
-    "refundDone": "Le magasin a indiqué que votre remboursement a été envoyé."
+    "refundDone": "Le magasin a indiqué que votre remboursement a été envoyé.",
+    "storeNote": "Message de la boutique"
   },
   "onboarding": {
     "title": "Préparez votre magasin",

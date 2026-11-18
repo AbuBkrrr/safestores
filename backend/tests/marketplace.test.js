@@ -1,6 +1,12 @@
 const { request } = require('./helpers/app');
-const { createActiveStoreWithAdmin, createProduct } = require('./helpers/factories');
+const { createActiveStoreWithAdmin, createProduct, createUser, tokenFor } = require('./helpers/factories');
 const { pool } = require('../src/config/db');
+
+// Review steps a marketplace order goes through before it can be fulfilled.
+async function readyOrder(storeId, orderId, auth, method = 'pickup') {
+  await request().patch(`/api/stores/${storeId}/marketplace/orders/${orderId}/confirm`).set('Authorization', auth).send({ method });
+  await request().patch(`/api/stores/${storeId}/marketplace/orders/${orderId}/dispatch`).set('Authorization', auth).send({});
+}
 
 async function enableMarketplace(storeId, city = 'Lagos', category = 'grocery') {
   await pool.query('UPDATE stores SET marketplace_enabled = true, city = $2, category = $3 WHERE id = $1', [storeId, city, category]);
@@ -120,6 +126,7 @@ describe('Marketplace: admin order management', () => {
     expect(list.body).toHaveLength(1);
     expect(list.body[0].is_guest).toBe(true);
 
+    await readyOrder(store.id, placed.body.id, `Bearer ${token}`);
     const fulfill = await request()
       .patch(`/api/stores/${store.id}/marketplace/orders/${placed.body.id}/fulfill`)
       .set('Authorization', `Bearer ${token}`);
@@ -138,6 +145,7 @@ describe('Marketplace: admin order management', () => {
       items: [{ productId: product.id, quantity: 5 }], guestName: 'Guest',
     });
 
+    await readyOrder(store.id, placed.body.id, `Bearer ${token}`);
     const res = await request().patch(`/api/stores/${store.id}/marketplace/orders/${placed.body.id}/fulfill`).set('Authorization', `Bearer ${token}`);
     expect(res.status).toBe(400);
   });
@@ -148,6 +156,7 @@ describe('Marketplace: admin order management', () => {
     const placed = await request().post(`/api/marketplace/${store.id}/orders`).send({
       items: [{ productId: product.id, quantity: 1 }], guestName: 'Guest',
     });
+    await readyOrder(store.id, placed.body.id, `Bearer ${token}`);
     await request().patch(`/api/stores/${store.id}/marketplace/orders/${placed.body.id}/fulfill`).set('Authorization', `Bearer ${token}`);
 
     const res = await request().patch(`/api/stores/${store.id}/marketplace/orders/${placed.body.id}/fulfill`).set('Authorization', `Bearer ${token}`);
@@ -209,5 +218,46 @@ describe('Custom domains', () => {
     await pool.query('UPDATE stores SET marketplace_enabled = false WHERE id = $1', [a.store.id]);
     await patch(a, { customDomain: 'shop.mamangozi.com' }); // clears the lookup cache
     expect((await request().get('/api/public/domain-check').query({ domain: 'shop.mamangozi.com' })).status).toBe(404);
+  });
+});
+
+describe('Marketplace order review flow', () => {
+  it('new → confirm delivery → out for delivery → fulfilled, visible on tracking; a marketplace manager can run it; fulfil early is refused', async () => {
+    const { store, token } = await createActiveStoreWithAdmin();
+    await enableMarketplace(store.id);
+    const product = await createProduct(store.id, { shelfQty: 5 });
+    const mm = await createUser(store.id, { role: 'marketplace_manager' });
+    const auth = `Bearer ${tokenFor(mm)}`;
+    const o = await request().post(`/api/marketplace/${store.id}/orders`).send({ items: [{ productId: product.id, quantity: 1 }], guestName: 'G', deliveryAddress: '1 Road' });
+    const base = `/api/stores/${store.id}/marketplace/orders/${o.body.id}`;
+
+    expect((await request().patch(`${base}/fulfill`).set('Authorization', auth)).status).toBe(400);
+    expect((await request().patch(`${base}/dispatch`).set('Authorization', auth)).status).toBe(400);
+    expect((await request().patch(`${base}/confirm`).set('Authorization', auth).send({ method: 'drone' })).status).toBe(400);
+
+    const c = await request().patch(`${base}/confirm`).set('Authorization', auth).send({ method: 'delivery', note: 'Rider Musa' });
+    expect(c.body.status).toBe('confirmed');
+    const d = await request().patch(`${base}/dispatch`).set('Authorization', auth).send({});
+    expect(d.body.status).toBe('out_for_delivery');
+
+    const track = await request().get(`/api/public/marketplace-orders/${o.body.tracking_token}`);
+    expect(track.body).toMatchObject({ status: 'out_for_delivery', fulfilment_method: 'delivery', status_note: 'Rider Musa' });
+
+    expect((await request().patch(`${base}/fulfill`).set('Authorization', auth)).status).toBe(200);
+    // Cashiers can't run the marketplace.
+    const cashier = await createUser(store.id, { role: 'cashier' });
+    expect((await request().get(`/api/stores/${store.id}/marketplace/orders`).set('Authorization', `Bearer ${tokenFor(cashier)}`)).status).toBe(403);
+    void token;
+  });
+
+  it('pickup goes to ready_for_pickup', async () => {
+    const { store, token } = await createActiveStoreWithAdmin();
+    await enableMarketplace(store.id);
+    const product = await createProduct(store.id, { shelfQty: 5 });
+    const o = await request().post(`/api/marketplace/${store.id}/orders`).send({ items: [{ productId: product.id, quantity: 1 }], guestName: 'G' });
+    const base = `/api/stores/${store.id}/marketplace/orders/${o.body.id}`;
+    await request().patch(`${base}/confirm`).set('Authorization', `Bearer ${token}`).send({ method: 'pickup' });
+    const d = await request().patch(`${base}/dispatch`).set('Authorization', `Bearer ${token}`).send({ note: 'Front desk' });
+    expect(d.body.status).toBe('ready_for_pickup');
   });
 });

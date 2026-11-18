@@ -46,7 +46,9 @@
       "used": "Ejirila",
       "claimed": "Enwetara",
       "rejected": "Ajụrụ",
-      "applied": "Etinyere"
+      "applied": "Etinyere",
+      "ready_for_pickup": "Dị njikere ịnara",
+      "out_for_delivery": "Na-ebuga ugbu a"
     }
   },
   "nav": {
@@ -503,7 +505,8 @@
     "auditor": "Onye nyocha",
     "cashier": "Onye na-anata ego",
     "checkout": "Ebe ịkwụ ụgwọ",
-    "stock_taker": "Onye na-agụ ngwa ahịa"
+    "stock_taker": "Onye na-agụ ngwa ahịa",
+    "marketplace_manager": "Onye njikwa ahịa ịntanetị"
   },
   "invitesPage": {
     "title": "Njikwa Ọkpụkpọ",
@@ -1003,7 +1006,28 @@
     "dnsStep3": "Chere ruo otu awa, wee pịa Nyochaa. A na-edozi HTTPS na-akpaghị aka.",
     "checkDns": "Nyochaa njikọ",
     "dnsOk": "Ejikọla {{domain}}:",
-    "dnsNotYet": "Ọ katabeghị ebe a — DNS nwere ike iwe otu awa."
+    "dnsNotYet": "Ọ katabeghị ebe a — DNS nwere ike iwe otu awa.",
+    "review": "Nyochaa",
+    "view": "Lee",
+    "orderTitle": "Iwu {{ref}}",
+    "customerNote": "Ndetu onye ahịa",
+    "item": "Ihe",
+    "qty": "Ọnụọgụ",
+    "howFulfil": "Kedu ka iwu a ga-esi ruo onye ahịa?",
+    "method_delivery": "Nnyefe",
+    "method_pickup": "Ịnara n'ụlọ ahịa",
+    "noteForCustomer": "Ozi maka onye ahịa (na-egosi na ibe nleba anya)",
+    "notePhDelivery": "dịka: Onye nnyefe Musa, 0803…, ga-abịa tupu elekere 4",
+    "notePhPickup": "dịka: Bịa nara n'ihu tebụl mgbe elekere 2 gasịrị",
+    "confirmDelivery": "Kwado maka nnyefe",
+    "confirmPickup": "Kwado maka ịnara",
+    "outForDelivery": "Kaa akara na-ebuga",
+    "readyForPickup": "Kaa akara dị njikere ịnara",
+    "markDelivered": "Ebugala — mechaa iwu",
+    "markCollected": "Anarala — mechaa iwu",
+    "trackingPage": "Ibe nleba anya onye ahịa",
+    "confirmedToast": "Akwadoola iwu — onye ahịa ga-ahụ ya",
+    "dispatchedToast": "E mere ka onye ahịa mara"
   },
   "storefrontPage": {
     "title": "🛍️ Ụlọ Ahịa",
@@ -1493,7 +1517,12 @@
     "cancelled": "Ekagburu iwu a.",
     "steps": {
       "placed": "A natara iwu",
-      "fulfilled": "Dị njikere / e bubatara"
+      "fulfilled": "Dị njikere / e bubatara",
+      "confirmed": "Ụlọ ahịa akwadoola",
+      "ready_for_pickup": "Dị njikere ịnara",
+      "out_for_delivery": "Na-ebuga ugbu a",
+      "fulfilled_pickup": "Anarala",
+      "fulfilled_delivery": "Ebugala"
     },
     "questions": "Ajụjụ? Kpọọ ụlọ ahịa:",
     "paid": "Akwụọla",
@@ -1504,7 +1533,8 @@
     "paymentNotConfirmed": "Anyị enwebeghị ike ịkwado ịkwụ ụgwọ. Ọ bụrụ na e wepụrụ ego gị, ọ ga-emelite n'oge na-adịghị anya.",
     "emailPrompt": "Adreesị email gị maka rasiti ịkwụ ụgwọ:",
     "refundPending": "Ị kwụrụ n'ịntanetị, ya mere ụlọ ahịa ga-akwụghachi gị. Kpọtụrụ ụlọ ahịa ma ọ bụrụ na ị natabeghị ya n'ime ụbọchị ole na ole.",
-    "refundDone": "Ụlọ ahịa akaala akara na e zigara nkwụghachi gị."
+    "refundDone": "Ụlọ ahịa akaala akara na e zigara nkwụghachi gị.",
+    "storeNote": "Ozi sitere n'ụlọ ahịa"
   },
   "onboarding": {
     "title": "Kwadebe ụlọ ahịa gị",

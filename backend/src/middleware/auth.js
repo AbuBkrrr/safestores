@@ -19,7 +19,7 @@ async function authenticateJwt(req) {
   }
 
   try {
-    if (['admin', 'manager', 'staff', 'cashier', 'checkout', 'stock_taker'].includes(user.role)) {
+    if (['admin', 'manager', 'staff', 'cashier', 'checkout', 'stock_taker', 'marketplace_manager'].includes(user.role)) {
       const { rows } = await db.query('SELECT status, token_version FROM users WHERE id = $1', [user.sub]);
       if (!rows[0] || rows[0].status !== 'active') {
         return { ok: false, status: 401, body: { error: 'This account is no longer active. Contact your store admin.', code: 'ACCOUNT_DISABLED' } };

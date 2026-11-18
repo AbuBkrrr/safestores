@@ -3,11 +3,11 @@ import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useRealtimeEvents } from '../context/SocketContext.jsx';
-import { Alert, Badge, Toast } from '../components/ui.jsx';
+import { Alert, Badge, Modal, Toast } from '../components/ui.jsx';
 import { useToast } from '../components/useToast.js';
 import { useCurrency } from '../context/CurrencyContext.jsx';
 
-const SYNC_EVENTS = ['marketplace:order_placed', 'marketplace:order_fulfilled', 'marketplace:order_cancelled', 'marketplace:order_paid'];
+const SYNC_EVENTS = ['marketplace:order_placed', 'marketplace:order_updated', 'marketplace:order_fulfilled', 'marketplace:order_cancelled', 'marketplace:order_paid'];
 
 export default function Marketplace() {
   const { t } = useTranslation();
@@ -49,15 +49,30 @@ export default function Marketplace() {
   const setP = (k) => (e) => setProfile({ ...profile, [k]: e.target.value });
   useRealtimeEvents(SYNC_EVENTS, () => load());
 
-  const fulfill = async (orderId) => {
+  // Review flow: View → Confirm (pickup/delivery) → Ready / Out for delivery → Fulfill.
+  const [viewing, setViewing] = useState(null); // full order with items
+  const [reviewMethod, setReviewMethod] = useState('delivery');
+  const [statusNote, setStatusNote] = useState('');
+  const [busy, setBusy] = useState(false);
+  const openOrder = async (o) => {
     setError('');
     try {
-      await api.patch(`/stores/${user.storeId}/marketplace/orders/${orderId}/fulfill`);
-      showToast(t('marketplacePage.orderFulfilled'), 'success');
+      const { data } = await api.get(`/stores/${user.storeId}/marketplace/orders/${o.id}`);
+      setViewing(data);
+      setReviewMethod(data.fulfilment_method || (data.delivery_address ? 'delivery' : 'pickup'));
+      setStatusNote(data.status_note || '');
+    } catch (err) { setError(err.response?.data?.error || t('marketplacePage.fulfillFailed')); }
+  };
+  const step = async (action, body, toastKey) => {
+    setBusy(true); setError('');
+    try {
+      await api.patch(`/stores/${user.storeId}/marketplace/orders/${viewing.id}/${action}`, body);
+      showToast(t(toastKey), 'success');
+      setViewing(null);
       load();
     } catch (err) {
       setError(err.response?.data?.error || t('marketplacePage.fulfillFailed'));
-    }
+    } finally { setBusy(false); }
   };
 
   const cancel = async (o) => {
@@ -149,11 +164,11 @@ export default function Marketplace() {
                 <td>{o.customer_name}</td><td>{o.customer_phone || '—'}</td>
                 <td>{formatCurrency(o.total)}</td>
                 <td>{o.delivery_address || '—'}</td>
-                <td><Badge status={o.status} /> {o.payment_status === 'refund_due' ? <span className="badge pending">{t('marketplacePage.refundDue')}</span> : o.payment_status === 'refunded' ? <span className="badge closed">{t('marketplacePage.refunded')}</span> : o.payment_status === 'paid' ? <span className="badge active">{t('marketplacePage.paidOnline')}</span> : o.payment_method === 'online' ? <span className="badge pending">{t('marketplacePage.awaitingPayment')}</span> : <span className="badge closed">{t('marketplacePage.payOnDelivery')}</span>}</td>
+                <td><Badge status={o.status} />{o.fulfilment_method && <span className="muted" style={{ fontSize: 12 }}> · {t(`marketplacePage.method_${o.fulfilment_method}`)}</span>} {o.payment_status === 'refund_due' ? <span className="badge pending">{t('marketplacePage.refundDue')}</span> : o.payment_status === 'refunded' ? <span className="badge closed">{t('marketplacePage.refunded')}</span> : o.payment_status === 'paid' ? <span className="badge active">{t('marketplacePage.paidOnline')}</span> : o.payment_method === 'online' ? <span className="badge pending">{t('marketplacePage.awaitingPayment')}</span> : <span className="badge closed">{t('marketplacePage.payOnDelivery')}</span>}</td>
                 <td>{new Date(o.created_at).toLocaleString()}</td>
                 <td style={{ whiteSpace: 'nowrap' }}>
-                  {o.status === 'placed' && <button className="btn small" onClick={() => fulfill(o.id)}>{t('marketplacePage.fulfill')}</button>}{' '}
-                  {['placed', 'confirmed'].includes(o.status) && <button className="btn small secondary" onClick={() => cancel(o)}>{t('marketplacePage.cancel')}</button>}
+                  <button className={`btn small${o.status === 'placed' ? '' : ' secondary'}`} onClick={() => openOrder(o)}>{o.status === 'placed' ? t('marketplacePage.review') : t('marketplacePage.view')}</button>{' '}
+                  {['placed', 'confirmed', 'ready_for_pickup', 'out_for_delivery'].includes(o.status) && <button className="btn small secondary" onClick={() => cancel(o)}>{t('marketplacePage.cancel')}</button>}
                   {o.payment_status === 'refund_due' && <button className="btn small" onClick={() => markRefunded(o)}>{t('marketplacePage.markRefunded')}</button>}
                 </td>
               </tr>
@@ -162,6 +177,42 @@ export default function Marketplace() {
         </table>
         {orders.length === 0 && <p className="muted">{t('marketplacePage.noOrdersYet')}</p>}
       </div>
+      {viewing && (
+        <Modal title={t('marketplacePage.orderTitle', { ref: viewing.id.slice(0, 8).toUpperCase() })} onClose={() => setViewing(null)}>
+          <p><strong>{viewing.customer_name}</strong>{viewing.customer_phone && <> · <a href={`tel:${viewing.customer_phone}`}>{viewing.customer_phone}</a></>}{viewing.customer_email && <> · {viewing.customer_email}</>}</p>
+          <p className="muted">{t('marketplacePage.deliveryAddress')}: {viewing.delivery_address || '—'}</p>
+          {viewing.customer_note && <p className="muted">{t('marketplacePage.customerNote')}: {viewing.customer_note}</p>}
+          <table className="mt-1">
+            <thead><tr><th>{t('marketplacePage.item')}</th><th>{t('marketplacePage.qty')}</th><th>{t('marketplacePage.total')}</th></tr></thead>
+            <tbody>{(viewing.items || []).map((i) => <tr key={i.id}><td>{i.product_name}</td><td>{i.quantity}</td><td>{formatCurrency(i.line_total)}</td></tr>)}</tbody>
+          </table>
+          <p className="mt-1"><strong>{t('marketplacePage.total')}: {formatCurrency(viewing.total)}</strong> · <Badge status={viewing.status} /></p>
+
+          {viewing.status === 'placed' && (
+            <fieldset className="pay-choice mt-1">
+              <legend>{t('marketplacePage.howFulfil')}</legend>
+              <label><input type="radio" name="fm" checked={reviewMethod === 'delivery'} onChange={() => setReviewMethod('delivery')} /> {t('marketplacePage.method_delivery')}</label>
+              <label><input type="radio" name="fm" checked={reviewMethod === 'pickup'} onChange={() => setReviewMethod('pickup')} /> {t('marketplacePage.method_pickup')}</label>
+            </fieldset>
+          )}
+          {['placed', 'confirmed'].includes(viewing.status) && (
+            <div className="form-group mt-1">
+              <label htmlFor="mp-note">{t('marketplacePage.noteForCustomer')}</label>
+              <input id="mp-note" value={statusNote} onChange={(e) => setStatusNote(e.target.value)} maxLength={300}
+                placeholder={(viewing.fulfilment_method || reviewMethod) === 'delivery' ? t('marketplacePage.notePhDelivery') : t('marketplacePage.notePhPickup')} />
+            </div>
+          )}
+          {viewing.status_note && !['placed', 'confirmed'].includes(viewing.status) && <p className="muted">{t('marketplacePage.noteForCustomer')}: {viewing.status_note}</p>}
+
+          <div className="modal-actions">
+            {viewing.status === 'placed' && <button className="btn" disabled={busy} onClick={() => step('confirm', { method: reviewMethod, note: statusNote }, 'marketplacePage.confirmedToast')}>{reviewMethod === 'delivery' ? t('marketplacePage.confirmDelivery') : t('marketplacePage.confirmPickup')}</button>}
+            {viewing.status === 'confirmed' && <button className="btn" disabled={busy} onClick={() => step('dispatch', { note: statusNote }, 'marketplacePage.dispatchedToast')}>{viewing.fulfilment_method === 'delivery' ? t('marketplacePage.outForDelivery') : t('marketplacePage.readyForPickup')}</button>}
+            {['ready_for_pickup', 'out_for_delivery'].includes(viewing.status) && <button className="btn" disabled={busy} onClick={() => step('fulfill', {}, 'marketplacePage.orderFulfilled')}>{viewing.status === 'out_for_delivery' ? t('marketplacePage.markDelivered') : t('marketplacePage.markCollected')}</button>}
+            {viewing.tracking_token && <a className="btn secondary" href={`/track/${viewing.tracking_token}`} target="_blank" rel="noreferrer">{t('marketplacePage.trackingPage')}</a>}
+            <button className="btn secondary" onClick={() => setViewing(null)}>{t('common.close', { defaultValue: 'Close' })}</button>
+          </div>
+        </Modal>
+      )}
       <Toast {...(toast || {})} />
     </div>
   );

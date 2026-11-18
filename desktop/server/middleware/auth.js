@@ -21,7 +21,7 @@ function requireAuth(req, res, next) {
     return res.status(401).json({ error: 'Invalid or expired token' });
   }
 
-  if (['admin', 'manager', 'staff', 'cashier', 'checkout'].includes(req.user.role)) {
+  if (['admin', 'manager', 'staff', 'cashier', 'checkout', 'marketplace_manager'].includes(req.user.role)) {
     const user = db.prepare('SELECT status, token_version FROM users WHERE id = ?').get(req.user.sub);
     if (!user || user.status !== 'active') {
       return res.status(401).json({ error: 'This account is no longer active. Contact your store admin.', code: 'ACCOUNT_DISABLED' });

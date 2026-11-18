@@ -46,7 +46,9 @@
       "used": "مستخدم",
       "claimed": "تمت المطالبة",
       "rejected": "مرفوض",
-      "applied": "تم التطبيق"
+      "applied": "تم التطبيق",
+      "ready_for_pickup": "جاهز للاستلام",
+      "out_for_delivery": "قيد التوصيل"
     }
   },
   "nav": {
@@ -503,7 +505,8 @@
     "auditor": "مدقق",
     "cashier": "أمين الصندوق",
     "checkout": "الدفع",
-    "stock_taker": "مسؤول الجرد"
+    "stock_taker": "مسؤول الجرد",
+    "marketplace_manager": "مدير المتجر الإلكتروني"
   },
   "invitesPage": {
     "title": "إدارة الدعوات",
@@ -1003,7 +1006,28 @@
     "dnsStep3": "انتظر حتى ساعة ثم اضغط تحقق. يتم إعداد HTTPS تلقائيًا.",
     "checkDns": "تحقق من الاتصال",
     "dnsOk": "{{domain}} متصل:",
-    "dnsNotYet": "لم يُوجَّه بعد — قد يستغرق DNS حتى ساعة."
+    "dnsNotYet": "لم يُوجَّه بعد — قد يستغرق DNS حتى ساعة.",
+    "review": "مراجعة",
+    "view": "عرض",
+    "orderTitle": "الطلب {{ref}}",
+    "customerNote": "ملاحظة العميل",
+    "item": "الصنف",
+    "qty": "الكمية",
+    "howFulfil": "كيف سيصل هذا الطلب إلى العميل؟",
+    "method_delivery": "توصيل",
+    "method_pickup": "استلام من المتجر",
+    "noteForCustomer": "ملاحظة للعميل (تظهر في صفحة التتبع)",
+    "notePhDelivery": "مثال: المندوب موسى، 0803…، يصل قبل 4 مساءً",
+    "notePhPickup": "مثال: الاستلام من الاستقبال بعد 2 ظهرًا",
+    "confirmDelivery": "تأكيد للتوصيل",
+    "confirmPickup": "تأكيد للاستلام",
+    "outForDelivery": "تحديد كقيد التوصيل",
+    "readyForPickup": "تحديد كجاهز للاستلام",
+    "markDelivered": "تم التوصيل — إتمام الطلب",
+    "markCollected": "تم الاستلام — إتمام الطلب",
+    "trackingPage": "صفحة تتبع العميل",
+    "confirmedToast": "تم تأكيد الطلب — يراه العميل في صفحة التتبع",
+    "dispatchedToast": "تم تحديث العميل"
   },
   "storefrontPage": {
     "title": "🛍️ تسوق",
@@ -1493,7 +1517,12 @@
     "cancelled": "تم إلغاء هذا الطلب.",
     "steps": {
       "placed": "تم استلام الطلب",
-      "fulfilled": "جاهز / تم التوصيل"
+      "fulfilled": "جاهز / تم التوصيل",
+      "confirmed": "أكده المتجر",
+      "ready_for_pickup": "جاهز للاستلام",
+      "out_for_delivery": "قيد التوصيل",
+      "fulfilled_pickup": "تم الاستلام",
+      "fulfilled_delivery": "تم التوصيل"
     },
     "questions": "أسئلة؟ اتصل بالمتجر:",
     "paid": "مدفوع",
@@ -1504,7 +1533,8 @@
     "paymentNotConfirmed": "لم نتمكن من تأكيد الدفع بعد. إذا خُصم المبلغ، سيتم التحديث قريبًا.",
     "emailPrompt": "بريدك الإلكتروني لإيصال الدفع:",
     "refundPending": "دفعت إلكترونيًا، لذا سيعيد لك المتجر المبلغ. تواصل مع المتجر إذا لم يصلك خلال أيام قليلة.",
-    "refundDone": "أشار المتجر إلى أن المبلغ المسترد قد أُرسل."
+    "refundDone": "أشار المتجر إلى أن المبلغ المسترد قد أُرسل.",
+    "storeNote": "رسالة من المتجر"
   },
   "onboarding": {
     "title": "جهّز متجرك",

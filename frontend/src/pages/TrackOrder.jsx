@@ -5,7 +5,10 @@ import api from '../api/client.js';
 import { formatCurrency } from '../utils/currency.js';
 import { BrandFooter } from '../components/ui.jsx';
 
-const STEPS = ['placed', 'fulfilled'];
+// Steps follow the store's choice of pickup or delivery once it has reviewed the order.
+const stepsFor = (method) => (method === 'delivery'
+  ? ['placed', 'confirmed', 'out_for_delivery', 'fulfilled']
+  : method === 'pickup' ? ['placed', 'confirmed', 'ready_for_pickup', 'fulfilled'] : ['placed', 'confirmed', 'fulfilled']);
 
 /** Public order-tracking page for online shoppers (link shown after checkout). */
 export default function TrackOrder() {
@@ -51,6 +54,7 @@ export default function TrackOrder() {
   }, [token]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const c = o ? { code: o.currency_code, symbol: o.currency_symbol } : undefined;
+  const STEPS = stepsFor(o?.fulfilment_method);
   const stepIndex = o ? (o.status === 'cancelled' ? -1 : STEPS.indexOf(o.status)) : 0;
 
   return (
@@ -63,9 +67,10 @@ export default function TrackOrder() {
             <p className="muted">{t('trackPage.reference')}: <strong>{o.reference}</strong> · {new Date(o.created_at).toLocaleString()}</p>
             {o.status === 'cancelled' ? <div className="alert error">{t('trackPage.cancelled')}{o.cancel_reason ? ` — ${o.cancel_reason}` : ''}{o.payment_status === 'refund_due' && <div>{t('trackPage.refundPending')}</div>}{o.payment_status === 'refunded' && <div>{t('trackPage.refundDone')}</div>}</div> : (
               <ol className="track-steps">
-                {STEPS.map((s, i) => <li key={s} className={i <= stepIndex ? 'done' : ''}>{t(`trackPage.steps.${s}`)}</li>)}
+                {STEPS.map((s, i) => <li key={s} className={i <= stepIndex ? 'done' : ''}>{t(`trackPage.steps.${s === 'fulfilled' && o.fulfilment_method ? `fulfilled_${o.fulfilment_method}` : s}`)}</li>)}
               </ol>
             )}
+            {o.status_note && o.status !== 'cancelled' && <div className="alert info">{t('trackPage.storeNote')}: {o.status_note}</div>}
             {payMsg && <div className={`alert ${o.payment_status === 'paid' ? 'success' : 'info'}`}>{payMsg}</div>}
             <p>
               {o.payment_status === 'paid'

@@ -46,7 +46,9 @@
       "used": "An yi amfani",
       "claimed": "An yi da'awa",
       "rejected": "An ki",
-      "applied": "An aiwatar"
+      "applied": "An aiwatar",
+      "ready_for_pickup": "A shirye don ɗauka",
+      "out_for_delivery": "Ana kan hanyar kawowa"
     }
   },
   "nav": {
@@ -503,7 +505,8 @@
     "auditor": "Mai bincike",
     "cashier": "Mai karɓar kuɗi",
     "checkout": "Wurin biya",
-    "stock_taker": "Mai ƙidaya kaya"
+    "stock_taker": "Mai ƙidaya kaya",
+    "marketplace_manager": "Manajan kasuwar intanet"
   },
   "invitesPage": {
     "title": "Sarrafa Gayyata",
@@ -1003,7 +1006,28 @@
     "dnsStep3": "Jira har awa ɗaya, sannan danna Duba. Ana saita HTTPS kai tsaye.",
     "checkDns": "Duba haɗi",
     "dnsOk": "An haɗa {{domain}}:",
-    "dnsNotYet": "Bai nuna nan ba tukuna — DNS na iya ɗaukar awa ɗaya."
+    "dnsNotYet": "Bai nuna nan ba tukuna — DNS na iya ɗaukar awa ɗaya.",
+    "review": "Duba",
+    "view": "Duba",
+    "orderTitle": "Oda {{ref}}",
+    "customerNote": "Bayanin abokin ciniki",
+    "item": "Kaya",
+    "qty": "Yawa",
+    "howFulfil": "Ta yaya odar za ta isa ga abokin ciniki?",
+    "method_delivery": "Kawowa",
+    "method_pickup": "Ɗauka a shago",
+    "noteForCustomer": "Saƙo ga abokin ciniki (yana bayyana a shafin bin diddigi)",
+    "notePhDelivery": "misali: Dan aike Musa, 0803…, zai iso kafin 4",
+    "notePhPickup": "misali: Ka ɗauka a gaban teburi bayan 2",
+    "confirmDelivery": "Tabbatar don kawowa",
+    "confirmPickup": "Tabbatar don ɗauka",
+    "outForDelivery": "Saka ana kawowa",
+    "readyForPickup": "Saka a shirye don ɗauka",
+    "markDelivered": "An kawo — kammala oda",
+    "markCollected": "An ɗauka — kammala oda",
+    "trackingPage": "Shafin bin diddigi",
+    "confirmedToast": "An tabbatar da oda — abokin ciniki zai gani",
+    "dispatchedToast": "An sanar da abokin ciniki"
   },
   "storefrontPage": {
     "title": "🛍️ Shago",
@@ -1493,7 +1517,12 @@
     "cancelled": "An soke wannan odar.",
     "steps": {
       "placed": "An karɓi oda",
-      "fulfilled": "A shirye / an kawo"
+      "fulfilled": "A shirye / an kawo",
+      "confirmed": "Shago ya tabbatar",
+      "ready_for_pickup": "A shirye don ɗauka",
+      "out_for_delivery": "Ana kan hanyar kawowa",
+      "fulfilled_pickup": "An ɗauka",
+      "fulfilled_delivery": "An kawo"
     },
     "questions": "Tambayoyi? Kira shagon:",
     "paid": "An biya",
@@ -1504,7 +1533,8 @@
     "paymentNotConfirmed": "Ba mu iya tabbatar da biyan ba tukuna. Idan an cire maka kuɗi, zai sabunta nan ba da daɗewa ba.",
     "emailPrompt": "Adireshin imel ɗinka don rasit ɗin biya:",
     "refundPending": "Ka biya ta yanar gizo, don haka shagon zai mayar maka da kuɗi. Tuntuɓi shagon idan ba ka karɓa ba cikin 'yan kwanaki.",
-    "refundDone": "Shagon ya yi alamar cewa an aika mayarwarka."
+    "refundDone": "Shagon ya yi alamar cewa an aika mayarwarka.",
+    "storeNote": "Saƙo daga shago"
   },
   "onboarding": {
     "title": "Shirya shagonka",
