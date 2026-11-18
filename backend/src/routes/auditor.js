@@ -6,6 +6,7 @@ router.use(requireAuth, requireRole('auditor'));
 
 router.get('/engagements', ctrl.listAuditorEngagements);
 router.patch('/engagements/:id/accept', ctrl.acceptEngagement);
+router.patch('/engagements/:id/decline', ctrl.declineEngagement);
 router.patch('/engagements/:id/complete', ctrl.completeEngagement);
 router.post('/engagements/:id/invites', ctrl.inviteStockTaker);
 

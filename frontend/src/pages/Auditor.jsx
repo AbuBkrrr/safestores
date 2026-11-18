@@ -11,6 +11,7 @@ export default function Auditor() {
   const { user } = useAuth();
   const [engagements, setEngagements] = useState([]);
   const [notes, setNotes] = useState('');
+  const [when, setWhen] = useState('');
   const [error, setError] = useState('');
   const [toast, showToast] = useToast();
 
@@ -23,9 +24,9 @@ export default function Auditor() {
     e.preventDefault();
     setError('');
     try {
-      await api.post(`/stores/${user.storeId}/audit-engagements`, { notes });
+      await api.post(`/stores/${user.storeId}/audit-engagements`, { notes, scheduledFor: when ? new Date(when).toISOString() : null });
       showToast(t('auditorPage.auditRequested'), 'success');
-      setNotes('');
+      setNotes(''); setWhen('');
       load();
     } catch (err) {
       setError(err.response?.data?.error || t('auditorPage.requestFailed'));
@@ -49,10 +50,16 @@ export default function Auditor() {
         ) : (
           <form onSubmit={request} className="mt-1">
             <div className="form-group">
+              <label htmlFor="audit-when">{t('auditorPage.when')}</label>
+              <input id="audit-when" type="datetime-local" required value={when} onChange={(e) => setWhen(e.target.value)}
+                min={new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16)} />
+              <p className="muted" style={{ fontSize: 12 }}>{t('auditorPage.whenHelp')}</p>
+            </div>
+            <div className="form-group">
               <label>{t('auditorPage.notesForAuditor')}</label>
               <textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder={t('auditorPage.notesPlaceholder')} />
             </div>
-            <button className="btn">{t('auditorPage.requestAudit')}</button>
+            <button className="btn">{t('auditorPage.bookAudit')}</button>
           </form>
         )}
       </div>
@@ -60,12 +67,13 @@ export default function Auditor() {
       <div className="card">
         <h3 style={{ marginBottom: 12 }}>{t('auditorPage.requestHistory')}</h3>
         <table>
-          <thead><tr><th>{t('auditorPage.requested')}</th><th>{t('auditorPage.auditor')}</th><th>{t('usersPage.status')}</th><th>{t('auditorPage.notes')}</th></tr></thead>
+          <thead><tr><th>{t('auditorPage.requested')}</th><th>{t('auditorPage.when')}</th><th>{t('auditorPage.auditor')}</th><th>{t('usersPage.status')}</th><th>{t('auditorPage.notes')}</th></tr></thead>
           <tbody>
             {engagements.map((e) => (
               <tr key={e.id}>
                 <td>{new Date(e.requested_at).toLocaleString()}</td>
-                <td>{e.auditor_name || '—'}</td>
+                <td>{e.scheduled_for ? new Date(e.scheduled_for).toLocaleString() : '—'}</td>
+                <td>{e.auditor_name || (e.status === 'requested' ? t('auditorPage.awaitingAssignment') : '—')}{e.auditor_name && e.status === 'requested' && <div className="muted" style={{ fontSize: 11 }}>{t('auditorPage.awaitingAuditor')}</div>}</td>
                 <td><Badge status={e.status} /></td>
                 <td>{e.notes || '—'}</td>
               </tr>

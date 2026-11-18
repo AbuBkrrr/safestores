@@ -943,7 +943,9 @@
     "markComplete": "Mark Engagement Complete",
     "engagementCompleted": "Engagement marked complete",
     "pastEngagements": "Past Engagements",
-    "noneYet": "None yet."
+    "noneYet": "None yet.",
+    "assignedToYou": "Assigned to you — accept or decline",
+    "decline": "Decline"
   },
   "auditorPage": {
     "title": "🕵️ Auditor",
@@ -959,7 +961,12 @@
     "requested": "Requested",
     "auditor": "Auditor",
     "notes": "Notes",
-    "noAuditRequests": "No audit requests yet."
+    "noAuditRequests": "No audit requests yet.",
+    "when": "Audit date & time",
+    "whenHelp": "Book in advance. The SafeStores team will assign an auditor for this slot.",
+    "bookAudit": "Book audit",
+    "awaitingAssignment": "Awaiting assignment",
+    "awaitingAuditor": "Waiting for auditor to accept"
   },
   "marketplacePage": {
     "title": "🛍️ Online Marketplace",

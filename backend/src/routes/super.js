@@ -62,6 +62,9 @@ router.post('/support/tickets/:id/reply', supportCtrl.addReplySuper);
 router.get('/auditors', auditCtrl.listAuditors);
 router.patch('/auditors/:id/activate', auditCtrl.activateAuditor);
 router.patch('/auditors/:id/suspend', auditCtrl.suspendAuditor);
+router.get('/audit-engagements', auditCtrl.listAllEngagementsSuper);
+router.patch('/audit-engagements/:id/assign', auditCtrl.assignEngagementSuper);
+router.patch('/audit-engagements/:id/cancel', auditCtrl.cancelEngagementSuper);
 
 // Lending / microfinance partners
 router.get('/lending-partners', lendingCtrl.listPartners);

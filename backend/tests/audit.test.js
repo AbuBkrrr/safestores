@@ -52,25 +52,47 @@ describe('Auditor accounts', () => {
   });
 });
 
+const SOON = new Date(Date.now() + 86400000).toISOString();
+// The Super Admin assigns a booking to an auditor before they can accept it.
+async function assignTo(engagementId, auditor) {
+  await pool.query('UPDATE audit_engagements SET auditor_id = $1, assigned_at = now() WHERE id = $2', [auditor.id, engagementId]);
+}
+
 describe('Audit Engagements', () => {
-  it('a store admin requests an engagement; it shows up as open for any auditor', async () => {
+  it('store books a date/time; Super Admin assigns an auditor; only that auditor sees it and can accept or decline', async () => {
     const { store, token } = await createActiveStoreWithAdmin();
     const auditor = await createActiveAuditor();
+    const other = await createActiveAuditor();
+    const S = `Bearer ${superToken(await createSuperAdmin())}`;
 
+    expect((await request().post(`/api/stores/${store.id}/audit-engagements`).set('Authorization', `Bearer ${token}`).send({ notes: 'x' })).status).toBe(400);
     const created = await request().post(`/api/stores/${store.id}/audit-engagements`).set('Authorization', `Bearer ${token}`)
-      .send({ notes: 'Annual stock check' });
+      .send({ notes: 'Annual stock check', scheduledFor: SOON });
     expect(created.status).toBe(201);
-    expect(created.body.status).toBe('requested');
+    expect(created.body.scheduled_for).toBeTruthy();
+    expect((await request().get('/api/auditor/engagements').set('Authorization', `Bearer ${auditor.token}`)).body).toHaveLength(0);
 
-    const open = await request().get('/api/auditor/engagements?status=requested').set('Authorization', `Bearer ${auditor.token}`);
-    expect(open.status).toBe(200);
-    expect(open.body.some((e) => e.id === created.body.id)).toBe(true);
+    const all = await request().get('/api/super/audit-engagements').set('Authorization', S);
+    expect(all.body.some((e) => e.id === created.body.id && e.store_name)).toBe(true);
+    expect((await request().patch(`/api/super/audit-engagements/${created.body.id}/assign`).set('Authorization', S).send({ auditorId: auditor.id })).status).toBe(200);
+
+    const mine = await request().get('/api/auditor/engagements').set('Authorization', `Bearer ${auditor.token}`);
+    expect(mine.body.map((e) => e.id)).toEqual([created.body.id]);
+    expect((await request().patch(`/api/auditor/engagements/${created.body.id}/accept`).set('Authorization', `Bearer ${other.token}`)).status).toBe(400);
+    expect((await request().patch(`/api/auditor/engagements/${created.body.id}/decline`).set('Authorization', `Bearer ${auditor.token}`)).status).toBe(200);
+    expect((await request().get('/api/auditor/engagements').set('Authorization', `Bearer ${auditor.token}`)).body).toHaveLength(0);
+
+    await request().patch(`/api/super/audit-engagements/${created.body.id}/assign`).set('Authorization', S).send({ auditorId: other.id });
+    const ok = await request().patch(`/api/auditor/engagements/${created.body.id}/accept`).set('Authorization', `Bearer ${other.token}`);
+    expect(ok.body.status).toBe('accepted');
   });
 
   it('an auditor accepts an engagement; a second acceptance attempt fails', async () => {
     const { store, token } = await createActiveStoreWithAdmin();
     const auditor = await createActiveAuditor();
-    const created = await request().post(`/api/stores/${store.id}/audit-engagements`).set('Authorization', `Bearer ${token}`).send({});
+    const created = await request().post(`/api/stores/${store.id}/audit-engagements`).set('Authorization', `Bearer ${token}`).send({ scheduledFor: SOON });
+
+    await assignTo(created.body.id, auditor);
 
     const accept = await request().patch(`/api/auditor/engagements/${created.body.id}/accept`).set('Authorization', `Bearer ${auditor.token}`);
     expect(accept.status).toBe(200);
@@ -84,7 +106,8 @@ describe('Audit Engagements', () => {
   it('the store sees the assigned auditor\'s name once accepted', async () => {
     const { store, token } = await createActiveStoreWithAdmin();
     const auditor = await createActiveAuditor({ name: 'Assigned Ada' });
-    const created = await request().post(`/api/stores/${store.id}/audit-engagements`).set('Authorization', `Bearer ${token}`).send({});
+    const created = await request().post(`/api/stores/${store.id}/audit-engagements`).set('Authorization', `Bearer ${token}`).send({ scheduledFor: SOON });
+    await assignTo(created.body.id, auditor);
     await request().patch(`/api/auditor/engagements/${created.body.id}/accept`).set('Authorization', `Bearer ${auditor.token}`);
 
     const list = await request().get(`/api/stores/${store.id}/audit-engagements`).set('Authorization', `Bearer ${token}`);
@@ -94,7 +117,8 @@ describe('Audit Engagements', () => {
   it('the auditor completes an engagement they own; cannot complete one they don\'t', async () => {
     const { store, token } = await createActiveStoreWithAdmin();
     const auditor = await createActiveAuditor();
-    const created = await request().post(`/api/stores/${store.id}/audit-engagements`).set('Authorization', `Bearer ${token}`).send({});
+    const created = await request().post(`/api/stores/${store.id}/audit-engagements`).set('Authorization', `Bearer ${token}`).send({ scheduledFor: SOON });
+    await assignTo(created.body.id, auditor);
     await request().patch(`/api/auditor/engagements/${created.body.id}/accept`).set('Authorization', `Bearer ${auditor.token}`);
 
     const otherAuditor = await createActiveAuditor();
@@ -109,7 +133,8 @@ describe('Audit Engagements', () => {
   it('an auditor invites a stock-taker for their active engagement', async () => {
     const { store, token } = await createActiveStoreWithAdmin();
     const auditor = await createActiveAuditor();
-    const created = await request().post(`/api/stores/${store.id}/audit-engagements`).set('Authorization', `Bearer ${token}`).send({});
+    const created = await request().post(`/api/stores/${store.id}/audit-engagements`).set('Authorization', `Bearer ${token}`).send({ scheduledFor: SOON });
+    await assignTo(created.body.id, auditor);
     await request().patch(`/api/auditor/engagements/${created.body.id}/accept`).set('Authorization', `Bearer ${auditor.token}`);
 
     const res = await request().post(`/api/auditor/engagements/${created.body.id}/invites`).set('Authorization', `Bearer ${auditor.token}`)
@@ -124,7 +149,7 @@ describe('Audit Engagements', () => {
   it('cannot invite a stock-taker for an engagement that is not yet accepted', async () => {
     const { store, token } = await createActiveStoreWithAdmin();
     const auditor = await createActiveAuditor();
-    const created = await request().post(`/api/stores/${store.id}/audit-engagements`).set('Authorization', `Bearer ${token}`).send({});
+    const created = await request().post(`/api/stores/${store.id}/audit-engagements`).set('Authorization', `Bearer ${token}`).send({ scheduledFor: SOON });
     // never accepted
 
     const res = await request().post(`/api/auditor/engagements/${created.body.id}/invites`).set('Authorization', `Bearer ${auditor.token}`)
@@ -137,7 +162,8 @@ describe('stock_taker shelf-audit access is time-boxed to an active engagement',
   async function setup() {
     const { store, token } = await createActiveStoreWithAdmin();
     const auditor = await createActiveAuditor();
-    const engagement = await request().post(`/api/stores/${store.id}/audit-engagements`).set('Authorization', `Bearer ${token}`).send({});
+    const engagement = await request().post(`/api/stores/${store.id}/audit-engagements`).set('Authorization', `Bearer ${token}`).send({ scheduledFor: SOON });
+    await assignTo(engagement.body.id, auditor);
     await request().patch(`/api/auditor/engagements/${engagement.body.id}/accept`).set('Authorization', `Bearer ${auditor.token}`);
     const invite = await request().post(`/api/auditor/engagements/${engagement.body.id}/invites`).set('Authorization', `Bearer ${auditor.token}`)
       .send({ name: 'Temp Counter', email: `counter${Date.now()}@example.com` });

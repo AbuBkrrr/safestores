@@ -81,7 +81,11 @@ async function suspendAuditor(req, res) {
 // back to trusting the name the desktop app supplied.
 async function requestEngagement(req, res) {
   const { storeId } = req.params;
-  const { notes, requestedByName } = req.body;
+  const { notes, requestedByName, scheduledFor } = req.body;
+  // Web bookings must name a future date/time; the desktop sync path may omit it.
+  const when = scheduledFor ? new Date(scheduledFor) : null;
+  if (scheduledFor && Number.isNaN(when.getTime())) return res.status(400).json({ error: 'Invalid date/time' });
+  if (req.user.sub && (!when || when < new Date())) return res.status(400).json({ error: 'Pick a future date and time for the audit' });
 
   let resolvedName = requestedByName || null;
   if (req.user.sub) {
@@ -90,8 +94,8 @@ async function requestEngagement(req, res) {
   }
 
   const { rows } = await db.query(
-    `INSERT INTO audit_engagements (store_id, notes, requested_by_name) VALUES ($1,$2,$3) RETURNING *`,
-    [storeId, notes || null, resolvedName]
+    `INSERT INTO audit_engagements (store_id, notes, requested_by_name, scheduled_for) VALUES ($1,$2,$3,$4) RETURNING *`,
+    [storeId, notes || null, resolvedName, when]
   );
   res.status(201).json(rows[0]);
 }
@@ -112,7 +116,7 @@ async function listStoreEngagements(req, res) {
 async function listAuditorEngagements(req, res) {
   const { status } = req.query;
   const params = [req.user.sub];
-  let where = '(ae.auditor_id = $1 OR ae.auditor_id IS NULL)';
+  let where = 'ae.auditor_id = $1'; // only bookings the Super Admin assigned to this auditor
   if (status) { params.push(status); where += ` AND ae.status = $${params.length}`; }
   const { rows } = await db.query(
     `SELECT ae.*, s.name AS store_name FROM audit_engagements ae
@@ -127,12 +131,54 @@ async function listAuditorEngagements(req, res) {
 async function acceptEngagement(req, res) {
   const { id } = req.params;
   const { rows } = await db.query(
-    `UPDATE audit_engagements SET auditor_id = $1, status = 'accepted', accepted_at = now()
-     WHERE id = $2 AND status = 'requested' RETURNING *`,
+    `UPDATE audit_engagements SET status = 'accepted', accepted_at = now()
+     WHERE auditor_id = $1 AND id = $2 AND status = 'requested' RETURNING *`,
     [req.user.sub, id]
   );
   if (!rows[0]) return res.status(400).json({ error: 'Engagement not found or already accepted' });
   res.json(rows[0]);
+}
+
+// PATCH /api/auditor/engagements/:id/decline — hands the booking back to the Super Admin
+async function declineEngagement(req, res) {
+  const { rows } = await db.query(
+    `UPDATE audit_engagements SET auditor_id = NULL, assigned_at = NULL, assigned_by = NULL
+     WHERE auditor_id = $1 AND id = $2 AND status = 'requested' RETURNING id`, [req.user.sub, req.params.id]
+  );
+  if (!rows[0]) return res.status(400).json({ error: 'Engagement not found or already accepted' });
+  res.json({ message: 'Declined' });
+}
+
+// GET /api/super/audit-engagements — every store's bookings, unassigned first
+async function listAllEngagementsSuper(req, res) {
+  const { rows } = await db.query(
+    `SELECT ae.*, s.name AS store_name, s.address AS store_address, s.city AS store_city, s.phone AS store_phone, a.name AS auditor_name
+     FROM audit_engagements ae JOIN stores s ON s.id = ae.store_id LEFT JOIN auditors a ON a.id = ae.auditor_id
+     ORDER BY (ae.status = 'requested' AND ae.auditor_id IS NULL) DESC, (ae.status IN ('completed','cancelled')), ae.scheduled_for NULLS LAST, ae.requested_at DESC
+     LIMIT 300`
+  );
+  res.json(rows);
+}
+
+// PATCH /api/super/audit-engagements/:id/assign  { auditorId }
+async function assignEngagementSuper(req, res) {
+  const a = await db.query(`SELECT id FROM auditors WHERE id = $1 AND status = 'active'`, [req.body?.auditorId]);
+  if (!a.rows[0]) return res.status(400).json({ error: 'Pick an active auditor' });
+  const { rows } = await db.query(
+    `UPDATE audit_engagements SET auditor_id = $1, status = 'requested', accepted_at = NULL, assigned_by = $2, assigned_at = now()
+     WHERE id = $3 AND status IN ('requested','accepted') RETURNING *`, [a.rows[0].id, req.user.sub, req.params.id]
+  );
+  if (!rows[0]) return res.status(400).json({ error: 'Booking not found or already under way' });
+  res.json(rows[0]);
+}
+
+// PATCH /api/super/audit-engagements/:id/cancel
+async function cancelEngagementSuper(req, res) {
+  const { rows } = await db.query(
+    `UPDATE audit_engagements SET status = 'cancelled' WHERE id = $1 AND status IN ('requested','accepted') RETURNING id`, [req.params.id]
+  );
+  if (!rows[0]) return res.status(400).json({ error: 'Booking not found or already under way' });
+  res.json({ message: 'Cancelled' });
 }
 
 // PATCH /api/auditor/engagements/:id/complete
@@ -173,6 +219,7 @@ async function inviteStockTaker(req, res) {
 }
 
 module.exports = {
+  declineEngagement, listAllEngagementsSuper, assignEngagementSuper, cancelEngagementSuper,
   auditorSignup, auditorLogin, listAuditors, activateAuditor, suspendAuditor,
   requestEngagement, listStoreEngagements, listAuditorEngagements,
   acceptEngagement, completeEngagement, inviteStockTaker,
