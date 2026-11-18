@@ -431,6 +431,11 @@ async function refundOrder(req, res) {
       return res.status(400).json({ error: 'Store-credit refunds need a sale linked to a customer' });
     }
 
+    // Stores with a security post: refunds only for goods security has received back.
+    const hasSecurity = (await client.query(
+      `SELECT 1 FROM users WHERE store_id = $1 AND role = 'security' AND status = 'active' LIMIT 1`, [storeId]
+    )).rowCount > 0;
+
     const shiftId = await openShiftFor(client, storeId, req.user.sub);
     const refundId = crypto.randomUUID();
     let total = 0;
@@ -448,6 +453,18 @@ async function refundOrder(req, res) {
       if (qty > line.quantity - line.refunded_qty) {
         await client.query('ROLLBACK');
         return res.status(400).json({ error: `Only ${line.quantity - line.refunded_qty} of that item can still be refunded` });
+      }
+      if (hasSecurity) {
+        const back = (await client.query(
+          'SELECT COALESCE(SUM(quantity), 0)::int AS n FROM security_returns WHERE order_item_id = $1', [line.id]
+        )).rows[0].n;
+        if (line.refunded_qty + qty > back) {
+          await client.query('ROLLBACK');
+          return res.status(400).json({
+            code: 'SECURITY_RETURN_REQUIRED',
+            error: `Security has confirmed ${Math.max(0, back - line.refunded_qty)} of this item back. Send the customer to the security post with the goods and receipt first.`,
+          });
+        }
       }
       const amount = refundAmountFor({ lineTotal: line.line_total, lineQty: line.quantity, qty, orderSubtotal: order.subtotal, orderTotal: order.total });
       total = r2(total + amount);

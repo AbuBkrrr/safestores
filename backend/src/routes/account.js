@@ -3,7 +3,7 @@ const router = require('express').Router();
 const ctrl = require('../controllers/accountController');
 const { requireAuth, requireRole } = require('../middleware/auth');
 
-const PEOPLE = ['super_admin', 'admin', 'manager', 'staff', 'cashier', 'checkout', 'stock_taker', 'marketplace_manager'];
+const PEOPLE = ['super_admin', 'admin', 'manager', 'staff', 'cashier', 'checkout', 'stock_taker', 'marketplace_manager', 'security'];
 // A store's own audit staff (role 'auditor' + storeId) are store users too;
 // independent auditor firms (no storeId) are not handled here.
 const storeAuditor = (req, res, next) => (req.user?.role === 'auditor' && req.user.storeId ? next() : requireRole(...PEOPLE)(req, res, next));

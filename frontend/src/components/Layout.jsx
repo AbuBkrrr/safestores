@@ -33,6 +33,7 @@ const storeNav = [
   { group: 'storeOperations', to: '/checkout', navKey: 'checkout', icon: '🛒', roles: ['admin', 'manager', 'cashier', 'checkout'] },
   { group: 'storeOperations', to: '/sales', navKey: 'sales', icon: '🧮', roles: ['admin', 'manager', 'cashier', 'checkout'] },
   { group: 'storeOperations', to: '/shifts', navKey: 'shifts', icon: '⏰', roles: ['admin', 'manager', 'cashier', 'checkout'] },
+  { group: 'storeOperations', to: '/exit-check', navKey: 'exitCheck', icon: '🛡️', roles: ['admin', 'manager', 'security'] },
   { group: 'storeOperations', to: '/receipts', navKey: 'receipts', icon: '🧾', roles: ['admin', 'manager', 'staff'] },
   { group: 'storeOperations', to: '/camera', navKey: 'camera', icon: '📷', roles: ['admin', 'manager', 'staff'] },
   { group: 'administration', to: '/settings', navKey: 'settings', icon: '⚙️', roles: ['admin'] },

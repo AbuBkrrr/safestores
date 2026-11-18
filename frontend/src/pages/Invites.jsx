@@ -13,7 +13,7 @@ function inviteLink(code) {
 }
 
 // Every role a store user can hold (the store auditor is time-boxed to an audit engagement).
-const INVITE_ROLES = ['staff', 'cashier', 'checkout', 'stock_taker', 'marketplace_manager', 'manager', 'admin', 'auditor'];
+const INVITE_ROLES = ['staff', 'cashier', 'checkout', 'stock_taker', 'marketplace_manager', 'security', 'manager', 'admin', 'auditor'];
 
 export default function Invites() {
   const { t } = useTranslation();

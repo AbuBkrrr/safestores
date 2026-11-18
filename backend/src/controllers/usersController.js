@@ -13,7 +13,7 @@ const { checkPassword } = require('../utils/passwordPolicy');
 const { generateInviteCode } = require('../utils/codes');
 
 // Every role a store user can be invited as.
-const INVITE_ROLES = ['admin', 'manager', 'cashier', 'checkout', 'staff', 'stock_taker', 'marketplace_manager', 'auditor'];
+const INVITE_ROLES = ['admin', 'manager', 'cashier', 'checkout', 'staff', 'stock_taker', 'marketplace_manager', 'auditor', 'security'];
 
 // GET /api/stores/:storeId/users
 async function listUsers(req, res) {

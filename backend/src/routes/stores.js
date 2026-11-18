@@ -286,13 +286,20 @@ router.delete('/images/:imageId', requireRole('admin', 'manager'), imagesCtrl.de
 router.get('/barcode-lookup', imagesCtrl.barcodeLookup);
 
 // Analytics dashboard.
-router.get('/analytics/summary', analyticsCtrl.summary);
-router.get('/analytics/stock-by-category', analyticsCtrl.stockByCategory);
-router.get('/analytics/top-products', analyticsCtrl.topProducts);
-router.get('/analytics/movement-trends', analyticsCtrl.movementTrends);
-router.get('/analytics/low-stock-distribution', analyticsCtrl.lowStockDistribution);
-router.get('/analytics/reorder-alerts', analyticsCtrl.reorderAlerts);
-router.get('/analytics/expiring-soon', analyticsCtrl.expiringSoon);
+// Each role's own home screen — only what that role needs.
+const roleDash = require('../controllers/roleDashboardController');
+router.get('/my-dashboard', roleDash.myDashboard);
+// Security post at the exit: check a receipt, then mark it used.
+router.get('/exit-check', requireRole('admin', 'manager', 'security'), roleDash.lookup);
+router.post('/exit-check/:orderId', requireRole('admin', 'manager', 'security'), roleDash.markChecked);
+router.post('/exit-check/:orderId/returns', requireRole('admin', 'manager', 'security'), roleDash.confirmReturn);
+router.get('/analytics/summary', requireRole('admin', 'manager'), analyticsCtrl.summary);
+router.get('/analytics/stock-by-category', requireRole('admin', 'manager'), analyticsCtrl.stockByCategory);
+router.get('/analytics/top-products', requireRole('admin', 'manager'), analyticsCtrl.topProducts);
+router.get('/analytics/movement-trends', requireRole('admin', 'manager'), analyticsCtrl.movementTrends);
+router.get('/analytics/low-stock-distribution', requireRole('admin', 'manager'), analyticsCtrl.lowStockDistribution);
+router.get('/analytics/reorder-alerts', requireRole('admin', 'manager'), analyticsCtrl.reorderAlerts);
+router.get('/analytics/expiring-soon', requireRole('admin', 'manager'), analyticsCtrl.expiringSoon);
 router.get('/analytics/shrinkage', requireRole('admin', 'manager'), analyticsCtrl.shrinkageReport);
 const insightsCtrl = require('../controllers/insightsController');
 router.get('/insights/profit', requireRole('admin', 'manager'), insightsCtrl.profit);

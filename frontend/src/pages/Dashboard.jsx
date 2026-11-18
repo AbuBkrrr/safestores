@@ -5,8 +5,15 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { Metric, Alert } from '../components/ui.jsx';
 import { useCurrency } from '../context/CurrencyContext.jsx';
 import GettingStarted from '../components/GettingStarted.jsx';
+import RoleDashboard from '../components/RoleDashboard.jsx';
 
 export default function Dashboard() {
+  const { user: who } = useAuth();
+  if (!['admin', 'manager'].includes(who?.role)) return <RoleDashboard />;
+  return <StoreDashboard />;
+}
+
+function StoreDashboard() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { formatCurrency } = useCurrency();
