@@ -7,6 +7,7 @@ import { Alert, Badge, Modal, Toast } from '../components/ui.jsx';
 import { useToast } from '../components/useToast.js';
 import { useCurrency } from '../context/CurrencyContext.jsx';
 import CreditPanel from '../components/CreditPanel.jsx';
+import BrandingPanel from '../components/BrandingPanel.jsx';
 import CouriersPanel from '../components/CouriersPanel.jsx';
 
 const SYNC_EVENTS = ['marketplace:order_placed', 'marketplace:order_updated', 'marketplace:order_fulfilled', 'marketplace:order_cancelled', 'marketplace:order_paid'];
@@ -164,6 +165,8 @@ export default function Marketplace() {
           </form>
         )}
       </div>
+
+      <BrandingPanel onToast={showToast} shopUrl={storefrontUrl} />
 
       <div className="card">
         <h3 style={{ marginBottom: 12 }}>{t('marketplacePage.orders')}</h3>

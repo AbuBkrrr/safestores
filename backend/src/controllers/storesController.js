@@ -416,10 +416,12 @@ async function deleteAnyUser(req, res) {
 // all (marketplace_enabled) is deliberately NOT settable here — that's a
 // Super Admin-only switch (see storesController's updateStore) toggled
 // from the Super Admin dashboard, not something a store can flip for itself.
+const SHOP_FONTS = ['Poppins', 'Montserrat', 'Nunito', 'Playfair Display', 'Merriweather', 'Lobster', 'Oswald', 'Quicksand'];
+
 async function getMarketplaceProfile(req, res) {
   const { storeId } = req.params;
   const { rows } = await db.query(
-    'SELECT id, name, category, address, city, marketplace_enabled, shop_slug, shop_tagline, custom_domain FROM stores WHERE id = $1', [storeId]
+    'SELECT id, name, category, address, city, marketplace_enabled, shop_slug, shop_tagline, custom_domain, shop_logo_url, shop_bg_image_url, shop_brand_color, shop_bg_color, shop_font, shop_theme FROM stores WHERE id = $1', [storeId]
   );
   if (!rows[0]) return res.status(404).json({ error: 'Store not found' });
   res.json({ ...rows[0], domain_target: require('../utils/customDomain').domainTarget() });
@@ -428,6 +430,31 @@ async function getMarketplaceProfile(req, res) {
 async function updateMarketplaceProfile(req, res) {
   const { storeId } = req.params;
   const { category, address, city, shopSlug, shopTagline, customDomain } = req.body;
+  // Branding: undefined = leave, '' = reset to default. Colours are #rrggbb; fonts/themes from fixed lists.
+  const HEX = /^#[0-9a-f]{6}$/i;
+  const brand = {};
+  for (const [key, col] of [['brandColor', 'shop_brand_color'], ['bgColor', 'shop_bg_color']]) {
+    const v = req.body[key];
+    if (v === undefined) continue;
+    if (v && !HEX.test(v)) return res.status(400).json({ error: 'Colours must look like #1a2b3c' });
+    brand[col] = v || null;
+  }
+  if (req.body.font !== undefined) {
+    if (req.body.font && !SHOP_FONTS.includes(req.body.font)) return res.status(400).json({ error: 'Unknown font' });
+    brand.shop_font = req.body.font || null;
+  }
+  if (req.body.theme !== undefined) {
+    if (req.body.theme && !['light', 'dark'].includes(req.body.theme)) return res.status(400).json({ error: 'theme must be light or dark' });
+    brand.shop_theme = req.body.theme || null;
+  }
+  // Images are set through the upload endpoint; here they can only be cleared.
+  for (const [key, col] of [['logoUrl', 'shop_logo_url'], ['bgImageUrl', 'shop_bg_image_url']]) {
+    if (req.body[key] === '' || req.body[key] === null) brand[col] = null;
+  }
+  if (Object.keys(brand).length) {
+    const cols = Object.keys(brand);
+    await db.query(`UPDATE stores SET ${cols.map((c, i) => `${c} = $${i + 2}`).join(', ')} WHERE id = $1`, [storeId, ...cols.map((c) => brand[c])]);
+  }
   const cd = require('../utils/customDomain');
   let domain;
   if (customDomain !== undefined) {
@@ -458,7 +485,7 @@ async function updateMarketplaceProfile(req, res) {
             shop_tagline = CASE WHEN $7 THEN $8 ELSE shop_tagline END,
             custom_domain = CASE WHEN $9 THEN $10 ELSE custom_domain END,
             updated_at = now()
-     WHERE id = $4 RETURNING id, name, category, address, city, marketplace_enabled, shop_slug, shop_tagline, custom_domain`,
+     WHERE id = $4 RETURNING id, name, category, address, city, marketplace_enabled, shop_slug, shop_tagline, custom_domain, shop_logo_url, shop_bg_image_url, shop_brand_color, shop_bg_color, shop_font, shop_theme`,
     [category ?? null, address ?? null, city ?? null, storeId, slug !== undefined, slug ?? null, tagline !== undefined, tagline ?? null,
       domain !== undefined, domain ?? null]
   );
@@ -466,6 +493,16 @@ async function updateMarketplaceProfile(req, res) {
   if (rows[0]) rows[0].domain_target = cd.domainTarget();
   if (!rows[0]) return res.status(404).json({ error: 'Store not found' });
   res.json(rows[0]);
+}
+
+// POST /api/stores/:storeId/branding/:kind  (multipart "image") — kind: logo | background
+async function uploadBranding(req, res) {
+  const col = { logo: 'shop_logo_url', background: 'shop_bg_image_url' }[req.params.kind];
+  if (!col) return res.status(400).json({ error: 'kind must be logo or background' });
+  if (!req.file) return res.status(400).json({ error: 'Choose an image' });
+  const { url } = await require('../utils/storage').persistUpload(req.file, { keyPrefix: `stores/${req.params.storeId}/branding` });
+  await db.query(`UPDATE stores SET ${col} = $1 WHERE id = $2`, [url, req.params.storeId]);
+  res.json({ url });
 }
 
 // GET /api/stores/:storeId/custom-domain/check — is the store's domain's DNS pointed here yet?
@@ -513,6 +550,7 @@ async function updateLoyaltySettings(req, res) {
 }
 
 module.exports = {
+  uploadBranding,
   listStores, listReferrals, createStore, updateStore, activateStore, suspendStore, deleteStore, listPlans, updateTier, issueCodeForStore, issueStoreCode,
   generateCode, listCodes, revokeCode, redeemCode,
   listAllUsers, updateAnyUserStatus, deleteAnyUser,

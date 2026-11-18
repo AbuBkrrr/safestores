@@ -1883,5 +1883,33 @@
     "paid": "I've paid",
     "reported": "Reported ({{ref}}) — awaiting store",
     "reportedOk": "Payment reported. The store will confirm it."
+  },
+  "branding": {
+    "title": "Look & feel",
+    "intro": "Make your online shop yours: logo, colours, font and background. Customers see it on your shop page and your own domain.",
+    "logo": "Logo",
+    "logoHelp": "Square PNG or JPG works best (at least 200×200).",
+    "bgImage": "Background image",
+    "bgImageHelp": "Optional. A wide photo or pattern; it sits behind your products.",
+    "brandColor": "Brand colour (buttons, highlights)",
+    "bgColor": "Background colour",
+    "font": "Font",
+    "defaultFont": "Default (system)",
+    "cards": "Product cards",
+    "themeAuto": "Follow the shopper's light/dark setting",
+    "themeLight": "Always light",
+    "themeDark": "Always dark",
+    "presets": "Quick styles",
+    "preview": "Preview",
+    "sampleProduct": "Sample product",
+    "sampleButton": "Add",
+    "save": "Save look",
+    "viewShop": "View my shop",
+    "remove": "Remove",
+    "reset": "Reset",
+    "default": "Default",
+    "uploaded": "Image uploaded. Save to keep other changes.",
+    "saved": "Shop look saved",
+    "failed": "Could not save. Try again."
   }
 }

@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { formatCurrency as format } from '../utils/currency.js';
+import { shopThemeVars, useShopTheme } from '../utils/shopTheme.js';
 import { LanguageSwitcher } from '../components/Layout.jsx';
 import { BrandFooter } from '../components/ui.jsx';
 import PasswordInput from '../components/PasswordInput.jsx';
@@ -192,12 +193,15 @@ export default function Storefront() {
     window.open(`https://wa.me/${String(store?.phone || '').replace(/\D/g, '')}?text=${encodeURIComponent(lines.join('\n'))}`, '_blank');
   };
   const trackingPath = placed?.tracking_token ? `/track/${placed.tracking_token}` : null;
+  useShopTheme(store);
 
   return (
-    <div className="storefront">
+    <div className={`storefront${store?.shop_bg_color || store?.shop_bg_image_url ? ' sf-branded-bg' : ''}`} data-sf-theme={store?.shop_theme || undefined} style={shopThemeVars(store)}>
       <header className="storefront-header">
         <div className="sf-hero">
-          <div className="sf-avatar" aria-hidden="true">{(store?.name || 'S').trim().charAt(0).toUpperCase()}</div>
+          {store?.shop_logo_url
+            ? <img className="sf-avatar sf-logo" src={store.shop_logo_url} alt={store.name} />
+            : <div className="sf-avatar" aria-hidden="true">{(store?.name || 'S').trim().charAt(0).toUpperCase()}</div>}
           <div>
             <h1>{store?.name || t('storefrontPage.title')}</h1>
             {store?.shop_tagline && <p className="sf-tagline">{store.shop_tagline}</p>}

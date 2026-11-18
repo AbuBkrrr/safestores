@@ -74,7 +74,7 @@ function robots(req, res) {
 async function storeInfo(req, res) {
   if (!UUID.test(req.params.storeId)) return res.status(404).json({ error: 'Store not found' });
   const { rows } = await db.query(
-    `SELECT s.id, s.name, s.category, s.city, s.address, s.phone, s.shop_slug, s.shop_tagline,
+    `SELECT s.id, s.name, s.category, s.city, s.address, s.phone, s.shop_slug, s.shop_tagline, s.shop_logo_url, s.shop_bg_image_url, s.shop_brand_color, s.shop_bg_color, s.shop_font, s.shop_theme,
             COALESCE(s.currency_code, c.code) AS currency_code, COALESCE(s.currency_symbol, c.symbol) AS currency_symbol
      FROM stores s LEFT JOIN currency_settings c ON c.id = 'default'
      WHERE s.id = $1 AND s.subscription_status = 'active' AND s.marketplace_enabled = true`,

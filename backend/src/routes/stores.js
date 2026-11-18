@@ -84,6 +84,7 @@ router.post('/audit-engagements', requireAuthOrStoreSyncKey('admin', 'manager'),
 // listing management page.
 router.get('/marketplace-profile', requireAuthOrStoreSyncKey('admin', 'manager'), storesCtrl.getMarketplaceProfile);
 router.patch('/marketplace-profile', requireAuthOrStoreSyncKey('admin', 'manager'), storesCtrl.updateMarketplaceProfile);
+router.post('/branding/:kind', requireAuth, scopeToOwnStore, requireRole('admin', 'manager'), require('../middleware/upload').upload.single('image'), storesCtrl.uploadBranding);
 
 // Marketplace order management — same dual-mode reasoning as above;
 // desktop's marketplaceController.js proxies all three with the sync key.

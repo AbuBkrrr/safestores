@@ -627,3 +627,16 @@ tr:hover td { background: #fafbfc; }
 .pw-wrap { position: relative; display: block; }
 .pw-wrap input { width: 100%; padding-right: 42px; }
 .pw-toggle { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: transparent; border: 0; cursor: pointer; font-size: 16px; padding: 4px 6px; line-height: 1; }
+
+/* ---------- Shop branding ---------- */
+.storefront { color: var(--text); }
+.storefront .sf-logo { object-fit: contain; background: var(--panel); padding: 4px; border: 1px solid var(--line); }
+.storefront.sf-branded-bg .storefront-header { background: var(--panel); border-radius: var(--radius); padding: 14px; box-shadow: var(--shadow); opacity: 0.97; }
+.storefront[data-sf-theme] .card, .storefront[data-sf-theme] .storefront-cart { background: var(--panel); color: var(--text); border-color: var(--line); }
+.storefront[data-sf-theme] input, .storefront[data-sf-theme] select, .storefront[data-sf-theme] textarea { background: var(--panel); color: var(--text); border-color: var(--line); }
+.storefront[data-sf-theme="light"] { color-scheme: light; }
+.storefront[data-sf-theme="dark"] { color-scheme: dark; }
+.storefront .btn { font-family: inherit; }
+.brand-preview { border-radius: var(--radius); padding: 14px; border: 1px solid var(--line); display: flex; gap: 12px; align-items: center; }
+.brand-swatch { display: flex; gap: 8px; align-items: center; }
+.brand-swatch input[type="color"] { width: 44px; height: 36px; padding: 2px; }
