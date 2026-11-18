@@ -4,7 +4,9 @@ require('dotenv').config();
 // Most hosted Postgres providers (Render, Railway, Supabase, Neon, RDS) require
 // SSL and present a certificate that isn't in Node's default trust store.
 // DATABASE_SSL=require opts into that; leave unset for local Postgres with no SSL.
-const useSSL = process.env.DATABASE_SSL === 'require' || process.env.NODE_ENV === 'production';
+// DATABASE_SSL=disable turns it off even in production (e.g. a Postgres container on the same Docker network).
+const useSSL = process.env.DATABASE_SSL === 'require'
+  || (process.env.NODE_ENV === 'production' && process.env.DATABASE_SSL !== 'disable');
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
