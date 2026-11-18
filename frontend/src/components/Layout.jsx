@@ -73,7 +73,7 @@ const superNav = [
   { group: 'Administration', to: '/super/stores', label: '🏪 Manage Stores', icon: '🏪', text: 'Manage Stores' },
   { group: 'Administration', to: '/super/referrals', label: '🎯 Referrals', icon: '🎯', text: 'Referrals' },
   { group: 'Administration', to: '/super/users', label: '👥 All Users', icon: '👥', text: 'All Users' },
-  { group: 'Administration', to: '/super/subscriptions', label: '💳 Tiers & Codes', icon: '💳', text: 'Tiers & Codes' },
+  { group: 'Administration', to: '/super/subscriptions', label: '💳 Payments, Tiers & Codes', icon: '💳', text: 'Payments, Tiers & Codes' },
   { group: 'Administration', to: '/super/billing', label: '💰 Billing Charges', icon: '💰', text: 'Billing Charges' },
   { group: 'Administration', to: '/super/support', label: '🎧 Support Tickets', icon: '🎧', text: 'Support Tickets' },
   { group: 'Administration', to: '/super/activity', label: '🕓 Activity Log', icon: '🕓', text: 'Activity Log' },

@@ -93,7 +93,7 @@ export default function Subscriptions() {
 
   return (
     <div>
-      <div className="topbar"><h1>💳 Store Tiers & Access Codes</h1></div>
+      <div className="topbar"><h1>💳 Payment Account, Tiers & Access Codes</h1></div>
 
       <div className="card">
         <h3 style={{ marginBottom: 12 }}>Currency</h3>
