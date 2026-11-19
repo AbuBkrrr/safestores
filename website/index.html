@@ -141,6 +141,8 @@
   .ed-card h3 { font-family: var(--display); font-size: 20px; margin: 0; }
   .ed-card p { font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; margin: 0 0 14px; flex-grow: 1; }
   .ed-card .btn { width: 100%; }
+  .ed-row { display: flex; gap: 8px; }
+  .ed-row .btn { flex: 1; }
 
   /* Contact */
   .contact { display: grid; grid-template-columns: 1fr 1.2fr; gap: 36px; }
@@ -339,14 +341,18 @@
       <span class="tag live">Live</span>
       <h3>Desktop</h3>
       <p>Installs on the shop computer and works fully offline with its own database. Other devices in the shop connect to it over the Wi-Fi, and it backs up online when the internet is on.</p>
-      <a class="btn btn-primary" href="#contact" data-topic="desktop">Request the installer →</a>
+      <a class="btn btn-primary" href="https://github.com/AbuBkrrr/safestores/releases/latest/download/SAFE-Stores-Windows.exe" download>⬇ Download for Windows</a>
+      <div class="ed-row">
+        <a class="btn btn-ghost" href="https://github.com/AbuBkrrr/safestores/releases/latest/download/SAFE-Stores-Mac.dmg" download>Mac</a>
+        <a class="btn btn-ghost" href="https://github.com/AbuBkrrr/safestores/releases/latest/download/SAFE-Stores-Linux.AppImage" download>Linux</a>
+      </div>
     </div>
     <div class="ed-card">
-      <span class="tag wait">Coming soon</span>
+      <span class="tag live">Live</span>
       <h3>Android</h3>
-      <p>Camera barcode scanning, offline photo capture and push alerts for new orders — built, and waiting on Google Play. Until then, the web edition works on any Android phone.</p>
-      <a class="btn btn-primary" href="#contact" data-topic="android">Tell me when it's out</a>
-      <a class="btn btn-ghost" href="https://app.safestores.name.ng/login">Use it in the browser now</a>
+      <p>Camera barcode scanning, offline photo capture and alerts for new orders. Download the app straight to the phone; when asked, allow installing from your browser. Google Play listing coming soon.</p>
+      <a class="btn btn-primary" href="https://github.com/AbuBkrrr/safestores/releases/latest/download/SAFE-Stores-Android.apk" download>⬇ Download the Android app</a>
+      <a class="btn btn-ghost" href="https://app.safestores.name.ng/login">Or use it in the browser</a>
     </div>
   </div>
 </section>
