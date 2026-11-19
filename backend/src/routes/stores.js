@@ -174,6 +174,16 @@ router.patch('/notifications/:id/read', storeNotifCtrl.markRead);
 // also covers "not locked for non-payment" — see middleware/auth.js).
 router.use(requireActiveStore);
 
+// "In-store only" lock. The owner's controls come first; after the
+// requireOnSite line, changes by shop-floor staff must come from inside the
+// shop (its saved internet connection, or GPS within the radius) when it is on.
+const onsiteCtrl = require('../controllers/onsiteController');
+router.get('/onsite', requireRole('admin'), onsiteCtrl.getOnsite);
+router.patch('/onsite', requireRole('admin'), onsiteCtrl.updateOnsite);
+router.post('/onsite/networks', requireRole('admin'), onsiteCtrl.addNetworkHere);
+router.delete('/onsite/networks/:index', requireRole('admin'), onsiteCtrl.removeNetwork);
+router.use(require('../middleware/onsite').requireOnSite);
+
 // Staff & Invites — how a store admin/manager brings on cashiers/staff over the LAN.
 router.get('/users', usersCtrl.listUsers);
 router.delete('/users/:userId', requireRole('admin'), usersCtrl.removeUser);

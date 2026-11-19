@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { enqueueAction } from '../offline/outbox.js';
 import { dbPut, dbGet } from '../offline/db.js';
+import { lastFix, getFix, geoHeaders, fixForQueue } from '../utils/geo.js';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || '/api',
@@ -9,6 +10,14 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('ss_token');
   if (token) config.headers.Authorization = `Bearer ${token}`;
+  // In-store only lock: once the phone has a recent location, send it with
+  // changes so they don't each need a round trip. Never on a replay of an
+  // offline action: that carries the location from when it was made (or
+  // none), and stamping today's location on it would defeat the lock.
+  const fix = lastFix();
+  if (fix && config.method && config.method.toLowerCase() !== 'get' && !config.params?._offlineReplay) {
+    Object.assign(config.headers, geoHeaders(fix));
+  }
   return config;
 });
 
@@ -101,6 +110,19 @@ api.interceptors.response.use(
       }
     }
 
+    // In-store only lock: the shop accepts GPS, so ask the phone where it is
+    // and try once more. If location is refused or still outside the shop,
+    // the page shows the server's message.
+    if (err.response?.status === 403 && err.response.data?.code === 'OFFSITE' && err.response.data.canUseLocation
+        && !config._geoTried && !config.params?._offlineReplay) {
+      const fix = await getFix();
+      if (fix) {
+        config._geoTried = true;
+        config.headers = { ...(config.headers || {}), ...geoHeaders(fix) };
+        return api.request(config);
+      }
+    }
+
     // Offline write: queue it and hand the page back a synthesized
     // "accepted" response (with a client-generated id) instead of an
     // error, so the UI can proceed optimistically. It'll actually reach
@@ -116,7 +138,9 @@ api.interceptors.response.use(
         try { body = JSON.parse(body); } catch { /* leave as-is */ }
       }
       const storeId = storeIdFromUrl(config.url);
-      const entry = await enqueueAction({ method: config.method, url: config.url, storeId, body, isFormData });
+      // Stamped with where the phone was, so the in-store lock judges the
+      // action by where it was made, not where it is synced from.
+      const entry = await enqueueAction({ method: config.method, url: config.url, storeId, body, isFormData, geo: fixForQueue() });
       return {
         data: { ...(isFormData ? {} : entry.body), queued: true, queueId: entry.queueId },
         status: 202,
@@ -137,6 +161,9 @@ api.interceptors.response.use(
       } catch { /* fall through to the original error */ }
     }
 
+    if (err.response?.data?.code === 'OFFSITE' && typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('ss:offsite', { detail: err.response.data.error }));
+    }
     return Promise.reject(err);
   }
 );

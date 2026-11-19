@@ -8,6 +8,7 @@ import { useCurrency } from '../context/CurrencyContext.jsx';
 import { Alert, Toast } from '../components/ui.jsx';
 import { useToast } from '../components/useToast.js';
 import OnlinePaymentsCard from '../components/OnlinePaymentsCard.jsx';
+import OnsiteLockCard from '../components/OnsiteLockCard.jsx';
 import { CURRENCIES, allCurrencyCodes, currencyName, formatCurrency } from '../utils/currency.js';
 
 function allTimezones() {
@@ -133,6 +134,7 @@ export default function StoreSettings() {
       </form>
       {/* Storefront payments settle straight to the store's bank (web edition only). */}
       {import.meta.env.VITE_EDITION !== 'desktop' && <div className="mt-1"><OnlinePaymentsCard onToast={showToast} /></div>}
+      {import.meta.env.VITE_EDITION !== 'desktop' && user?.role === 'admin' && <div className="mt-1"><OnsiteLockCard /></div>}
       <Toast {...(toast || {})} />
     </div>
   );

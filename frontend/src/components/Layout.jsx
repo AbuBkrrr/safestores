@@ -168,6 +168,14 @@ export default function Layout() {
   // provide that a plain CSS class-toggle wouldn't give us for free here.
   useEffect(() => { setSidebarOpen(false); }, [location.pathname]);
 
+  // In-store only lock: any blocked action, on any page, shows one banner.
+  const [offsite, setOffsite] = useState(null);
+  useEffect(() => {
+    const on = (e) => setOffsite(e.detail);
+    window.addEventListener('ss:offsite', on);
+    return () => window.removeEventListener('ss:offsite', on);
+  }, []);
+
   const handleLogout = () => {
     logout();
     navigate('/login');
@@ -258,6 +266,12 @@ export default function Layout() {
           >
             ☰
           </button>
+          {offsite && (
+            <div className="alert error" role="alert" style={{ display: 'flex', gap: 12, alignItems: 'flex-start', justifyContent: 'space-between' }}>
+              <span>📍 <strong>{t('onsite.blockedTitle')}</strong> {offsite}</span>
+              <button type="button" className="btn small secondary" onClick={() => setOffsite(null)}>{t('onsite.dismiss')}</button>
+            </div>
+          )}
           <Suspense fallback={<div className="page-loading" role="status"><span className="spinner" /></div>}>
             <Outlet />
           </Suspense>
