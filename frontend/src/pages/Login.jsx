@@ -50,7 +50,7 @@ export default function Login() {
     } catch (err) {
       const body = err.response?.data || {};
       if (['TOTP_REQUIRED', 'TOTP_INVALID'].includes(body.code)) setNeedOtp(true);
-      if (body.code === 'CHOOSE_STORE') { setStoreChoices(body.stores); setStoreId(body.stores[0]?.id || ''); }
+      if (body.code === 'CHOOSE_STORE') { setStoreChoices(body.stores); setStoreId(body.stores[0]?.id || ''); return; }
       setError(body.error || 'Login failed');
     } finally {
       setLoading(false);

@@ -69,18 +69,33 @@ async function storeSignup(req, res) {
 // body: { email, password }
 // ------------------------------------------------------------
 async function adminLogin(req, res) {
-  const { email, password } = req.body;
+  const { email, password, storeId: chosenStoreId } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
 
-  const user = db.prepare(
+  // The same email can belong to accounts at several stores (an owner of two
+  // shops). Try each one whose password matches; if more than one matches and
+  // the person hasn't said which store, ask them to choose — never just open
+  // the first one, which made a second shop show the first shop's name.
+  const rows = db.prepare(
     `SELECT u.*, s.subscription_status, s.name AS store_name, s.locked, s.store_tier, s.business_type
      FROM users u JOIN stores s ON s.id = u.store_id
-     WHERE u.email = ? AND u.password_hash IS NOT NULL`
-  ).get(email);
-  if (!user) return res.status(401).json({ error: 'Invalid credentials' });
-
-  const ok = await bcrypt.compare(password, user.password_hash);
-  if (!ok) return res.status(401).json({ error: 'Invalid credentials' });
+     WHERE lower(u.email) = lower(?) AND u.password_hash IS NOT NULL ORDER BY u.created_at ASC`
+  ).all(email);
+  const matches = [];
+  for (const candidate of rows) {
+    if (chosenStoreId && candidate.store_id !== chosenStoreId) continue;
+    // eslint-disable-next-line no-await-in-loop
+    if (await bcrypt.compare(password, candidate.password_hash)) matches.push(candidate);
+  }
+  if (matches.length === 0) return res.status(401).json({ error: 'Invalid credentials' });
+  if (matches.length > 1) {
+    return res.status(409).json({
+      error: 'This email is used at more than one store. Choose which store to sign in to.',
+      code: 'CHOOSE_STORE',
+      stores: matches.map((m) => ({ id: m.store_id, name: m.store_name })),
+    });
+  }
+  const user = matches[0];
 
   if (user.subscription_status === 'suspended') {
     return res.status(403).json({ error: "This store's subscription is suspended. Contact support." });
