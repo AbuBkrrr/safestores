@@ -1403,7 +1403,9 @@
     "printerFailed": "Enweghị ike iru igwe mbipụta rasiti",
     "qrAlt": "Koodu QR na-eduga na rasiti dijitalụ a",
     "scanForDigital": "Nyochaa maka rasiti dijitalụ gị",
-    "notFound": "Anyị achọtaghị rasiti a. Njikọ ahụ nwere ike ọ gaghị ezu."
+    "notFound": "Anyị achọtaghị rasiti a. Njikọ ahụ nwere ike ọ gaghị ezu.",
+    "networkPrinter": "Ihe mbipụta Wi-Fi / netwọk",
+    "printerAddress": "IP ihe mbipụta, dịka 192.168.1.50"
   },
   "shift": {
     "title": "Oge Ọrụ",

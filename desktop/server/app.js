@@ -37,6 +37,8 @@ function createApp() {
   // sensitive, and the public customer Storefront needs this too, not just
   // logged-in admin pages.
   app.get('/api/settings/currency', settingsCtrl.getCurrency);
+  // Wi-Fi / network receipt printers, for every device in the shop.
+  app.post('/api/print/network', requireAuth, require('./controllers/printController').printNetwork);
   app.get('/api/public/receipts/:token', require('./controllers/ordersController').publicReceipt);
   app.use('/api/account', require('./routes/account'));
   app.use('/api/super', superRoutes);

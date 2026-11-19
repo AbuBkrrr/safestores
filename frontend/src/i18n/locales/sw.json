@@ -1403,7 +1403,9 @@
     "printerFailed": "Imeshindikana kufikia printa ya risiti",
     "qrAlt": "Msimbo wa QR unaoelekeza kwenye risiti hii ya kidijitali",
     "scanForDigital": "Changanua upate risiti yako ya kidijitali",
-    "notFound": "Hatukuweza kupata risiti hii. Huenda kiungo hakijakamilika."
+    "notFound": "Hatukuweza kupata risiti hii. Huenda kiungo hakijakamilika.",
+    "networkPrinter": "Printa ya Wi-Fi / mtandao",
+    "printerAddress": "IP ya printa, mf. 192.168.1.50"
   },
   "shift": {
     "title": "Zamu",

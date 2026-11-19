@@ -5,7 +5,7 @@ import { formatCurrency } from '../utils/currency.js';
 import {
   methodLabel, printReceipt, receiptEscPos, receiptLink, receiptCurrency, whatsappReceiptUrl, downloadReceiptText,
 } from '../utils/receipt.js';
-import { printRaw, printerSupport, savedPrinterType, savePrinterType } from '../utils/printer.js';
+import { printRaw, printerSupport, savedPrinterType, savePrinterType, savedPrinterAddress, savePrinterAddress } from '../utils/printer.js';
 
 /** On-screen receipt + every way to hand it to the customer. */
 export default function ReceiptView({ receipt, publicView = false, onToast }) {
@@ -13,6 +13,7 @@ export default function ReceiptView({ receipt, publicView = false, onToast }) {
   const [qr, setQr] = useState(null);
   const [phone, setPhone] = useState('');
   const [printerType, setPrinterType] = useState(savedPrinterType());
+  const [printerAddr, setPrinterAddr] = useState(savedPrinterAddress());
   const support = printerSupport();
   const c = receiptCurrency(receipt);
   const f = (n) => formatCurrency(n, c);
@@ -85,16 +86,18 @@ export default function ReceiptView({ receipt, publicView = false, onToast }) {
             <input aria-label={t('receipt.customerPhone')} placeholder={t('receipt.customerPhonePlaceholder')} value={phone} onChange={(e) => setPhone(e.target.value)} style={{ maxWidth: 200 }} inputMode="tel" />
             <a className="btn small" style={{ background: '#25D366', textDecoration: 'none' }} href={whatsappReceiptUrl(receipt, phone)} target="_blank" rel="noreferrer">WhatsApp</a>
           </div>
-          {(support.serial || support.usb || support.bluetooth) && (
+          {(support.serial || support.usb || support.bluetooth || support.network) && (
             <div className="flex mt-1">
               <select aria-label={t('receipt.printerType')} value={printerType} onChange={(e) => { setPrinterType(e.target.value); savePrinterType(e.target.value); }} style={{ maxWidth: 220 }}>
                 <option value="">{t('receipt.thermalChoose')}</option>
                 {support.serial && <option value="serial">USB / Serial</option>}
                 {support.usb && <option value="usb">USB (raw)</option>}
                 {support.bluetooth && <option value="bluetooth">Bluetooth</option>}
+                {support.network && <option value="network">{t('receipt.networkPrinter')}</option>}
               </select>
+              {printerType === 'network' && <input aria-label={t('receipt.printerAddress')} placeholder={t('receipt.printerAddress')} value={printerAddr} onChange={(e) => { setPrinterAddr(e.target.value); savePrinterAddress(e.target.value); }} style={{ maxWidth: 200 }} inputMode="decimal" />}
               {printerType && <button className="btn small secondary" onClick={() => thermal(false)}>🧾 {t('receipt.thermalPrint')}</button>}
-              {printerType && <button className="btn small secondary" onClick={() => thermal(true)}>{t('receipt.thermalPick')}</button>}
+              {printerType && printerType !== 'network' && <button className="btn small secondary" onClick={() => thermal(true)}>{t('receipt.thermalPick')}</button>}
             </div>
           )}
         </>

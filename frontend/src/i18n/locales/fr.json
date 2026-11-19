@@ -1403,7 +1403,9 @@
     "printerFailed": "Impossible de joindre l'imprimante de reçus",
     "qrAlt": "Code QR menant à ce reçu numérique",
     "scanForDigital": "Scannez pour votre reçu numérique",
-    "notFound": "Reçu introuvable. Le lien est peut-être incomplet."
+    "notFound": "Reçu introuvable. Le lien est peut-être incomplet.",
+    "networkPrinter": "Imprimante Wi-Fi / réseau",
+    "printerAddress": "IP de l'imprimante, ex. 192.168.1.50"
   },
   "shift": {
     "title": "Services",

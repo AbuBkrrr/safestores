@@ -1403,7 +1403,9 @@
     "printerFailed": "Could not reach the receipt printer",
     "qrAlt": "QR code linking to this digital receipt",
     "scanForDigital": "Scan for your digital receipt",
-    "notFound": "We couldn't find this receipt. The link may be incomplete."
+    "notFound": "We couldn't find this receipt. The link may be incomplete.",
+    "networkPrinter": "Wi-Fi / network printer",
+    "printerAddress": "Printer IP, e.g. 192.168.1.50"
   },
   "shift": {
     "title": "Shifts",
@@ -1724,7 +1726,7 @@
     },
     "thermal": {
       "q": "Can I print to a receipt printer?",
-      "a": "Yes, in Chrome or Edge. On a receipt, choose the printer connection (USB, Serial or Bluetooth), then Print to receipt printer. Your browser remembers the printer."
+      "a": "Yes. On a receipt, choose the printer connection (USB, Serial, Bluetooth, or Wi-Fi on the shop computer), then Print to receipt printer. Any printer installed on the device, including Wi-Fi and AirPrint printers, also works with the normal Print button."
     },
     "labels": {
       "q": "How do I print price labels and barcodes?",

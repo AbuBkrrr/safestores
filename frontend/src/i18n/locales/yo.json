@@ -1403,7 +1403,9 @@
     "printerFailed": "Kò ṣeé ṣe láti dé ẹ̀rọ ìtẹ̀wé rìsíìtì",
     "qrAlt": "Kóòdù QR tó ń darí sí rìsíìtì oní-nọ́ńbà yìí",
     "scanForDigital": "Ṣàyẹ̀wò fún rìsíìtì oní-nọ́ńbà rẹ",
-    "notFound": "A kò rí rìsíìtì yìí. Ó lè jẹ́ pé ìjápọ̀ kò pé."
+    "notFound": "A kò rí rìsíìtì yìí. Ó lè jẹ́ pé ìjápọ̀ kò pé.",
+    "networkPrinter": "Ẹ̀rọ ìtẹ̀wé Wi-Fi / nẹ́tíwọ́ọ̀kì",
+    "printerAddress": "IP ẹ̀rọ ìtẹ̀wé, àpẹẹrẹ 192.168.1.50"
   },
   "shift": {
     "title": "Àsìkò Iṣẹ́",

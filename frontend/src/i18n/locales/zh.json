@@ -1403,7 +1403,9 @@
     "printerFailed": "无法连接小票打印机",
     "qrAlt": "链接到此电子小票的二维码",
     "scanForDigital": "扫码获取电子小票",
-    "notFound": "找不到此小票，链接可能不完整。"
+    "notFound": "找不到此小票，链接可能不完整。",
+    "networkPrinter": "Wi-Fi / 网络打印机",
+    "printerAddress": "打印机 IP，例如 192.168.1.50"
   },
   "shift": {
     "title": "班次",

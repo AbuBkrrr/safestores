@@ -1403,7 +1403,9 @@
     "printerFailed": "Ba a iya kaiwa ga firintar rasit ba",
     "qrAlt": "Lambar QR da ke kai wa ga wannan rasit na dijital",
     "scanForDigital": "Duba don samun rasit ɗinka na dijital",
-    "notFound": "Ba mu sami wannan rasit ba. Watakila hanyar ba ta cika ba."
+    "notFound": "Ba mu sami wannan rasit ba. Watakila hanyar ba ta cika ba.",
+    "networkPrinter": "Firinta ta Wi-Fi / hanyar sadarwa",
+    "printerAddress": "IP na firinta, misali 192.168.1.50"
   },
   "shift": {
     "title": "Lokutan Aiki",
