@@ -50,6 +50,10 @@ services:
       JWT_EXPIRES_IN: 7d
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8080}
       SENTRY_DSN: ${SENTRY_DSN:-}
+      BOOTSTRAP_SUPER_ADMIN_NAME: ${BOOTSTRAP_SUPER_ADMIN_NAME:-}
+      BOOTSTRAP_SUPER_ADMIN_EMAIL: ${BOOTSTRAP_SUPER_ADMIN_EMAIL:-}
+      BOOTSTRAP_SUPER_ADMIN_PASSWORD: ${BOOTSTRAP_SUPER_ADMIN_PASSWORD:-}
+      SUPPORT_INBOX_EMAIL: ${SUPPORT_INBOX_EMAIL:-}
       # Email + object storage — optional for staging, required for launch
       # (see LAUNCH_GUIDE.md steps 6–7). Empty values are simply ignored.
       PAYSTACK_SECRET_KEY: ${PAYSTACK_SECRET_KEY:-}
@@ -91,7 +95,7 @@ services:
     depends_on:
       - backend
     ports:
-      - '8080:80'
+      - '${FRONTEND_BIND:-8080}:80'
 
 volumes:
   postgres_data:
