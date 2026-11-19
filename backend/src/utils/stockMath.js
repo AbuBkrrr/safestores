@@ -43,11 +43,15 @@ async function recomputeProductQuantities(client, productId) {
   );
   const q = rows[0];
   const { rows: updated } = await client.query(
+    // Only when the numbers actually change — see the desktop copy of this
+    // file: re-stamping unchanged products made sync bounce them forever.
     `UPDATE products SET backroom_qty = $1, shelf_qty = $2, sold_qty = $3, damaged_qty = $4, updated_at = now()
-     WHERE id = $5 RETURNING *`,
+     WHERE id = $5 AND (backroom_qty, shelf_qty, sold_qty, damaged_qty) IS DISTINCT FROM ($1::numeric, $2::numeric, $3::numeric, $4::numeric)
+     RETURNING *`,
     [q.backroom_qty, q.shelf_qty, q.sold_qty, q.damaged_qty, productId]
   );
-  return updated[0];
+  if (updated[0]) return updated[0];
+  return (await client.query('SELECT * FROM products WHERE id = $1', [productId])).rows[0];
 }
 
 module.exports = { recomputeProductQuantities };

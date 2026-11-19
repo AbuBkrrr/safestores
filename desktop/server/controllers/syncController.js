@@ -8,6 +8,10 @@ const ORDER_STATUS_RANK = { pending_payment: 0, paid: 1, cancelled: 1 };
 const RECEIPT_STATUS_RANK = { pending: 0, applied: 1, rejected: 1 };
 
 // GET /api/stores/:storeId/sync/export?since=<ISO8601>
+const parseJson = (v, fallback) => { try { return typeof v === 'string' ? JSON.parse(v) : (v ?? fallback); } catch { return fallback; } };
+const asJson = (v, fallback) => JSON.stringify(v == null ? fallback : (typeof v === 'string' ? parseJson(v, fallback) : v));
+const newer = (incoming, local) => !local || new Date(incoming) > new Date(local);
+
 function exportChanges(req, res) {
   const { storeId } = req.params;
   const since = req.query.since || '1970-01-01T00:00:00.000Z';
@@ -48,10 +52,11 @@ function exportChanges(req, res) {
   const receipts = db.prepare('SELECT * FROM receipts WHERE store_id = ? AND created_at > ? ORDER BY created_at ASC').all(storeId, since)
     .map((r) => ({ ...r, parsed_items: JSON.parse(r.parsed_items) }));
   // Orders re-export when paid or cancelled later (a parked sale), not only when created.
-  const orders = db.prepare('SELECT * FROM orders WHERE store_id = ? AND (created_at > ? OR paid_at > ? OR cancelled_at > ?) ORDER BY created_at ASC').all(storeId, since, since, since);
+  // updated_at also catches later changes such as the exit check.
+  const orders = db.prepare('SELECT * FROM orders WHERE store_id = ? AND (created_at > ? OR paid_at > ? OR cancelled_at > ? OR updated_at > ?) ORDER BY created_at ASC').all(storeId, since, since, since, since);
   const orderItems = db.prepare(
-    `SELECT oi.* FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.store_id = ? AND (o.created_at > ? OR o.paid_at > ? OR o.cancelled_at > ?)`
-  ).all(storeId, since, since, since);
+    `SELECT oi.* FROM order_items oi JOIN orders o ON o.id = oi.order_id WHERE o.store_id = ? AND (o.created_at > ? OR o.paid_at > ? OR o.cancelled_at > ? OR o.updated_at > ?)`
+  ).all(storeId, since, since, since, since);
   // v26 till data: shifts, split payments, refunds.
   const shifts = db.prepare('SELECT * FROM shifts WHERE store_id = ? AND (opened_at > ? OR closed_at > ?) ORDER BY opened_at ASC').all(storeId, since, since);
   const orderPayments = db.prepare('SELECT * FROM order_payments WHERE store_id = ? AND created_at > ? ORDER BY created_at ASC').all(storeId, since);
@@ -66,8 +71,30 @@ function exportChanges(req, res) {
   // after creation still needs to show up in an incremental export.
   const webhooks = db.prepare('SELECT * FROM webhooks WHERE store_id = ? AND updated_at > ? ORDER BY updated_at ASC').all(storeId, since);
 
+  // Shop floor: handovers, returns at security, production, service jobs.
+  // Records that change carry updated_at (latest wins); the rest never change.
+  const handovers = db.prepare('SELECT * FROM stock_handovers WHERE store_id = ? AND COALESCE(updated_at, issued_at) > ? ORDER BY issued_at ASC').all(storeId, since);
+  const handoverItems = handovers.length ? db.prepare(
+    `SELECT i.* FROM stock_handover_items i JOIN stock_handovers h ON h.id = i.handover_id WHERE h.store_id = ? AND COALESCE(h.updated_at, h.issued_at) > ?`
+  ).all(storeId, since) : [];
+  const securityReturns = db.prepare('SELECT * FROM security_returns WHERE store_id = ? AND COALESCE(updated_at, created_at) > ? ORDER BY created_at ASC').all(storeId, since);
+  const recipes = db.prepare('SELECT * FROM production_recipes WHERE store_id = ? AND COALESCE(updated_at, created_at) > ? ORDER BY created_at ASC').all(storeId, since)
+    .map((r) => ({ ...r, active: !!r.active }));
+  const recipeLines = recipes.length ? db.prepare(
+    `SELECT l.* FROM production_recipe_lines l JOIN production_recipes r ON r.id = l.recipe_id WHERE r.store_id = ? AND COALESCE(r.updated_at, r.created_at) > ?`
+  ).all(storeId, since) : [];
+  const productionRuns = db.prepare('SELECT * FROM production_runs WHERE store_id = ? AND created_at > ? ORDER BY created_at ASC').all(storeId, since);
+  const productionRunLines = productionRuns.length ? db.prepare(
+    'SELECT l.* FROM production_run_lines l JOIN production_runs r ON r.id = l.run_id WHERE r.store_id = ? AND r.created_at > ?'
+  ).all(storeId, since) : [];
+  const jobs = db.prepare('SELECT * FROM job_orders WHERE store_id = ? AND COALESCE(updated_at, created_at) > ? ORDER BY created_at ASC').all(storeId, since)
+    .map((j) => ({ ...j, items: parseJson(j.items, []), measurements: parseJson(j.measurements, {}) }));
+  const jobPayments = db.prepare('SELECT p.* FROM job_payments p JOIN job_orders j ON j.id = p.job_id WHERE j.store_id = ? AND p.created_at > ?').all(storeId, since);
+  const jobMaterials = db.prepare('SELECT m.* FROM job_materials m JOIN job_orders j ON j.id = m.job_id WHERE j.store_id = ? AND m.created_at > ?').all(storeId, since);
+
   res.json({
     serverTime: new Date().toISOString(),
+    handovers, handoverItems, securityReturns, recipes, recipeLines, productionRuns, productionRunLines, jobs, jobPayments, jobMaterials,
     users, products, arrivals, movements, audits,
     suppliers, purchaseOrders, purchaseOrderItems, batches, receipts, orders, orderItems, webhooks, cycleCounts,
     shifts, orderPayments, refunds, refundItems, customers, customerLedger, loyaltyPoints,
@@ -90,6 +117,8 @@ function importChanges(req, res) {
     receipts = [], orders = [], orderItems = [], webhooks = [], cycleCounts = [],
     shifts = [], orderPayments = [], refunds = [], refundItems = [],
     customers = [], customerLedger = [], loyaltyPoints = [],
+    handovers = [], handoverItems = [], securityReturns = [], recipes = [], recipeLines = [],
+    productionRuns = [], productionRunLines = [], jobs = [], jobPayments = [], jobMaterials = [],
   } = req.body;
   const touched = new Set();
 
@@ -186,6 +215,11 @@ function importChanges(req, res) {
          WHERE id = ? AND updated_at = ?`
       ).run(p.barcode || null, Number(p.pack_size) || 1, p.variant_of || null, p.id, p.updated_at);
     }
+    for (const p of products) {
+      if (p.sold_by === undefined && p.shelf_life_days === undefined) continue;
+      db.prepare('UPDATE products SET sold_by = ?, shelf_life_days = ? WHERE id = ? AND updated_at = ?')
+        .run(['unit', 'weight', 'volume', 'length'].includes(p.sold_by) ? p.sold_by : 'unit', p.shelf_life_days || null, p.id, p.updated_at);
+    }
 
     for (const m of movements) {
       db.prepare(
@@ -272,12 +306,14 @@ function importChanges(req, res) {
       const birthday = c.birthday ? new Date(c.birthday).toISOString().slice(0, 10) : null;
       if (!ex) {
         db.prepare(
-          `INSERT OR IGNORE INTO store_customers (id, store_id, name, phone, notes, email, birthday, created_at, archived_at, updated_at)
-           VALUES (?,?,?,?,?,?,?,?,?,?)`
-        ).run(c.id, storeId, c.name, c.phone || null, c.notes || null, c.email || null, birthday, c.created_at, c.archived_at || null, stamp);
+          `INSERT OR IGNORE INTO store_customers (id, store_id, name, phone, notes, email, birthday, created_at, archived_at, updated_at, measurements)
+           VALUES (?,?,?,?,?,?,?,?,?,?,?)`
+        ).run(c.id, storeId, c.name, c.phone || null, c.notes || null, c.email || null, birthday, c.created_at, c.archived_at || null, stamp, asJson(c.measurements, {}));
       } else if (new Date(stamp) > new Date(ex.stamp)) {
-        db.prepare('UPDATE store_customers SET name=?, phone=?, notes=?, email=?, birthday=?, archived_at=?, updated_at=? WHERE id=?')
-          .run(c.name, c.phone || null, c.notes || null, c.email || null, birthday, c.archived_at || null, stamp, c.id);
+        // One statement, setting updated_at itself, so the change-time trigger doesn't restamp it.
+        db.prepare('UPDATE store_customers SET name=?, phone=?, notes=?, email=?, birthday=?, archived_at=?, measurements=COALESCE(?, measurements), updated_at=? WHERE id=?')
+          .run(c.name, c.phone || null, c.notes || null, c.email || null, birthday, c.archived_at || null,
+            c.measurements === undefined ? null : asJson(c.measurements, {}), stamp, c.id);
       }
     }
 
@@ -321,6 +357,12 @@ function importChanges(req, res) {
         ).run(o.status, resolveUser(o.paid_by), o.payment_method, o.receipt_number, o.paid_at, o.cancelled_at, o.id);
         applyOrderMoney(o);
       }
+    }
+    // The exit check happens once per receipt; take it from whichever side did it.
+    for (const o of orders) {
+      if (!o.exit_checked_at) continue;
+      db.prepare('UPDATE orders SET exit_checked_at = ?, exit_checked_by = ?, exit_status = ?, exit_note = ?, updated_at = COALESCE(?, updated_at) WHERE id = ? AND exit_checked_at IS NULL')
+        .run(o.exit_checked_at, resolveUser(o.exit_checked_by), o.exit_status || 'passed', o.exit_note || null, o.updated_at || null, o.id);
     }
     for (const item of orderItems) {
       db.prepare(
@@ -368,6 +410,8 @@ function importChanges(req, res) {
       db.prepare('UPDATE orders SET refunded_total = (SELECT COALESCE(SUM(amount), 0) FROM refunds WHERE order_id = ?) WHERE id = ?').run(orderId, orderId);
     }
 
+    importShopFloor({ storeId, resolveUser, handovers, handoverItems, securityReturns, recipes, recipeLines, productionRuns, productionRunLines, jobs, jobPayments, jobMaterials });
+
     for (const productId of touched) {
       if (db.prepare('SELECT id FROM products WHERE id = ?').get(productId)) {
         recomputeProductQuantities(db, productId);
@@ -386,11 +430,105 @@ function importChanges(req, res) {
         cycleCounts: cycleCounts.length,
         shifts: shifts.length, orderPayments: orderPayments.length, refunds: refunds.length, refundItems: refundItems.length,
         customers: customers.length, customerLedger: customerLedger.length, loyaltyPoints: loyaltyPoints.length,
+        handovers: handovers.length, securityReturns: securityReturns.length, recipes: recipes.length,
+        productionRuns: productionRuns.length, jobs: jobs.length, jobPayments: jobPayments.length,
       },
     });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Failed to import sync batch' });
+  }
+}
+
+// Handovers, returns at security, production and service jobs. Stock itself
+// moves through stock_movements (synced above), so these are the records.
+function importShopFloor(x) {
+  const { storeId, resolveUser } = x;
+  const has = (table, id) => !!(id && db.prepare(`SELECT 1 FROM ${table} WHERE id = ?`).get(id));
+
+  for (const h of x.handovers) {
+    const ex = db.prepare('SELECT updated_at FROM stock_handovers WHERE id = ?').get(h.id);
+    const stamp = h.updated_at || h.received_at || h.issued_at;
+    if (!ex) {
+      db.prepare(`INSERT OR IGNORE INTO stock_handovers (id, store_id, status, note, issued_by, issued_at, received_by, received_at, receive_note, updated_at)
+        VALUES (?,?,?,?,?,?,?,?,?,?)`).run(h.id, storeId, h.status, h.note || null, resolveUser(h.issued_by), h.issued_at, resolveUser(h.received_by), h.received_at || null, h.receive_note || null, stamp);
+    } else if (newer(stamp, ex.updated_at)) {
+      db.prepare('UPDATE stock_handovers SET status=?, note=?, received_by=?, received_at=?, receive_note=?, updated_at=? WHERE id=?')
+        .run(h.status, h.note || null, resolveUser(h.received_by), h.received_at || null, h.receive_note || null, stamp, h.id);
+    }
+  }
+  for (const i of x.handoverItems) {
+    if (!has('stock_handovers', i.handover_id) || !has('products', i.product_id)) continue;
+    db.prepare('INSERT OR IGNORE INTO stock_handover_items (id, handover_id, product_id, qty_issued, qty_received) VALUES (?,?,?,?,?)')
+      .run(i.id, i.handover_id, i.product_id, Number(i.qty_issued), i.qty_received == null ? null : Number(i.qty_received));
+    if (i.qty_received != null) db.prepare('UPDATE stock_handover_items SET qty_received = ? WHERE id = ? AND qty_received IS NULL').run(Number(i.qty_received), i.id);
+  }
+
+  for (const r of x.securityReturns) {
+    if (!has('orders', r.order_id) || !has('order_items', r.order_item_id)) continue;
+    const ex = db.prepare('SELECT updated_at FROM security_returns WHERE id = ?').get(r.id);
+    const stamp = r.updated_at || r.received_at || r.created_at;
+    if (!ex) {
+      db.prepare(`INSERT OR IGNORE INTO security_returns (id, store_id, order_id, order_item_id, quantity, note, checked_by, received_by, received_at, qty_resellable, qty_damaged, receive_note, created_at, updated_at)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(r.id, storeId, r.order_id, r.order_item_id, Number(r.quantity), r.note || null, resolveUser(r.checked_by),
+        resolveUser(r.received_by), r.received_at || null, r.qty_resellable == null ? null : Number(r.qty_resellable), r.qty_damaged == null ? null : Number(r.qty_damaged), r.receive_note || null, r.created_at, stamp);
+    } else if (newer(stamp, ex.updated_at)) {
+      db.prepare('UPDATE security_returns SET received_by=?, received_at=?, qty_resellable=?, qty_damaged=?, receive_note=?, updated_at=? WHERE id=?')
+        .run(resolveUser(r.received_by), r.received_at || null, r.qty_resellable == null ? null : Number(r.qty_resellable), r.qty_damaged == null ? null : Number(r.qty_damaged), r.receive_note || null, stamp, r.id);
+    }
+  }
+
+  for (const r of x.recipes) {
+    const ex = db.prepare('SELECT updated_at FROM production_recipes WHERE id = ?').get(r.id);
+    const stamp = r.updated_at || r.created_at;
+    const active = r.active === false || Number(r.active) === 0 ? 0 : 1;
+    if (!ex) {
+      db.prepare('INSERT OR IGNORE INTO production_recipes (id, store_id, name, kind, notes, active, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?)')
+        .run(r.id, storeId, r.name, r.kind, r.notes || null, active, r.created_at, stamp);
+    } else if (newer(stamp, ex.updated_at)) {
+      db.prepare('UPDATE production_recipes SET name=?, notes=?, active=?, updated_at=? WHERE id=?').run(r.name, r.notes || null, active, stamp, r.id);
+    }
+  }
+  for (const l of x.recipeLines) {
+    if (!has('production_recipes', l.recipe_id) || !has('products', l.product_id)) continue;
+    db.prepare('INSERT OR IGNORE INTO production_recipe_lines (id, recipe_id, product_id, role, quantity) VALUES (?,?,?,?,?)').run(l.id, l.recipe_id, l.product_id, l.role, Number(l.quantity));
+  }
+  for (const r of x.productionRuns) {
+    db.prepare(`INSERT OR IGNORE INTO production_runs (id, store_id, recipe_id, kind, batches, note, input_cost, performed_by, created_at)
+      VALUES (?,?,(SELECT id FROM production_recipes WHERE id = ?),?,?,?,?,?,?)`).run(r.id, storeId, r.recipe_id || null, r.kind, Number(r.batches), r.note || null, Number(r.input_cost || 0), resolveUser(r.performed_by), r.created_at);
+  }
+  for (const l of x.productionRunLines) {
+    if (!has('production_runs', l.run_id) || !has('products', l.product_id)) continue;
+    db.prepare('INSERT OR IGNORE INTO production_run_lines (id, run_id, product_id, role, expected_qty, quantity) VALUES (?,?,?,?,?,?)')
+      .run(l.id, l.run_id, l.product_id, l.role, Number(l.expected_qty || 0), Number(l.quantity));
+  }
+
+  for (const j of x.jobs) {
+    const ex = db.prepare('SELECT updated_at FROM job_orders WHERE id = ?').get(j.id);
+    const stamp = j.updated_at || j.collected_at || j.created_at;
+    const cust = has('store_customers', j.store_customer_id) ? j.store_customer_id : null;
+    const due = j.due_date ? String(j.due_date).slice(0, 10) : null;
+    if (!ex) {
+      // Two offline devices can, rarely, pick the same job reference: keep both jobs, suffixing the newcomer's.
+      const clash = !!db.prepare('SELECT 1 FROM job_orders WHERE store_id = ? AND ref = ?').get(storeId, j.ref);
+      const ref = clash ? `${j.ref}-${String(j.id).replace(/-/g, '').slice(0, 3).toUpperCase()}` : j.ref;
+      db.prepare(`INSERT OR IGNORE INTO job_orders (id, store_id, ref, store_customer_id, customer_name, customer_phone, title, items, measurements, total, paid, status, due_date, notes, assigned_to, created_by, created_at, updated_at, collected_at)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(j.id, storeId, ref, cust, j.customer_name, j.customer_phone || null, j.title, asJson(j.items, []), asJson(j.measurements, {}),
+        Number(j.total), Number(j.paid), j.status, due, j.notes || null, resolveUser(j.assigned_to), resolveUser(j.created_by), j.created_at, stamp, j.collected_at || null);
+    } else if (newer(stamp, ex.updated_at)) {
+      db.prepare('UPDATE job_orders SET title=?, items=?, measurements=?, total=?, paid=?, status=?, due_date=?, notes=?, assigned_to=?, collected_at=?, updated_at=? WHERE id=?')
+        .run(j.title, asJson(j.items, []), asJson(j.measurements, {}), Number(j.total), Number(j.paid), j.status, due, j.notes || null, resolveUser(j.assigned_to), j.collected_at || null, stamp, j.id);
+    }
+  }
+  for (const p of x.jobPayments) {
+    if (!has('job_orders', p.job_id)) continue;
+    db.prepare(`INSERT OR IGNORE INTO job_payments (id, job_id, amount, method, kind, recorded_by, shift_id, created_at)
+      VALUES (?,?,?,?,?,?,(SELECT id FROM shifts WHERE id = ?),?)`).run(p.id, p.job_id, Number(p.amount), p.method, p.kind, resolveUser(p.recorded_by), p.shift_id || null, p.created_at);
+  }
+  for (const m of x.jobMaterials) {
+    if (!has('job_orders', m.job_id) || !has('products', m.product_id)) continue;
+    db.prepare('INSERT OR IGNORE INTO job_materials (id, job_id, product_id, quantity, recorded_by, created_at) VALUES (?,?,?,?,?,?)')
+      .run(m.id, m.job_id, m.product_id, Number(m.quantity), resolveUser(m.recorded_by), m.created_at);
   }
 }
 
