@@ -111,15 +111,18 @@ describe('Customer Credit Tracking (desktop)', () => {
     expect(profile.body.ledger).toHaveLength(1);
   });
 
-  it('staff can list and record payments, but only admin can archive', async () => {
+  it('till staff can list customer accounts, stock staff cannot, and only admin can archive', async () => {
     const { store, token } = await createActiveStoreWithAdmin();
+    const cashier = await createUser(store.id, { role: 'cashier' });
     const staff = await createUser(store.id, { role: 'staff' });
     const customer = await request().post(`/api/stores/${store.id}/customers`).set('Authorization', `Bearer ${token}`).send({ name: 'X' });
 
+    const asCashier = await request().get(`/api/stores/${store.id}/customers`).set('Authorization', `Bearer ${tokenFor(cashier)}`);
+    expect(asCashier.status).toBe(200);
     const asStaff = await request().get(`/api/stores/${store.id}/customers`).set('Authorization', `Bearer ${tokenFor(staff)}`);
-    expect(asStaff.status).toBe(200);
+    expect(asStaff.status).toBe(403);
 
-    const res = await request().delete(`/api/stores/${store.id}/customers/${customer.body.id}`).set('Authorization', `Bearer ${tokenFor(staff)}`);
+    const res = await request().delete(`/api/stores/${store.id}/customers/${customer.body.id}`).set('Authorization', `Bearer ${tokenFor(cashier)}`);
     expect(res.status).toBe(403);
   });
 

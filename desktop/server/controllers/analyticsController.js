@@ -110,44 +110,56 @@ function expiringSoon(req, res) {
 // shelf audit or cycle count, priced at cost). Aggregated in JS rather
 // than SQL UNION/GROUP BY — same reasoning as suppliersController.js's
 // header: this file's other functions already follow that pattern.
+// The store's own record of stock that went missing or bad: short counts,
+// damaged/spoiled write-offs and handovers that arrived short. Booked
+// auditors' shelf counts are deliberately left out (their findings go to
+// SAFE Stores, not the shop). Same as the cloud edition.
 function shrinkageReport(req, res) {
   const { storeId } = req.params;
   const days = Math.max(1, Math.min(365, Number(req.query.days) || 30));
   const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
-  const shelfIncidents = db.prepare(
-    `SELECT product_id, discrepancy FROM shelf_audits WHERE store_id = ? AND discrepancy < 0 AND created_at >= ?`
-  ).all(storeId, since);
-  const cycleIncidents = db.prepare(
-    `SELECT product_id, discrepancy FROM cycle_counts WHERE store_id = ? AND discrepancy < 0 AND created_at >= ?`
-  ).all(storeId, since);
-  const incidents = [...shelfIncidents, ...cycleIncidents];
+  const incidents = [
+    ...db.prepare(`SELECT product_id, -discrepancy AS qty, 'count' AS source FROM cycle_counts WHERE store_id = ? AND discrepancy < 0 AND created_at >= ?`).all(storeId, since),
+    ...db.prepare(
+      `SELECT product_id, quantity AS qty, CASE WHEN type = 'expiry' THEN 'spoiled' ELSE 'damaged' END AS source
+       FROM stock_movements WHERE store_id = ? AND type IN ('damage', 'expiry', 'return_damaged') AND created_at >= ?`
+    ).all(storeId, since),
+    ...db.prepare(
+      `SELECT hi.product_id, hi.qty_issued - hi.qty_received AS qty, 'handover_short' AS source
+       FROM stock_handover_items hi JOIN stock_handovers h ON h.id = hi.handover_id
+       WHERE h.store_id = ? AND h.status = 'short' AND hi.qty_received < hi.qty_issued AND h.received_at >= ?`
+    ).all(storeId, since),
+  ];
 
+  const products = new Map();
+  const productOf = (id) => {
+    if (!products.has(id)) products.set(id, db.prepare('SELECT id, name, sku, unit, sold_by, cost_price FROM products WHERE id = ?').get(id) || null);
+    return products.get(id);
+  };
   const byProductId = new Map();
+  const bySourceMap = new Map();
   for (const inc of incidents) {
-    const entry = byProductId.get(inc.product_id) || { incidentCount: 0, unitsLost: 0 };
-    entry.incidentCount += 1;
-    entry.unitsLost += -inc.discrepancy;
-    byProductId.set(inc.product_id, entry);
+    const p = productOf(inc.product_id);
+    if (!p) continue; // deleted since — nothing left to attribute cost to
+    const value = Number(inc.qty) * Number(p.cost_price);
+    const e = byProductId.get(p.id) || { product_id: p.id, name: p.name, sku: p.sku, unit: p.unit, sold_by: p.sold_by, incident_count: 0, units_lost: 0, value_lost: 0 };
+    e.incident_count += 1; e.units_lost += Number(inc.qty); e.value_lost += value;
+    byProductId.set(p.id, e);
+    const src = bySourceMap.get(inc.source) || { source: inc.source, incidents: 0, value_lost: 0 };
+    src.incidents += 1; src.value_lost += value;
+    bySourceMap.set(inc.source, src);
   }
-
-  const byProduct = [];
-  let totalValueLost = 0;
-  let totalUnitsLost = 0;
-  for (const [productId, entry] of byProductId) {
-    const product = db.prepare('SELECT id, name, sku, cost_price FROM products WHERE id = ?').get(productId);
-    if (!product) continue; // deleted since the incident — nothing left to attribute cost to
-    const valueLost = entry.unitsLost * Number(product.cost_price);
-    totalValueLost += valueLost;
-    totalUnitsLost += entry.unitsLost;
-    byProduct.push({
-      product_id: productId, name: product.name, sku: product.sku,
-      incident_count: entry.incidentCount, units_lost: entry.unitsLost, value_lost: valueLost,
-    });
-  }
-  byProduct.sort((a, b) => b.value_lost - a.value_lost);
-
-  res.json({ days, totalValueLost, totalUnitsLost, byProduct });
+  const round = (n) => Math.round(n * 1000) / 1000;
+  const byProduct = [...byProductId.values()].map((e) => ({ ...e, units_lost: round(e.units_lost), value_lost: Math.round(e.value_lost * 100) / 100 }))
+    .sort((a, b) => b.value_lost - a.value_lost);
+  res.json({
+    days,
+    totalValueLost: Math.round(byProduct.reduce((s, r) => s + r.value_lost, 0) * 100) / 100,
+    totalUnitsLost: round(byProduct.reduce((s, r) => s + r.units_lost, 0)),
+    byProduct,
+    bySource: [...bySourceMap.values()].map((r) => ({ ...r, value_lost: Math.round(r.value_lost * 100) / 100 })).sort((a, b) => b.value_lost - a.value_lost),
+  });
 }
 
 module.exports = { summary, stockByCategory, topProducts, movementTrends, lowStockDistribution, reorderAlerts, expiringSoon, shrinkageReport };

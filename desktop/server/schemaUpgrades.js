@@ -123,6 +123,166 @@ function applySchemaUpgrades(db) {
         used ? s.id : null, s.id, new Date(Date.now() + 30 * 86400000).toISOString());
     }
   }
+
+  applyShopFloorUpgrades(db);
+}
+
+const NOW = "(strftime('%Y-%m-%dT%H:%M:%fZ','now'))";
+
+// Mirrors cloud migrations 035–061 that the shop floor needs with no
+// internet: exit check + returns, store room → shelf handovers, business
+// types (weighing, shelf life, production, jobs), order cancel reasons.
+// Quantity columns need no change: SQLite keeps 1.35 in an INTEGER column.
+function applyShopFloorUpgrades(db) {
+  // 056 — a Mini store is the owner plus up to 2 helpers
+  db.exec("UPDATE store_tiers SET max_users = 3 WHERE tier = 'mini' AND (max_users IS NULL OR max_users = 5)");
+  // 035, 038, 041
+  ensureColumn(db, 'stores', 'daily_summary_enabled', 'INTEGER NOT NULL DEFAULT 0');
+  ensureColumn(db, 'stores', 'last_summary_on', 'TEXT');
+  ensureColumn(db, 'orders', 'cancel_reason', 'TEXT');
+  ensureColumn(db, 'stores', 'shop_slug', 'TEXT');
+  ensureColumn(db, 'stores', 'shop_tagline', 'TEXT');
+
+  // 051, 052, 055 — receipt check at the exit, and goods customers bring back
+  ensureColumn(db, 'orders', 'exit_checked_at', 'TEXT');
+  ensureColumn(db, 'orders', 'exit_checked_by', 'TEXT');
+  ensureColumn(db, 'orders', 'exit_status', 'TEXT');
+  ensureColumn(db, 'orders', 'exit_note', 'TEXT');
+  db.exec(`CREATE TABLE IF NOT EXISTS security_returns (
+    id TEXT PRIMARY KEY,
+    store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+    order_id TEXT NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+    order_item_id TEXT NOT NULL REFERENCES order_items(id) ON DELETE CASCADE,
+    quantity REAL NOT NULL CHECK (quantity > 0),
+    note TEXT,
+    checked_by TEXT,
+    received_by TEXT,
+    received_at TEXT,
+    qty_resellable REAL,
+    qty_damaged REAL,
+    receive_note TEXT,
+    created_at TEXT NOT NULL DEFAULT ${NOW},
+    updated_at TEXT NOT NULL DEFAULT ${NOW}
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_security_returns_item ON security_returns(order_item_id)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_security_returns_store ON security_returns(store_id, created_at)');
+
+  // 053 — store room → shelf handovers
+  db.exec(`CREATE TABLE IF NOT EXISTS stock_handovers (
+    id TEXT PRIMARY KEY,
+    store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+    status TEXT NOT NULL DEFAULT 'issued' CHECK (status IN ('issued', 'received', 'short', 'cancelled')),
+    note TEXT,
+    issued_by TEXT,
+    issued_at TEXT NOT NULL DEFAULT ${NOW},
+    received_by TEXT,
+    received_at TEXT,
+    receive_note TEXT,
+    updated_at TEXT NOT NULL DEFAULT ${NOW}
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS stock_handover_items (
+    id TEXT PRIMARY KEY,
+    handover_id TEXT NOT NULL REFERENCES stock_handovers(id) ON DELETE CASCADE,
+    product_id TEXT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    qty_issued REAL NOT NULL CHECK (qty_issued > 0),
+    qty_received REAL CHECK (qty_received >= 0)
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_stock_handovers_store ON stock_handovers(store_id, status, issued_at)');
+
+  // 058 — business types
+  ensureColumn(db, 'stores', 'business_type', "TEXT NOT NULL DEFAULT 'general'");
+  ensureColumn(db, 'products', 'sold_by', "TEXT NOT NULL DEFAULT 'unit'");
+  ensureColumn(db, 'products', 'shelf_life_days', 'INTEGER');
+  ensureColumn(db, 'store_customers', 'measurements', "TEXT NOT NULL DEFAULT '{}'");
+  db.exec(`CREATE TABLE IF NOT EXISTS production_recipes (
+    id TEXT PRIMARY KEY,
+    store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+    name TEXT NOT NULL,
+    kind TEXT NOT NULL DEFAULT 'recipe' CHECK (kind IN ('recipe', 'breakdown')),
+    notes TEXT,
+    active INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL DEFAULT ${NOW},
+    updated_at TEXT NOT NULL DEFAULT ${NOW}
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS production_recipe_lines (
+    id TEXT PRIMARY KEY,
+    recipe_id TEXT NOT NULL REFERENCES production_recipes(id) ON DELETE CASCADE,
+    product_id TEXT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    role TEXT NOT NULL CHECK (role IN ('input', 'output')),
+    quantity REAL NOT NULL CHECK (quantity > 0)
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS production_runs (
+    id TEXT PRIMARY KEY,
+    store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+    recipe_id TEXT REFERENCES production_recipes(id) ON DELETE SET NULL,
+    kind TEXT NOT NULL,
+    batches REAL NOT NULL DEFAULT 1,
+    note TEXT,
+    input_cost REAL NOT NULL DEFAULT 0,
+    performed_by TEXT,
+    created_at TEXT NOT NULL DEFAULT ${NOW}
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS production_run_lines (
+    id TEXT PRIMARY KEY,
+    run_id TEXT NOT NULL REFERENCES production_runs(id) ON DELETE CASCADE,
+    product_id TEXT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    role TEXT NOT NULL,
+    expected_qty REAL NOT NULL DEFAULT 0,
+    quantity REAL NOT NULL DEFAULT 0
+  )`);
+  db.exec(`CREATE TABLE IF NOT EXISTS job_orders (
+    id TEXT PRIMARY KEY,
+    store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+    ref TEXT NOT NULL,
+    store_customer_id TEXT REFERENCES store_customers(id) ON DELETE SET NULL,
+    customer_name TEXT NOT NULL,
+    customer_phone TEXT,
+    title TEXT NOT NULL,
+    items TEXT NOT NULL DEFAULT '[]',
+    measurements TEXT NOT NULL DEFAULT '{}',
+    total REAL NOT NULL DEFAULT 0,
+    paid REAL NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'received' CHECK (status IN ('received', 'in_progress', 'fitting', 'ready', 'collected', 'cancelled')),
+    due_date TEXT,
+    notes TEXT,
+    assigned_to TEXT,
+    created_by TEXT,
+    created_at TEXT NOT NULL DEFAULT ${NOW},
+    updated_at TEXT NOT NULL DEFAULT ${NOW},
+    collected_at TEXT,
+    UNIQUE (store_id, ref)
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_job_orders_store ON job_orders(store_id, status, due_date)');
+  db.exec(`CREATE TABLE IF NOT EXISTS job_payments (
+    id TEXT PRIMARY KEY,
+    job_id TEXT NOT NULL REFERENCES job_orders(id) ON DELETE CASCADE,
+    amount REAL NOT NULL CHECK (amount > 0),
+    method TEXT NOT NULL DEFAULT 'cash',
+    kind TEXT NOT NULL DEFAULT 'deposit' CHECK (kind IN ('deposit', 'balance', 'payment')),
+    recorded_by TEXT,
+    shift_id TEXT,
+    created_at TEXT NOT NULL DEFAULT ${NOW}
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_job_payments_shift ON job_payments(shift_id)');
+  db.exec(`CREATE TABLE IF NOT EXISTS job_materials (
+    id TEXT PRIMARY KEY,
+    job_id TEXT NOT NULL REFERENCES job_orders(id) ON DELETE CASCADE,
+    product_id TEXT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    quantity REAL NOT NULL CHECK (quantity > 0),
+    recorded_by TEXT,
+    created_at TEXT NOT NULL DEFAULT ${NOW}
+  )`);
+
+  // 062 — records that change after creation carry updated_at so devices
+  // and the cloud can sync the change, latest wins. The trigger stamps it on
+  // every update unless the update sets it itself (a sync import does).
+  ensureColumn(db, 'orders', 'updated_at', 'TEXT');
+  db.exec("UPDATE orders SET updated_at = COALESCE(cancelled_at, paid_at, created_at) WHERE updated_at IS NULL");
+  for (const t of ['stock_handovers', 'security_returns', 'job_orders', 'production_recipes', 'orders', 'store_customers']) {
+    db.exec(`CREATE TRIGGER IF NOT EXISTS ${t}_touch AFTER UPDATE ON ${t} FOR EACH ROW
+      WHEN NEW.updated_at IS OLD.updated_at
+      BEGIN UPDATE ${t} SET updated_at = ${NOW} WHERE id = NEW.id; END`);
+  }
 }
 
 module.exports = { applySchemaUpgrades, ensureColumn };

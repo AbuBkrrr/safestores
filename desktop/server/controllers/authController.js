@@ -73,7 +73,7 @@ async function adminLogin(req, res) {
   if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
 
   const user = db.prepare(
-    `SELECT u.*, s.subscription_status, s.name AS store_name, s.locked
+    `SELECT u.*, s.subscription_status, s.name AS store_name, s.locked, s.store_tier, s.business_type
      FROM users u JOIN stores s ON s.id = u.store_id
      WHERE u.email = ? AND u.password_hash IS NOT NULL`
   ).get(email);
@@ -98,12 +98,14 @@ async function adminLogin(req, res) {
   }
 
   const token = signToken({ sub: user.id, role: user.role, storeId: user.store_id, tv: user.token_version || 0 });
+  // Also open this person's cloud session (if online) for the online-only screens.
+  require('../utils/cloudSession').signInToCloud(user.id, email, password, req.body.otp);
   res.json({
     token,
     user: {
       id: user.id, name: user.name, email: user.email, role: user.role,
       storeId: user.store_id, storeName: user.store_name, subscriptionStatus: user.subscription_status,
-      locked: !!user.locked,
+      locked: !!user.locked, storeTier: user.store_tier, businessType: user.business_type || 'general',
     },
   });
 }

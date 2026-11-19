@@ -14,9 +14,11 @@ function cashFigures(shiftId) {
     'SELECT method, COALESCE(SUM(amount), 0) AS total, COUNT(DISTINCT order_id) AS orders FROM order_payments WHERE shift_id = ? GROUP BY method'
   ).all(shiftId);
   const refunds = db.prepare('SELECT method, COALESCE(SUM(amount), 0) AS total, COUNT(*) AS count FROM refunds WHERE shift_id = ? GROUP BY method').all(shiftId);
-  const cashIn = Number(payments.find((p) => p.method === 'cash')?.total || 0);
+  // Cash taken for tailoring/laundry jobs goes in the same drawer.
+  const jobPayments = db.prepare('SELECT method, SUM(amount) AS total, COUNT(*) AS count FROM job_payments WHERE shift_id = ? GROUP BY method').all(shiftId);
+  const cashIn = Number(payments.find((p) => p.method === 'cash')?.total || 0) + Number(jobPayments.find((p) => p.method === 'cash')?.total || 0);
   const cashOut = Number(refunds.find((p) => p.method === 'cash')?.total || 0);
-  return { payments, refunds, cashIn, cashOut };
+  return { payments, refunds, jobPayments, cashIn, cashOut };
 }
 
 function currentShift(req, res) {
@@ -111,7 +113,7 @@ function dailyReport(req, res) {
     `SELECT op.* FROM order_payments op JOIN orders o ON o.id = op.order_id WHERE o.store_id = ? AND o.paid_at BETWEEN ? AND ?`
   ).all(storeId, from, to).filter((p) => ids.has(p.order_id));
   const items = db.prepare(
-    `SELECT oi.order_id, oi.quantity, oi.line_total, p.name FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id
+    `SELECT oi.order_id, oi.quantity, oi.line_total, p.name, p.unit, p.sold_by FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id
      WHERE o.store_id = ? AND o.status = 'paid' AND o.paid_at BETWEEN ? AND ?`
   ).all(storeId, from, to).filter((i) => ids.has(i.order_id));
   const users = Object.fromEntries(db.prepare('SELECT id, name FROM users WHERE store_id = ?').all(storeId).map((u) => [u.id, u.name]));
@@ -124,14 +126,28 @@ function dailyReport(req, res) {
   };
   const gross = sum(orders, 'total');
   const refundTotal = sum(refunds, 'amount');
+  // Service jobs (tailors, laundries): deposits and balances taken that day.
+  const jobs = db.prepare(
+    'SELECT jp.method, jp.amount, jp.created_at FROM job_payments jp JOIN job_orders j ON j.id = jp.job_id WHERE j.store_id = ? AND jp.created_at BETWEEN ? AND ?'
+  ).all(storeId, from, to).filter((p) => inDay(p.created_at));
+  const jobsTotal = sum(jobs, 'amount');
+  const methods = new Map();
+  for (const p of [...payments, ...jobs]) methods.set(p.method, r2((methods.get(p.method) || 0) + Number(p.amount || 0)));
   res.json({
     date: day, timezone: tz, orders: orders.length, gross, discounts: sum(orders, 'discount_amount'), tax: sum(orders, 'tax_amount'),
     average: orders.length ? r2(gross / orders.length) : 0,
-    refunds: { total: refundTotal, count: refunds.length }, net: r2(gross - refundTotal),
-    byMethod: group(payments, (p) => p.method, (p) => p.amount).map((g) => ({ method: g.key, total: g.total })).sort((a, b) => b.total - a.total),
+    refunds: { total: refundTotal, count: refunds.length }, net: r2(gross + jobsTotal - refundTotal),
+    jobPayments: {
+      total: jobsTotal, count: jobs.length,
+      byMethod: group(jobs, (p) => p.method, (p) => p.amount).map((g) => ({ method: g.key, count: g.count, total: g.total })),
+    },
+    byMethod: [...methods.entries()].map(([method, total]) => ({ method, total })).sort((a, b) => b.total - a.total),
     byHour: group(orders, (o) => localHour(o.paid_at, tz), (o) => o.total).map((g) => ({ hour: g.key, orders: g.count, total: g.total })).sort((a, b) => a.hour - b.hour),
     byCashier: group(orders, (o) => users[o.paid_by] || '—', (o) => o.total).map((g) => ({ name: g.key, orders: g.count, total: g.total })).sort((a, b) => b.total - a.total),
-    topItems: group(items, (i) => i.name, (i) => i.line_total).map((g) => ({ name: g.key, units: g.units, total: g.total })).sort((a, b) => b.units - a.units).slice(0, 10),
+    topItems: group(items, (i) => i.name, (i) => i.line_total).map((g) => {
+      const p = items.find((i) => i.name === g.key);
+      return { name: g.key, unit: p?.unit, sold_by: p?.sold_by, units: Math.round(g.units * 1000) / 1000, total: g.total };
+    }).sort((a, b) => b.total - a.total).slice(0, 10),
   });
 }
 
@@ -142,11 +158,12 @@ const FIELDS = {
   phone: 'phone', address: 'address', city: 'city', receiptHeader: 'receipt_header', receiptFooter: 'receipt_footer',
   maxCashierDiscountPct: 'max_cashier_discount_pct', requireShift: 'require_shift', name: 'name',
   pointsPer100: 'points_per_100', pointValue: 'point_value', pointsExpiryMonths: 'points_expiry_months',
+  dailySummaryEnabled: 'daily_summary_enabled', businessType: 'business_type',
 };
 
 function readSettings(storeId) {
   const r = db.prepare(
-    `SELECT s.id, s.name, s.timezone, s.tax_rate_pct, s.tax_inclusive, s.tax_label, s.tax_number, s.phone, s.address, s.city,
+    `SELECT s.id, s.name, s.store_tier, s.business_type, s.daily_summary_enabled, s.timezone, s.tax_rate_pct, s.tax_inclusive, s.tax_label, s.tax_number, s.phone, s.address, s.city,
             s.receipt_header, s.receipt_footer, s.max_cashier_discount_pct, s.require_shift,
             s.points_per_100, s.point_value, s.points_expiry_months,
             s.currency_code AS store_currency_code, s.currency_symbol AS store_currency_symbol,
@@ -154,7 +171,10 @@ function readSettings(storeId) {
      FROM stores s LEFT JOIN currency_settings c ON c.id = 'default' WHERE s.id = ?`
   ).get(storeId);
   if (!r) return null;
-  return { ...r, tax_inclusive: !!r.tax_inclusive, require_shift: !!r.require_shift };
+  return {
+    ...r, tax_inclusive: !!r.tax_inclusive, require_shift: !!r.require_shift, daily_summary_enabled: !!r.daily_summary_enabled,
+    tools: require('../utils/businessTypes').toolsFor(r.business_type),
+  };
 }
 
 function getSettings(req, res) {
@@ -190,11 +210,14 @@ function updateSettings(req, res) {
     }
   }
   if (body.name !== undefined && !String(body.name).trim()) return res.status(400).json({ error: 'Store name cannot be empty' });
+  if (body.businessType !== undefined && !require('../utils/businessTypes').TYPE_KEYS.includes(body.businessType)) {
+    return res.status(400).json({ error: 'Unknown business type' });
+  }
   const sets = []; const values = [];
   for (const [k, col] of Object.entries(FIELDS)) {
     if (body[k] === undefined) continue;
     let v = body[k];
-    if (['taxInclusive', 'requireShift'].includes(k)) v = v ? 1 : 0;
+    if (['taxInclusive', 'requireShift', 'dailySummaryEnabled'].includes(k)) v = v ? 1 : 0;
     else if (typeof v === 'string') v = v.trim().slice(0, k.startsWith('receipt') ? 500 : 160) || null;
     sets.push(`${col} = ?`); values.push(v);
   }
