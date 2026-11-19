@@ -59,7 +59,7 @@ async function createWindow() {
     height: 900,
     minWidth: 1000,
     minHeight: 700,
-    title: 'SAFE Stores',
+    title: app.getName(), // the store's own name in a store build (templates/store-app)
     backgroundColor: '#0f7180',
     webPreferences: {
       contextIsolation: true,

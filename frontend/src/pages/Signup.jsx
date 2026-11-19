@@ -5,6 +5,7 @@ import api from '../api/client.js';
 import { BUSINESS_TYPES } from '../utils/businessTypes.js';
 import { Alert, AuthBrand, BrandFooter } from '../components/ui.jsx';
 import PasswordInput from '../components/PasswordInput.jsx';
+import { StoreAppsPopup } from '../components/StoreApps.jsx';
 
 export default function Signup() {
   const { t } = useTranslation();
@@ -18,6 +19,7 @@ export default function Signup() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [appsToken, setAppsToken] = useState(null);
   const navigate = useNavigate();
 
   const update = (key) => (e) => setForm({ ...form, [key]: e.target.value });
@@ -31,9 +33,12 @@ export default function Signup() {
     }
     setLoading(true);
     try {
-      await api.post('/auth/store/signup', { ...form, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone });
+      const res = await api.post('/auth/store/signup', { ...form, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone });
       setSuccess(t('signupPage.registrationSuccess'));
-      setTimeout(() => navigate('/login'), 3500);
+      // The store's own apps are being made: show the download pop-up (it
+      // leads on to sign-in); without it, go straight to sign-in.
+      if (res.data?.apps?.token) setAppsToken(res.data.apps.token);
+      else setTimeout(() => navigate('/login'), 3500);
     } catch (err) {
       setError(err.response?.data?.error || t('signupPage.registrationFailed'));
     } finally {
@@ -49,6 +54,7 @@ export default function Signup() {
         <p className="subtitle">{t('signupPage.subtitle')}</p>
         <Alert type="error">{error}</Alert>
         <Alert type="success">{success}</Alert>
+        {appsToken && <StoreAppsPopup token={appsToken} onClose={() => navigate('/login')} />}
 
         <form onSubmit={handleSubmit}>
           <div className="form-group">

@@ -13,6 +13,7 @@ import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 
 import en from './locales/en.json';
+import { brandTree } from '../utils/brand.js';
 
 // nativeName is what's shown in the switcher — always in that
 // language's own script/spelling, not translated into the current UI
@@ -54,7 +55,7 @@ i18n
     // English ships in the main bundle; every other language is a
     // separate file fetched only when someone picks it (see
     // ensureLanguage below) — ~50 KB each that most users never need.
-    resources: { en: { translation: en } },
+    resources: { en: { translation: brandTree(en) } },
     fallbackLng: 'en',
     supportedLngs: SUPPORTED_LANGUAGES.map((l) => l.code),
     // Only checks localStorage + the ss_lang key — deliberately NOT
@@ -76,7 +77,7 @@ const LOADERS = {
 export async function ensureLanguage(code) {
   if (!code || code === 'en' || !LOADERS[code] || i18n.hasResourceBundle(code, 'translation')) return;
   const mod = await LOADERS[code]();
-  i18n.addResourceBundle(code, 'translation', mod.default || mod, true, true);
+  i18n.addResourceBundle(code, 'translation', brandTree(mod.default || mod), true, true);
 }
 
 applyDocumentDirection(i18n.resolvedLanguage || 'en');

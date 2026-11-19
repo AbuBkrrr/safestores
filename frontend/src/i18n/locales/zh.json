@@ -2461,5 +2461,18 @@
     "partUsed": "使用的配件（来自库存）",
     "usePart": "记录配件",
     "partSaved": "配件已记录并从库存扣除。"
+  },
+  "storeApps": {
+    "popupTitle": "您的店铺已注册",
+    "cardTitle": "您自己的应用",
+    "cardSub": "带有您店铺名称的 Windows 安装程序和 Android 应用。",
+    "building": "正在为 {{name}} 制作 Windows 和 Android 应用，大约需要 10 分钟。",
+    "buildingHelp": "您可以保持此页面打开，也可以现在登录：完成后下载链接也会出现在店铺设置中。",
+    "readyText": "{{name}} 的应用已可下载。",
+    "windows": "Windows 安装程序",
+    "android": "Android 应用",
+    "installHelp": "Windows：运行安装程序；如果 Windows 提示警告，请选择“更多信息”→“仍要运行”。Android：在手机上打开文件，并允许从浏览器安装。",
+    "later": "应用准备好后会显示在这里。",
+    "continue": "继续登录"
   }
 }

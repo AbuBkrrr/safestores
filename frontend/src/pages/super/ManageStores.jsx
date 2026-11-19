@@ -54,6 +54,12 @@ export default function ManageStores() {
   };
   useEffect(() => { load(); }, []);
 
+  const rebuildApps = async (s) => {
+    try {
+      const r = await api.post(`/super/stores/${s.id}/apps`);
+      showToast(r.data.status === 'building' ? `Building ${s.name}'s apps — ready in about 10 minutes` : 'App building is not set up on the server yet (GITHUB_TOKEN)', r.data.status === 'building' ? 'success' : 'error');
+    } catch (err) { showToast(err.response?.data?.error || 'Could not start the build', 'error'); }
+  };
   const suspend = async (id) => { await api.patch(`/super/stores/${id}/suspend`); showToast('Store suspended', 'success'); load(); };
   const remove = async (id) => {
     if (!confirm('Permanently delete this store and all its data?')) return;
@@ -129,6 +135,7 @@ export default function ManageStores() {
                 <td className="flex">
                   <button className="btn secondary small" onClick={() => setViewingConnection(s)}>🔗 Connect</button>
                   <button className="btn secondary small" onClick={() => openEdit(s)}>Edit</button>
+                  <button className="btn secondary small" title="Build this store's own Windows and Android apps again (e.g. after a name change)" onClick={() => rebuildApps(s)}>📲 Rebuild apps</button>
                   {s.subscription_status === 'active' && <button className="btn secondary small" onClick={() => suspend(s.id)}>Suspend</button>}
                   <button className="btn danger small" onClick={() => remove(s.id)}>Delete</button>
                 </td>

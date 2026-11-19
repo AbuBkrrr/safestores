@@ -7,6 +7,7 @@ import { useSocket } from '../context/SocketContext.jsx';
 import { useOffline } from '../context/OfflineContext.jsx';
 import { SUPPORTED_LANGUAGES } from '../i18n/config.js';
 import { getThemePref, setThemePref, getTextSize, setTextSize } from '../utils/preferences.js';
+import { BRAND, WHITE_LABEL } from '../utils/brand.js';
 
 // Inventory features (Products, Suppliers, Cycle Counting, etc.) work
 // identically in both editions now — Web/LAN Edition runs the same
@@ -217,7 +218,7 @@ export default function Layout() {
           <div className="brand">
             <div className="brand-mark">🏪</div>
             <div className="brand-text">
-              SAFE Stores
+              {BRAND}
               <small>{isSuperAdmin ? t('nav.systemAdministration') : t('nav.inventoryIntelligence')}</small>
             </div>
           </div>
@@ -252,9 +253,11 @@ export default function Layout() {
             <a href="/terms" target="_blank" rel="noreferrer">{t('nav.terms')}</a>
             <a href="/privacy" target="_blank" rel="noreferrer">{t('nav.privacy')}</a>
           </div>
-          <div style={{ padding: '12px 4px 0', fontSize: 11, color: '#5a6f7c', textAlign: 'center', opacity: 0.8 }}>
-            A product of <strong>A I Brains Ventures</strong>
-          </div>
+          {!WHITE_LABEL && (
+            <div style={{ padding: '12px 4px 0', fontSize: 11, color: '#5a6f7c', textAlign: 'center', opacity: 0.8 }}>
+              A product of <strong>A I Brains Ventures</strong>
+            </div>
+          )}
         </aside>
 
         <main className="main-content" id="main" tabIndex={-1}>

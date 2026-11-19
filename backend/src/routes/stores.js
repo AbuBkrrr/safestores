@@ -104,6 +104,8 @@ router.use(requireAuth, scopeToOwnStore);
 // Subscription activation — deliberately NOT behind requireActiveStore,
 // since this is how a pending store's admin activates it in the first place.
 router.post('/redeem-code', requireRole('admin'), storesCtrl.redeemCode);
+// The store's own Windows and Android apps (also before activation).
+router.get('/apps', requireRole('admin', 'manager'), require('../controllers/storeAppsController').mine);
 
 // A store's public marketplace listing (category/address/city, opt-out
 // toggle) — see routes/marketplace.js's listStores for where this shows up.

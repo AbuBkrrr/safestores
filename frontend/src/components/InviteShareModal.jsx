@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import QRCode from 'qrcode';
 import { Modal } from './ui.jsx';
+import { BRAND } from '../utils/brand.js';
 
 // Draws a shareable invite card (store, name, role, code, QR) as a PNG.
 async function drawCard({ storeName, invite, link, qrUrl }) {
@@ -13,7 +14,7 @@ async function drawCard({ storeName, invite, link, qrUrl }) {
   g.fillStyle = '#0f7180'; g.fillRect(0, 0, W, 120);
   g.fillStyle = '#ffffff'; g.textAlign = 'center';
   g.font = 'bold 30px system-ui, sans-serif'; g.fillText(storeName, W / 2, 58, W - 40);
-  g.font = '18px system-ui, sans-serif'; g.fillText('You are invited to join on SAFE Stores', W / 2, 92);
+  g.font = '18px system-ui, sans-serif'; g.fillText('You are invited to join on ' + BRAND, W / 2, 92);
   g.fillStyle = '#182026';
   g.font = 'bold 26px system-ui, sans-serif'; g.fillText(invite.name, W / 2, 175, W - 40);
   g.fillStyle = '#64717c'; g.font = '18px system-ui, sans-serif';
@@ -48,7 +49,7 @@ export default function InviteShareModal({ invite, link, storeName, onClose, onS
       const blob = await drawCard({ storeName, invite, link, qrUrl });
       const file = new File([blob], fileName, { type: 'image/png' });
       if (navigator.canShare?.({ files: [file] })) {
-        await navigator.share({ files: [file], title: 'SAFE Stores invite', text: `${storeName} invite code: ${invite.code}\n${link}` });
+        await navigator.share({ files: [file], title: `${BRAND} invite`, text: `${storeName} invite code: ${invite.code}\n${link}` });
         return;
       }
     } catch { /* fall through to the text share */ }

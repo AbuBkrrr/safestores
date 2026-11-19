@@ -78,10 +78,14 @@ async function storeSignup(req, res) {
     await client.query('COMMIT');
     // Fire-and-forget: a mail outage must never block registration.
     require('./accountController').sendVerificationEmail(userResult.rows[0]).catch(() => {});
+    // Start building the store's own Windows and Android apps; a build
+    // problem never blocks registration.
+    const apps = await require('../utils/storeApps').requestBuild(store).catch(() => null);
     res.status(201).json({
       message: 'Store registered! You can log in right away to activate your subscription with an access code.',
       store,
       admin: userResult.rows[0],
+      apps: apps ? { token: apps.download_token, status: apps.status } : null,
     });
   } catch (err) {
     await client.query('ROLLBACK');

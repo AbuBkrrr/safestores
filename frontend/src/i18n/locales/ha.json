@@ -2461,5 +2461,18 @@
     "partUsed": "Kayan gyara da aka yi amfani (daga ajiya)",
     "usePart": "Rubuta kayan gyara",
     "partSaved": "An rubuta kayan gyara kuma an cire daga ajiya."
+  },
+  "storeApps": {
+    "popupTitle": "An yi rajistar shagonka",
+    "cardTitle": "Manhajojinka na kanka",
+    "cardSub": "Mai saka manhaja na Windows da manhajar Android masu sunan shagonka.",
+    "building": "Muna shirya manhajojin Windows da Android na {{name}}. Yana ɗaukar kusan minti 10.",
+    "buildingHelp": "Za ka iya barin wannan a buɗe, ko ka shiga yanzu: abubuwan saukarwa za su bayyana a Saitunan Shago idan sun shirya.",
+    "readyText": "Manhajojin {{name}} sun shirya don saukarwa.",
+    "windows": "Mai saka manhaja na Windows",
+    "android": "Manhajar Android",
+    "installHelp": "Windows: buɗe mai saka manhajar; idan Windows ta yi gargaɗi, zaɓi More info → Run anyway. Android: buɗe fayil ɗin a waya ka ba da izinin saka shi daga burauzarka.",
+    "later": "Manhajojinka za su bayyana a nan idan sun shirya.",
+    "continue": "Ci gaba zuwa shiga"
   }
 }

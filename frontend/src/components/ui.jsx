@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.jsx';
+import { BRAND, WHITE_LABEL } from '../utils/brand.js';
 
 export function Metric({ value, label }) {
   return (
@@ -58,6 +59,7 @@ export function EmptyState({ children }) {
 }
 
 export function BrandFooter() {
+  if (WHITE_LABEL) return null;
   return (
     <div style={{ textAlign: 'center', fontSize: 12, color: '#8aa5a8', marginTop: 20 }}>
       A product of <strong>A I Brains Ventures</strong>
@@ -70,7 +72,7 @@ export function AuthBrand({ tagline }) {
     <div className="brand">
       <div className="brand-mark">🏪</div>
       <div className="brand-text">
-        SAFE Stores
+        {BRAND}
         <small>{tagline}</small>
       </div>
     </div>
