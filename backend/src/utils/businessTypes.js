@@ -5,6 +5,7 @@
 //   production — recipes: ingredients → product (ice-cream, bread)
 //   breakdown  — one animal/carcass → cuts, with yield (abattoir, butchery)
 //   jobs       — services & job orders with customer measurements (tailor, laundry)
+//   repair     — jobs on a customer's item (car, phone, machine): item details, condition, QR tag, notes
 const BUSINESS_TYPES = {
   general: { tools: [], defaultSoldBy: 'unit', defaultUnit: 'unit',
     categories: ['Groceries', 'Drinks', 'Toiletries', 'Household', 'Snacks'] },
@@ -22,6 +23,13 @@ const BUSINESS_TYPES = {
     categories: ['Fabrics', 'Linings', 'Threads', 'Buttons & zips', 'Ready-made'] },
   laundry: { tools: ['jobs'], defaultSoldBy: 'unit', defaultUnit: 'item',
     categories: ['Detergents', 'Starch', 'Packaging', 'Hangers'] },
+  // Repair shops: the customer's item is checked in, QR-tagged and tracked to collection.
+  mechanic: { tools: ['jobs', 'repair'], defaultSoldBy: 'unit', defaultUnit: 'piece',
+    categories: ['Engine parts', 'Brake parts', 'Filters', 'Oils & fluids', 'Tyres', 'Electrical', 'Body parts'] },
+  tech_repair: { tools: ['jobs', 'repair'], defaultSoldBy: 'unit', defaultUnit: 'piece',
+    categories: ['Screens', 'Batteries', 'Charging ports', 'Chargers & cables', 'Phone parts', 'Laptop parts', 'Accessories'] },
+  engineering: { tools: ['jobs', 'repair'], defaultSoldBy: 'unit', defaultUnit: 'piece',
+    categories: ['Spare parts', 'Electrical', 'Plumbing', 'Welding', 'Consumables', 'Tools'] },
 };
 const TYPE_KEYS = Object.keys(BUSINESS_TYPES);
 const toolsFor = (type) => (BUSINESS_TYPES[type] || BUSINESS_TYPES.general).tools;

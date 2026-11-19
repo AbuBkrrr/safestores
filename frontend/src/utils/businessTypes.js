@@ -9,6 +9,9 @@ export const BUSINESS_TYPES = {
   bakery: { icon: '🍞', tools: ['fresh', 'production'], soldBy: 'unit', unit: 'loaf', shelfLifeDays: 4, categories: ['Bread', 'Cakes', 'Pastries', 'Ingredients', 'Packaging'] },
   tailor: { icon: '🧵', tools: ['jobs', 'measure'], soldBy: 'length', unit: 'yard', categories: ['Fabrics', 'Linings', 'Threads', 'Buttons & zips', 'Ready-made'] },
   laundry: { icon: '👕', tools: ['jobs'], soldBy: 'unit', unit: 'item', categories: ['Detergents', 'Starch', 'Packaging', 'Hangers'] },
+  mechanic: { icon: '🔧', tools: ['jobs', 'repair'], soldBy: 'unit', unit: 'piece', categories: ['Engine parts', 'Brake parts', 'Filters', 'Oils & fluids', 'Tyres', 'Electrical', 'Body parts'] },
+  tech_repair: { icon: '📱', tools: ['jobs', 'repair'], soldBy: 'unit', unit: 'piece', categories: ['Screens', 'Batteries', 'Charging ports', 'Chargers & cables', 'Phone parts', 'Laptop parts', 'Accessories'] },
+  engineering: { icon: '⚙️', tools: ['jobs', 'repair'], soldBy: 'unit', unit: 'piece', categories: ['Spare parts', 'Electrical', 'Plumbing', 'Welding', 'Consumables', 'Tools'] },
 };
 export const SOLD_BY_UNITS = { unit: ['unit', 'piece', 'pack', 'cup', 'loaf', 'bottle', 'carton', 'head'], weight: ['kg', 'g'], volume: ['litre', 'ml'], length: ['yard', 'metre'] };
 export const isFractional = (p) => ['weight', 'volume', 'length'].includes(p?.sold_by);

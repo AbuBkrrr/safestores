@@ -235,7 +235,10 @@ router.get('/jobs/customers', requireRole(...JOB_ROLES), jobsCtrl.findCustomers)
 router.patch('/jobs/customers/:customerId/measurements', requireRole(...JOB_ROLES), jobsCtrl.saveMeasurements);
 router.get('/jobs', requireRole(...JOB_ROLES), jobsCtrl.listJobs);
 router.post('/jobs', requireRole(...JOB_ROLES), jobsCtrl.createJob);
+router.get('/jobs/tag/:code', requireRole(...JOB_ROLES), jobsCtrl.getByTag);
 router.get('/jobs/:id', requireRole(...JOB_ROLES), jobsCtrl.getJob);
+router.patch('/jobs/:id/repair', requireRole(...JOB_ROLES), jobsCtrl.updateRepair);
+router.post('/jobs/:id/notes', requireRole(...JOB_ROLES), jobsCtrl.addNote);
 router.patch('/jobs/:id/status', requireRole(...JOB_ROLES), jobsCtrl.setStatus);
 router.post('/jobs/:id/payments', requireRole(...JOB_ROLES), jobsCtrl.addPayment);
 router.post('/jobs/:id/collect', requireRole(...JOB_ROLES), jobsCtrl.collect);

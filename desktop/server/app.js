@@ -1,4 +1,6 @@
 const express = require('express');
+// Must load before any route is defined: async handler failures reach the error handler.
+const { publicError } = require('./utils/asyncErrors');
 const morgan = require('morgan');
 const path = require('path');
 const { uploadsDir } = require('./db');
@@ -63,7 +65,8 @@ function createApp() {
   app.use((err, req, res, next) => {
     console.error(err);
     if (res.headersSent) return next(err);
-    res.status(err.status || 500).json({ error: err.message || 'Internal server error' });
+    const { status, body } = publicError(err);
+    res.status(status).json(body);
   });
 
   return app;
