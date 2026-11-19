@@ -124,6 +124,8 @@
 
   /* Pricing */
   .pricing { display: grid; grid-template-columns: 1.2fr 1fr; gap: 28px; align-items: start; }
+  .pricing > * { min-width: 0; }
+  @media (max-width: 520px) { .price-box { padding: 22px; } .price-box .big { font-size: 30px; } .sizes { table-layout: fixed; font-size: 13px; } .sizes th, .sizes td { padding: 10px 6px; overflow-wrap: anywhere; } }
   .price-box { background: var(--teal-deep); color: #fff; border-radius: var(--radius); padding: 30px; }
   .price-box .big { font-family: var(--display); font-size: 40px; font-weight: 700; margin: 6px 0; }
   .price-box p { color: #cfe3e5; font-size: 15px; line-height: 1.6; margin: 0 0 18px; }
@@ -141,6 +143,8 @@
   .ed-card h3 { font-family: var(--display); font-size: 20px; margin: 0; }
   .ed-card p { font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; margin: 0 0 14px; flex-grow: 1; }
   .ed-card .btn { width: 100%; }
+  .ed-row { display: flex; gap: 8px; }
+  .ed-row .btn { flex: 1; }
 
   /* Contact */
   .contact { display: grid; grid-template-columns: 1fr 1.2fr; gap: 36px; }
@@ -162,6 +166,44 @@
   .foot-links { display: flex; gap: 20px; flex-wrap: wrap; }
   .foot-links a:hover { color: var(--teal); }
 
+
+  /* How it works: two flows of connected cards */
+  .flow-block { margin-top: 28px; }
+  .flow-block + .flow-block { margin-top: 56px; }
+  .flow-title { display: flex; align-items: baseline; gap: 12px; margin: 0 0 18px; }
+  .flow-title h3 { font-family: var(--display); font-size: 21px; margin: 0; }
+  .flow-title span { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); }
+  .flow { list-style: none; margin: 0; padding: 0; display: grid; gap: 22px; }
+  .flow.six { grid-template-columns: repeat(6, 1fr); }
+  .flow.five { grid-template-columns: repeat(5, 1fr); }
+  .flow li { position: relative; background: #fff; border: 1px solid var(--paper-line); border-radius: 10px; padding: 20px 16px 18px; box-shadow: 0 1px 0 rgba(22,38,42,.04); transition: transform .18s ease, box-shadow .18s ease; }
+  .flow li:hover { transform: translateY(-3px); box-shadow: 0 10px 24px -14px rgba(10,46,51,.35); }
+  .flow li::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 4px; border-radius: 10px 10px 0 0; background: var(--teal); }
+  .flow.shop li::before { background: var(--amber); }
+  .flow li:not(:last-child)::after { content: "→"; position: absolute; right: -19px; top: 44px; font-size: 16px; color: var(--teal); font-weight: 700; z-index: 1; }
+  .flow.shop li:not(:last-child)::after { color: var(--amber-deep); }
+  .flow .step { font-family: var(--mono); font-size: 11px; color: var(--ink-soft); }
+  .flow .ico { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 21px; background: var(--teal-tint); margin: 8px 0 10px; }
+  .flow.shop .ico { background: #fbefd9; }
+  .flow h4 { font-family: var(--display); font-size: 15.5px; margin: 0 0 6px; }
+  .flow p { font-size: 12.8px; line-height: 1.5; color: var(--ink-soft); margin: 0; }
+  .pays { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 10px; }
+  .pays span { font-size: 11px; font-weight: 600; padding: 3px 7px; border-radius: 20px; background: #fbefd9; color: var(--amber-deep); }
+  .chips { display: flex; flex-wrap: wrap; gap: 10px; }
+  .chip { display: inline-flex; align-items: center; gap: 8px; background: #fff; border: 1px solid var(--paper-line); border-radius: 30px; padding: 9px 16px; font-size: 14px; font-weight: 500; }
+  @media (max-width: 1100px) {
+    .flow.six, .flow.five { grid-template-columns: repeat(3, 1fr); }
+    .flow li::after { display: none; }
+  }
+  @media (max-width: 620px) {
+    .flow.six, .flow.five { grid-template-columns: 1fr; gap: 26px; }
+    .flow li:not(:last-child)::after { display: block; content: "↓"; right: auto; left: 50%; top: auto; bottom: -24px; transform: translateX(-50%); }
+    .flow-title { flex-direction: column; gap: 4px; }
+    .flow li { display: grid; grid-template-columns: 44px 1fr; column-gap: 14px; align-items: start; padding: 16px; }
+    .flow li .step { grid-column: 1 / -1; }
+    .flow li .ico { grid-row: span 3; margin: 4px 0 0; }
+    .flow li .pays { grid-column: 2; }
+  }
   @media (max-width: 960px) {
     .types, .steps { grid-template-columns: repeat(2, 1fr); }
     .pricing, .contact { grid-template-columns: 1fr; }
@@ -192,9 +234,8 @@
     <nav aria-label="Main">
       <a class="brand" href="#top"><span class="brand-mark">SS</span> SAFE Stores</a>
       <div class="nav-links" id="nav-links">
-        <a href="#features">What it does</a>
-        <a href="#who">Who it's for</a>
-        <a href="#start">How to start</a>
+        <a href="#flow">How it works</a>
+        <a href="#features">Features</a>
         <a href="#pricing">Pricing</a>
         <a href="#download">Download</a>
         <a href="#contact">Contact</a>
@@ -216,7 +257,7 @@
     <p class="lede">Stock, checkout, staff and your own online shop — in one system that keeps working even when the internet doesn't.</p>
     <div class="cta-row">
       <a href="https://app.safestores.name.ng/signup" class="btn btn-primary">Start free →</a>
-      <a href="#features" class="btn btn-ghost">See what it does</a>
+      <a href="#flow" class="btn btn-ghost">See how it works</a>
     </div>
     <ul class="trust">
       <li>No upfront fee</li>
@@ -234,7 +275,7 @@
       <hr>
       <div class="receipt-item"><span class="name">Web Edition<small>Any phone, tablet or computer</small></span><span class="status live">Live</span></div>
       <div class="receipt-item"><span class="name">Desktop Edition<small>Windows · Mac · Linux · offline</small></span><span class="status live">Live</span></div>
-      <div class="receipt-item"><span class="name">Android App<small>Camera scan · offline · push</small></span><span class="status wait">Coming soon</span></div>
+      <div class="receipt-item"><span class="name">Android App<small>Camera scan · offline · alerts</small></span><span class="status live">Live</span></div>
       <hr>
       <div class="receipt-total"><span>Upfront cost</span><span>₦0</span></div>
       <div class="barcode"></div>
@@ -243,41 +284,68 @@
   </div>
 </section>
 
+<section class="section wrap" id="flow" aria-labelledby="flow-title">
+  <div class="section-head">
+    <h2 id="flow-title">How it works</h2>
+    <div class="section-note">every hand-off is recorded, so nothing goes missing</div>
+  </div>
+
+  <div class="flow-block">
+    <div class="flow-title"><h3>In the shop</h3><span>stock moves from the supplier to the door</span></div>
+    <ol class="flow six">
+      <li><div class="step">01</div><div class="ico" aria-hidden="true">🚚</div><h4>Supplier</h4><p>Delivers goods with an invoice. Snap it and the items fill in by themselves.</p></li>
+      <li><div class="step">02</div><div class="ico" aria-hidden="true">📦</div><h4>Store manager</h4><p>Counts what arrived into the store room, notes short deliveries and expiry dates.</p></li>
+      <li><div class="step">03</div><div class="ico" aria-hidden="true">🗂️</div><h4>Shelf manager</h4><p>Confirms each handover onto the shelves. Stock only moves once it's signed for.</p></li>
+      <li><div class="step">04</div><div class="ico" aria-hidden="true">🧺</div><h4>Counter</h4><p>Customers pick from full, priced shelves. Low shelves raise a refill alert.</p></li>
+      <li><div class="step">05</div><div class="ico" aria-hidden="true">🧾</div><h4>Cashier</h4><p>Scans, weighs and takes cash, transfer, card or split. Prints or WhatsApps a QR receipt.</p></li>
+      <li><div class="step">06</div><div class="ico" aria-hidden="true">🛡️</div><h4>Security</h4><p>Scans the receipt at the door and ticks every item. A receipt works only once.</p></li>
+    </ol>
+  </div>
+
+  <div class="flow-block">
+    <div class="flow-title"><h3>Online</h3><span>customers order from your own shop page</span></div>
+    <ol class="flow five shop">
+      <li><div class="step">01</div><div class="ico" aria-hidden="true">🔐</div><h4>Log in</h4><p>Customers open your shop link and sign in, or check out as a guest.</p></li>
+      <li><div class="step">02</div><div class="ico" aria-hidden="true">🛍️</div><h4>Browse products</h4><p>Your live stock, prices and photos, in your shop's colours and logo.</p></li>
+      <li><div class="step">03</div><div class="ico" aria-hidden="true">✅</div><h4>Select</h4><p>Add to cart, by the piece or by weight, and choose delivery or pickup.</p></li>
+      <li><div class="step">04</div><div class="ico" aria-hidden="true">💳</div><h4>Pay their way</h4><p>Whatever suits the customer:</p><div class="pays"><span>Online</span><span>On delivery</span><span>On credit</span><span>On pickup</span></div></li>
+      <li><div class="step">05</div><div class="ico" aria-hidden="true">🎉</div><h4>Received</h4><p>The order lands in your dashboard, gets packed and delivered, and the customer can track it.</p></li>
+    </ol>
+  </div>
+</section>
+
 <section class="section wrap" id="features" aria-labelledby="features-title">
   <div class="section-head">
-    <h2 id="features-title">What it actually does</h2>
-    <div class="section-note">no fluff — this is the whole job</div>
+    <h2 id="features-title">Features</h2>
+    <div class="section-note">the essentials, nothing extra</div>
   </div>
   <div class="grid">
-    <div class="card"><div class="num">01</div><h3>Stock, start to finish</h3><p>Scan the supplier's invoice into the store room, hand stock to the shelves, count it, and track every batch by its expiry date.</p></div>
-    <div class="card"><div class="num">02</div><h3>Fast checkout</h3><p>Scan or search, weigh items sold by the kilo, take cash, transfer, card or split payment, and send the receipt by print or WhatsApp.</p></div>
-    <div class="card"><div class="num">03</div><h3>Works with no signal</h3><p>Sales and stock changes save on the device and sync when the internet is back. Shop computers keep each other up to date over the shop Wi-Fi.</p></div>
-    <div class="card"><div class="num">04</div><h3>Receipt check at the door</h3><p>Security scans the receipt's QR code and ticks each item against the bag. Each receipt works once, so nothing leaves unpaid.</p></div>
-    <div class="card"><div class="num">05</div><h3>Staff can't sell from home</h3><p>Switch on "in-store only" and cashiers can only sell or move stock from inside the shop. You get an alert if anyone tries from outside.</p></div>
-    <div class="card"><div class="num">06</div><h3>Your own online shop</h3><p>Your shop gets its own page with your logo and colours. Customers order for delivery or pickup, and orders land straight in your dashboard.</p></div>
-    <div class="card"><div class="num">07</div><h3>Smart reordering</h3><p>Reorder suggestions from what actually sells, turned into a purchase order in one tap.</p></div>
-    <div class="card"><div class="num">08</div><h3>Credit sales, guaranteed</h3><p>Let trusted customers buy now and pay later, backed by their bank, cooperative or pension fund after a proper KYC check.</p></div>
-    <div class="card"><div class="num">09</div><h3>A screen for every role</h3><p>Owner, manager, cashier, store manager, shelf manager and security each see only what their job needs.</p></div>
+    <div class="card"><div class="num">01</div><h3>Fast checkout</h3><p>Scan or search, weigh items sold by the kilo, take cash, transfer, card or split payment, and send the receipt by print or WhatsApp.</p></div>
+    <div class="card"><div class="num">02</div><h3>Works with no signal</h3><p>Sales and stock changes save on the device and sync when the internet is back. Shop computers keep each other up to date over the shop Wi-Fi.</p></div>
+    <div class="card"><div class="num">03</div><h3>Staff can't sell from home</h3><p>Switch on "in-store only" and cashiers can only sell or move stock from inside the shop. You get an alert if anyone tries from outside.</p></div>
+    <div class="card"><div class="num">04</div><h3>Your own online shop</h3><p>Your shop gets its own page with your logo and colours. Customers order for delivery or pickup, and orders land straight in your dashboard.</p></div>
+    <div class="card"><div class="num">05</div><h3>Smart reordering</h3><p>Reorder suggestions from what actually sells, turned into a purchase order in one tap.</p></div>
+    <div class="card"><div class="num">06</div><h3>Credit sales, guaranteed</h3><p>Let trusted customers buy now and pay later, backed by their bank, cooperative or pension fund after a proper KYC check.</p></div>
   </div>
 </section>
 
 <section class="section wrap" id="who" aria-labelledby="who-title">
   <div class="section-head">
     <h2 id="who-title">Built for your kind of business</h2>
-    <div class="section-note">pick your trade at sign-up — the right tools switch on</div>
+    <div class="section-note">pick your trade at sign-up and the right tools switch on</div>
   </div>
-  <div class="types">
-    <div class="type"><div class="icon" aria-hidden="true">🛒</div><h3>Supermarkets &amp; shops</h3><p>Barcodes, shelves, expiry dates and a busy till.</p></div>
-    <div class="type"><div class="icon" aria-hidden="true">🥩</div><h3>Butchers</h3><p>Sell by weight, break down carcasses into cuts, track freshness.</p></div>
-    <div class="type"><div class="icon" aria-hidden="true">🐄</div><h3>Abattoirs</h3><p>Record every animal broken down, with the real yield in kg.</p></div>
-    <div class="type"><div class="icon" aria-hidden="true">🥬</div><h3>Fresh produce</h3><p>See what spoils soon and what waste cost you this week.</p></div>
-    <div class="type"><div class="icon" aria-hidden="true">🍦</div><h3>Ice cream</h3><p>Recipes that turn milk and sugar into cups, at the true cost.</p></div>
-    <div class="type"><div class="icon" aria-hidden="true">🍞</div><h3>Bakeries</h3><p>Batch production with ingredients taken off stock automatically.</p></div>
-    <div class="type"><div class="icon" aria-hidden="true">🧵</div><h3>Tailors</h3><p>Measurements, deposits, due dates and fabric used, per job.</p></div>
-    <div class="type"><div class="icon" aria-hidden="true">🧺</div><h3>Laundries</h3><p>Job tickets from drop-off to collection, with balances owed.</p></div>
-    <div class="type"><div class="icon" aria-hidden="true">🔧</div><h3>Mechanics</h3><p>Check in cars by plate and mileage, QR-tag the keys, track parts and labour.</p></div>
-    <div class="type"><div class="icon" aria-hidden="true">📱</div><h3>Phone &amp; computer repair</h3><p>Log each device by IMEI and condition, tag it, and hand it back only to its owner.</p></div>
-    <div class="type"><div class="icon" aria-hidden="true">⚙️</div><h3>Engineering &amp; machines</h3><p>Generators, pumps and machines: fault, diagnosis, parts and notes in one ticket.</p></div>
+  <div class="chips">
+    <span class="chip"><span aria-hidden="true">🛒</span>Supermarkets &amp; shops</span>
+    <span class="chip"><span aria-hidden="true">🥩</span>Butchers</span>
+    <span class="chip"><span aria-hidden="true">🐄</span>Abattoirs</span>
+    <span class="chip"><span aria-hidden="true">🥬</span>Fresh produce</span>
+    <span class="chip"><span aria-hidden="true">🍦</span>Ice cream</span>
+    <span class="chip"><span aria-hidden="true">🍞</span>Bakeries</span>
+    <span class="chip"><span aria-hidden="true">🧵</span>Tailors</span>
+    <span class="chip"><span aria-hidden="true">🧺</span>Laundries</span>
+    <span class="chip"><span aria-hidden="true">🔧</span>Mechanics</span>
+    <span class="chip"><span aria-hidden="true">📱</span>Phone &amp; computer repair</span>
+    <span class="chip"><span aria-hidden="true">⚙️</span>Engineering &amp; machines</span>
   </div>
 </section>
 
@@ -339,14 +407,18 @@
       <span class="tag live">Live</span>
       <h3>Desktop</h3>
       <p>Installs on the shop computer and works fully offline with its own database. Other devices in the shop connect to it over the Wi-Fi, and it backs up online when the internet is on.</p>
-      <a class="btn btn-primary" href="#contact" data-topic="desktop">Request the installer →</a>
+      <a class="btn btn-primary" href="https://github.com/AbuBkrrr/safestores/releases/latest/download/SAFE-Stores-Windows.exe" download>⬇ Download for Windows</a>
+      <div class="ed-row">
+        <a class="btn btn-ghost" href="https://github.com/AbuBkrrr/safestores/releases/latest/download/SAFE-Stores-Mac.dmg" download>Mac</a>
+        <a class="btn btn-ghost" href="https://github.com/AbuBkrrr/safestores/releases/latest/download/SAFE-Stores-Linux.AppImage" download>Linux</a>
+      </div>
     </div>
     <div class="ed-card">
-      <span class="tag wait">Coming soon</span>
+      <span class="tag live">Live</span>
       <h3>Android</h3>
-      <p>Camera barcode scanning, offline photo capture and push alerts for new orders — built, and waiting on Google Play. Until then, the web edition works on any Android phone.</p>
-      <a class="btn btn-primary" href="#contact" data-topic="android">Tell me when it's out</a>
-      <a class="btn btn-ghost" href="https://app.safestores.name.ng/login">Use it in the browser now</a>
+      <p>Camera barcode scanning, offline photo capture and alerts for new orders. Download the app straight to the phone; when asked, allow installing from your browser. Google Play listing coming soon.</p>
+      <a class="btn btn-primary" href="https://github.com/AbuBkrrr/safestores/releases/latest/download/SAFE-Stores-Android.apk" download>⬇ Download the Android app</a>
+      <a class="btn btn-ghost" href="https://app.safestores.name.ng/login">Or use it in the browser</a>
     </div>
   </div>
 </section>

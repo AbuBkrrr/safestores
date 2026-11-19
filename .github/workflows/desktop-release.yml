@@ -1,12 +1,13 @@
-name: Desktop installers
+name: App downloads
 
-# Builds the shop-computer (desktop) installers for Windows, Mac and Linux and
-# attaches them to a GitHub release.
-#   - Push a tag like desktop-v1.4.0  → a release named after the tag.
-#   - Or run it by hand (Actions → Desktop installers → Run workflow) → files
-#     are kept as workflow artifacts for 30 days, no release is made.
-# The Mac build is unsigned unless signing secrets are added (see desktop/README.md):
-# people open it the first time with right-click → Open.
+# Builds everything visitors download from the landing page and publishes it
+# as a public GitHub release with fixed file names, so the landing page links
+# (releases/latest/download/<name>) always point at the newest build:
+#   SAFE-Stores-Windows.exe, SAFE-Stores-Mac.dmg, SAFE-Stores-Linux.AppImage,
+#   SAFE-Stores-Android.apk
+# Runs when a tag like desktop-v1.4.0 is pushed, or by hand (Actions →
+# App downloads → Run workflow), which releases desktop-v<desktop version>.
+# Installers are unsigned unless signing secrets are added (see desktop/README.md).
 
 on:
   push:
@@ -35,15 +36,18 @@ jobs:
         include:
           - os: windows-latest
             script: build:win:admin
-            files: desktop/release/*.exe
+            pattern: '*.exe'
+            name: SAFE-Stores-Windows.exe
           - os: macos-latest
             script: build:mac
-            files: desktop/release/*.dmg
+            pattern: '*.dmg'
+            name: SAFE-Stores-Mac.dmg
           - os: ubuntu-latest
             script: build:linux
-            files: desktop/release/*.AppImage
+            pattern: '*.AppImage'
+            name: SAFE-Stores-Linux.AppImage
     runs-on: ${{ matrix.os }}
-    defaults: { run: { working-directory: desktop } }
+    defaults: { run: { working-directory: desktop, shell: bash } }
     env:
       # No code-signing certificate configured yet: build unsigned instead of failing.
       CSC_IDENTITY_AUTO_DISCOVERY: 'false'
@@ -59,28 +63,77 @@ jobs:
       - run: npm ci
       - name: Build installer (also builds the app screens in shop-computer mode)
         run: npm run ${{ matrix.script }}
+      - name: Give it a fixed download name
+        run: |
+          mkdir -p out
+          f=$(ls release/${{ matrix.pattern }} | grep -vi blockmap | head -1)
+          cp "$f" "out/${{ matrix.name }}"
       - uses: actions/upload-artifact@v4
         with:
-          name: installer-${{ matrix.os }}
-          path: ${{ matrix.files }}
+          name: download-${{ matrix.os }}
+          path: desktop/out/*
+          retention-days: 30
+          if-no-files-found: error
+
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: |
+            mobile/package-lock.json
+            frontend/package-lock.json
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '17' }
+      - name: Build the app screens for the phone
+        working-directory: mobile
+        env:
+          SAFE_STORES_API_URL: https://app.safestores.name.ng/api
+        run: |
+          npm ci
+          node scripts/build-www.js
+          npx cap sync android
+      - name: Build the APK
+        working-directory: mobile/android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+          mkdir -p ../../out
+          cp app/build/outputs/apk/debug/app-debug.apk ../../out/SAFE-Stores-Android.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: download-android
+          path: out/*
           retention-days: 30
           if-no-files-found: error
 
   release:
-    if: startsWith(github.ref, 'refs/tags/desktop-v')
-    needs: build
+    needs: [build, android]
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with: { path: dist, merge-multiple: true }
+      - name: Pick the release name
+        id: tag
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/desktop-v* ]]; then echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT";
+          else echo "tag=desktop-v$(node -p "require('./desktop/package.json').version")" >> "$GITHUB_OUTPUT"; fi
       - uses: softprops/action-gh-release@v2
         with:
-          name: SAFE Stores for shop computers ${{ github.ref_name }}
+          tag_name: ${{ steps.tag.outputs.tag }}
+          target_commitish: ${{ github.sha }}
+          name: SAFE Stores ${{ steps.tag.outputs.tag }}
+          make_latest: 'true'
           files: dist/*
           body: |
-            Install on the shop computer:
-            - **Windows:** download the `.exe` and run it.
-            - **Mac:** download the `.dmg`, drag SAFE Stores to Applications, then right-click → Open the first time.
-            - **Linux:** download the `.AppImage`, make it executable and run it.
+            Download and install:
+            - **Windows (shop computer):** `SAFE-Stores-Windows.exe` — run it. If Windows warns, click More info → Run anyway.
+            - **Mac:** `SAFE-Stores-Mac.dmg` — drag SAFE Stores to Applications, then right-click → Open the first time.
+            - **Linux:** `SAFE-Stores-Linux.AppImage` — make it executable and run it.
+            - **Android phone:** `SAFE-Stores-Android.apk` — open it on the phone and allow installing from this source.
 
-            Works fully offline; other devices in the shop connect to it over the Wi-Fi, and it backs up to your online store when the internet is on.
+            The desktop app works fully offline; other devices in the shop connect to it over the Wi-Fi, and it backs up to your online store when the internet is on.
