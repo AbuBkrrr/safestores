@@ -27,8 +27,8 @@ async function findReceipt(storeId, raw) {
   if (!order) return null;
   const items = await db.query(
     `SELECT oi.id, oi.quantity, oi.line_total, p.name,
-            COALESCE((SELECT SUM(ri.quantity) FROM refund_items ri WHERE ri.order_item_id = oi.id), 0)::int AS refunded_qty,
-            COALESCE((SELECT SUM(sr.quantity) FROM security_returns sr WHERE sr.order_item_id = oi.id), 0)::int AS returned_qty
+            COALESCE((SELECT SUM(ri.quantity) FROM refund_items ri WHERE ri.order_item_id = oi.id), 0) AS refunded_qty,
+            COALESCE((SELECT SUM(sr.quantity) FROM security_returns sr WHERE sr.order_item_id = oi.id), 0) AS returned_qty
      FROM order_items oi JOIN products p ON p.id = oi.product_id
      WHERE oi.order_id = $1 ORDER BY p.name`, [order.id]
   );
@@ -92,13 +92,14 @@ async function confirmReturn(req, res) {
     for (const it of items) {
       const qty = Math.round(Number(it.quantity) * 1000) / 1000;
       const line = (await client.query(
-        `SELECT oi.quantity, COALESCE((SELECT SUM(sr.quantity) FROM security_returns sr WHERE sr.order_item_id = oi.id), 0)::int AS returned
+        `SELECT oi.quantity, COALESCE((SELECT SUM(sr.quantity) FROM security_returns sr WHERE sr.order_item_id = oi.id), 0) AS returned
          FROM order_items oi WHERE oi.id = $1 AND oi.order_id = $2`, [it.orderItemId, orderId]
       )).rows[0];
       if (!line) { await client.query('ROLLBACK'); return res.status(404).json({ error: 'Item not on this receipt' }); }
-      if (qty > line.quantity - line.returned) {
+      const left = Math.round((Number(line.quantity) - Number(line.returned)) * 1000) / 1000;
+      if (qty > left + 1e-9) {
         await client.query('ROLLBACK');
-        return res.status(400).json({ error: `Only ${line.quantity - line.returned} of that item can still come back on this receipt` });
+        return res.status(400).json({ error: `Only ${left} of that item can still come back on this receipt` });
       }
       await client.query(
         `INSERT INTO security_returns (store_id, order_id, order_item_id, quantity, note, checked_by) VALUES ($1,$2,$3,$4,$5,$6)`,
@@ -181,7 +182,7 @@ async function myDashboard(req, res) {
     Object.assign(out, { openOrders: Object.fromEntries(by.rows.map((r) => [r.status, r.n])), fulfilledToday: fulfilled.rows[0].n, queue: newest.rows });
   } else if (role === 'store_manager') {
     const deliveries = await db.query(
-      `SELECT COUNT(*)::int AS n, COALESCE(SUM(quantity), 0)::int AS units FROM stock_arrivals WHERE store_id = $1 AND ${isToday('created_at')}`, [storeId]
+      `SELECT COUNT(*)::int AS n, COALESCE(SUM(quantity), 0) AS units FROM stock_arrivals WHERE store_id = $1 AND ${isToday('created_at')}`, [storeId]
     );
     const recent = await db.query(
       `SELECT a.quantity, a.invoice_number, a.created_at, p.name FROM stock_arrivals a JOIN products p ON p.id = a.product_id
@@ -196,7 +197,7 @@ async function myDashboard(req, res) {
     Object.assign(out, { deliveriesToday: deliveries.rows[0], recentDeliveries: recent.rows, storeRoomLow: low.rows, handoversOpen: open.rows[0].n, handoversShort: short.rows[0].n });
   } else if (role === 'shelf_manager') {
     const waiting = await db.query(
-      `SELECT h.id, h.issued_at, u.name AS issued_by_name, COUNT(i.id)::int AS lines, COALESCE(SUM(i.qty_issued), 0)::int AS units
+      `SELECT h.id, h.issued_at, u.name AS issued_by_name, COUNT(i.id)::int AS lines, COALESCE(SUM(i.qty_issued), 0) AS units
        FROM stock_handovers h LEFT JOIN users u ON u.id = h.issued_by LEFT JOIN stock_handover_items i ON i.handover_id = h.id
        WHERE h.store_id = $1 AND h.status = 'issued' GROUP BY h.id, u.name ORDER BY h.issued_at`, [storeId]
     );

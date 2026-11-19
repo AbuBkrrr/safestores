@@ -125,7 +125,7 @@ async function shiftReport(req, res) {
     [shiftId]
   );
   const { rows: items } = await db.query(
-    `SELECT COALESCE(SUM(oi.quantity), 0)::int AS units FROM order_items oi JOIN orders o ON o.id = oi.order_id
+    `SELECT COALESCE(SUM(oi.quantity), 0) AS units FROM order_items oi JOIN orders o ON o.id = oi.order_id
      WHERE o.shift_id = $1 AND o.status = 'paid'`,
     [shiftId]
   );

@@ -36,12 +36,13 @@ async function issueHandover(req, res) {
       if (!p) { await client.query('ROLLBACK'); return res.status(404).json({ error: 'Product not found' }); }
       // Count stock already promised to the shelf in other open handovers.
       const pending = (await client.query(
-        `SELECT COALESCE(SUM(i.qty_issued), 0)::int AS n FROM stock_handover_items i JOIN stock_handovers h ON h.id = i.handover_id
+        `SELECT COALESCE(SUM(i.qty_issued), 0) AS n FROM stock_handover_items i JOIN stock_handovers h ON h.id = i.handover_id
          WHERE h.store_id = $1 AND h.status = 'issued' AND i.product_id = $2`, [storeId, it.productId]
       )).rows[0].n;
-      if (it.quantity > p.backroom_qty - pending) {
+      const free = Math.max(0, Math.round((Number(p.backroom_qty) - Number(pending)) * 1000) / 1000);
+      if (it.quantity > free + 1e-9) {
         await client.query('ROLLBACK');
-        return res.status(400).json({ error: `Only ${Math.max(0, p.backroom_qty - pending)} of ${p.name} is free in the store room` });
+        return res.status(400).json({ error: `Only ${free} of ${p.name} is free in the store room` });
       }
     }
     const h = (await client.query(

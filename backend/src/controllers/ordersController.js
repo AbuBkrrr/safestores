@@ -98,7 +98,7 @@ async function getOrder(req, res) {
 async function loadReceipt(client, order) {
   const { rows: items } = await client.query(
     `SELECT oi.*, p.name AS product_name, p.sku,
-            COALESCE((SELECT SUM(ri.quantity) FROM refund_items ri WHERE ri.order_item_id = oi.id), 0)::int AS refunded_qty
+            COALESCE((SELECT SUM(ri.quantity) FROM refund_items ri WHERE ri.order_item_id = oi.id), 0) AS refunded_qty
      FROM order_items oi JOIN products p ON p.id = oi.product_id WHERE oi.order_id = $1 ORDER BY oi.created_at ASC`,
     [order.id]
   );
@@ -448,21 +448,22 @@ async function refundOrder(req, res) {
       const qty = roundQty(it.quantity);
       if (!(qty > 0)) { await client.query('ROLLBACK'); return res.status(400).json({ error: 'Each refund quantity must be at least 1' }); }
       const { rows: lineRows } = await client.query(
-        `SELECT oi.*, COALESCE((SELECT SUM(ri.quantity) FROM refund_items ri WHERE ri.order_item_id = oi.id), 0)::int AS refunded_qty
+        `SELECT oi.*, COALESCE((SELECT SUM(ri.quantity) FROM refund_items ri WHERE ri.order_item_id = oi.id), 0) AS refunded_qty
          FROM order_items oi WHERE oi.id = $1 AND oi.order_id = $2`,
         [it.orderItemId, orderId]
       );
       const line = lineRows[0];
       if (!line) { await client.query('ROLLBACK'); return res.status(404).json({ error: 'Item not found on this sale' }); }
-      if (qty > line.quantity - line.refunded_qty) {
+      const refundable = Math.round((Number(line.quantity) - Number(line.refunded_qty)) * 1000) / 1000;
+      if (qty > refundable + 1e-9) {
         await client.query('ROLLBACK');
-        return res.status(400).json({ error: `Only ${line.quantity - line.refunded_qty} of that item can still be refunded` });
+        return res.status(400).json({ error: `Only ${refundable} of that item can still be refunded` });
       }
       if (hasSecurity) {
         const back = (await client.query(
-          'SELECT COALESCE(SUM(quantity), 0)::int AS n FROM security_returns WHERE order_item_id = $1', [line.id]
+          'SELECT COALESCE(SUM(quantity), 0) AS n FROM security_returns WHERE order_item_id = $1', [line.id]
         )).rows[0].n;
-        if (line.refunded_qty + qty > back) {
+        if (Math.round((Number(line.refunded_qty) + qty) * 1000) > Math.round(Number(back) * 1000)) {
           await client.query('ROLLBACK');
           return res.status(400).json({
             code: 'SECURITY_RETURN_REQUIRED',

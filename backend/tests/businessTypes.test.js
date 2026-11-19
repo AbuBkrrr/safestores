@@ -45,6 +45,16 @@ describe('Business types', () => {
     expect((await request().post(`/api/stores/${store.id}/orders/${order.body.id}/items`).set('Authorization', A).send({ productId: bags.id, quantity: 1.5 })).body.error).toMatch(/whole units/);
     const p = (await pool.query('SELECT shelf_qty, sold_qty FROM products WHERE id = $1', [beef.id])).rows[0];
     expect(p).toEqual({ shelf_qty: 24.15, sold_qty: 1.35 });
+
+    // Weighed goods refund in part, to the gram, and not beyond what was sold.
+    await request().post(`/api/stores/${store.id}/orders/${order.body.id}/pay`).set('Authorization', A).send({ paymentMethod: 'cash' });
+    const refund = (q) => request().post(`/api/stores/${store.id}/orders/${order.body.id}/refunds`).set('Authorization', A)
+      .send({ items: [{ orderItemId: line.body.item.id, quantity: q }], method: 'cash', reason: 'too much' });
+    expect((await refund(0.5)).status).toBe(201);
+    expect((await refund(0.85)).status).toBe(201);
+    const over = await refund(0.01);
+    expect(over.status).toBe(400);
+    expect(over.body.error).toMatch(/Only 0 of that item/);
   });
 
   it('ice-cream: a recipe uses the ingredients and makes the product, costing it from the inputs', async () => {
