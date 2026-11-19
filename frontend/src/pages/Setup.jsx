@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import { Alert } from '../components/ui.jsx';
+import PasswordInput from '../components/PasswordInput.jsx';
 
 export default function Setup({ onComplete }) {
   const { t } = useTranslation();
@@ -38,8 +39,8 @@ export default function Setup({ onComplete }) {
         <form onSubmit={handleSubmit}>
           <div className="form-group"><label>{t('setupPage.yourName')}</label><input value={form.name} onChange={update('name')} required /></div>
           <div className="form-group"><label>{t('setupPage.email')}</label><input type="email" value={form.email} onChange={update('email')} required /></div>
-          <div className="form-group"><label>{t('setupPage.password')}</label><input type="password" value={form.password} onChange={update('password')} required minLength={6} /></div>
-          <div className="form-group"><label>{t('setupPage.confirmPassword')}</label><input type="password" value={form.confirm} onChange={update('confirm')} required /></div>
+          <div className="form-group"><label>{t('setupPage.password')}</label><PasswordInput value={form.password} onChange={update('password')} required minLength={6} /></div>
+          <div className="form-group"><label>{t('setupPage.confirmPassword')}</label><PasswordInput value={form.confirm} onChange={update('confirm')} required /></div>
           <button className="btn" style={{ width: '100%' }} disabled={loading}>
             {loading ? t('setupPage.settingUp') : t('setupPage.submit')}
           </button>

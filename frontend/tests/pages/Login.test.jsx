@@ -23,7 +23,7 @@ describe('Login page', () => {
     renderWithProviders(<Login />);
 
     await userEvent.type(screen.getByLabelText(/email/i), 'admin@shop.com');
-    await userEvent.type(screen.getByLabelText(/password/i), 'Password123!');
+    await userEvent.type(screen.getByLabelText(/password/i, { selector: 'input' }), 'Password123!');
     await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
 
     await waitFor(() => {
@@ -38,7 +38,7 @@ describe('Login page', () => {
     renderWithProviders(<Login />);
 
     await userEvent.type(screen.getByLabelText(/email/i), 'admin@shop.com');
-    await userEvent.type(screen.getByLabelText(/password/i), 'Password123!');
+    await userEvent.type(screen.getByLabelText(/password/i, { selector: 'input' }), 'Password123!');
     await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
 
     await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/activate-store'));
@@ -49,7 +49,7 @@ describe('Login page', () => {
     renderWithProviders(<Login />);
 
     await userEvent.type(screen.getByLabelText(/email/i), 'admin@shop.com');
-    await userEvent.type(screen.getByLabelText(/password/i), 'wrongpass');
+    await userEvent.type(screen.getByLabelText(/password/i, { selector: 'input' }), 'wrongpass');
     await userEvent.click(screen.getByRole('button', { name: /sign in/i }));
 
     expect(await screen.findByText('Invalid credentials')).toBeInTheDocument();
@@ -73,5 +73,21 @@ describe('Login page', () => {
   it('pre-fills and switches to the Invite tab when a ?invite= link is opened', () => {
     renderWithProviders(<Login />, { route: '/login?invite=inv-xyz789' });
     expect(screen.getByPlaceholderText(/INV-/i)).toHaveValue('INV-XYZ789');
+  });
+
+  it('an invite link / QR (?invite=CODE) signs the person straight in without a tap', async () => {
+    api.post.mockResolvedValue({ data: { token: 't-inv', user: { role: 'cashier' } } });
+    renderWithProviders(<Login />, { route: '/login?invite=ab12cd' });
+    await waitFor(() => expect(api.post).toHaveBeenCalledWith('/auth/invite/login', { code: 'AB12CD' }));
+    expect(api.post).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/'));
+    expect(localStorage.getItem('ss_token')).toBe('t-inv');
+  });
+
+  it('a bad invite link shows the error on the invite tab', async () => {
+    api.post.mockRejectedValue({ response: { data: { error: 'This invite code has been revoked' } } });
+    renderWithProviders(<Login />, { route: '/login?invite=DEAD01' });
+    expect(await screen.findByText(/revoked/i)).toBeInTheDocument();
+    expect(mockNavigate).not.toHaveBeenCalled();
   });
 });

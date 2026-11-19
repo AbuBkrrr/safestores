@@ -27,7 +27,20 @@ async function getTenantTables() {
 async function resetDb() {
   const tables = await getTenantTables();
   if (!tables.length) return;
-  await pool.query(`TRUNCATE TABLE ${tables.map((t) => `"${t}"`).join(', ')} RESTART IDENTITY CASCADE`);
+  const sql = `TRUNCATE TABLE ${tables.map((t) => `"${t}"`).join(', ')} RESTART IDENTITY CASCADE`;
+  // Some endpoints do follow-up reads after replying (realtime/push side
+  // effects, e.g. createAudit). The previous test can end while one is
+  // still running, and TRUNCATE then deadlocks with it. Postgres kills one
+  // side (40P01); the read is done a moment later, so try again.
+  for (let attempt = 1; ; attempt++) {
+    try {
+      await pool.query(sql);
+      break;
+    } catch (err) {
+      if (err.code !== '40P01' || attempt >= 5) throw err;
+      await new Promise((r) => setTimeout(r, 50 * attempt));
+    }
+  }
   await restoreMutableSingletons();
 }
 
@@ -54,6 +67,10 @@ async function restoreMutableSingletons() {
     WHERE id = 'default'
   `);
   await pool.query(`UPDATE currency_settings SET code = 'NGN', symbol = '₦' WHERE id = 'default'`);
+  // Tier limits can be edited by a Super Admin test; put the migration defaults back.
+  await pool.query(`UPDATE store_tiers SET max_products = 200, max_users = 3 WHERE tier = 'mini'`);
+  await pool.query(`UPDATE store_tiers SET max_products = 2000, max_users = 20 WHERE tier = 'midi'`);
+  await pool.query(`UPDATE store_tiers SET max_products = NULL, max_users = NULL WHERE tier = 'mega'`);
 }
 
 async function closeDb() {

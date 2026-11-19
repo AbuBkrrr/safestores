@@ -67,3 +67,20 @@ describe('ProtectedRoute', () => {
     expect(screen.queryByText('Admin Content')).not.toBeInTheDocument();
   });
 });
+
+describe('ProtectedRoute role homes', () => {
+  it('sends an auditor to /auditor instead of looping on a blank page', () => {
+    localStorage.setItem('ss_user', JSON.stringify({ id: 'a1', role: 'auditor' }));
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <AuthProvider>
+          <Routes>
+            <Route path="/" element={<ProtectedRoute roles={['admin']}><div>Store</div></ProtectedRoute>} />
+            <Route path="/auditor" element={<div>Auditor Home</div>} />
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>
+    );
+    expect(screen.getByText('Auditor Home')).toBeInTheDocument();
+  });
+});

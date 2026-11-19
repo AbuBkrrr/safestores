@@ -54,7 +54,7 @@ function createProduct(req, res) {
   if (existing) return res.status(409).json({ error: 'SKU already exists for this store' });
 
   const newId = id || crypto.randomUUID();
-  const initQty = Number(initialBackroomQty) || 0;
+  const initQty = Math.max(0, Math.round((Number(initialBackroomQty) || 0) * 1000) / 1000);
 
   db.transaction(() => {
     const supplierId = findOrCreateSupplier(db, storeId, supplier);
@@ -69,6 +69,12 @@ function createProduct(req, res) {
       leadTimeDays ?? 7, minOrderQty ?? 1, autoReorder ? 1 : 0, initQty, storageType || 'ambient'
     );
 
+    // Sold by weight/volume/length (1.35 kg) and fresh-food shelf life.
+    if (req.body.soldBy || req.body.shelfLifeDays) {
+      const soldBy = ['unit', 'weight', 'volume', 'length'].includes(req.body.soldBy) ? req.body.soldBy : 'unit';
+      const life = parseInt(req.body.shelfLifeDays, 10);
+      db.prepare('UPDATE products SET sold_by = ?, shelf_life_days = ? WHERE id = ?').run(soldBy, life > 0 ? life : null, newId);
+    }
     const { barcode, packSize, packUnit, variantOf, variantLabel } = req.body;
     if (barcode || packSize || packUnit || variantOf || variantLabel) {
       db.prepare('UPDATE products SET barcode = ?, pack_size = ?, pack_unit = ?, variant_of = ?, variant_label = ? WHERE id = ?')
@@ -93,9 +99,10 @@ function updateProduct(req, res) {
   const fields = [
     'name', 'sku', 'category', 'supplier', 'unit', 'location', 'cost_price', 'price_multiplier', 'reorder_level',
     'lead_time_days', 'min_order_qty', 'auto_reorder', 'brand', 'image_url', 'storage_type',
-    'barcode', 'pack_size', 'pack_unit', 'variant_of', 'variant_label',
+    'barcode', 'pack_size', 'pack_unit', 'variant_of', 'variant_label', 'sold_by', 'shelf_life_days',
   ];
   const camelToSnake = {
+    soldBy: 'sold_by', shelfLifeDays: 'shelf_life_days',
     packSize: 'pack_size', packUnit: 'pack_unit', variantOf: 'variant_of', variantLabel: 'variant_label',
     costPrice: 'cost_price', priceMultiplier: 'price_multiplier', reorderLevel: 'reorder_level',
     leadTimeDays: 'lead_time_days', minOrderQty: 'min_order_qty', autoReorder: 'auto_reorder', imageUrl: 'image_url',
@@ -109,7 +116,9 @@ function updateProduct(req, res) {
     if (fields.includes(col)) {
       // better-sqlite3 can't bind JS booleans directly — SQLite has no
       // boolean type anyway (auto_reorder is stored as INTEGER 0/1).
-      const bound = typeof val === 'boolean' ? (val ? 1 : 0) : val;
+      let bound = typeof val === 'boolean' ? (val ? 1 : 0) : val;
+      if (col === 'sold_by' && !['unit', 'weight', 'volume', 'length'].includes(bound)) bound = 'unit';
+      if (col === 'shelf_life_days') bound = parseInt(bound, 10) > 0 ? parseInt(bound, 10) : null;
       updates.push(`${col} = ?`); values.push(bound);
     }
   }

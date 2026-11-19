@@ -19,6 +19,9 @@ export default function BillingStatus() {
   const [method, setMethod] = useState('bank_transfer');
   const [reference, setReference] = useState('');
   const [payingId, setPayingId] = useState(null);
+  const [proof, setProof] = useState(null); // receipt photo or PDF for the claim
+  const [showAccount, setShowAccount] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [toast, showToast] = useToast();
   const verifiedRef = useRef(false); // guards against double-verifying on a re-render
 
@@ -72,7 +75,14 @@ export default function BillingStatus() {
 
   const submitClaim = async (chargeId) => {
     try {
-      await api.post(`/stores/${user.storeId}/billing/claim-payment`, { chargeId, method, reference });
+      if (proof) {
+        const fd = new FormData();
+        fd.append('chargeId', chargeId); fd.append('method', method); fd.append('reference', reference); fd.append('proof', proof);
+        await api.post(`/stores/${user.storeId}/billing/claim-payment`, fd);
+      } else {
+        await api.post(`/stores/${user.storeId}/billing/claim-payment`, { chargeId, method, reference });
+      }
+      setProof(null);
       showToast(t('billingPage.claimSubmittedToast'), 'success');
       setClaimingId(null);
       setReference('');
@@ -106,6 +116,9 @@ export default function BillingStatus() {
 
   if (!status) return null;
 
+  const unpaid = status.charges.filter((c) => (c.status === 'pending' || c.status === 'overdue') && !c.claimed_at);
+  const claiming = status.charges.find((c) => c.id === claimingId);
+
   return (
     <div>
       <div className="topbar"><h1>{t('billingPage.title')}</h1></div>
@@ -120,10 +133,36 @@ export default function BillingStatus() {
 
       {settings && (
         <div className="card">
-          <h3 style={{ marginBottom: 12 }}>{t('billingPage.howToPay')}</h3>
-          <p><strong>{settings.bank_or_provider}</strong> — {t('billingPage.account')} <span className="code-chip">{settings.account_number}</span> ({settings.account_name})</p>
-          <p className="muted">{t('billingPage.acceptedMethods')} {(settings.methods || []).map((m) => METHOD_LABELS[m] || m).join(', ')}</p>
-          {settings.instructions && <p className="muted mt-1">{settings.instructions}</p>}
+          <button type="button" onClick={() => setShowAccount((v) => !v)} aria-expanded={showAccount} aria-controls="pay-account"
+            className="flex" style={{ width: '100%', justifyContent: 'space-between', alignItems: 'center', background: 'none', border: 0, padding: 0, cursor: 'pointer', color: 'inherit', textAlign: 'left' }}>
+            <span>
+              <strong style={{ fontSize: 17 }}>{t('billingPage.howToPay')}</strong>
+              <span className="muted" style={{ marginLeft: 8 }}>{settings.bank_or_provider} · {t('billingPage.accountEnding', { last: String(settings.account_number || '').slice(-4) })}</span>
+            </span>
+            <span aria-hidden="true" style={{ fontSize: 14, transition: 'transform .15s', transform: showAccount ? 'rotate(180deg)' : 'none' }}>▼</span>
+          </button>
+          {showAccount && (
+            <div id="pay-account" className="mt-1">
+              <table><tbody>
+                <tr><td className="muted">{t('billingPage.bankOrProvider')}</td><td><strong>{settings.bank_or_provider}</strong></td></tr>
+                <tr><td className="muted">{t('billingPage.accountNumber')}</td><td>
+                  <span className="code-chip">{settings.account_number}</span>{' '}
+                  <button type="button" className="btn small secondary" onClick={() => { navigator.clipboard?.writeText(String(settings.account_number)).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2000); }).catch(() => {}); }}>
+                    {copied ? t('billingPage.copied') : t('billingPage.copy')}
+                  </button>
+                </td></tr>
+                <tr><td className="muted">{t('billingPage.accountName')}</td><td>{settings.account_name}</td></tr>
+                <tr><td className="muted">{t('billingPage.acceptedMethods')}</td><td>{(settings.methods || []).map((m) => METHOD_LABELS[m] || m).join(', ')}</td></tr>
+              </tbody></table>
+              {settings.instructions && <p className="muted mt-1">{settings.instructions}</p>}
+            </div>
+          )}
+          {unpaid.length > 0 && (
+            <div className="flex mt-1" style={{ gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+              <button type="button" className="btn" onClick={() => setClaimingId(unpaid[0].id)}>📎 {t('billingPage.uploadReceiptConfirm')}</button>
+              <span className="muted" style={{ fontSize: 13 }}>{t('billingPage.uploadReceiptHint')}</span>
+            </div>
+          )}
         </div>
       )}
 
@@ -169,6 +208,7 @@ export default function BillingStatus() {
       {claimingId && (
         <div className="card">
           <h3 style={{ marginBottom: 12 }}>{t('billingPage.confirmYourPayment')}</h3>
+          {claiming && <p className="muted">{t('billingPage.forCharge', { date: new Date(claiming.charge_date).toLocaleDateString(), amount: formatCurrency(claiming.amount_due) })}</p>}
           <div className="form-group">
             <label>{t('billingPage.paymentMethod')}</label>
             <select value={method} onChange={(e) => setMethod(e.target.value)}>
@@ -182,9 +222,14 @@ export default function BillingStatus() {
             <label>{t('billingPage.paymentReference')}</label>
             <input value={reference} onChange={(e) => setReference(e.target.value)} placeholder="e.g. OPAY-REF-12345" />
           </div>
+          <div className="form-group">
+            <label htmlFor="claim-proof">{t('billingPage.receiptFile')}</label>
+            <input id="claim-proof" type="file" accept="image/*,application/pdf" onChange={(e) => setProof(e.target.files?.[0] || null)} />
+            <p className="muted" style={{ fontSize: 12 }}>{t('billingPage.receiptFileHint')}</p>
+          </div>
           <div className="flex">
             <button className="btn" onClick={() => submitClaim(claimingId)}>{t('billingPage.submitClaim')}</button>
-            <button className="btn secondary" onClick={() => setClaimingId(null)}>{t('common.cancel')}</button>
+            <button className="btn secondary" onClick={() => { setClaimingId(null); setProof(null); }}>{t('common.cancel')}</button>
           </div>
         </div>
       )}

@@ -23,8 +23,8 @@ function listArrivals(req, res) {
 // duplicate/double-count.
 function createArrival(req, res) {
   const { storeId } = req.params;
-  const { id, movementId, productId, quantity, invoiceNumber, expiryDate, batchNumber } = req.body;
-  if (!productId || !quantity || quantity <= 0) {
+  const { id, movementId, productId, invoiceNumber, batchNumber } = req.body;
+  if (!productId || !(Number(req.body.quantity) > 0)) {
     return res.status(400).json({ error: 'productId and a positive quantity are required' });
   }
 
@@ -34,6 +34,15 @@ function createArrival(req, res) {
 
   const product = db.prepare('SELECT * FROM products WHERE id = ? AND store_id = ?').get(productId, storeId);
   if (!product) return res.status(404).json({ error: 'Product not found' });
+  const pq = require('../utils/qty').parseQty(req.body.quantity, product);
+  if (pq.error) return res.status(400).json({ error: pq.error });
+  const quantity = pq.value;
+  // Fresh food: no expiry given → arrival date + the product's shelf life.
+  let expiryDate = req.body.expiryDate;
+  if (!expiryDate && product.shelf_life_days) {
+    const d = new Date(); d.setDate(d.getDate() + Number(product.shelf_life_days));
+    expiryDate = d.toISOString().slice(0, 10);
+  }
 
   db.transaction(() => {
     db.prepare(
@@ -83,9 +92,10 @@ function listMovements(req, res) {
 
 function createMovement(req, res) {
   const { storeId } = req.params;
-  const { id, productId, type, quantity, note } = req.body;
+  const { id, productId, type, note } = req.body;
+  const quantity = Math.round(Number(req.body.quantity) * 1000) / 1000;
   const validTypes = ['transfer_to_shelf', 'sale', 'damage', 'expiry', 'adjustment'];
-  if (!productId || !validTypes.includes(type) || quantity === undefined) {
+  if (!productId || !validTypes.includes(type) || !Number.isFinite(quantity)) {
     return res.status(400).json({ error: `type must be one of ${validTypes.join(', ')}` });
   }
 

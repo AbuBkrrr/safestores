@@ -39,7 +39,24 @@ function CrashFallback({ error, resetError }) {
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(
+// A store's own custom domain (shop.example.com) opens straight into its
+// storefront. Hosts in VITE_MAIN_HOSTS (and their subdomains) are the app itself.
+const MAIN_HOSTS = (import.meta.env.VITE_MAIN_HOSTS || 'safestores.name.ng,localhost,127.0.0.1').split(',').map((h) => h.trim()).filter(Boolean);
+function isCustomShopHost() {
+  const h = window.location.hostname;
+  if (!/^https?:$/.test(window.location.protocol) || !h || /^\d+\.\d+\.\d+\.\d+$/.test(h)) return false;
+  if (import.meta.env.VITE_EDITION === 'desktop') return false;
+  return !MAIN_HOSTS.some((m) => h === m || h.endsWith(`.${m}`));
+}
+async function resolveShopHost() {
+  if (!isCustomShopHost()) return;
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_URL || '/api'}/public/by-domain/${encodeURIComponent(window.location.hostname)}`);
+    if (res.ok) window.__SHOP_DOMAIN_STORE__ = (await res.json()).storeId;
+  } catch { /* not a shop domain — load the normal app */ }
+}
+
+resolveShopHost().then(() => ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <ErrorBoundary fallback={CrashFallback}>
       <BrowserRouter>
@@ -55,7 +72,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       </BrowserRouter>
     </ErrorBoundary>
   </React.StrictMode>
-);
+));
 
 // Native-shell-only, no-op on web/desktop — see mobile/push.js.
 setupStatusBar();

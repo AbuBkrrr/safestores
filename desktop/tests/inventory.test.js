@@ -117,7 +117,8 @@ describe('Stock Movements', () => {
 
 describe('Shelf Audits', () => {
   it('records a matching count as confirmed (no conflict)', async () => {
-    const { store, token } = await createActiveStoreWithAdmin();
+    const { store } = await createActiveStoreWithAdmin();
+    const token = tokenFor(await createUser(store.id, { role: 'auditor' }));
     const product = await createProduct(store.id, { shelfQty: 5 });
 
     const res = await request()
@@ -131,8 +132,9 @@ describe('Shelf Audits', () => {
   });
 
   it('flags a conflict when two different stocktakers disagree at the same location', async () => {
-    const { store, token } = await createActiveStoreWithAdmin();
-    const staff2 = await createUser(store.id, { role: 'staff' });
+    const { store } = await createActiveStoreWithAdmin();
+    const token = tokenFor(await createUser(store.id, { role: 'auditor' }));
+    const staff2 = await createUser(store.id, { role: 'auditor' });
     const product = await createProduct(store.id, { shelfQty: 5 });
 
     const first = await request()
@@ -156,8 +158,9 @@ describe('Shelf Audits', () => {
   });
 
   it('the submitter of the latest count cannot accept their own recount', async () => {
-    const { store, token } = await createActiveStoreWithAdmin();
-    const staff2 = await createUser(store.id, { role: 'staff' });
+    const { store } = await createActiveStoreWithAdmin();
+    const token = tokenFor(await createUser(store.id, { role: 'auditor' }));
+    const staff2 = await createUser(store.id, { role: 'auditor' });
     const product = await createProduct(store.id, { shelfQty: 5 });
 
     await request().post(`/api/stores/${store.id}/audits`).set('Authorization', `Bearer ${token}`)

@@ -41,7 +41,7 @@ async function listStores(req, res) {
   if (city) { params.push(city); conditions.push(`city = $${params.length}`); }
 
   const { rows } = await db.query(
-    `SELECT id, name, category, city, address FROM stores WHERE ${conditions.join(' AND ')} ORDER BY name ASC`,
+    `SELECT id, name, category, city, address, shop_slug FROM stores WHERE ${conditions.join(' AND ')} ORDER BY name ASC`,
     params
   );
   res.json(rows);
@@ -63,7 +63,7 @@ async function searchProducts(req, res) {
   if (storeId) { params.push(storeId); conditions.push(`s.id = $${params.length}`); }
 
   const { rows } = await db.query(
-    `SELECT p.id, p.name, p.brand, p.category, p.unit, p.location, p.image_url,
+    `SELECT p.id, p.name, p.brand, p.category, p.unit, p.sold_by, p.location, p.image_url,
             ROUND(p.cost_price * p.price_multiplier, 2) AS price,
             (p.shelf_qty + p.backroom_qty) > 0 AS in_stock,
             s.id AS store_id, s.name AS store_name, s.city AS store_city
@@ -115,29 +115,43 @@ async function customerLogin(req, res) {
 async function placeOrder(req, res) {
   const { storeId } = req.params;
   const { items, deliveryAddress, customerNote, guestName, guestEmail, guestPhone } = req.body;
-  const paymentMethod = req.body.paymentMethod === 'online' ? 'online' : 'on_delivery';
+  // How the shopper gets it (delivery | pickup) and pays (online now, or cash on delivery / pickup).
+  const fulfilmentMethod = ['delivery', 'pickup'].includes(req.body.fulfilmentMethod) ? req.body.fulfilmentMethod
+    : req.body.paymentMethod === 'on_pickup' ? 'pickup' : null;
+  const paymentMethod = ['online', 'credit'].includes(req.body.paymentMethod) ? req.body.paymentMethod : fulfilmentMethod === 'pickup' ? 'on_pickup' : 'on_delivery';
+  if (fulfilmentMethod === 'delivery' && !String(deliveryAddress || '').trim()) {
+    return res.status(400).json({ error: 'A delivery address is required for delivery' });
+  }
   if (!Array.isArray(items) || items.length === 0) return res.status(400).json({ error: 'At least one item is required' });
-  if (items.some((i) => !Number.isInteger(Number(i.quantity)) || Number(i.quantity) < 1 || Number(i.quantity) > 1000)) {
-    return res.status(400).json({ error: 'Each quantity must be a whole number from 1 to 1000' });
+  if (items.some((i) => !(Number(i.quantity) > 0) || Number(i.quantity) > 1000)) {
+    return res.status(400).json({ error: 'Each quantity must be more than 0 and at most 1000' });
   }
   const options = await require('./storePaymentsController').paymentOptionsFor(storeId);
   if (paymentMethod === 'online' && !options.online) return res.status(400).json({ error: 'This store does not take online payments' });
   if (!options.online && !options.payOnDelivery) return res.status(400).json({ error: 'This store is not taking online orders right now' });
-  if (paymentMethod === 'on_delivery' && !options.payOnDelivery) return res.status(400).json({ error: 'This store only takes online payment right now' });
+  if (!['online', 'credit'].includes(paymentMethod) && !options.payOnDelivery) return res.status(400).json({ error: 'This store only takes online payment right now' });
 
   const customerId = req.user?.sub || null;
   if (!customerId && !guestName) {
     return res.status(400).json({ error: 'guestName is required for checkout without an account' });
+  }
+  let creditAccount = null;
+  if (paymentMethod === 'credit') {
+    if (!customerId) return res.status(400).json({ error: 'Log in to buy on credit' });
+    creditAccount = (await db.query(
+      `SELECT * FROM credit_accounts WHERE store_id = $1 AND customer_id = $2 AND status = 'approved'`, [storeId, customerId]
+    )).rows[0];
+    if (!creditAccount) return res.status(403).json({ error: 'You need an approved credit account at this store' });
   }
 
   const client = await db.pool.connect();
   try {
     await client.query('BEGIN');
     const orderRes = await client.query(
-      `INSERT INTO marketplace_orders (store_id, customer_id, guest_name, guest_email, guest_phone, delivery_address, customer_note, tracking_token, payment_method)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,
+      `INSERT INTO marketplace_orders (store_id, customer_id, guest_name, guest_email, guest_phone, delivery_address, customer_note, tracking_token, payment_method, fulfilment_method)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) RETURNING *`,
       [storeId, customerId, customerId ? null : guestName, customerId ? null : (guestEmail || null), customerId ? null : (guestPhone || null),
-        deliveryAddress || null, customerNote || null, require('crypto').randomBytes(16).toString('hex'), paymentMethod]
+        fulfilmentMethod === 'pickup' ? null : (deliveryAddress || null), customerNote || null, require('crypto').randomBytes(16).toString('hex'), paymentMethod, fulfilmentMethod]
     );
     const order = orderRes.rows[0];
     let subtotal = 0;
@@ -145,6 +159,8 @@ async function placeOrder(req, res) {
     for (const { productId, quantity } of items) {
       const prod = (await client.query('SELECT * FROM products WHERE id = $1 AND store_id = $2', [productId, storeId])).rows[0];
       if (!prod) { await client.query('ROLLBACK'); return res.status(404).json({ error: `Product ${productId} not found` }); }
+      const pq = require('../utils/qty').parseQty(quantity, prod);
+      if (pq.error) { await client.query('ROLLBACK'); return res.status(400).json({ error: pq.error }); }
       const unitPrice = Number(prod.cost_price) * Number(prod.price_multiplier);
       const lineTotal = Math.round(unitPrice * quantity * 100) / 100;
       subtotal += lineTotal;
@@ -180,6 +196,19 @@ async function placeOrder(req, res) {
           );
         }
       }
+    }
+
+    if (creditAccount) {
+      // Lock the account so two checkouts can't both spend the same limit.
+      await client.query('SELECT id FROM credit_accounts WHERE id = $1 FOR UPDATE', [creditAccount.id]);
+      const { total } = (await client.query('SELECT total FROM marketplace_orders WHERE id = $1', [order.id])).rows[0];
+      const used = await require('./creditController').creditUsed(client, creditAccount.id);
+      if (used + Number(total) > Number(creditAccount.credit_limit) + 0.001) {
+        await client.query('ROLLBACK');
+        const available = Math.max(0, Number(creditAccount.credit_limit) - used);
+        return res.status(400).json({ error: `This order is more than your available credit (${available.toFixed(2)})`, available });
+      }
+      await client.query('UPDATE marketplace_orders SET credit_account_id = $1 WHERE id = $2', [creditAccount.id, order.id]);
     }
 
     await client.query('COMMIT');
@@ -221,8 +250,9 @@ async function listStoreOrders(req, res) {
   const { rows } = await db.query(
     `SELECT mo.*, COALESCE(c.name, mo.guest_name) AS customer_name,
             COALESCE(c.phone, mo.guest_phone) AS customer_phone,
-            (mo.customer_id IS NULL) AS is_guest
+            (mo.customer_id IS NULL) AS is_guest, cp.name AS courier_name
      FROM marketplace_orders mo LEFT JOIN customers c ON c.id = mo.customer_id
+     LEFT JOIN partners cp ON cp.id = mo.courier_id
      WHERE mo.store_id = $1 ORDER BY mo.created_at DESC LIMIT 300`,
     [storeId]
   );
@@ -236,8 +266,9 @@ async function getStoreOrder(req, res) {
     `SELECT mo.*, COALESCE(c.name, mo.guest_name) AS customer_name,
             COALESCE(c.phone, mo.guest_phone) AS customer_phone,
             COALESCE(c.email, mo.guest_email) AS customer_email,
-            (mo.customer_id IS NULL) AS is_guest
+            (mo.customer_id IS NULL) AS is_guest, cp.name AS courier_name
      FROM marketplace_orders mo LEFT JOIN customers c ON c.id = mo.customer_id
+     LEFT JOIN partners cp ON cp.id = mo.courier_id
      WHERE mo.id = $1 AND mo.store_id = $2`,
     [orderId, storeId]
   );
@@ -248,6 +279,42 @@ async function getStoreOrder(req, res) {
     [orderId]
   );
   res.json({ ...orderRes.rows[0], items: items.rows });
+}
+
+// Review steps before fulfilment (see migration 043):
+// PATCH …/confirm   { method: 'pickup'|'delivery', note? }  placed → confirmed
+// PATCH …/dispatch  { note? }  confirmed → ready_for_pickup | out_for_delivery
+const STATUS_NOTE = (v) => (v === undefined ? undefined : String(v || '').trim().slice(0, 300) || null);
+
+async function confirmOrder(req, res) {
+  const { storeId, orderId } = req.params;
+  const { method } = req.body || {};
+  if (!['pickup', 'delivery'].includes(method)) return res.status(400).json({ error: "method must be 'pickup' or 'delivery'" });
+  const note = STATUS_NOTE(req.body.note);
+  const { rows } = await db.query(
+    `UPDATE marketplace_orders SET status = 'confirmed', fulfilment_method = $1, reviewed_by = $2, confirmed_at = now(),
+            status_note = COALESCE($3, status_note)
+     WHERE id = $4 AND store_id = $5 AND status = 'placed' RETURNING *`,
+    [method, req.user.sub || null, note ?? null, orderId, storeId]
+  );
+  if (!rows[0]) return res.status(400).json({ error: 'Only a new (placed) order can be confirmed' });
+  emitToStore(storeId, 'marketplace:order_updated', { id: orderId, status: 'confirmed' });
+  res.json(rows[0]);
+}
+
+async function dispatchOrder(req, res) {
+  const { storeId, orderId } = req.params;
+  const note = STATUS_NOTE(req.body?.note);
+  const { rows } = await db.query(
+    `UPDATE marketplace_orders
+        SET status = CASE fulfilment_method WHEN 'delivery' THEN 'out_for_delivery' ELSE 'ready_for_pickup' END,
+            dispatched_at = now(), status_note = COALESCE($1, status_note)
+      WHERE id = $2 AND store_id = $3 AND status = 'confirmed' RETURNING *`,
+    [note ?? null, orderId, storeId]
+  );
+  if (!rows[0]) return res.status(400).json({ error: 'Confirm pickup or delivery first' });
+  emitToStore(storeId, 'marketplace:order_updated', { id: orderId, status: rows[0].status });
+  res.json(rows[0]);
 }
 
 // PATCH /api/stores/:storeId/marketplace/orders/:orderId/fulfill
@@ -261,9 +328,13 @@ async function fulfillOrder(req, res) {
       `SELECT * FROM marketplace_orders WHERE id = $1 AND store_id = $2 FOR UPDATE`, [orderId, storeId]
     );
     const order = orderRes.rows[0];
-    if (!order || order.status !== 'placed') {
+    if (!order || !['ready_for_pickup', 'out_for_delivery'].includes(order.status)) {
       await client.query('ROLLBACK');
-      return res.status(400).json({ error: 'Order not found or already resolved' });
+      return res.status(400).json({
+        error: order && ['placed', 'confirmed'].includes(order.status)
+          ? 'Review the order first: confirm pickup or delivery, then mark it ready / out for delivery'
+          : 'Order not found or already resolved',
+      });
     }
     const items = await client.query('SELECT * FROM marketplace_order_items WHERE marketplace_order_id = $1', [orderId]);
     for (const item of items.rows) {
@@ -330,7 +401,7 @@ async function cancelOrder(req, res) {
       `SELECT * FROM marketplace_orders WHERE id = $1 AND store_id = $2 FOR UPDATE`, [orderId, storeId]
     );
     const order = rows[0];
-    if (!order || !['placed', 'confirmed'].includes(order.status)) {
+    if (!order || !['placed', 'confirmed', 'ready_for_pickup', 'out_for_delivery'].includes(order.status)) {
       await client.query('ROLLBACK');
       return res.status(400).json({ error: 'Order not found or already resolved' });
     }
@@ -370,6 +441,7 @@ async function markRefunded(req, res) {
 }
 
 module.exports = {
+  confirmOrder, dispatchOrder,
   cancelOrder, markRefunded,
   browseProducts, listStores, searchProducts, customerSignup, customerLogin, placeOrder, listMyOrders,
   listStoreOrders, getStoreOrder, fulfillOrder,

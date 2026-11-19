@@ -64,44 +64,29 @@ describe('Analytics', () => {
 // Report" describe block — see analyticsController.js's shrinkageReport
 // header for the rationale.
 describe('Shrinkage Report (desktop)', () => {
-  it('reports value lost from a shelf audit that found LESS than expected', async () => {
+  it('shows what the shop itself recorded: a short count, damaged and spoiled write-offs', async () => {
     const { store, token } = await createActiveStoreWithAdmin();
-    const product = await createProduct(store.id, { costPrice: 5, shelfQty: 10, backroomQty: 0 });
+    const product = await createProduct(store.id, { costPrice: 5, shelfQty: 10, backroomQty: 10 });
+    const auth = { Authorization: `Bearer ${token}` };
+    await request().post(`/api/stores/${store.id}/cycle-counts`).set(auth).send({ productId: product.id, countedQty: 17 }); // 3 missing
+    await request().post(`/api/stores/${store.id}/movements`).set(auth).send({ productId: product.id, type: 'damage', quantity: 1 });
+    await request().post(`/api/stores/${store.id}/movements`).set(auth).send({ productId: product.id, type: 'expiry', quantity: 2 });
 
-    await request().post(`/api/stores/${store.id}/audits`).set('Authorization', `Bearer ${token}`)
-      .send({ productId: product.id, countedQty: 7, area: 'shelf' }); // 3 missing
-
-    const res = await request().get(`/api/stores/${store.id}/analytics/shrinkage`).set('Authorization', `Bearer ${token}`);
+    const res = await request().get(`/api/stores/${store.id}/analytics/shrinkage`).set(auth);
     expect(res.status).toBe(200);
-    expect(res.body.totalUnitsLost).toBe(3);
-    expect(res.body.totalValueLost).toBe(15); // 3 units * 5 cost
-    expect(res.body.byProduct[0].product_id).toBe(product.id);
+    expect(res.body.totalUnitsLost).toBe(6);
+    expect(res.body.totalValueLost).toBe(30);
+    expect(res.body.byProduct[0]).toMatchObject({ product_id: product.id, incident_count: 3 });
+    expect(Object.fromEntries(res.body.bySource.map((r) => [r.source, r.value_lost]))).toEqual({ count: 15, damaged: 5, spoiled: 10 });
   });
 
   it('does NOT count a count that found MORE than expected as shrinkage', async () => {
     const { store, token } = await createActiveStoreWithAdmin();
     const product = await createProduct(store.id, { costPrice: 5, shelfQty: 10, backroomQty: 0 });
-
-    await request().post(`/api/stores/${store.id}/audits`).set('Authorization', `Bearer ${token}`)
-      .send({ productId: product.id, countedQty: 12, area: 'shelf' }); // found extra, not missing
-
+    await request().post(`/api/stores/${store.id}/cycle-counts`).set('Authorization', `Bearer ${token}`).send({ productId: product.id, countedQty: 12 });
     const res = await request().get(`/api/stores/${store.id}/analytics/shrinkage`).set('Authorization', `Bearer ${token}`);
     expect(res.body.totalUnitsLost).toBe(0);
     expect(res.body.byProduct).toHaveLength(0);
-  });
-
-  it('combines shelf audits and cycle counts into one report', async () => {
-    const { store, token } = await createActiveStoreWithAdmin();
-    const product = await createProduct(store.id, { costPrice: 2, shelfQty: 10, backroomQty: 10 });
-
-    await request().post(`/api/stores/${store.id}/audits`).set('Authorization', `Bearer ${token}`)
-      .send({ productId: product.id, countedQty: 8, area: 'shelf' }); // shelf: 10 expected, 8 found -> -2
-    await request().post(`/api/stores/${store.id}/cycle-counts`).set('Authorization', `Bearer ${token}`)
-      .send({ productId: product.id, countedQty: 18 }); // total on-hand 20 expected, 18 found -> -2
-
-    const res = await request().get(`/api/stores/${store.id}/analytics/shrinkage`).set('Authorization', `Bearer ${token}`);
-    expect(Number(res.body.byProduct[0].incident_count)).toBe(2);
-    expect(res.body.totalUnitsLost).toBe(4);
   });
 
   it('a staff member cannot view the shrinkage report (admin/manager only)', async () => {

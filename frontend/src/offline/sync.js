@@ -1,3 +1,4 @@
+import { geoHeaders } from '../utils/geo.js';
 import { listQueued, removeQueued } from './outbox.js';
 
 // Tiny pub/sub so the UI (a sidebar badge, a toast) can react to sync
@@ -31,7 +32,12 @@ export async function flushOutbox(apiClient, storeId) {
     for (const entry of queued) {
       try {
         const data = entry.isFormData ? toFormData(entry.body) : entry.body;
-        const headers = entry.isFormData ? { 'Content-Type': 'multipart/form-data' } : undefined;
+        // Where and when it was made, for the shop's in-store lock.
+        const headers = {
+          ...(entry.isFormData ? { 'Content-Type': 'multipart/form-data' } : {}),
+          ...geoHeaders(entry.geo),
+          'X-Made-At': new Date(entry.createdAt || Date.now()).toISOString(),
+        };
         await apiClient.request({ method: entry.method, url: entry.url, data, headers, params: { _offlineReplay: true } });
         await removeQueued(entry.seq);
         synced += 1;

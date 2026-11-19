@@ -22,6 +22,8 @@ router.patch('/stores/:id/billing', billingCtrl.updateBilling);
 
 // Store size tiers (mini/midi/mega) and their limits
 router.get('/tiers', ctrl.listPlans);
+router.put('/tiers/:tier', ctrl.updateTier);
+router.post('/stores/:id/access-code', ctrl.issueCodeForStore);
 router.get('/plans', ctrl.listPlans); // legacy alias
 
 router.get('/access-codes', ctrl.listCodes);

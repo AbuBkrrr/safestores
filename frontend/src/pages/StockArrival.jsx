@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { useRealtimeEvents } from '../context/SocketContext.jsx';
 import { Alert, Toast } from '../components/ui.jsx';
 import { useToast } from '../components/useToast.js';
+import ScanProductButton from '../components/ScanProductButton.jsx';
 
 const SYNC_EVENTS = ['arrival:created', 'product:created', 'product:updated', 'product:deleted'];
 
@@ -14,6 +15,7 @@ export default function StockArrival() {
   const [products, setProducts] = useState([]);
   const [arrivals, setArrivals] = useState([]);
   const [form, setForm] = useState({ productId: '', quantity: '', invoiceNumber: '', expiryDate: '', batchNumber: '' });
+  const [noExpiry, setNoExpiry] = useState(false);
   const [error, setError] = useState('');
   const [toast, showToast] = useToast();
 
@@ -34,7 +36,7 @@ export default function StockArrival() {
     setError('');
     try {
       await api.post(`/stores/${user.storeId}/arrivals`, {
-        ...form, quantity: Number(form.quantity),
+        ...form, expiryDate: noExpiry ? '' : form.expiryDate, quantity: Number(form.quantity),
       });
       setForm({ productId: '', quantity: '', invoiceNumber: '', expiryDate: '', batchNumber: '' });
       showToast(t('stockArrivalPage.recordedToast'), 'success');
@@ -54,6 +56,7 @@ export default function StockArrival() {
           <div className="grid grid-2">
             <div className="form-group">
               <label>{t('stockArrivalPage.product')}</label>
+              <ScanProductButton products={products} onFound={(p) => setForm((f) => ({ ...f, productId: p.id }))} />
               <select value={form.productId} onChange={update('productId')} required>
                 <option value="">{t('stockArrivalPage.selectProduct')}</option>
                 {products.map((p) => <option key={p.id} value={p.id}>{p.name} ({p.sku})</option>)}
@@ -67,13 +70,15 @@ export default function StockArrival() {
               return (
                 <div className="form-group">
                   <label htmlFor="arr-packs">{t('stockArrivalPage.packsReceived', { unit: sel.pack_unit || t('products.pack'), size: sel.pack_size })}</label>
-                  <input id="arr-packs" type="number" min="0" onChange={(e) => setForm({ ...form, quantity: String((Number(e.target.value) || 0) * sel.pack_size) })} />
+                  <input id="arr-packs" type="number" step="any" min="0" onChange={(e) => setForm({ ...form, quantity: String((Number(e.target.value) || 0) * sel.pack_size) })} />
                 </div>
               );
             })()}
-            <div className="form-group"><label>{t('stockArrivalPage.quantityReceived')}</label><input type="number" min="1" value={form.quantity} onChange={update('quantity')} required /></div>
+            <div className="form-group"><label>{t('stockArrivalPage.quantityReceived')}</label><input type="number" step="any" min="1" value={form.quantity} onChange={update('quantity')} required /></div>
             <div className="form-group"><label>{t('stockArrivalPage.invoiceNumber')}</label><input value={form.invoiceNumber} onChange={update('invoiceNumber')} /></div>
-            <div className="form-group"><label>{t('stockArrivalPage.expiryDate')}</label><input type="date" value={form.expiryDate} onChange={update('expiryDate')} /></div>
+            <div className="form-group"><label htmlFor="arr-exp">{t('stockArrivalPage.expiryDate')} *</label>
+              <input id="arr-exp" type="date" value={noExpiry ? '' : form.expiryDate} onChange={update('expiryDate')} required={!noExpiry} disabled={noExpiry} />
+              <label style={{ fontSize: 12, display: 'block', marginTop: 4 }}><input type="checkbox" checked={noExpiry} onChange={(e) => setNoExpiry(e.target.checked)} /> {t('receiptsPage.noExpiry')}</label></div>
             <div className="form-group"><label>{t('stockArrivalPage.batchNumber')}</label><input value={form.batchNumber} onChange={update('batchNumber')} placeholder={t('stockArrivalPage.batchPlaceholder')} /></div>
           </div>
           <button className="btn">{t('stockArrivalPage.recordArrival')}</button>

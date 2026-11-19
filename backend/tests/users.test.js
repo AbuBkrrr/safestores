@@ -1,5 +1,6 @@
 const { request } = require('./helpers/app');
 const { createActiveStoreWithAdmin, createUser, tokenFor } = require('./helpers/factories');
+const { pool } = require('../src/config/db');
 
 describe('Store Users', () => {
   it('lists users for the store', async () => {
@@ -90,6 +91,7 @@ describe('Invites', () => {
 
   it('bulk-creates invites from a comma-separated name list, assigning unique emails on collision', async () => {
     const { store, token } = await createActiveStoreWithAdmin();
+    await pool.query("UPDATE stores SET store_tier = 'midi' WHERE id = $1", [store.id]);
     await createUser(store.id, { role: 'staff', email: 'john@shop.com' });
 
     const res = await request()
@@ -151,5 +153,20 @@ describe('Invites', () => {
   it('an unknown invite code returns 404', async () => {
     const res = await request().post('/api/auth/invite/login').send({ code: 'NOPE-NOPE' });
     expect(res.status).toBe(404);
+  });
+});
+
+describe('Invite roles', () => {
+  it('accepts every store role and rejects unknown ones', async () => {
+    const { store, token } = await createActiveStoreWithAdmin();
+    await pool.query("UPDATE stores SET store_tier = 'mega' WHERE id = $1", [store.id]);
+    for (const role of ['admin', 'manager', 'cashier', 'checkout', 'staff', 'store_manager', 'shelf_manager', 'marketplace_manager', 'security']) {
+      const res = await request().post(`/api/stores/${store.id}/invites`).set('Authorization', `Bearer ${token}`).send({ name: `P ${role}`, role });
+      expect(res.status).toBe(201);
+    }
+    // Auditors are an outside service requested by admin/manager, not a store role you invite.
+    expect((await request().post(`/api/stores/${store.id}/invites`).set('Authorization', `Bearer ${token}`).send({ name: 'A', role: 'auditor' })).status).toBe(400);
+    const bad = await request().post(`/api/stores/${store.id}/invites`).set('Authorization', `Bearer ${token}`).send({ name: 'X', role: 'owner' });
+    expect(bad.status).toBe(400);
   });
 });

@@ -63,6 +63,20 @@ async function listBanks(req, res) {
   try { return res.json(await paystack.listBanks(currency)); } catch (err) { return res.status(502).json({ error: err.message }); }
 }
 
+// Tell "Paystack isn't set up / key rejected" apart from "account not found",
+// so a server misconfiguration isn't reported as the store's typo.
+function accountCheckError(res, err) {
+  const msg = String(err?.message || '');
+  if (/invalid key|unauthori[sz]ed|not configured|secret key|HTTP 401|HTTP 403/i.test(msg)) {
+    console.error('Paystack account check failed — check PAYSTACK_SECRET_KEY:', msg);
+    return res.status(503).json({ error: 'Online payments are not set up correctly on the server yet (payment key missing or invalid). Please contact SAFE Stores support.' });
+  }
+  if (/HTTP 5\d\d|fetch failed|ETIMEDOUT|ECONNRESET|ENOTFOUND/i.test(msg)) {
+    return res.status(502).json({ error: 'Could not reach the payment provider. Please try again in a minute.' });
+  }
+  return res.status(400).json({ error: `We could not verify that account${msg ? ` (${msg})` : ''}. Check the bank and the 10-digit account number.` });
+}
+
 // POST /api/stores/:storeId/payouts/resolve { bankCode, accountNumber }
 async function resolveAccount(req, res) {
   const { bankCode, accountNumber } = req.body || {};
@@ -72,7 +86,7 @@ async function resolveAccount(req, res) {
     const r = await paystack.resolveAccount(String(accountNumber), String(bankCode));
     return res.json({ accountName: r.accountName });
   } catch (err) {
-    return res.status(400).json({ error: 'We could not find that account. Check the bank and account number.' });
+    return accountCheckError(res, err);
   }
 }
 
@@ -91,8 +105,8 @@ async function connectPayouts(req, res) {
   let resolved;
   try {
     resolved = await paystack.resolveAccount(String(accountNumber), String(bankCode));
-  } catch {
-    return res.status(400).json({ error: 'We could not find that account. Check the bank and account number.' });
+  } catch (err) {
+    return accountCheckError(res, err);
   }
   let sub;
   try {

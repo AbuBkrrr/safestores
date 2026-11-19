@@ -61,6 +61,13 @@ const CycleCounting = lazy(() => import('./pages/CycleCounting.jsx'));
 const AuditorSignup = lazy(() => import('./pages/AuditorSignup.jsx'));
 const AuditorLogin = lazy(() => import('./pages/AuditorLogin.jsx'));
 const AuditorDashboard = lazy(() => import('./pages/AuditorDashboard.jsx'));
+const Production = lazy(() => import('./pages/Production.jsx'));
+const Waste = lazy(() => import('./pages/Waste.jsx'));
+const Jobs = lazy(() => import('./pages/Jobs.jsx'));
+const Handovers = lazy(() => import('./pages/Handovers.jsx'));
+const ExitCheck = lazy(() => import('./pages/ExitCheck.jsx'));
+const PartnerLogin = lazy(() => import('./pages/PartnerLogin.jsx'));
+const PartnerPortal = lazy(() => import('./pages/PartnerPortal.jsx'));
 const Storefront = lazy(() => import('./pages/Storefront.jsx'));
 const MarketplaceHome = lazy(() => import('./pages/MarketplaceHome.jsx'));
 
@@ -75,7 +82,7 @@ const Referrals = lazy(() => import('./pages/super/Referrals.jsx'));
 const SupportTickets = lazy(() => import('./pages/super/SupportTickets.jsx'));
 const LendingPartnersAdmin = lazy(() => import('./pages/super/LendingPartnersAdmin.jsx'));
 
-const STORE_ROLES = ['admin', 'manager', 'staff', 'cashier', 'checkout', 'stock_taker'];
+const STORE_ROLES = ['admin', 'manager', 'staff', 'cashier', 'checkout', 'stock_taker', 'marketplace_manager', 'store_auditor', 'security', 'store_manager', 'shelf_manager'];
 
 // Baked in at build time (see desktop/package.json's build:win:admin vs
 // build:win:superadmin scripts). 'superadmin' (the default) is today's full
@@ -125,6 +132,18 @@ export default function App() {
       .finally(() => setChecked(true));
   }, []);
 
+  // A store's custom domain only ever shows that shop (plus order tracking and receipts).
+  if (window.__SHOP_DOMAIN_STORE__) {
+    return (
+      <Suspense fallback={<PageLoading />}>
+        <Routes>
+          <Route path="/track/:token" element={<TrackOrder />} />
+          <Route path="/r/:token" element={<PublicReceipt />} />
+          <Route path="*" element={<Storefront />} />
+        </Routes>
+      </Suspense>
+    );
+  }
   if (!checked) return null;
   if (needsSetup) return <Setup onComplete={() => setNeedsSetup(false)} />;
 
@@ -145,6 +164,9 @@ export default function App() {
       {APP_VARIANT === 'superadmin' && <Route path="/super-login" element={<SuperLogin />} />}
       <Route path="/auditor-signup" element={<AuditorSignup />} />
       <Route path="/auditor-login" element={<AuditorLogin />} />
+      <Route path="/partner-login" element={<PartnerLogin />} />
+      <Route path="/partner/accept" element={<PartnerLogin />} />
+      <Route path="/partner" element={<ProtectedRoute roles={['guarantor', 'courier']}><PartnerPortal /></ProtectedRoute>} />
 
       {/* Public customer storefront — no staff login involved */}
       <Route path="/shop/:storeId" element={<Storefront />} />
@@ -200,20 +222,25 @@ export default function App() {
         }
       >
         <Route path="/" element={<Dashboard />} />
+        <Route path="/exit-check" element={<ExitCheck />} />
+        <Route path="/handovers" element={<Handovers />} />
+        <Route path="/production" element={<Production />} />
+        <Route path="/waste" element={<Waste />} />
+        <Route path="/jobs" element={<Jobs />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/products" element={<Products />} />
         <Route path="/products/import" element={<ImportProducts />} />
         <Route path="/labels" element={<Labels />} />
         <Route path="/insights" element={<Insights />} />
-        {EDITION !== 'desktop' && <Route path="/transfers" element={<Transfers />} />}
-        {EDITION !== 'desktop' && <Route path="/settlements" element={<Settlements />} />}
+        <Route path="/transfers" element={<Transfers />} />
+        <Route path="/settlements" element={<Settlements />} />
         <Route path="/stock-arrival" element={<StockArrival />} />
         <Route path="/movements" element={<Movements />} />
         <Route path="/replenishment" element={<Replenishment />} />
         <Route path="/shelf-audit" element={<ShelfAudit />} />
         <Route path="/audit-report" element={<AuditReport />} />
         <Route path="/shrinkage-report" element={<ShrinkageReport />} />
-        {EDITION !== 'desktop' && <Route path="/auditor-tab" element={<Auditor />} />}
+        <Route path="/auditor-tab" element={<Auditor />} />
         <Route path="/receipts" element={<Receipts />} />
         <Route path="/camera" element={<Camera />} />
         <Route path="/checkout" element={<Checkout />} />
@@ -221,8 +248,8 @@ export default function App() {
         <Route path="/shifts" element={<Shifts />} />
         <Route path="/daily-report" element={<DailyReport />} />
         <Route path="/settings" element={<StoreSettings />} />
-        {EDITION !== 'desktop' && <Route path="/marketplace" element={<Marketplace />} />}
-        {EDITION !== 'desktop' && <Route path="/lending-partners" element={<LendingPartners />} />}
+        <Route path="/marketplace" element={<Marketplace />} />
+        <Route path="/lending-partners" element={<LendingPartners />} />
         <Route path="/invites" element={<Invites />} />
         <Route path="/users" element={<Users />} />
         <Route path="/reports" element={<Reports />} />

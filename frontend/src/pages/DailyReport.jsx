@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { useCurrency } from '../context/CurrencyContext.jsx';
 import { EmptyState, Metric } from '../components/ui.jsx';
 import { methodLabel } from '../utils/receipt.js';
+import { fmtQty } from '../utils/businessTypes.js';
 
 /** End-of-day report for any date, in the store's own time zone. */
 export default function DailyReport() {
@@ -38,8 +39,9 @@ export default function DailyReport() {
             <Metric value={f(r.refunds.total)} label={t('dailyPage.refunds', { count: r.refunds.count })} />
             <Metric value={f(r.discounts)} label={t('receipt.discount')} />
             <Metric value={f(r.tax)} label={t('receipt.tax')} />
+            {r.jobPayments?.count > 0 && <Metric value={f(r.jobPayments.total)} label={t('dailyPage.jobPayments', { count: r.jobPayments.count })} />}
           </div>
-          {r.orders === 0 ? <EmptyState>{t('dailyPage.noSales')}</EmptyState> : (
+          {r.orders === 0 && !(r.jobPayments?.count > 0) ? <EmptyState>{t('dailyPage.noSales')}</EmptyState> : (
             <div className="grid grid-2 mt-1">
               <div className="card">
                 <h3>{t('shift.byMethod')}</h3>
@@ -61,7 +63,7 @@ export default function DailyReport() {
               </div>
               <div className="card">
                 <h3>{t('dailyPage.topItems')}</h3>
-                {r.topItems.map((i) => <div key={i.name} className="flex-between"><span>{i.name} <span className="muted">× {i.units}</span></span><span>{f(i.total)}</span></div>)}
+                {r.topItems.map((i) => <div key={i.name} className="flex-between"><span>{i.name} <span className="muted">× {fmtQty(i.units, i)}</span></span><span>{f(i.total)}</span></div>)}
               </div>
             </div>
           )}

@@ -132,7 +132,15 @@ async function createActiveStoreWithAdmin(storeOverrides = {}, userOverrides = {
   return { store, admin, token: tokenFor(admin) };
 }
 
+/** A stock taker working for an outside auditor on an active audit job in this store. */
+async function createAuditStockTaker(storeId) {
+  await pool.query(`INSERT INTO audit_engagements (store_id, status, accepted_at) VALUES ($1, 'accepted', now())`, [storeId]);
+  const user = await createUser(storeId, { role: 'stock_taker' });
+  return { user, token: tokenFor(user) };
+}
+
 module.exports = {
+  createAuditStockTaker,
   createStore,
   createUser,
   createSuperAdmin,

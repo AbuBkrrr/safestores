@@ -15,6 +15,8 @@
 // ------------------------------------------------------------
 
 const express = require('express');
+// Must load before any route is defined: async handler failures reach the error handler.
+const { publicError } = require('./utils/asyncErrors');
 const cors = require('cors');
 const helmet = require('helmet');
 const compression = require('compression');
@@ -100,8 +102,20 @@ function createApp() {
   app.get('/api/public/receipts/:token', require('./controllers/ordersController').publicReceipt);
   const publicCtrl = require('./controllers/publicController');
   app.get('/api/public/marketplace-orders/:token', publicCtrl.trackOrder);
-  app.get('/api/public/stores/:storeId', publicCtrl.storeInfo);
+  const { shopParam } = require('./utils/shopSlug');
+  app.get('/api/public/stores/:storeId', (req, res, next) => shopParam(req, res, next, req.params.storeId), publicCtrl.storeInfo);
   app.get('/share/shop/:storeId', publicCtrl.shareShop);
+  // Custom domains: Caddy's on-demand TLS "ask" (200 = issue a certificate)…
+  app.get('/api/public/domain-check', async (req, res) => {
+    const store = await require('./utils/customDomain').storeForDomain(req.query.domain);
+    res.status(store ? 200 : 404).end();
+  });
+  // …and the frontend, to know which shop a custom domain belongs to.
+  app.get('/api/public/by-domain/:host', async (req, res) => {
+    const store = await require('./utils/customDomain').storeForDomain(req.params.host);
+    if (!store) return res.status(404).json({ error: 'No shop on this domain' });
+    res.json({ storeId: store.id, shopSlug: store.shop_slug });
+  });
   app.get('/sitemap.xml', publicCtrl.sitemap);
   app.get('/robots.txt', publicCtrl.robots);
   app.use('/api/account', require('./routes/account'));
@@ -111,6 +125,7 @@ function createApp() {
   app.use('/api/marketplace', marketplaceRoutes);
   app.use('/api/push', pushRoutes);
   app.use('/api/lending', lendingRoutes);
+  app.use('/api/partner', require('./routes/partner'));
   // No auth — Paystack calls this directly and doesn't have our JWTs;
   // see paymentWebhookController.js's header for how it's secured instead.
   app.post('/api/webhooks/paystack', require('./controllers/paymentWebhookController').handlePaystackWebhook);
@@ -132,7 +147,8 @@ function createApp() {
   app.use((err, req, res, next) => {
     console.error(err);
     if (res.headersSent) return next(err);
-    res.status(err.status || 500).json({ error: err.message || 'Internal server error' });
+    const { status, body } = publicError(err);
+    res.status(status).json(body);
   });
 
   return app;

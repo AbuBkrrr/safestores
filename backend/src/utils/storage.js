@@ -83,6 +83,16 @@ const upload = multer({
   },
 });
 
+// Proof of payment and similar documents: a photo or a PDF.
+const uploadDocument = multer({
+  storage,
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (/^image\//.test(file.mimetype) || file.mimetype === 'application/pdf') cb(null, true);
+    else cb(new Error('Upload a photo or a PDF of the receipt'));
+  },
+});
+
 /**
  * Persists an already-multer-handled file and returns { url, key }.
  * - Disk mode: the file is already on disk by the time this runs (multer
@@ -136,4 +146,4 @@ function ocrSource(file) {
   return usingS3 ? file.buffer : file.path;
 }
 
-module.exports = { upload, uploadDir, usingS3, persistUpload, deleteUpload, ocrSource };
+module.exports = { upload, uploadDocument, uploadDir, usingS3, persistUpload, deleteUpload, ocrSource };

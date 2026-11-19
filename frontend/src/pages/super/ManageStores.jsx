@@ -36,7 +36,22 @@ export default function ManageStores() {
   const [editForm, setEditForm] = useState(null);
   const [viewingConnection, setViewingConnection] = useState(null); // store row to show Store ID/Sync Key for
 
-  const load = () => api.get('/super/stores').then((r) => setStores(r.data));
+  const [codeDays, setCodeDays] = useState(30);
+  const load = () => api.get('/super/stores').then((r) => {
+    setStores(r.data);
+    // Keep the open Connect window in step with the refreshed row.
+    setViewingConnection((v) => (v ? r.data.find((s) => s.id === v.id) || null : v));
+    return r.data;
+  });
+  const newStoreCode = async () => {
+    try {
+      await api.post(`/super/stores/${viewingConnection.id}/access-code`, { expiresInDays: Number(codeDays) });
+      showToast('New access code issued — the old unused one no longer works', 'success');
+      load();
+    } catch (err) {
+      showToast(err.response?.data?.error || 'Could not issue a code', 'error');
+    }
+  };
   useEffect(() => { load(); }, []);
 
   const suspend = async (id) => { await api.patch(`/super/stores/${id}/suspend`); showToast('Store suspended', 'success'); load(); };
@@ -290,6 +305,27 @@ export default function ManageStores() {
             <div className="flex" style={{ gap: 8 }}>
               <input readOnly value={viewingConnection.sync_key} style={{ flex: 1, fontFamily: 'monospace' }} />
               <button type="button" className="btn small secondary" onClick={() => navigator.clipboard.writeText(viewingConnection.sync_key)}>Copy</button>
+            </div>
+          </div>
+          <div className="form-group">
+            <label>Access Code</label>
+            <div className="flex" style={{ gap: 8 }}>
+              <input readOnly value={viewingConnection.access_code || '—'} style={{ flex: 1, fontFamily: 'monospace' }} />
+              <button type="button" className="btn small secondary" disabled={!viewingConnection.access_code}
+                onClick={() => navigator.clipboard.writeText(viewingConnection.access_code)}>Copy</button>
+            </div>
+            {viewingConnection.access_code && (
+              <p className="muted" style={{ fontSize: 12, marginTop: 4 }}>
+                Status: <strong>{viewingConnection.access_code_status}</strong>
+                {' · '}expires {new Date(viewingConnection.access_code_expires_at).toLocaleDateString()}
+                {viewingConnection.access_code_status === 'active' && ' — the owner enters this on the Activate Your Store screen.'}
+              </p>
+            )}
+            <div className="flex" style={{ gap: 8, marginTop: 6, alignItems: 'center' }}>
+              <label style={{ margin: 0, fontSize: 12 }}>New code valid for</label>
+              <input type="number" min="1" max="365" value={codeDays} onChange={(e) => setCodeDays(e.target.value)} style={{ width: 80 }} />
+              <span className="muted" style={{ fontSize: 12 }}>days</span>
+              <button type="button" className="btn small secondary" onClick={newStoreCode}>Issue new code</button>
             </div>
           </div>
           <div className="form-group">

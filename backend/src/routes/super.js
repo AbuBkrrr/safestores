@@ -32,6 +32,8 @@ router.delete('/stores/:id', ctrl.deleteStore);
 
 // Store size tiers (mini/midi/mega) and their limits
 router.get('/tiers', ctrl.listPlans);
+router.put('/tiers/:tier', ctrl.updateTier);
+router.post('/stores/:id/access-code', ctrl.issueCodeForStore);
 
 router.get('/access-codes', ctrl.listCodes);
 router.post('/access-codes', ctrl.generateCode);
@@ -60,6 +62,12 @@ router.post('/support/tickets/:id/reply', supportCtrl.addReplySuper);
 router.get('/auditors', auditCtrl.listAuditors);
 router.patch('/auditors/:id/activate', auditCtrl.activateAuditor);
 router.patch('/auditors/:id/suspend', auditCtrl.suspendAuditor);
+router.get('/auditors/:id', auditCtrl.getAuditorSuper);
+router.get('/auditors/:id/documents/:docId', auditCtrl.getAuditorDocumentSuper);
+router.patch('/auditors/:id/reject', auditCtrl.rejectAuditor);
+router.get('/audit-engagements', auditCtrl.listAllEngagementsSuper);
+router.patch('/audit-engagements/:id/assign', auditCtrl.assignEngagementSuper);
+router.patch('/audit-engagements/:id/cancel', auditCtrl.cancelEngagementSuper);
 
 // Lending / microfinance partners
 router.get('/lending-partners', lendingCtrl.listPartners);

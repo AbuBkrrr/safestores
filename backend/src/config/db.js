@@ -1,17 +1,29 @@
-const { Pool } = require('pg');
+const { Pool, types } = require('pg');
+
+// NUMERIC columns (money, and quantities sold by weight) come back as JS
+// numbers rather than strings. Values stay well inside double precision.
+types.setTypeParser(1700, (v) => (v === null ? null : parseFloat(v)));
 require('dotenv').config();
 
 // Most hosted Postgres providers (Render, Railway, Supabase, Neon, RDS) require
 // SSL and present a certificate that isn't in Node's default trust store.
 // DATABASE_SSL=require opts into that; leave unset for local Postgres with no SSL.
-const useSSL = process.env.DATABASE_SSL === 'require' || process.env.NODE_ENV === 'production';
+// DATABASE_SSL=disable turns it off even in production (e.g. a Postgres container on the same Docker network).
+const useSSL = process.env.DATABASE_SSL === 'require'
+  || (process.env.NODE_ENV === 'production' && process.env.DATABASE_SSL !== 'disable');
+
+function buildPoolConfig() {
+  return {
+    connectionString: process.env.DATABASE_URL,
+    ssl: useSSL ? { rejectUnauthorized: false } : false,
+    connectionTimeoutMillis: 10000,
+  };
+}
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: useSSL ? { rejectUnauthorized: false } : false,
+  ...buildPoolConfig(),
   max: parseInt(process.env.DB_POOL_MAX || '10', 10),
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000,
 });
 
 pool.on('error', (err) => {
@@ -23,4 +35,5 @@ pool.on('error', (err) => {
 module.exports = {
   query: (text, params) => pool.query(text, params),
   pool,
+  buildPoolConfig,
 };

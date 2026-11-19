@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { Alert, AuthBrand } from '../components/ui.jsx';
+import PasswordInput from '../components/PasswordInput.jsx';
 
 export default function SuperLogin() {
   const { t } = useTranslation();
@@ -44,7 +45,7 @@ export default function SuperLogin() {
           </div>
           <div className="form-group">
             <label>{t('login.password')}</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} required />
           </div>
           {needOtp && (
             <div className="form-group">

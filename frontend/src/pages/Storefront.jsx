@@ -3,8 +3,11 @@ import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { formatCurrency as format } from '../utils/currency.js';
+import { shopThemeVars, useShopTheme } from '../utils/shopTheme.js';
+import CreditKycSteps from '../components/CreditKycSteps.jsx';
 import { LanguageSwitcher } from '../components/Layout.jsx';
 import { BrandFooter } from '../components/ui.jsx';
+import PasswordInput from '../components/PasswordInput.jsx';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
 const client = axios.create({ baseURL: API_BASE });
@@ -15,7 +18,9 @@ const SHARE_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/api\/?$/, '')
 
 export default function Storefront() {
   const { t } = useTranslation();
-  const { storeId } = useParams();
+  const params = useParams();
+  // On a store's custom domain the shop is fixed by the host (see main.jsx).
+  const storeId = window.__SHOP_DOMAIN_STORE__ || params.storeId;
   const [store, setStore] = useState(null);
   const [products, setProducts] = useState([]);
   const [query, setQuery] = useState('');
@@ -27,6 +32,7 @@ export default function Storefront() {
   const [authMode, setAuthMode] = useState('login'); // login | signup
   const [showAuth, setShowAuth] = useState(false);
   const [authForm, setAuthForm] = useState({ name: '', email: '', phone: '', password: '' });
+  const [confirmPw, setConfirmPw] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
@@ -40,7 +46,18 @@ export default function Storefront() {
   const currency = store ? { code: store.currency_code, symbol: store.currency_symbol } : undefined;
   const canPayOnline = !!store?.payments?.online;
   const canPayOnDelivery = store ? store.payments?.payOnDelivery !== false : true;
-  const method = payMethod || (canPayOnline ? 'online' : 'on_delivery');
+  // payMethod: 'online' (pay now) or 'cash' (pay when delivered / collected).
+  const [receive, setReceive] = useState('delivery');
+  // Guaranteed credit (bank, cooperative, PFA, employer…) — see creditController.
+  const [credit, setCredit] = useState({ guarantors: [], account: null });
+  const [applyForm, setApplyForm] = useState(null); // { guarantorId, memberRef, requestedLimit } while open
+  const creditOk = credit.account?.status === 'approved';
+  const payOptions = [canPayOnline && 'online', canPayOnDelivery && 'cash', creditOk && 'credit'].filter(Boolean);
+  const payChoice = payOptions.includes(payMethod) ? payMethod : payOptions[0];
+  const method = payChoice === 'online' || payChoice === 'credit' ? payChoice : receive === 'pickup' ? 'on_pickup' : 'on_delivery';
+  const payLabel = (o) => (o === 'online' ? `💳 ${t('storefrontPage.payNowOnline')}`
+    : o === 'credit' ? `🤝 ${t('storefrontPage.buyOnCredit', { available: format(credit.account?.available || 0, currency) })}`
+      : `💵 ${receive === 'pickup' ? t('storefrontPage.payOnPickup') : t('storefrontPage.payOnDelivery')}`);
   const formatCurrency = (n) => format(n, currency);
 
   useEffect(() => {
@@ -56,6 +73,17 @@ export default function Storefront() {
     meta.content = t('storefrontPage.metaDescription', { name: store.name, city: store.city || '' });
   }, [store, t]);
 
+  const loadCredit = () => client.get(`/marketplace/${storeId}/credit`, customer ? { headers: { Authorization: `Bearer ${customer.token}` } } : {})
+    .then((r) => setCredit(r.data)).catch(() => {});
+  useEffect(() => { loadCredit(); }, [customer, storeId]); // eslint-disable-line react-hooks/exhaustive-deps
+  const submitCredit = async (e) => {
+    e.preventDefault(); setError('');
+    try {
+      await client.post(`/marketplace/${storeId}/credit/apply`, applyForm, { headers: { Authorization: `Bearer ${customer.token}` } });
+      setApplyForm(null); setMessage(t('storefrontPage.creditApplied')); loadCredit();
+    } catch (err) { setError(err.response?.data?.error || t('storefrontPage.orderFailed')); }
+  };
+
   useEffect(() => {
     if (!customer) return;
     client.get(`/marketplace/${storeId}/my-orders`, { headers: { Authorization: `Bearer ${customer.token}` } }).then((r) => setMyOrders(r.data)).catch(() => {});
@@ -64,6 +92,10 @@ export default function Storefront() {
   const handleAuth = async (e) => {
     e.preventDefault();
     setError('');
+    if (authMode === 'signup' && authForm.password !== confirmPw) {
+      setError(t('storefrontPage.passwordsDontMatch'));
+      return;
+    }
     try {
       const path = authMode === 'login' ? 'login' : 'signup';
       const { data } = await client.post(`/marketplace/${storeId}/${path}`, authForm);
@@ -81,17 +113,27 @@ export default function Storefront() {
     setCustomer(null);
   };
 
-  const addToCart = (productId) => setCart((c) => ({ ...c, [productId]: (c[productId] || 0) + 1 }));
+  const stepFor = (productId) => (['weight', 'volume', 'length'].includes(products.find((x) => x.id === productId)?.sold_by) ? 0.5 : 1);
+  const addToCart = (productId) => setCart((c) => ({ ...c, [productId]: Math.round(((c[productId] || 0) + stepFor(productId)) * 1000) / 1000 }));
   const removeFromCart = (productId) => setCart((c) => {
     const next = { ...c };
-    if (next[productId] > 1) next[productId] -= 1; else delete next[productId];
+    const st = stepFor(productId);
+    if (next[productId] > st) next[productId] = Math.round((next[productId] - st) * 1000) / 1000; else delete next[productId];
     return next;
   });
 
+  const [category, setCategory] = useState('');
+  const categories = useMemo(() => [...new Set(products.map((p) => p.category).filter(Boolean))].sort(), [products]);
   const visible = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return products.filter((p) => !q || [p.name, p.category, p.brand].some((v) => v && String(v).toLowerCase().includes(q)));
-  }, [products, query]);
+    return products.filter((p) => (!category || p.category === category)
+      && (!q || [p.name, p.category, p.brand].some((v) => v && String(v).toLowerCase().includes(q))));
+  }, [products, query, category]);
+  const cartCount = Object.values(cart).reduce((n, q) => n + q, 0);
+  // Opened via the long /shop/<id> link but the store has a custom address: show the nicer one.
+  useEffect(() => {
+    if (!window.__SHOP_DOMAIN_STORE__ && store?.shop_slug && storeId !== store.shop_slug) window.history.replaceState(null, '', `/shop/${store.shop_slug}`);
+  }, [store, storeId]);
 
   const cartItems = Object.entries(cart).map(([productId, quantity]) => {
     const product = products.find((p) => p.id === productId);
@@ -105,12 +147,16 @@ export default function Storefront() {
       setError(t('storefrontPage.pleaseEnterNameGuest'));
       return;
     }
+    if (receive === 'delivery' && !deliveryAddress.trim()) {
+      setError(t('storefrontPage.addressRequired'));
+      return;
+    }
     if (method === 'online' && !customer && !guestEmail) {
       setError(t('storefrontPage.emailForPayment'));
       return;
     }
     try {
-      const body = { items: cartItems.map((i) => ({ productId: i.id, quantity: i.quantity })), deliveryAddress, paymentMethod: method };
+      const body = { items: cartItems.map((i) => ({ productId: i.id, quantity: i.quantity })), deliveryAddress: receive === 'delivery' ? deliveryAddress : undefined, paymentMethod: method, fulfilmentMethod: receive };
       const config = {};
       if (customer) {
         config.headers = { Authorization: `Bearer ${customer.token}` };
@@ -122,6 +168,7 @@ export default function Storefront() {
       const { data } = await client.post(`/marketplace/${storeId}/orders`, body, config);
       setCart({});
       setPlaced(data); // tracking link stays available even if starting payment fails
+      if (method === 'credit') loadCredit();
       if (method === 'online') {
         // Paystack checkout: the money goes straight to this store's bank.
         const pay = await client.post(`/marketplace/orders/${data.tracking_token}/pay`, { email: customer?.email || guestEmail });
@@ -138,7 +185,7 @@ export default function Storefront() {
     }
   };
 
-  const shareUrl = `${SHARE_BASE}/share/shop/${storeId}`;
+  const shareUrl = `${SHARE_BASE}/share/shop/${store?.shop_slug || storeId}`;
   const shareShop = async () => {
     if (navigator.share) { try { await navigator.share({ title: store?.name, url: shareUrl }); } catch { /* cancelled */ } return; }
     try { await navigator.clipboard.writeText(shareUrl); setMessage(t('storefrontPage.linkCopied')); } catch { /* ignore */ }
@@ -149,15 +196,28 @@ export default function Storefront() {
     window.open(`https://wa.me/${String(store?.phone || '').replace(/\D/g, '')}?text=${encodeURIComponent(lines.join('\n'))}`, '_blank');
   };
   const trackingPath = placed?.tracking_token ? `/track/${placed.tracking_token}` : null;
+  useShopTheme(store);
 
   return (
-    <div className="storefront">
+    <div className={`storefront${store?.shop_bg_color || store?.shop_bg_image_url ? ' sf-branded-bg' : ''}`} data-sf-theme={store?.shop_theme || undefined} style={shopThemeVars(store)}>
       <header className="storefront-header">
-        <div>
-          <h1>{store?.name || t('storefrontPage.title')}</h1>
-          {store && <p className="muted">{[store.category, store.city].filter(Boolean).join(' · ')}{store.phone ? ` · ${store.phone}` : ''}</p>}
+        <div className="sf-hero">
+          {store?.shop_logo_url
+            ? <img className="sf-avatar sf-logo" src={store.shop_logo_url} alt={store.name} />
+            : <div className="sf-avatar" aria-hidden="true">{(store?.name || 'S').trim().charAt(0).toUpperCase()}</div>}
+          <div>
+            <h1>{store?.name || t('storefrontPage.title')}</h1>
+            {store?.shop_tagline && <p className="sf-tagline">{store.shop_tagline}</p>}
+            {store && (
+              <div className="sf-chips">
+                {store.category && <span className="sf-chip">🏷️ {store.category}</span>}
+                {(store.city || store.address) && <span className="sf-chip">📍 {[store.address, store.city].filter(Boolean).join(', ')}</span>}
+                {store.phone && <a className="sf-chip" href={`tel:${store.phone}`}>📞 {store.phone}</a>}
+              </div>
+            )}
+          </div>
         </div>
-        <div className="flex">
+        <div className="flex sf-actions">
           <div style={{ width: 140 }}><LanguageSwitcher /></div>
           <button className="btn small secondary" onClick={shareShop}>{t('storefrontPage.share')}</button>
           {customer
@@ -176,7 +236,8 @@ export default function Storefront() {
             {authMode === 'signup' && <div className="form-group"><input aria-label={t('storefrontPage.fullName')} placeholder={t('storefrontPage.fullName')} value={authForm.name} onChange={(e) => setAuthForm({ ...authForm, name: e.target.value })} required /></div>}
             <div className="form-group"><input type="email" aria-label={t('storefrontPage.email')} placeholder={t('storefrontPage.email')} value={authForm.email} onChange={(e) => setAuthForm({ ...authForm, email: e.target.value })} required /></div>
             {authMode === 'signup' && <div className="form-group"><input aria-label={t('storefrontPage.phoneOptional')} placeholder={t('storefrontPage.phoneOptional')} value={authForm.phone} onChange={(e) => setAuthForm({ ...authForm, phone: e.target.value })} /></div>}
-            <div className="form-group"><input type="password" aria-label={t('storefrontPage.password')} placeholder={t('storefrontPage.password')} value={authForm.password} onChange={(e) => setAuthForm({ ...authForm, password: e.target.value })} required /></div>
+            <div className="form-group"><PasswordInput aria-label={t('storefrontPage.password')} placeholder={t('storefrontPage.password')} value={authForm.password} onChange={(e) => setAuthForm({ ...authForm, password: e.target.value })} required /></div>
+            {authMode === 'signup' && <div className="form-group"><PasswordInput aria-label={t('storefrontPage.confirmPassword')} placeholder={t('storefrontPage.confirmPassword')} value={confirmPw} onChange={(e) => setConfirmPw(e.target.value)} autoComplete="new-password" required /></div>}
             <button className="btn" type="submit">{authMode === 'login' ? t('storefrontPage.logIn') : t('storefrontPage.signUp')}</button>
           </form>
         </div>
@@ -187,25 +248,42 @@ export default function Storefront() {
       <div className="storefront-grid">
         <section>
           <input className="storefront-search" aria-label={t('common.search')} placeholder={t('storefrontPage.searchPlaceholder')} value={query} onChange={(e) => setQuery(e.target.value)} />
+          {categories.length > 1 && (
+            <div className="sf-cats" role="tablist" aria-label={t('storefrontPage.categories')}>
+              <button type="button" className={!category ? 'active' : ''} onClick={() => setCategory('')}>{t('storefrontPage.allCategories')}</button>
+              {categories.map((c) => <button type="button" key={c} className={category === c ? 'active' : ''} onClick={() => setCategory(c)}>{c}</button>)}
+            </div>
+          )}
+          {products.length > 0 && visible.length === 0 && <p className="muted sf-empty">{t('storefrontPage.noMatches')}</p>}
           <div className="product-grid">
             {visible.map((p) => (
-              <div key={p.id} className="product-tile">
-                {p.image_url && <img src={p.image_url} alt="" loading="lazy" />}
+              <div key={p.id} className={`product-tile${p.in_stock ? '' : ' out'}`}>
+                {p.image_url
+                  ? <img src={p.image_url} alt="" loading="lazy" />
+                  : <div className="pt-ph" aria-hidden="true">{p.name.trim().charAt(0).toUpperCase()}</div>}
                 <div className="pt-name">{p.name}</div>
-                <div className="muted">{p.category}</div>
+                {p.category && <div className="muted pt-cat">{p.category}</div>}
                 <div className="pt-foot">
-                  <strong>{formatCurrency(p.price)}</strong>
-                  {p.in_stock
-                    ? <button className="btn small" onClick={() => addToCart(p.id)}>{cart[p.id] ? `+ (${cart[p.id]})` : t('storefrontPage.add')}</button>
-                    : <span className="muted">{t('storefrontPage.outOfStockTag')}</span>}
+                  <strong>{formatCurrency(p.price)}{p.sold_by && p.sold_by !== 'unit' ? <span className="muted" style={{ fontWeight: 400 }}>/{p.unit}</span> : null}</strong>
+                  {!p.in_stock
+                    ? <span className="muted">{t('storefrontPage.outOfStockTag')}</span>
+                    : cart[p.id]
+                      ? (
+                        <span className="pt-step">
+                          <button type="button" aria-label={`${t('storefrontPage.remove')} ${p.name}`} onClick={() => removeFromCart(p.id)}>−</button>
+                          <span aria-live="polite">{cart[p.id]}{p.sold_by && p.sold_by !== 'unit' ? ` ${p.unit}` : ''}</span>
+                          <button type="button" aria-label={`${t('storefrontPage.add')} ${p.name}`} onClick={() => addToCart(p.id)}>+</button>
+                        </span>
+                      )
+                      : <button className="btn small" onClick={() => addToCart(p.id)}>{t('storefrontPage.add')}</button>}
                 </div>
               </div>
             ))}
           </div>
         </section>
 
-        <aside className="card storefront-cart">
-          <h2>{t('storefrontPage.yourCart')}</h2>
+        <aside className="card storefront-cart" id="sf-cart">
+          <h2>{t('storefrontPage.yourCart')}{cartCount > 0 && <span className="sf-count">{cartCount}</span>}</h2>
           {placed && (
             <div className="alert success">
               {message}{' '}
@@ -223,7 +301,14 @@ export default function Storefront() {
           {cartItems.length > 0 && (
             <div className="mt-1">
               <div style={{ fontWeight: 700, fontSize: 18 }}>{t('storefrontPage.total')} {formatCurrency(cartTotal)}</div>
-              <div className="form-group mt-1"><input aria-label={t('storefrontPage.deliveryAddress')} placeholder={t('storefrontPage.deliveryAddress')} value={deliveryAddress} onChange={(e) => setDeliveryAddress(e.target.value)} /></div>
+              <fieldset className="pay-choice mt-1">
+                <legend>{t('storefrontPage.howToReceive')}</legend>
+                <label><input type="radio" name="receive" checked={receive === 'delivery'} onChange={() => setReceive('delivery')} /> 🚚 {t('storefrontPage.receiveDelivery')}</label>
+                <label><input type="radio" name="receive" checked={receive === 'pickup'} onChange={() => setReceive('pickup')} /> 🏪 {t('storefrontPage.receivePickup')}</label>
+              </fieldset>
+              {receive === 'delivery'
+                ? <div className="form-group"><input aria-label={t('storefrontPage.deliveryAddress')} placeholder={t('storefrontPage.deliveryAddress')} value={deliveryAddress} onChange={(e) => setDeliveryAddress(e.target.value)} required /></div>
+                : <p className="muted" style={{ fontSize: 13 }}>📍 {t('storefrontPage.pickupFrom', { place: [store?.address, store?.city].filter(Boolean).join(', ') || store?.name || '' })}</p>}
               {!customer && (
                 <>
                   <div className="form-group"><input aria-label={t('storefrontPage.yourNameGuest')} placeholder={t('storefrontPage.yourNameGuest')} value={guestName} onChange={(e) => setGuestName(e.target.value)} /></div>
@@ -231,18 +316,51 @@ export default function Storefront() {
                   <div className="form-group"><input aria-label={t('storefrontPage.phoneOptional')} placeholder={t('storefrontPage.phoneOptional')} value={guestPhone} onChange={(e) => setGuestPhone(e.target.value)} inputMode="tel" /></div>
                 </>
               )}
-              {!canPayOnline && !canPayOnDelivery ? (
+              {payOptions.length === 0 ? (
                 <div className="alert warning">{t('storefrontPage.notTakingOrders')}</div>
-              ) : canPayOnline && canPayOnDelivery ? (
+              ) : (
                 <fieldset className="pay-choice">
                   <legend>{t('storefrontPage.howToPay')}</legend>
-                  <label><input type="radio" name="pay" checked={method === 'online'} onChange={() => setPayMethod('online')} /> {t('storefrontPage.payOnline')}</label>
-                  <label><input type="radio" name="pay" checked={method === 'on_delivery'} onChange={() => setPayMethod('on_delivery')} /> {t('storefrontPage.payOnCollection')}</label>
+                  {['online', 'cash', 'credit'].map((o) => {
+                    const ok = payOptions.includes(o);
+                    const why = o === 'online' ? t('storefrontPage.onlineOff')
+                      : o === 'cash' ? t('storefrontPage.cashOff')
+                        : !customer ? t('storefrontPage.creditLogin')
+                          : credit.account?.status === 'pending' ? t('storefrontPage.creditAwaiting')
+                            : credit.guarantors.length ? t('storefrontPage.creditApplyBelow') : t('storefrontPage.creditOff');
+                    return (
+                      <label key={o} style={ok ? undefined : { opacity: 0.55 }}>
+                        <input type="radio" name="pay" disabled={!ok} checked={ok && payChoice === o} onChange={() => setPayMethod(o)} />{' '}
+                        {o === 'credit' && !ok ? `🤝 ${t('storefrontPage.payOnCredit')}` : payLabel(o)}
+                        {!ok && <span className="muted" style={{ display: 'block', fontSize: 11, marginLeft: 24 }}>{why}</span>}
+                      </label>
+                    );
+                  })}
                 </fieldset>
-              ) : <p className="muted">{canPayOnline ? t('storefrontPage.payOnlineOnly') : t('storefrontPage.payOnCollection')}</p>}
+              )}
+              {credit.guarantors.length > 0 && !creditOk && (
+                customer
+                  ? (credit.account?.status === 'pending'
+                    ? <><p className="muted" style={{ fontSize: 12 }}>⏳ {t('storefrontPage.creditPending', { guarantor: credit.account.guarantor_name })}</p>
+                      <CreditKycSteps storeId={storeId} token={customer.token} credit={credit} formatMoney={formatCurrency} onChange={loadCredit} /></>
+                    : !applyForm && <button type="button" className="btn small secondary" onClick={() => setApplyForm({ guarantorId: credit.guarantors[0].id, memberRef: '', requestedLimit: '' })}>🤝 {t('storefrontPage.applyCredit')}</button>)
+                  : <p className="muted" style={{ fontSize: 12 }}>🤝 {t('storefrontPage.creditLogin')}</p>
+              )}
+              {applyForm && (
+                <form onSubmit={submitCredit} className="card mt-1" style={{ padding: 12 }}>
+                  <p className="muted" style={{ fontSize: 12 }}>{t('storefrontPage.creditExplain')}</p>
+                  <div className="form-group"><label htmlFor="cr-g">{t('storefrontPage.guarantor')}</label>
+                    <select id="cr-g" value={applyForm.guarantorId} onChange={(e) => setApplyForm({ ...applyForm, guarantorId: e.target.value })}>
+                      {credit.guarantors.map((g) => <option key={g.id} value={g.id}>{g.name} ({t(`storefrontPage.gKind_${g.kind}`)})</option>)}
+                    </select></div>
+                  <div className="form-group"><label htmlFor="cr-ref">{t('storefrontPage.memberRef')}</label><input id="cr-ref" value={applyForm.memberRef} onChange={(e) => setApplyForm({ ...applyForm, memberRef: e.target.value })} required /></div>
+                  <div className="form-group"><label htmlFor="cr-amt">{t('storefrontPage.creditAmount')}</label><input id="cr-amt" type="number" min="1" value={applyForm.requestedLimit} onChange={(e) => setApplyForm({ ...applyForm, requestedLimit: e.target.value })} required /></div>
+                  <div className="flex"><button className="btn small" type="submit">{t('storefrontPage.sendApplication')}</button><button type="button" className="btn small secondary" onClick={() => setApplyForm(null)}>{t('common.cancel', { defaultValue: 'Cancel' })}</button></div>
+                </form>
+              )}
               {method === 'online' && <p className="muted" style={{ fontSize: 12 }}>🔒 {t('storefrontPage.securePayNote', { store: store?.name || '' })}</p>}
               <div className="flex">
-                <button className="btn" disabled={!canPayOnline && !canPayOnDelivery} onClick={placeOrder}>{method === 'online' ? t('storefrontPage.payNow', { amount: formatCurrency(cartTotal) }) : t('storefrontPage.placeOrder')}</button>
+                <button className="btn" disabled={payOptions.length === 0} onClick={placeOrder}>{method === 'online' ? t('storefrontPage.payNow', { amount: formatCurrency(cartTotal) }) : t('storefrontPage.placeOrder')}</button>
                 {store?.phone && <button className="btn" style={{ background: '#25D366' }} onClick={whatsappOrder}>{t('storefrontPage.orderOnWhatsApp')}</button>}
               </div>
             </div>
@@ -261,6 +379,11 @@ export default function Storefront() {
           )}
         </aside>
       </div>
+      {cartCount > 0 && (
+        <a className="sf-cartbar" href="#sf-cart">
+          🛒 {t('storefrontPage.viewCart', { count: cartCount })} · <strong>{formatCurrency(cartTotal)}</strong>
+        </a>
+      )}
       <BrandFooter />
     </div>
   );

@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { useRealtimeEvents } from '../context/SocketContext.jsx';
 import { Alert, Toast } from '../components/ui.jsx';
 import { useToast } from '../components/useToast.js';
+import ScanProductButton from '../components/ScanProductButton.jsx';
 
 const SYNC_EVENTS = ['movement:created', 'product:created', 'product:updated', 'product:deleted'];
 
@@ -54,6 +55,7 @@ export default function Movements() {
           <div className="grid grid-2">
             <div className="form-group">
               <label>{t('movementsPage.product')}</label>
+              <ScanProductButton products={products} onFound={(p) => setForm((f) => ({ ...f, productId: p.id }))} />
               <select value={form.productId} onChange={update('productId')} required>
                 <option value="">{t('movementsPage.selectProduct')}</option>
                 {products.map((p) => (
@@ -69,7 +71,7 @@ export default function Movements() {
             </div>
             <div className="form-group">
               <label>{t('movementsPage.quantity')} {form.type === 'adjustment' && t('movementsPage.quantityAdjustmentHint')}</label>
-              <input type="number" value={form.quantity} onChange={update('quantity')} required />
+              <input type="number" step="any" value={form.quantity} onChange={update('quantity')} required />
             </div>
             <div className="form-group"><label>{t('movementsPage.note')}</label><input value={form.note} onChange={update('note')} /></div>
           </div>

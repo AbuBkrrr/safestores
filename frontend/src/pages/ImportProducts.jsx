@@ -1,5 +1,6 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import ScanProductButton from '../components/ScanProductButton.jsx';
 import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -24,8 +25,15 @@ async function parseFile(file) {
 
 /** Bring a whole product list in from a spreadsheet (CSV or Excel .xlsx). */
 export default function ImportProducts() {
+  const navigate = useNavigate();
+  const [existing, setExisting] = useState([]);
+  const [scanned, setScanned] = useState(null); // existing product a scan matched
+
   const { t } = useTranslation();
   const { user } = useAuth();
+  useEffect(() => {
+    api.get(`/stores/${user.storeId}/products`).then((r) => setExisting(r.data)).catch(() => {});
+  }, [user.storeId]);
   const [rows, setRows] = useState(null);
   const [fileName, setFileName] = useState('');
   const [check, setCheck] = useState(null);
@@ -84,6 +92,21 @@ export default function ImportProducts() {
           {fileName && <span className="help-text">{fileName} · {t('importPage.rowsFound', { count: rows?.length || 0 })}</span>}
         </div>
         {busy && <p className="muted">{t('common.loading')}</p>}
+      </div>
+      <div className="card">
+        <h3 style={{ marginBottom: 6 }}>📷 {t('importPage.scanTitle')}</h3>
+        <p className="muted" style={{ marginBottom: 8 }}>{t('importPage.scanHelp')}</p>
+        <ScanProductButton
+          products={existing}
+          onFound={(p) => setScanned(p)}
+          onNotFound={(code) => navigate(`/products?barcode=${encodeURIComponent(code)}`)}
+        />
+        {scanned && (
+          <Alert type="info">
+            {t('importPage.scanExisting', { name: scanned.name })}{' '}
+            <Link to="/stock-arrival">{t('importPage.receiveStock')}</Link>
+          </Alert>
+        )}
       </div>
 
       {check && (

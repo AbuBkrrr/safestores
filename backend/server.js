@@ -44,11 +44,12 @@ const PORT = process.env.PORT || 4000;
 // file's header for what's different about it (mainly: no realtime).
 const server = http.createServer(app);
 realtime.init(server);
-const stopBillingJob = startBillingJob();
-const stopCycleCountJob = startCycleCountJob();
-const stopExpiryJob = startExpiryJob();
-const stopRetentionJob = startRetentionJob();
-const stopDailySummaryJob = startDailySummaryJob();
+// With several copies behind a load balancer, only the elected leader
+// runs scheduled jobs (see src/utils/leader.js).
+const jobStops = [];
+const stopLeaderElection = require('./src/utils/leader').startWhenLeader(() => {
+  jobStops.push(startBillingJob(), startCycleCountJob(), startExpiryJob(), startRetentionJob(), startDailySummaryJob());
+});
 
 bootstrapSuperAdmin()
   .catch((err) => console.error('Bootstrap failed:', err.message))
@@ -61,11 +62,8 @@ bootstrapSuperAdmin()
 // (Render, Railway, Docker, and systemd all send SIGTERM before SIGKILL).
 function shutdown(signal) {
   console.log(`\n${signal} received, shutting down gracefully...`);
-  stopBillingJob();
-  stopCycleCountJob();
-  stopExpiryJob();
-  stopRetentionJob();
-  stopDailySummaryJob();
+  jobStops.forEach((stop) => stop && stop());
+  stopLeaderElection();
   server.close(() => {
     console.log('HTTP server closed.');
     const { pool } = require('./src/config/db');

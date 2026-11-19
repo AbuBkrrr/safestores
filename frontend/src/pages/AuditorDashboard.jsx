@@ -52,13 +52,17 @@ export default function AuditorDashboard() {
         <Alert type="error">{error}</Alert>
 
         <div className="card">
-          <h3 style={{ marginBottom: 12 }}>{t('auditorDashPage.openRequests')}</h3>
+          <h3 style={{ marginBottom: 12 }}>{t('auditorDashPage.assignedToYou')}</h3>
           {open.length === 0 && <p className="muted">{t('auditorDashPage.noOpenRequests')}</p>}
           {open.map((e) => (
             <div key={e.id} className="card" style={{ background: 'var(--bg)' }}>
               <strong>{e.store_name}</strong> <Badge status={e.status} />
-              <p className="muted">{e.notes || t('auditorDashPage.noNotesProvided')} · {t('auditorDashPage.requestedAt', { time: new Date(e.requested_at).toLocaleString() })}</p>
-              <button className="btn small mt-1" onClick={() => accept(e.id)}>{t('auditorDashPage.acceptEngagement')}</button>
+              {e.scheduled_for && <p>📅 <strong>{new Date(e.scheduled_for).toLocaleString()}</strong></p>}
+              <p className="muted">{e.notes || t('auditorDashPage.noNotesProvided')}</p>
+              <div className="flex mt-1" style={{ gap: 8 }}>
+                <button className="btn small" onClick={() => accept(e.id)}>{t('auditorDashPage.acceptEngagement')}</button>
+                <button className="btn small secondary" onClick={() => api.patch(`/auditor/engagements/${e.id}/decline`).then(load)}>{t('auditorDashPage.decline')}</button>
+              </div>
             </div>
           ))}
         </div>
@@ -69,6 +73,7 @@ export default function AuditorDashboard() {
           {mine.map((e) => (
             <div key={e.id} className="card" style={{ background: 'var(--bg)' }}>
               <strong>{e.store_name}</strong> <Badge status={e.status} />
+              {e.scheduled_for && <p>📅 {new Date(e.scheduled_for).toLocaleString()}</p>}
               <p className="muted">{e.notes}</p>
               <div className="flex mt-1">
                 <input placeholder={t('auditorDashPage.stockTakerName')} value={inviteForms[e.id]?.name || ''}

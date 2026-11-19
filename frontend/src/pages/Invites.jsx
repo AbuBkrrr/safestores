@@ -4,12 +4,18 @@ import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { Alert, Badge, Toast } from '../components/ui.jsx';
 import { useToast } from '../components/useToast.js';
+import InviteShareModal from '../components/InviteShareModal.jsx';
+import { useStoreTier, MINI_ROLES } from '../utils/useStoreTier.js';
 
 const APP_BASE_URL = window.location.origin;
 
 function inviteLink(code) {
   return `${APP_BASE_URL}/login?invite=${code}`;
 }
+
+// Every role a store user can hold. Auditors are an outside service booked
+// through SAFE Stores (Hire an Auditor), not staff you invite.
+const INVITE_ROLES = ['staff', 'cashier', 'checkout', 'store_manager', 'shelf_manager', 'marketplace_manager', 'security', 'manager', 'admin'];
 
 export default function Invites() {
   const { t } = useTranslation();
@@ -20,15 +26,19 @@ export default function Invites() {
   const [error, setError] = useState('');
   const [toast, showToast] = useToast();
 
+  const storeTier = useStoreTier();
+  const roleOptions = storeTier === 'mini' ? INVITE_ROLES.filter((r) => MINI_ROLES.includes(r)) : INVITE_ROLES;
+  const [sharing, setSharing] = useState(null); // invite whose share card is open
   const load = () => api.get(`/stores/${user.storeId}/invites`).then((r) => setInvites(r.data));
   useEffect(() => { load(); }, [user.storeId]);
 
   const createSingle = async (e) => {
     e.preventDefault(); setError('');
     try {
-      await api.post(`/stores/${user.storeId}/invites`, single);
+      const { data } = await api.post(`/stores/${user.storeId}/invites`, single);
       setSingle({ name: '', email: '', role: 'staff' });
       showToast(t('invitesPage.inviteCreated'), 'success');
+      if (data?.code) setSharing(data); // straight to QR / WhatsApp / email / download
       load();
     } catch (err) { setError(err.response?.data?.error || t('invitesPage.createInviteFailed')); }
   };
@@ -78,6 +88,7 @@ export default function Invites() {
   return (
     <div>
       <div className="topbar"><h1>{t('invitesPage.title')}</h1></div>
+      {storeTier === 'mini' && <div className="alert info">🏪 {t('invitesPage.miniNote')}</div>}
       <Alert type="error">{error}</Alert>
 
       <div className="grid grid-2">
@@ -89,7 +100,7 @@ export default function Invites() {
             <div className="form-group">
               <label>{t('invitesPage.role')}</label>
               <select value={single.role} onChange={(e) => setSingle({ ...single, role: e.target.value })}>
-                <option value="staff">{t('roles.staff')}</option><option value="manager">{t('roles.manager')}</option><option value="auditor">{t('roles.auditor')}</option>
+                {roleOptions.map((r) => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}
               </select>
             </div>
             <button className="btn">{t('invitesPage.createInvite')}</button>
@@ -110,7 +121,7 @@ export default function Invites() {
             <div className="form-group">
               <label>{t('invitesPage.roleAppliedToAll')}</label>
               <select value={bulk.role} onChange={(e) => setBulk({ ...bulk, role: e.target.value })}>
-                <option value="staff">{t('roles.staff')}</option><option value="manager">{t('roles.manager')}</option><option value="auditor">{t('roles.auditor')}</option>
+                {roleOptions.map((r) => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}
               </select>
             </div>
             <button className="btn">{t('invitesPage.createBulkInvites')}</button>
@@ -134,7 +145,8 @@ export default function Invites() {
                 <td>
                   {i.status === 'pending' && (
                     <div className="flex">
-                      <button className="btn small" onClick={() => share(i, 'whatsapp')}>{t('invitesPage.whatsapp', { defaultValue: 'WhatsApp' })}</button>
+                      <button className="btn small" onClick={() => setSharing(i)}>📱 {t('inviteShare.qrShare')}</button>
+                      <button className="btn small secondary" onClick={() => share(i, 'whatsapp')}>{t('invitesPage.whatsapp', { defaultValue: 'WhatsApp' })}</button>
                       <button className="btn small secondary" onClick={() => share(i, 'email')}>{t('invitesPage.emailAction')}</button>
                       <button className="btn small secondary" onClick={() => share(i, 'sms')}>{t('invitesPage.smsAction')}</button>
                       <button className="btn small secondary" onClick={() => share(i, 'copy')}>{t('invitesPage.copyAction')}</button>
@@ -147,6 +159,10 @@ export default function Invites() {
           </tbody>
         </table>
       </div>
+      {sharing && (
+        <InviteShareModal invite={sharing} link={inviteLink(sharing.code)} storeName={user.storeName || 'Our store'}
+          onClose={() => setSharing(null)} onShare={(ch) => share(sharing, ch)} />
+      )}
       <Toast {...(toast || {})} />
     </div>
   );

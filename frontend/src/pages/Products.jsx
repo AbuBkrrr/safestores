@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -7,6 +7,8 @@ import { useRealtimeEvents } from '../context/SocketContext.jsx';
 import { Alert, Toast } from '../components/ui.jsx';
 import { useToast } from '../components/useToast.js';
 import { useCurrency } from '../context/CurrencyContext.jsx';
+import { useStoreProfile } from '../utils/useStoreTier.js';
+import { BUSINESS_TYPES, SOLD_BY_UNITS, fmtQty } from '../utils/businessTypes.js';
 
 const SYNC_EVENTS = ['product:created', 'product:updated', 'product:deleted', 'arrival:created', 'movement:created', 'audit:created'];
 const NEW_ARRIVAL_DAYS = 3;
@@ -28,7 +30,7 @@ function buildUploadUrl(imageUrl) {
 }
 
 const empty = {
-  name: '', sku: '', category: '', supplier: '', unit: 'unit', location: '', storageType: 'ambient',
+  name: '', sku: '', category: '', supplier: '', unit: 'unit', location: '', storageType: 'ambient', soldBy: 'unit', shelfLifeDays: '',
   costPrice: '', priceMultiplier: '1.3', reorderLevel: '5', initialBackroomQty: '0',
   leadTimeDays: '7', minOrderQty: '1', autoReorder: false,
   barcode: '', packSize: '1', packUnit: '', variantOf: '', variantLabel: '',
@@ -39,7 +41,11 @@ export default function Products() {
   const { user } = useAuth();
   const { formatCurrency } = useCurrency();
   const [products, setProducts] = useState([]);
+  const { businessType, tools } = useStoreProfile();
+  const bt = BUSINESS_TYPES[businessType] || BUSINESS_TYPES.general;
+  const typeDefaults = { soldBy: bt.soldBy, unit: bt.unit, shelfLifeDays: bt.shelfLifeDays ? String(bt.shelfLifeDays) : '' };
   const [form, setForm] = useState(empty);
+  useEffect(() => { setForm((f) => (f.name ? f : { ...f, ...typeDefaults })); }, [businessType]); // eslint-disable-line react-hooks/exhaustive-deps
   const [error, setError] = useState('');
   const [toast, showToast] = useToast();
   const [showForm, setShowForm] = useState(false);
@@ -50,6 +56,16 @@ export default function Products() {
 
   const load = () => api.get(`/stores/${user.storeId}/products${showArchived ? '?includeArchived=true' : ''}`).then((r) => setProducts(r.data));
   useEffect(() => { load(); }, [user.storeId, showArchived]);
+  // Arriving from a scan (Import Products → Scan): open the new-product form with the barcode filled in.
+  const [params, setParams] = useSearchParams();
+  useEffect(() => {
+    const code = params.get('barcode');
+    if (!code) return;
+    setForm((f) => ({ ...f, barcode: code, sku: f.sku || code }));
+    setShowForm(true);
+    setParams({}, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   useRealtimeEvents(SYNC_EVENTS, () => load());
 
   const update = (key) => (e) => setForm({ ...form, [key]: e.target.value });
@@ -71,7 +87,7 @@ export default function Products() {
     setError('');
     try {
       await api.post(`/stores/${user.storeId}/products`, form);
-      setForm(empty); setShowForm(false);
+      setForm({ ...empty, ...typeDefaults }); setShowForm(false);
       showToast(t('products.productCreatedToast'), 'success');
       load();
     } catch (err) {
@@ -121,9 +137,18 @@ export default function Products() {
               {form.variantOf && <div className="form-group"><label htmlFor="pf-vlabel">{t('products.variantLabel')}</label><input id="pf-vlabel" value={form.variantLabel} onChange={update('variantLabel')} placeholder={t('products.variantLabelPlaceholder')} /></div>}
               <div className="form-group"><label htmlFor="pf-pack">{t('products.packSize')}</label><input id="pf-pack" type="number" min="1" value={form.packSize} onChange={update('packSize')} /><span className="help-text">{t('products.packSizeHelp')}</span></div>
               <div className="form-group"><label htmlFor="pf-packunit">{t('products.packUnit')}</label><input id="pf-packunit" value={form.packUnit} onChange={update('packUnit')} placeholder={t('products.packUnitPlaceholder')} /></div>
-              <div className="form-group"><label>{t('products.category')}</label><input value={form.category} onChange={update('category')} /></div>
+              <div className="form-group"><label>{t('products.category')}</label><input value={form.category} onChange={update('category')} list="pf-cats" />
+                <datalist id="pf-cats">{bt.categories.map((c) => <option key={c} value={c} />)}</datalist></div>
               <div className="form-group"><label>{t('products.supplier')}</label><input value={form.supplier} onChange={update('supplier')} /></div>
-              <div className="form-group"><label>{t('products.unit')}</label><input value={form.unit} onChange={update('unit')} /></div>
+              <div className="form-group"><label htmlFor="pf-soldby">{t('products.soldBy')}</label>
+                <select id="pf-soldby" value={form.soldBy} onChange={(e) => setForm({ ...form, soldBy: e.target.value, unit: SOLD_BY_UNITS[e.target.value][0] })}>
+                  {Object.keys(SOLD_BY_UNITS).map((k) => <option key={k} value={k}>{t(`products.soldBy_${k}`)}</option>)}
+                </select></div>
+              <div className="form-group"><label htmlFor="pf-unit">{t('products.unit')}</label><input id="pf-unit" value={form.unit} onChange={update('unit')} list="pf-units" />
+                <datalist id="pf-units">{SOLD_BY_UNITS[form.soldBy || 'unit'].map((u) => <option key={u} value={u} />)}</datalist></div>
+              {(tools.includes('fresh') || form.storageType !== 'ambient') && (
+                <div className="form-group"><label htmlFor="pf-shelf">{t('products.shelfLifeDays')}</label><input id="pf-shelf" type="number" min="1" value={form.shelfLifeDays} onChange={update('shelfLifeDays')} placeholder={t('products.shelfLifePh')} /></div>
+              )}
               <div className="form-group">
                 <label>{t('products.location')}</label>
                 <input placeholder={t('products.locationPlaceholder')} value={form.location} onChange={update('location')} />
@@ -184,7 +209,7 @@ export default function Products() {
                 <td>
                   {p.name}
                   {p.variant_label && <span className="muted"> · {p.variant_label}</span>}
-                  {p.pack_size > 1 && <span className="muted" title={t('products.packSize')}> · {p.pack_size}/{p.pack_unit || t('products.pack')}</span>}
+                  {p.sold_by && p.sold_by !== 'unit' && <span className="muted"> · {t('products.perUnit', { unit: p.unit })}</span>}{p.pack_size > 1 && <span className="muted" title={t('products.packSize')}> · {p.pack_size}/{p.pack_unit || t('products.pack')}</span>}
                   {p.storage_type === 'frozen' && <span title={t('products.frozenTitle')}> 🧊</span>}
                   {p.storage_type === 'refrigerated' && <span title={t('products.refrigeratedTitle')}> ❄️</span>}
                   {p.shelf_qty <= p.reorder_level && <span title={t('products.lowStockTitle')}> ⚠️</span>}

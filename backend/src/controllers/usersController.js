@@ -12,6 +12,9 @@ const bcrypt = require('bcryptjs');
 const { checkPassword } = require('../utils/passwordPolicy');
 const { generateInviteCode } = require('../utils/codes');
 
+// Every role a store user can be invited as.
+const INVITE_ROLES = ['admin', 'manager', 'cashier', 'checkout', 'staff', 'store_manager', 'shelf_manager', 'stock_taker', 'marketplace_manager', 'security'];
+
 // GET /api/stores/:storeId/users
 async function listUsers(req, res) {
   const { storeId } = req.params;
@@ -62,6 +65,32 @@ async function setUserPassword(req, res) {
   res.json({ message: `Password set for ${rows[0].name}. They have been signed out of other devices.` });
 }
 
+// Mini stores are small shops: the owner plus a couple of helpers. Only these
+// helper roles fit; the chain-of-custody roles come with Midi and Mega.
+const MINI_ROLES = ['manager', 'cashier', 'staff'];
+
+/** Checks the store's size rules before adding `adding` people with `role`. Returns an error message or null. */
+async function teamProblem(storeId, role, adding = 1) {
+  const { rows } = await db.query(
+    `SELECT s.store_tier, t.label, t.max_users FROM stores s LEFT JOIN store_tiers t ON t.tier = s.store_tier WHERE s.id = $1`, [storeId]
+  );
+  const s = rows[0];
+  if (!s) return 'Store not found';
+  if (s.store_tier === 'mini' && !MINI_ROLES.includes(role)) {
+    return 'A Mini store is run by the owner with up to 2 helpers (manager, cashier or shop assistant). Upgrade to Midi to add store managers, shelf managers, security and online market managers.';
+  }
+  if (s.max_users) {
+    const { rows: c } = await db.query(
+      `SELECT (SELECT COUNT(*) FROM users WHERE store_id = $1 AND status = 'active')::int
+            + (SELECT COUNT(*) FROM invites WHERE store_id = $1 AND status = 'pending')::int AS n`, [storeId]
+    );
+    if (c[0].n + adding > s.max_users) {
+      return `${s.label || 'This store'} allows ${s.max_users} people including you (${c[0].n} already, counting pending invites). Revoke an unused invite, disable someone who left, or upgrade your store size.`;
+    }
+  }
+  return null;
+}
+
 // GET /api/stores/:storeId/invites
 async function listInvites(req, res) {
   const { storeId } = req.params;
@@ -74,6 +103,9 @@ async function createInvite(req, res) {
   const { storeId } = req.params;
   const { name, email, role } = req.body;
   if (!name || !role) return res.status(400).json({ error: 'name and role are required' });
+  if (!INVITE_ROLES.includes(role)) return res.status(400).json({ error: `role must be one of: ${INVITE_ROLES.join(', ')}` });
+  const problem = await teamProblem(storeId, role);
+  if (problem) return res.status(400).json({ error: problem, code: 'TEAM_LIMIT' });
 
   const code = generateInviteCode();
   const { rows } = await db.query(
@@ -88,6 +120,10 @@ async function createBulkInvites(req, res) {
   const { storeId } = req.params;
   const { names, emailDomain, role } = req.body;
   if (!names || !role) return res.status(400).json({ error: 'names and role are required' });
+  if (!INVITE_ROLES.includes(role)) return res.status(400).json({ error: `role must be one of: ${INVITE_ROLES.join(', ')}` });
+  const bulkCount = String(names).split(',').map((n) => n.trim()).filter(Boolean).length;
+  const bulkProblem = await teamProblem(storeId, role, bulkCount);
+  if (bulkProblem) return res.status(400).json({ error: bulkProblem, code: 'TEAM_LIMIT' });
 
   const nameList = names.split(',').map((n) => n.trim()).filter(Boolean);
   if (nameList.length === 0) return res.status(400).json({ error: 'No valid names provided' });

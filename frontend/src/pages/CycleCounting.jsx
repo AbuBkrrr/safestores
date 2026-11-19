@@ -25,8 +25,11 @@ export default function CycleCounting() {
   const load = () => {
     api.get(`/stores/${user.storeId}/cycle-counts/tasks`).then((r) => setTasks(r.data));
     api.get(`/stores/${user.storeId}/products`).then((r) => setProducts(r.data));
-    api.get(`/stores/${user.storeId}/cycle-counts/accuracy`).then((r) => setAccuracy(r.data));
-    api.get(`/stores/${user.storeId}/cycle-counts/history`).then((r) => setHistory(r.data));
+    // Accuracy and history are manager views; staff just do the counts.
+    if (['admin', 'manager'].includes(user.role)) {
+      api.get(`/stores/${user.storeId}/cycle-counts/accuracy`).then((r) => setAccuracy(r.data)).catch(() => {});
+      api.get(`/stores/${user.storeId}/cycle-counts/history`).then((r) => setHistory(r.data)).catch(() => {});
+    }
   };
   useEffect(() => { load(); }, [user.storeId]);
 

@@ -5,7 +5,7 @@ import { dbPut, dbGetAll, dbDelete } from './db.js';
 // UUID before queuing — see stockMath.js on the backend for why that's
 // what makes replaying this safely idempotent (sync it to a LAN peer now,
 // the cloud later; either order, no double-count).
-export async function enqueueAction({ method, url, storeId, body, isFormData }) {
+export async function enqueueAction({ method, url, storeId, body, isFormData, geo = null }) {
   const queueId = crypto.randomUUID(); // identifies this queued action to the UI (sync events etc.)
   const bodyWithId = isFormData
     ? body // FormData entries are serialized as a plain object by the caller; id isn't relevant there
@@ -18,6 +18,7 @@ export async function enqueueAction({ method, url, storeId, body, isFormData }) 
     storeId,
     body: bodyWithId,
     isFormData: !!isFormData,
+    geo, // where the phone was when this was done (in-store lock); null if unknown
     createdAt: Date.now(),
   };
   const seq = await dbPut('outbox', entry); // IndexedDB assigns `seq` since it's the autoIncrement keyPath

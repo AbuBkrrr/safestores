@@ -4,12 +4,18 @@
 //   • Web Serial    — USB printers that appear as a serial/COM port
 //   • WebUSB        — USB printers with a raw "printer class" interface
 //   • Web Bluetooth — common BLE receipt printers
+//   • Wi-Fi / network — printers on the shop Wi-Fi (raw port 9100), sent
+//     through the shop computer, so any phone or tablet in the shop can use it
 // The chosen connection type is remembered; the browser itself remembers
 // which device the user allowed, so later prints need no picker.
 // Anything unsupported falls back to the normal print dialog.
 // ------------------------------------------------------------
 
+import api from '../api/client.js';
+
 const PREF_KEY = 'ss_printer';
+const ADDR_KEY = 'ss_printer_addr';
+const isShopComputer = import.meta.env.VITE_EDITION === 'desktop';
 // Service/characteristic pairs used by the most common BLE receipt printers.
 const BLE_SERVICES = [
   ['000018f0-0000-1000-8000-00805f9b34fb', '00002af1-0000-1000-8000-00805f9b34fb'],
@@ -19,7 +25,7 @@ const BLE_SERVICES = [
 
 export function printerSupport() {
   const n = typeof navigator !== 'undefined' ? navigator : {};
-  return { serial: !!n.serial, usb: !!n.usb, bluetooth: !!n.bluetooth };
+  return { serial: !!n.serial, usb: !!n.usb, bluetooth: !!n.bluetooth, network: isShopComputer };
 }
 
 export function savedPrinterType() {
@@ -27,6 +33,29 @@ export function savedPrinterType() {
 }
 export function savePrinterType(t) {
   try { if (t) localStorage.setItem(PREF_KEY, t); else localStorage.removeItem(PREF_KEY); } catch { /* storage blocked */ }
+}
+
+export function savedPrinterAddress() {
+  try { return localStorage.getItem(ADDR_KEY) || ''; } catch { return ''; }
+}
+export function savePrinterAddress(a) {
+  try { localStorage.setItem(ADDR_KEY, String(a || '').trim()); } catch { /* storage blocked */ }
+}
+
+function toBase64(bytes) {
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 1) bin += String.fromCharCode(bytes[i]);
+  return btoa(bin);
+}
+
+async function viaNetwork(bytes) {
+  const [host, port] = savedPrinterAddress().split(':');
+  if (!host) throw new Error('Enter the printer\'s IP address first (find it on the printer\'s self-test page)');
+  try {
+    await api.post('/print/network', { host, port: port ? Number(port) : 9100, data: toBase64(bytes) });
+  } catch (err) {
+    throw new Error(err.response?.data?.error || err.message);
+  }
 }
 
 async function viaSerial(bytes, ask) {
@@ -60,17 +89,22 @@ async function viaBluetooth(bytes, ask) {
     }
     if (!bleChar) throw new Error('No supported printer service found on this Bluetooth device');
   }
-  // BLE packets are small; send in chunks.
-  for (let i = 0; i < bytes.length; i += 180) {
+  // BLE packets are small; send in chunks, with a short pause so budget
+  // printers with tiny buffers don't drop lines.
+  for (let i = 0; i < bytes.length; i += 100) {
+    const chunk = bytes.slice(i, i + 100);
     // eslint-disable-next-line no-await-in-loop
-    await bleChar.writeValueWithoutResponse(bytes.slice(i, i + 180)).catch(() => bleChar.writeValue(bytes.slice(i, i + 180)));
+    await bleChar.writeValueWithoutResponse(chunk).catch(() => bleChar.writeValue(chunk));
+    // eslint-disable-next-line no-await-in-loop
+    await new Promise((r) => setTimeout(r, 20));
   }
 }
 
-/** Sends raw ESC/POS bytes. type: 'serial' | 'usb' | 'bluetooth'. `ask` forces the device picker. */
+/** Sends raw ESC/POS bytes. type: 'serial' | 'usb' | 'bluetooth' | 'network'. `ask` forces the device picker. */
 export async function printRaw(bytes, type = savedPrinterType(), { ask = false } = {}) {
   if (type === 'serial' && navigator.serial) return viaSerial(bytes, ask);
   if (type === 'usb' && navigator.usb) return viaUsb(bytes, ask);
   if (type === 'bluetooth' && navigator.bluetooth) return viaBluetooth(bytes, ask);
+  if (type === 'network' && isShopComputer) return viaNetwork(bytes);
   throw new Error('No receipt printer connection chosen, or this browser does not support it');
 }

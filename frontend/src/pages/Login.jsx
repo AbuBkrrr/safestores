@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { Alert, AuthBrand, BrandFooter } from '../components/ui.jsx';
+import PasswordInput from '../components/PasswordInput.jsx';
 
 export default function Login() {
   const { t } = useTranslation();
@@ -30,8 +31,11 @@ export default function Login() {
     if (inviteFromLink) {
       setTab('invite');
       setCode(inviteFromLink.toUpperCase());
+      // Opening the link (or scanning the QR code) signs the person straight
+      // in — no extra tap. If the code is bad, the error shows on this tab.
+      joinWithCode(inviteFromLink.toUpperCase());
     }
-  }, [inviteFromLink]);
+  }, [inviteFromLink]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleAdminLogin = async (e) => {
     e.preventDefault();
@@ -46,18 +50,17 @@ export default function Login() {
     } catch (err) {
       const body = err.response?.data || {};
       if (['TOTP_REQUIRED', 'TOTP_INVALID'].includes(body.code)) setNeedOtp(true);
-      if (body.code === 'CHOOSE_STORE') { setStoreChoices(body.stores); setStoreId(body.stores[0]?.id || ''); }
+      if (body.code === 'CHOOSE_STORE') { setStoreChoices(body.stores); setStoreId(body.stores[0]?.id || ''); return; }
       setError(body.error || 'Login failed');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleInviteLogin = async (e) => {
-    e.preventDefault();
+  const joinWithCode = async (inviteCode) => {
     setError(''); setLoading(true);
     try {
-      const { data } = await api.post('/auth/invite/login', { code });
+      const { data } = await api.post('/auth/invite/login', { code: inviteCode });
       login(data.token, data.user);
       navigate('/');
     } catch (err) {
@@ -66,6 +69,7 @@ export default function Login() {
       setLoading(false);
     }
   };
+  const handleInviteLogin = (e) => { e.preventDefault(); joinWithCode(code); };
 
   return (
     <div className="auth-screen">
@@ -88,7 +92,7 @@ export default function Login() {
             </div>
             <div className="form-group">
               <label htmlFor="login-password">{t('login.password')}</label>
-              <input id="login-password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+              <PasswordInput id="login-password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
               <span className="help-text"><Link to="/forgot-password">{t('login.forgotPassword')}</Link></span>
             </div>
             {storeChoices && (
@@ -126,6 +130,7 @@ export default function Login() {
 
         <div className="auth-links">
           {t('login.newStore')} <Link to="/signup">{t('login.registerStore')}</Link><br />
+          <Link to="/partner-login">{t('login.partnerLogin')}</Link><br />
           <Link to="/super-login">{t('login.superAdminLogin')}</Link>
         </div>
       <BrandFooter />

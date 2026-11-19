@@ -120,8 +120,10 @@ cp .env.staging.example .env      # fill POSTGRES_PASSWORD, JWT_SECRET, FRONTEND
 docker compose up --build -d
 ```
 
-Put Caddy in front for automatic HTTPS (`api.safestores.name.ng` →
-`localhost:4000`, `app.safestores.name.ng` → `localhost:8080`). Add the
+Put Caddy in front for automatic HTTPS (`app.safestores.name.ng` and, if you
+use it, `api.safestores.name.ng` → `localhost:8080`; the frontend's nginx
+load-balances `/api`, `/socket.io`, `/share`, `/uploads` and `/sitemap.xml`
+across the backend copies). Add the
 SMTP and S3 variables to the `backend` service in `docker-compose.yml`.
 Schedule a nightly `pg_dump` off the server.
 
@@ -386,3 +388,59 @@ Every bundled dependency uses a permissive open-source licence (MIT, ISC,
 BSD, Apache-2.0). Their notices ship with the app at `/licenses`, generated
 on every build by `frontend/scripts/licenses.mjs`. Map tiles, SMS gateways
 and paid barcode databases were deliberately not used.
+
+## Store custom domains
+
+A store can connect its own domain (e.g. `shop.mamangozi.com`) on **Marketplace → Your shop page**. Visitors to that domain see only that store's storefront.
+
+Server setup (once), in the Caddyfile:
+
+1. At the very top, in the global options block (create it if there is none):
+   ```
+   {
+       on_demand_tls {
+           ask http://ssapp-backend-1:4000/api/public/domain-check
+       }
+   }
+   ```
+2. At the bottom, a catch-all site for shop domains:
+   ```
+   https:// {
+       tls {
+           on_demand
+       }
+       reverse_proxy ssapp-frontend-1:80
+   }
+   ```
+3. Reload Caddy. Certificates are only issued for domains a listed, active store has saved, so nobody can point random domains at the server.
+
+The store adds a DNS `CNAME` for its domain to `app.safestores.name.ng` (an apex domain needs an `A` record to the server IP instead). Set `CUSTOM_DOMAIN_TARGET` if the CNAME target should differ from the `FRONTEND_URL` host.
+
+
+## Scaling: load balancing the API
+
+The API runs as several identical copies behind the frontend's nginx
+(`BACKEND_REPLICAS` in `.env`, default 2). Requests are spread round-robin;
+a copy that fails is skipped (nginx retries the next one).
+
+- **Scale up or down** without downtime:
+  `docker compose -p ssapp up -d --scale backend=4 --no-recreate`
+  (or set `BACKEND_REPLICAS=4` in `.env` and run `up -d`).
+- **Scheduled jobs** (billing, daily summaries, expiry, cycle counts,
+  retention) run on exactly one copy, chosen with a Postgres advisory lock.
+  If it dies, another copy takes over within 30 seconds.
+- **Live updates** (orders, stock counts) reach users on every copy through
+  Postgres LISTEN/NOTIFY — no Redis needed.
+- **Migrations** run once even when copies start together.
+- **Uploads** go to the shared `backend_uploads` volume (same server) or S3
+  (set `S3_*`), which you need before spreading copies over several servers.
+- **Database connections**: each copy opens up to `DB_POOL_MAX` (default 10).
+  Keep `BACKEND_REPLICAS × DB_POOL_MAX` under Postgres's `max_connections`
+  (100 by default).
+- **Rate limits** are counted per copy, so the effective limit is
+  limit × copies — fine for abuse protection.
+
+Beyond one server: run the same compose file on each server pointing at one
+shared Postgres (managed, or a dedicated box), set `S3_*` for uploads, and put
+Caddy (or a cloud load balancer) in front with every server's `:8080` as an
+upstream, e.g. `reverse_proxy server1:8080 server2:8080 { lb_policy least_conn health_uri /api/health }`.

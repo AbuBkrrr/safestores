@@ -21,9 +21,13 @@ async function shiftCashFigures(shiftId) {
     `SELECT method, COALESCE(SUM(amount), 0) AS total, COUNT(*)::int AS count FROM refunds WHERE shift_id = $1 GROUP BY method`,
     [shiftId]
   );
-  const cashIn = Number(pay.find((p) => p.method === 'cash')?.total || 0);
+  const { rows: jobs } = await db.query(
+    `SELECT method, COALESCE(SUM(amount), 0) AS total, COUNT(*)::int AS count FROM job_payments WHERE shift_id = $1 GROUP BY method`,
+    [shiftId]
+  );
+  const cashIn = Number(pay.find((p) => p.method === 'cash')?.total || 0) + Number(jobs.find((p) => p.method === 'cash')?.total || 0);
   const cashOut = Number(ref.find((p) => p.method === 'cash')?.total || 0);
-  return { payments: pay, refunds: ref, cashIn, cashOut };
+  return { payments: pay, refunds: ref, jobPayments: jobs, cashIn, cashOut };
 }
 
 // GET /api/stores/:storeId/shifts/current
@@ -121,7 +125,7 @@ async function shiftReport(req, res) {
     [shiftId]
   );
   const { rows: items } = await db.query(
-    `SELECT COALESCE(SUM(oi.quantity), 0)::int AS units FROM order_items oi JOIN orders o ON o.id = oi.order_id
+    `SELECT COALESCE(SUM(oi.quantity), 0) AS units FROM order_items oi JOIN orders o ON o.id = oi.order_id
      WHERE o.shift_id = $1 AND o.status = 'paid'`,
     [shiftId]
   );
@@ -181,21 +185,37 @@ async function buildDailyReport(storeId, date) {
     [storeId, tz, day]
   );
   const { rows: topItems } = await db.query(
-    `SELECT p.name, SUM(oi.quantity)::int AS units, COALESCE(SUM(oi.line_total), 0) AS total
+    `SELECT p.name, p.unit, p.sold_by, SUM(oi.quantity) AS units, COALESCE(SUM(oi.line_total), 0) AS total
      FROM order_items oi JOIN orders o ON o.id = oi.order_id JOIN products p ON p.id = oi.product_id
      WHERE o.store_id = $1 AND o.status = 'paid' AND ${inDay('o.paid_at')}
-     GROUP BY p.name ORDER BY units DESC LIMIT 10`,
+     GROUP BY p.name, p.unit, p.sold_by ORDER BY total DESC LIMIT 10`,
     [storeId, tz, day]
   );
+  // Service jobs (tailors, laundries): deposits and balances taken today.
+  const { rows: jobs } = await db.query(
+    `SELECT jp.method, COUNT(*)::int AS count, COALESCE(SUM(jp.amount), 0) AS total
+     FROM job_payments jp JOIN job_orders j ON j.id = jp.job_id
+     WHERE j.store_id = $1 AND ${inDay('jp.created_at')} GROUP BY jp.method ORDER BY total DESC`,
+    [storeId, tz, day]
+  );
+  const jobsTotal = jobs.reduce((a, r) => a + Number(r.total), 0);
   const num = (rows, keys) => rows.map((r) => { const o = { ...r }; keys.forEach((k) => { o[k] = Number(o[k]); }); return o; });
   const t = totals[0];
   return ({
     date: day instanceof Date ? day.toISOString().slice(0, 10) : String(day), timezone: tz,
     orders: t.orders, gross: Number(t.gross), discounts: Number(t.discounts), tax: Number(t.tax), average: r2(t.average),
     refunds: { total: Number(refunds[0].total), count: refunds[0].count },
-    net: r2(Number(t.gross) - Number(refunds[0].total)),
-    byMethod: num(byMethod, ['total']), byHour: num(byHour, ['total']), byCashier: num(byCashier, ['total']), topItems: num(topItems, ['total']),
+    jobPayments: { total: r2(jobsTotal), count: jobs.reduce((a, r) => a + r.count, 0), byMethod: num(jobs, ['total']) },
+    net: r2(Number(t.gross) + jobsTotal - Number(refunds[0].total)),
+    byMethod: mergeMethods(num(byMethod, ['total']), num(jobs, ['total'])), byHour: num(byHour, ['total']), byCashier: num(byCashier, ['total']), topItems: num(topItems, ['total', 'units']),
   });
+}
+
+/** Till and job payments by method, combined for the cash-up. */
+function mergeMethods(a, b) {
+  const m = new Map();
+  [...a, ...b].forEach((r) => m.set(r.method, r2((m.get(r.method) || 0) + Number(r.total))));
+  return [...m.entries()].map(([method, total]) => ({ method, total })).sort((x, y) => y.total - x.total);
 }
 
 module.exports = { currentShift, openShift, closeShift, listShifts, shiftReport, dailyReport, buildDailyReport };

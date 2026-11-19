@@ -50,3 +50,4 @@ desktop/release/
 
 # Generated at build time (frontend/scripts/licenses.mjs)
 frontend/public/third-party-licenses.json
+walkthrough/

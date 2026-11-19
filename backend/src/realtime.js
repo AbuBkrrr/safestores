@@ -24,6 +24,22 @@ function init(httpServer) {
     cors: { origin, credentials: true },
   });
 
+  // Several backend copies behind a load balancer: relay events between
+  // them through Postgres LISTEN/NOTIFY so a store's users get updates
+  // whichever copy they're connected to. Off in tests / when disabled.
+  if (process.env.NODE_ENV === 'production' && process.env.REALTIME_ADAPTER !== 'none') {
+    try {
+      const { createAdapter } = require('@socket.io/postgres-adapter');
+      const { Pool } = require('pg');
+      const adapterPool = new Pool({ ...require('./config/db').buildPoolConfig(), max: 2 });
+      adapterPool.on('error', (err) => console.error('Realtime adapter pool error:', err.message));
+      io.adapter(createAdapter(adapterPool));
+      console.log('🔁 Realtime events shared across instances (Postgres adapter).');
+    } catch (err) {
+      console.error('Realtime adapter not enabled:', err.message);
+    }
+  }
+
   // Authenticate the socket the same way REST requests are authenticated:
   // a JWT is passed in the handshake, not a cookie/session.
   io.use((socket, next) => {

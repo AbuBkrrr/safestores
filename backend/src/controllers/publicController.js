@@ -16,7 +16,7 @@ const UUID = /^[0-9a-f-]{36}$/i;
 async function trackOrder(req, res) {
   const { rows } = await db.query(
     `SELECT mo.id, mo.status, mo.subtotal, mo.total, mo.created_at, mo.fulfilled_at, mo.loyalty_discount_pct,
-            mo.payment_method, mo.payment_status, mo.paid_at, mo.cancel_reason, s.online_payments_enabled AND s.payout_subaccount_code IS NOT NULL AS can_pay_online,
+            mo.payment_method, mo.payment_status, mo.paid_at, mo.cancel_reason, mo.fulfilment_method, mo.status_note, mo.confirmed_at, mo.dispatched_at, s.online_payments_enabled AND s.payout_subaccount_code IS NOT NULL AS can_pay_online,
             s.name AS store_name, s.phone AS store_phone, s.address AS store_address, s.city AS store_city,
             COALESCE(s.currency_code, c.code) AS currency_code, COALESCE(s.currency_symbol, c.symbol) AS currency_symbol
      FROM marketplace_orders mo JOIN stores s ON s.id = mo.store_id LEFT JOIN currency_settings c ON c.id = 'default'
@@ -33,10 +33,10 @@ async function trackOrder(req, res) {
 }
 
 async function shareShop(req, res) {
-  const { storeId } = req.params;
-  const target = `${frontendBase()}/shop/${encodeURIComponent(storeId)}`;
+  const target = `${frontendBase()}/shop/${encodeURIComponent(req.params.storeId)}`;
   let store = null;
-  if (UUID.test(storeId)) {
+  const storeId = await require('../utils/shopSlug').resolveShopId(req.params.storeId);
+  if (storeId) {
     const { rows } = await db.query(
       `SELECT name, category, city FROM stores WHERE id = $1 AND subscription_status = 'active' AND marketplace_enabled = true`, [storeId]
     );
@@ -58,10 +58,10 @@ async function shareShop(req, res) {
 async function sitemap(req, res) {
   const base = frontendBase();
   const { rows } = await db.query(
-    `SELECT id, updated_at FROM stores WHERE subscription_status = 'active' AND marketplace_enabled = true ORDER BY name LIMIT 45000`
+    `SELECT id, shop_slug, updated_at FROM stores WHERE subscription_status = 'active' AND marketplace_enabled = true ORDER BY name LIMIT 45000`
   );
   const urls = [`<url><loc>${esc(`${base}/marketplace-home`)}</loc><changefreq>daily</changefreq></url>`,
-    ...rows.map((r) => `<url><loc>${esc(`${base}/shop/${r.id}`)}</loc><lastmod>${new Date(r.updated_at).toISOString().slice(0, 10)}</lastmod></url>`)];
+    ...rows.map((r) => `<url><loc>${esc(`${base}/shop/${r.shop_slug || r.id}`)}</loc><lastmod>${new Date(r.updated_at).toISOString().slice(0, 10)}</lastmod></url>`)];
   res.set('Cache-Control', 'public, max-age=3600').type('application/xml')
     .send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.join('')}</urlset>`);
 }
@@ -74,7 +74,7 @@ function robots(req, res) {
 async function storeInfo(req, res) {
   if (!UUID.test(req.params.storeId)) return res.status(404).json({ error: 'Store not found' });
   const { rows } = await db.query(
-    `SELECT s.id, s.name, s.category, s.city, s.address, s.phone,
+    `SELECT s.id, s.name, s.category, s.city, s.address, s.phone, s.shop_slug, s.shop_tagline, s.shop_logo_url, s.shop_bg_image_url, s.shop_brand_color, s.shop_bg_color, s.shop_font, s.shop_theme,
             COALESCE(s.currency_code, c.code) AS currency_code, COALESCE(s.currency_symbol, c.symbol) AS currency_symbol
      FROM stores s LEFT JOIN currency_settings c ON c.id = 'default'
      WHERE s.id = $1 AND s.subscription_status = 'active' AND s.marketplace_enabled = true`,

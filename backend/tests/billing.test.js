@@ -42,6 +42,28 @@ describe('Billing: store-facing', () => {
     expect(notifs.rows).toHaveLength(1);
   });
 
+  it('accepts a receipt (PDF or photo) with the claim and tells the super admin it is attached; refuses other files', async () => {
+    const { store, token } = await createActiveStoreWithAdmin();
+    const charge = await seedCharge(store.id);
+    const pdf = Buffer.from('%PDF-1.4\n% receipt\n');
+
+    const bad = await request().post(`/api/stores/${store.id}/billing/claim-payment`).set('Authorization', `Bearer ${token}`)
+      .field('chargeId', charge.id).field('method', 'bank_transfer')
+      .attach('proof', Buffer.from('hello'), { filename: 'notes.txt', contentType: 'text/plain' });
+    expect(bad.status).toBe(400);
+
+    const res = await request().post(`/api/stores/${store.id}/billing/claim-payment`).set('Authorization', `Bearer ${token}`)
+      .field('chargeId', charge.id).field('method', 'bank_transfer').field('reference', 'OPAY-77')
+      .attach('proof', pdf, { filename: 'transfer.pdf', contentType: 'application/pdf' });
+    expect(res.status).toBe(200);
+    expect(res.body.proofUrl).toMatch(/\.pdf$/);
+
+    const { rows } = await pool.query('SELECT claim_proof_url, claim_reference FROM billing_charges WHERE id = $1', [charge.id]);
+    expect(rows[0]).toEqual({ claim_proof_url: res.body.proofUrl, claim_reference: 'OPAY-77' });
+    const notifs = await pool.query(`SELECT message FROM notifications WHERE type = 'payment_claim' AND store_id = $1`, [store.id]);
+    expect(notifs.rows[0].message).toMatch(/receipt attached/);
+  });
+
   it('rejects an invalid claim method', async () => {
     const { store, token } = await createActiveStoreWithAdmin();
     const charge = await seedCharge(store.id);

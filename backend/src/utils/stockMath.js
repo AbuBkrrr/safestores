@@ -23,26 +23,35 @@ async function recomputeProductQuantities(client, productId) {
                           WHEN type = 'transfer_to_shelf' THEN -quantity
                           WHEN type = 'backroom_adjustment' THEN quantity
                           WHEN type = 'transfer_out' THEN -quantity
+                          WHEN type = 'customer_return' THEN quantity
+                          WHEN type = 'production_output' THEN quantity
+                          WHEN type = 'production_use' THEN -quantity
                           ELSE 0 END), 0) AS backroom_qty,
        COALESCE(SUM(CASE WHEN type = 'transfer_to_shelf' THEN quantity
                           WHEN type IN ('sale', 'damage', 'expiry') THEN -quantity
                           WHEN type = 'adjustment' THEN quantity
                           WHEN type = 'return' THEN quantity
+                          WHEN type = 'production_output_shelf' THEN quantity
+                          WHEN type = 'production_use_shelf' THEN -quantity
                           ELSE 0 END), 0) AS shelf_qty,
        COALESCE(SUM(CASE WHEN type = 'sale' THEN quantity
-                          WHEN type = 'return' THEN -quantity
+                          WHEN type IN ('return', 'refund_out') THEN -quantity
                           ELSE 0 END), 0) AS sold_qty,
-       COALESCE(SUM(CASE WHEN type IN ('damage', 'expiry') THEN quantity ELSE 0 END), 0) AS damaged_qty
+       COALESCE(SUM(CASE WHEN type IN ('damage', 'expiry', 'return_damaged') THEN quantity ELSE 0 END), 0) AS damaged_qty
      FROM stock_movements WHERE product_id = $1`,
     [productId]
   );
   const q = rows[0];
   const { rows: updated } = await client.query(
+    // Only when the numbers actually change — see the desktop copy of this
+    // file: re-stamping unchanged products made sync bounce them forever.
     `UPDATE products SET backroom_qty = $1, shelf_qty = $2, sold_qty = $3, damaged_qty = $4, updated_at = now()
-     WHERE id = $5 RETURNING *`,
+     WHERE id = $5 AND (backroom_qty, shelf_qty, sold_qty, damaged_qty) IS DISTINCT FROM ($1::numeric, $2::numeric, $3::numeric, $4::numeric)
+     RETURNING *`,
     [q.backroom_qty, q.shelf_qty, q.sold_qty, q.damaged_qty, productId]
   );
-  return updated[0];
+  if (updated[0]) return updated[0];
+  return (await client.query('SELECT * FROM products WHERE id = $1', [productId])).rows[0];
 }
 
 module.exports = { recomputeProductQuantities };

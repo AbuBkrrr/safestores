@@ -129,28 +129,59 @@ async function shrinkageReport(req, res) {
   const { storeId } = req.params;
   const days = Math.max(1, Math.min(365, Number(req.query.days) || 30));
 
+  // The store's own record of stock that went missing or bad. Booked auditors'
+  // shelf counts are deliberately NOT here: their findings go to SAFE Stores,
+  // not the shop, so staff can't learn what an audit is looking for.
   const { rows } = await db.query(
     `WITH incidents AS (
-       SELECT sa.product_id, sa.discrepancy, sa.created_at, 'shelf_audit' AS source
-       FROM shelf_audits sa WHERE sa.store_id = $1 AND sa.discrepancy < 0 AND sa.created_at >= now() - ($2 || ' days')::interval
-       UNION ALL
-       SELECT cc.product_id, cc.discrepancy, cc.created_at, 'cycle_count' AS source
+       SELECT cc.product_id, -cc.discrepancy AS qty, 'count' AS source
        FROM cycle_counts cc WHERE cc.store_id = $1 AND cc.discrepancy < 0 AND cc.created_at >= now() - ($2 || ' days')::interval
+       UNION ALL
+       SELECT sm.product_id, sm.quantity AS qty, CASE WHEN sm.type = 'expiry' THEN 'spoiled' ELSE 'damaged' END AS source
+       FROM stock_movements sm WHERE sm.store_id = $1 AND sm.type IN ('damage', 'expiry', 'return_damaged')
+         AND sm.created_at >= now() - ($2 || ' days')::interval
+       UNION ALL
+       SELECT hi.product_id, hi.qty_issued - hi.qty_received AS qty, 'handover_short' AS source
+       FROM stock_handover_items hi JOIN stock_handovers h ON h.id = hi.handover_id
+       WHERE h.store_id = $1 AND h.status = 'short' AND hi.qty_received < hi.qty_issued
+         AND h.received_at >= now() - ($2 || ' days')::interval
      )
-     SELECT p.id AS product_id, p.name, p.sku,
+     SELECT p.id AS product_id, p.name, p.sku, p.unit, p.sold_by,
             COUNT(*) AS incident_count,
-            SUM(-i.discrepancy) AS units_lost,
-            SUM(-i.discrepancy * p.cost_price) AS value_lost
+            SUM(i.qty) AS units_lost,
+            SUM(i.qty * p.cost_price) AS value_lost
      FROM incidents i
      JOIN products p ON p.id = i.product_id
-     GROUP BY p.id, p.name, p.sku
+     GROUP BY p.id, p.name, p.sku, p.unit, p.sold_by
      ORDER BY value_lost DESC`,
     [storeId, days]
   );
+  const { rows: bySource } = await db.query(
+    `WITH incidents AS (
+       SELECT cc.product_id, -cc.discrepancy AS qty, 'count' AS source
+       FROM cycle_counts cc WHERE cc.store_id = $1 AND cc.discrepancy < 0 AND cc.created_at >= now() - ($2 || ' days')::interval
+       UNION ALL
+       SELECT sm.product_id, sm.quantity, CASE WHEN sm.type = 'expiry' THEN 'spoiled' ELSE 'damaged' END
+       FROM stock_movements sm WHERE sm.store_id = $1 AND sm.type IN ('damage', 'expiry', 'return_damaged')
+         AND sm.created_at >= now() - ($2 || ' days')::interval
+       UNION ALL
+       SELECT hi.product_id, hi.qty_issued - hi.qty_received, 'handover_short'
+       FROM stock_handover_items hi JOIN stock_handovers h ON h.id = hi.handover_id
+       WHERE h.store_id = $1 AND h.status = 'short' AND hi.qty_received < hi.qty_issued
+         AND h.received_at >= now() - ($2 || ' days')::interval
+     )
+     SELECT i.source, COUNT(*)::int AS incidents, SUM(i.qty * p.cost_price) AS value_lost
+     FROM incidents i JOIN products p ON p.id = i.product_id GROUP BY i.source ORDER BY value_lost DESC`,
+    [storeId, days]
+  );
 
-  const totalValueLost = rows.reduce((sum, r) => sum + Number(r.value_lost), 0);
-  const totalUnitsLost = rows.reduce((sum, r) => sum + Number(r.units_lost), 0);
-  res.json({ days, totalValueLost, totalUnitsLost, byProduct: rows });
+  const byProduct = rows.map((r) => ({ ...r, units_lost: Number(r.units_lost), value_lost: Number(r.value_lost), incident_count: Number(r.incident_count) }));
+  const totalValueLost = byProduct.reduce((sum, r) => sum + r.value_lost, 0);
+  const totalUnitsLost = byProduct.reduce((sum, r) => sum + r.units_lost, 0);
+  res.json({
+    days, totalValueLost, totalUnitsLost, byProduct,
+    bySource: bySource.map((r) => ({ ...r, value_lost: Number(r.value_lost) })),
+  });
 }
 
 module.exports = { summary, stockByCategory, topProducts, movementTrends, lowStockDistribution, reorderAlerts, expiringSoon, shrinkageReport };

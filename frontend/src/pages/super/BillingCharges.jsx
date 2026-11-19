@@ -58,6 +58,7 @@ export default function BillingCharges() {
                     <span className="muted">
                       {METHOD_LABELS[c.claim_method] || c.claim_method}
                       {c.claim_reference ? ` · ${c.claim_reference}` : ''}
+                      {c.claim_proof_url && <> · <a href={c.claim_proof_url} target="_blank" rel="noreferrer">📎 receipt</a></>}
                     </span>
                   ) : '—'}
                 </td>

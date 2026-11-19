@@ -26,6 +26,9 @@ async function ensureMigrationsTable(client) {
 async function migrate() {
   const client = await pool.connect();
   try {
+    // Several backend copies may start together: serialise migrations so
+    // only one applies them; the others wait, then find nothing left to do.
+    await client.query('SELECT pg_advisory_lock(727002)');
     await ensureMigrationsTable(client);
 
     const applied = new Set(
@@ -62,6 +65,7 @@ async function migrate() {
     console.error('❌ Migration failed:', err.message);
     process.exitCode = 1;
   } finally {
+    await client.query('SELECT pg_advisory_unlock(727002)').catch(() => {});
     client.release();
     await pool.end();
   }

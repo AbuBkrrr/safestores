@@ -82,16 +82,19 @@ router.post('/audit-engagements', requireAuthOrStoreSyncKey('admin', 'manager'),
 // validation step would reject every legitimately-paired key, blocking
 // desktop's cloud-linking setup entirely, not just the marketplace
 // listing management page.
-router.get('/marketplace-profile', requireAuthOrStoreSyncKey('admin', 'manager'), storesCtrl.getMarketplaceProfile);
+router.get('/marketplace-profile', requireAuthOrStoreSyncKey('admin', 'manager', 'marketplace_manager'), storesCtrl.getMarketplaceProfile);
 router.patch('/marketplace-profile', requireAuthOrStoreSyncKey('admin', 'manager'), storesCtrl.updateMarketplaceProfile);
+router.post('/branding/:kind', requireAuth, scopeToOwnStore, requireRole('admin', 'manager'), require('../middleware/upload').upload.single('image'), storesCtrl.uploadBranding);
 
 // Marketplace order management — same dual-mode reasoning as above;
 // desktop's marketplaceController.js proxies all three with the sync key.
-router.get('/marketplace/orders', requireAuthOrStoreSyncKey('admin', 'manager'), marketplaceCtrl.listStoreOrders);
-router.get('/marketplace/orders/:orderId', requireAuthOrStoreSyncKey('admin', 'manager'), marketplaceCtrl.getStoreOrder);
-router.patch('/marketplace/orders/:orderId/fulfill', requireAuthOrStoreSyncKey('admin', 'manager'), marketplaceCtrl.fulfillOrder);
-router.patch('/marketplace/orders/:orderId/cancel', requireAuthOrStoreSyncKey('admin', 'manager'), marketplaceCtrl.cancelOrder);
-router.patch('/marketplace/orders/:orderId/refunded', requireAuthOrStoreSyncKey('admin', 'manager'), marketplaceCtrl.markRefunded);
+router.get('/marketplace/orders', requireAuthOrStoreSyncKey('admin', 'manager', 'marketplace_manager'), marketplaceCtrl.listStoreOrders);
+router.get('/marketplace/orders/:orderId', requireAuthOrStoreSyncKey('admin', 'manager', 'marketplace_manager'), marketplaceCtrl.getStoreOrder);
+router.patch('/marketplace/orders/:orderId/confirm', requireAuthOrStoreSyncKey('admin', 'manager', 'marketplace_manager'), marketplaceCtrl.confirmOrder);
+router.patch('/marketplace/orders/:orderId/dispatch', requireAuthOrStoreSyncKey('admin', 'manager', 'marketplace_manager'), marketplaceCtrl.dispatchOrder);
+router.patch('/marketplace/orders/:orderId/fulfill', requireAuthOrStoreSyncKey('admin', 'manager', 'marketplace_manager'), marketplaceCtrl.fulfillOrder);
+router.patch('/marketplace/orders/:orderId/cancel', requireAuthOrStoreSyncKey('admin', 'manager', 'marketplace_manager'), marketplaceCtrl.cancelOrder);
+router.patch('/marketplace/orders/:orderId/refunded', requireAuthOrStoreSyncKey('admin', 'manager', 'marketplace_manager'), marketplaceCtrl.markRefunded);
 
 // Everything else on this router is a specific staff member's action
 // (or, for the eleven routes above, either that or the store-as-a-whole
@@ -110,7 +113,8 @@ router.patch('/loyalty-settings', requireRole('admin', 'manager'), storesCtrl.up
 // Billing status/claim-payment must stay reachable even for a locked
 // store, so its admin can see why, know what's owed, and claim payment.
 router.get('/billing/status', billingCtrl.getBillingStatus);
-router.post('/billing/claim-payment', requireRole('admin', 'manager'), billingCtrl.claimPayment);
+// Multipart when a receipt is attached (field "proof"); plain JSON still works.
+router.post('/billing/claim-payment', requireRole('admin', 'manager'), (req, res, next) => require('../utils/storage').uploadDocument.single('proof')(req, res, (err) => (err ? res.status(400).json({ error: err.message }) : next())), billingCtrl.claimPayment);
 // Online payment via Paystack — an alternative to the manual claim above,
 // available only once a Super Admin has configured and enabled it (see
 // initializeGatewayPayment's own check). Same locked-store exemption as
@@ -142,6 +146,25 @@ router.get('/payouts', requireRole('admin', 'manager'), storePaymentsCtrl.getPay
 router.get('/payouts/banks', requireRole('admin'), storePaymentsCtrl.listBanks);
 router.post('/payouts/resolve', requireRole('admin'), storePaymentsCtrl.resolveAccount);
 router.put('/payouts', requireRole('admin'), storePaymentsCtrl.connectPayouts);
+const creditCtrl = require('../controllers/creditController');
+const CREDIT_ROLES = ['admin', 'manager', 'marketplace_manager'];
+const partnerCtrl = require('../controllers/partnerController');
+router.post('/partner-invites', requireRole('admin', 'manager'), partnerCtrl.createInvite);
+router.get('/couriers', requireRole('admin', 'manager', 'marketplace_manager'), partnerCtrl.listCouriers);
+router.patch('/couriers/:courierId', requireRole('admin', 'manager'), partnerCtrl.setCourierActive);
+router.patch('/marketplace/orders/:orderId/courier', requireRole('admin', 'manager', 'marketplace_manager'), partnerCtrl.assignCourier);
+router.get('/credit/accounts/:accountId/letter', requireRole('admin', 'manager'), creditCtrl.getLetter);
+router.patch('/credit/accounts/:accountId/fee', requireRole('admin', 'manager'), creditCtrl.recordFee);
+router.patch('/credit/accounts/:accountId/verify', requireRole('admin', 'manager'), creditCtrl.verifyWithGuarantor);
+router.patch('/credit/settings', requireRole('admin', 'manager'), creditCtrl.updateCreditSettings);
+router.get('/credit/guarantors', requireRole(...CREDIT_ROLES), creditCtrl.listGuarantors);
+router.post('/credit/guarantors', requireRole('admin', 'manager'), creditCtrl.saveGuarantor);
+router.patch('/credit/guarantors/:guarantorId', requireRole('admin', 'manager'), creditCtrl.saveGuarantor);
+router.get('/credit/accounts', requireRole(...CREDIT_ROLES), creditCtrl.listAccounts);
+router.patch('/credit/accounts/:accountId', requireRole('admin', 'manager'), creditCtrl.reviewAccount);
+router.get('/credit/statement', requireRole(...CREDIT_ROLES), creditCtrl.statement);
+router.patch('/marketplace/orders/:orderId/credit-settled', requireRole('admin', 'manager'), creditCtrl.markCreditSettled);
+router.get('/custom-domain/check', requireRole('admin', 'manager'), storesCtrl.checkCustomDomain);
 router.patch('/payouts', requireRole('admin'), storePaymentsCtrl.updatePaymentOptions);
 const storeSettingsCtrl = require('../controllers/storeSettingsController');
 router.get('/settings', storeSettingsCtrl.getSettings);
@@ -151,6 +174,16 @@ router.patch('/notifications/:id/read', storeNotifCtrl.markRead);
 // Everything below requires the store to actually be active (requireActiveStore
 // also covers "not locked for non-payment" — see middleware/auth.js).
 router.use(requireActiveStore);
+
+// "In-store only" lock. The owner's controls come first; after the
+// requireOnSite line, changes by shop-floor staff must come from inside the
+// shop (its saved internet connection, or GPS within the radius) when it is on.
+const onsiteCtrl = require('../controllers/onsiteController');
+router.get('/onsite', requireRole('admin'), onsiteCtrl.getOnsite);
+router.patch('/onsite', requireRole('admin'), onsiteCtrl.updateOnsite);
+router.post('/onsite/networks', requireRole('admin'), onsiteCtrl.addNetworkHere);
+router.delete('/onsite/networks/:index', requireRole('admin'), onsiteCtrl.removeNetwork);
+router.use(require('../middleware/onsite').requireOnSite);
 
 // Staff & Invites — how a store admin/manager brings on cashiers/staff over the LAN.
 router.get('/users', usersCtrl.listUsers);
@@ -184,10 +217,43 @@ router.get('/replenishment/purchase-orders', requireRole('admin', 'manager'), re
 router.post('/replenishment/purchase-orders', requireRole('admin', 'manager'), replenishmentCtrl.createPurchaseOrder);
 router.patch('/replenishment/purchase-orders/:id/send', requireRole('admin', 'manager'), replenishmentCtrl.sendPurchaseOrder);
 router.patch('/replenishment/purchase-orders/:id/cancel', requireRole('admin', 'manager'), replenishmentCtrl.cancelPurchaseOrder);
-router.post('/replenishment/purchase-orders/:id/receive', requireRole('admin', 'manager', 'staff'), replenishmentCtrl.receivePurchaseOrder);
+router.post('/replenishment/purchase-orders/:id/receive', requireRole('admin', 'manager', 'staff', 'store_manager'), replenishmentCtrl.receivePurchaseOrder);
 
 router.get('/arrivals', inventoryCtrl.listArrivals);
-router.post('/arrivals', requireRole('admin', 'manager', 'staff'), inventoryCtrl.createArrival);
+// Business-type tools: production (recipes / break-downs), waste log, job orders.
+const productionCtrl = require('../controllers/productionController');
+const PROD_ROLES = ['admin', 'manager', 'staff', 'store_manager'];
+router.get('/production/recipes', requireRole(...PROD_ROLES), productionCtrl.listRecipes);
+router.post('/production/recipes', requireRole('admin', 'manager', 'store_manager'), productionCtrl.saveRecipe);
+router.delete('/production/recipes/:id', requireRole('admin', 'manager', 'store_manager'), productionCtrl.archiveRecipe);
+router.get('/production/runs', requireRole(...PROD_ROLES), productionCtrl.listRuns);
+router.post('/production/runs', requireRole(...PROD_ROLES), productionCtrl.runProduction);
+router.get('/waste', requireRole('admin', 'manager', 'staff', 'store_manager', 'shelf_manager'), productionCtrl.wasteSummary);
+const jobsCtrl = require('../controllers/jobsController');
+const JOB_ROLES = ['admin', 'manager', 'staff', 'cashier', 'checkout'];
+router.get('/jobs/customers', requireRole(...JOB_ROLES), jobsCtrl.findCustomers);
+router.patch('/jobs/customers/:customerId/measurements', requireRole(...JOB_ROLES), jobsCtrl.saveMeasurements);
+router.get('/jobs', requireRole(...JOB_ROLES), jobsCtrl.listJobs);
+router.post('/jobs', requireRole(...JOB_ROLES), jobsCtrl.createJob);
+router.get('/jobs/tag/:code', requireRole(...JOB_ROLES), jobsCtrl.getByTag);
+router.get('/jobs/:id', requireRole(...JOB_ROLES), jobsCtrl.getJob);
+router.patch('/jobs/:id/repair', requireRole(...JOB_ROLES), jobsCtrl.updateRepair);
+router.post('/jobs/:id/notes', requireRole(...JOB_ROLES), jobsCtrl.addNote);
+router.patch('/jobs/:id/status', requireRole(...JOB_ROLES), jobsCtrl.setStatus);
+router.post('/jobs/:id/payments', requireRole(...JOB_ROLES), jobsCtrl.addPayment);
+router.post('/jobs/:id/collect', requireRole(...JOB_ROLES), jobsCtrl.collect);
+router.post('/jobs/:id/materials', requireRole('admin', 'manager', 'staff'), jobsCtrl.addMaterial);
+
+// Store room → shelf handovers (store manager issues, shelf manager confirms).
+const handoverCtrl = require('../controllers/handoverController');
+router.get('/handovers', requireRole('admin', 'manager', 'staff', 'store_manager', 'shelf_manager'), handoverCtrl.listHandovers);
+router.post('/handovers', requireRole('admin', 'manager', 'store_manager'), handoverCtrl.issueHandover);
+router.post('/handovers/:id/receive', requireRole('admin', 'manager', 'staff', 'shelf_manager'), handoverCtrl.receiveHandover);
+router.post('/handovers/:id/cancel', requireRole('admin', 'manager', 'store_manager'), handoverCtrl.cancelHandover);
+// Customer returns: security → store manager → store room (kept apart from supplier stock).
+router.get('/returns', requireRole('admin', 'manager', 'store_manager', 'security'), handoverCtrl.listReturns);
+router.post('/returns/:id/receive', requireRole('admin', 'manager', 'store_manager'), handoverCtrl.receiveReturn);
+router.post('/arrivals', requireRole('admin', 'manager', 'staff', 'store_manager'), inventoryCtrl.createArrival);
 
 // Expiry & Batch Tracking.
 router.get('/batches', requireRole('admin', 'manager'), batchesCtrl.listBatches);
@@ -243,23 +309,23 @@ router.delete('/webhooks/:id', requireRole('admin'), webhooksCtrl.deleteWebhook)
 router.post('/webhooks/:id/test', requireRole('admin'), webhooksCtrl.testWebhook);
 
 router.get('/movements', inventoryCtrl.listMovements);
-router.post('/movements', requireRole('admin', 'manager', 'staff'), inventoryCtrl.createMovement);
+router.post('/movements', requireRole('admin', 'manager', 'staff', 'store_manager', 'shelf_manager'), inventoryCtrl.createMovement);
 
 // Shelf Audits — a standing feature for a store's own staff (and an
 // engaged external 'auditor', matching desktop's role list exactly),
 // not gated behind a separate engagement check on every call — the
 // engagement itself is how an auditor got invited into the store at all.
-router.get('/audits', inventoryCtrl.listAudits);
-router.get('/audits/report', inventoryCtrl.auditReport);
-router.post('/audits', requireRole('admin', 'manager', 'staff', 'auditor', 'stock_taker'), requireActiveEngagement, inventoryCtrl.createAudit);
-router.get('/audits/conflicts', requireRole('admin', 'manager', 'staff', 'auditor', 'stock_taker'), inventoryCtrl.listConflicts);
-router.post('/audits/conflicts/:groupId/accept', requireRole('admin', 'manager', 'staff', 'auditor', 'stock_taker'), requireActiveEngagement, inventoryCtrl.acceptRecount);
+router.get('/audits', requireRole('auditor', 'stock_taker'), inventoryCtrl.listAudits);
+router.get('/audits/report', requireRole('auditor', 'stock_taker'), inventoryCtrl.auditReport);
+router.post('/audits', requireRole('auditor', 'stock_taker'), requireActiveEngagement, inventoryCtrl.createAudit);
+router.get('/audits/conflicts', requireRole('auditor', 'stock_taker'), inventoryCtrl.listConflicts);
+router.post('/audits/conflicts/:groupId/accept', requireRole('auditor', 'stock_taker'), requireActiveEngagement, inventoryCtrl.acceptRecount);
 
 // Receipt scanning (OCR).
 router.get('/receipts', receiptsCtrl.listReceipts);
-router.post('/receipts', requireRole('admin', 'manager', 'staff'), upload.single('receipt'), receiptsCtrl.uploadReceipt);
-router.post('/receipts/:receiptId/apply', requireRole('admin', 'manager'), receiptsCtrl.applyReceipt);
-router.post('/receipts/:receiptId/reject', requireRole('admin', 'manager'), receiptsCtrl.rejectReceipt);
+router.post('/receipts', requireRole('admin', 'manager', 'staff', 'store_manager'), upload.single('receipt'), receiptsCtrl.uploadReceipt);
+router.post('/receipts/:receiptId/apply', requireRole('admin', 'manager', 'store_manager'), receiptsCtrl.applyReceipt);
+router.post('/receipts/:receiptId/reject', requireRole('admin', 'manager', 'store_manager'), receiptsCtrl.rejectReceipt);
 
 // Camera/gallery images + barcode-to-product lookup.
 router.get('/images', imagesCtrl.listImages);
@@ -268,13 +334,20 @@ router.delete('/images/:imageId', requireRole('admin', 'manager'), imagesCtrl.de
 router.get('/barcode-lookup', imagesCtrl.barcodeLookup);
 
 // Analytics dashboard.
-router.get('/analytics/summary', analyticsCtrl.summary);
-router.get('/analytics/stock-by-category', analyticsCtrl.stockByCategory);
-router.get('/analytics/top-products', analyticsCtrl.topProducts);
-router.get('/analytics/movement-trends', analyticsCtrl.movementTrends);
-router.get('/analytics/low-stock-distribution', analyticsCtrl.lowStockDistribution);
-router.get('/analytics/reorder-alerts', analyticsCtrl.reorderAlerts);
-router.get('/analytics/expiring-soon', analyticsCtrl.expiringSoon);
+// Each role's own home screen — only what that role needs.
+const roleDash = require('../controllers/roleDashboardController');
+router.get('/my-dashboard', roleDash.myDashboard);
+// Security post at the exit: check a receipt, then mark it used.
+router.get('/exit-check', requireRole('admin', 'manager', 'security'), roleDash.lookup);
+router.post('/exit-check/:orderId', requireRole('admin', 'manager', 'security'), roleDash.markChecked);
+router.post('/exit-check/:orderId/returns', requireRole('admin', 'manager', 'security'), roleDash.confirmReturn);
+router.get('/analytics/summary', requireRole('admin', 'manager'), analyticsCtrl.summary);
+router.get('/analytics/stock-by-category', requireRole('admin', 'manager'), analyticsCtrl.stockByCategory);
+router.get('/analytics/top-products', requireRole('admin', 'manager'), analyticsCtrl.topProducts);
+router.get('/analytics/movement-trends', requireRole('admin', 'manager'), analyticsCtrl.movementTrends);
+router.get('/analytics/low-stock-distribution', requireRole('admin', 'manager'), analyticsCtrl.lowStockDistribution);
+router.get('/analytics/reorder-alerts', requireRole('admin', 'manager'), analyticsCtrl.reorderAlerts);
+router.get('/analytics/expiring-soon', requireRole('admin', 'manager'), analyticsCtrl.expiringSoon);
 router.get('/analytics/shrinkage', requireRole('admin', 'manager'), analyticsCtrl.shrinkageReport);
 const insightsCtrl = require('../controllers/insightsController');
 router.get('/insights/profit', requireRole('admin', 'manager'), insightsCtrl.profit);

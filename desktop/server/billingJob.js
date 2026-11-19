@@ -42,7 +42,12 @@ function computeTransactionTotal(storeId, dateStr) {
     `SELECT COALESCE(SUM(total), 0) AS total FROM orders
      WHERE store_id = ? AND status = 'paid' AND date(paid_at) = date(?)`
   ).get(storeId, dateStr);
-  return Number(row.total) || 0;
+  // Service work (tailors, laundries): deposits and balances received that day.
+  const jobs = db.prepare(
+    `SELECT COALESCE(SUM(jp.amount), 0) AS total FROM job_payments jp JOIN job_orders j ON j.id = jp.job_id
+     WHERE j.store_id = ? AND date(jp.created_at) = date(?)`
+  ).get(storeId, dateStr);
+  return (Number(row.total) || 0) + (Number(jobs.total) || 0);
 }
 
 function createNotification(type, storeId, billingChargeId, message) {

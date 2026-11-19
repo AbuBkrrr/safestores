@@ -3,8 +3,12 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>SAFE Stores — Inventory, POS &amp; Marketplace for Retail Stores</title>
-<meta name="description" content="SAFE Stores runs your shop from arrival to sale — products, stock, checkout, replenishment, and a public storefront. Works offline. Available for Web, Desktop, and Android." />
+<title>SAFE Stores — Inventory, POS &amp; Online Shop for Nigerian Businesses</title>
+<meta name="description" content="SAFE Stores runs your shop from arrival to sale: stock, checkout, staff, and your own online shop. Works without internet. For supermarkets, butchers, bakeries, tailors and more." />
+<meta property="og:title" content="SAFE Stores — run your shop from arrival to sale" />
+<meta property="og:description" content="Stock, checkout, staff and your own online shop, in one system that keeps working when the internet doesn't." />
+<meta property="og:image" content="https://safestores.name.ng/icon-192.png" />
+<meta name="theme-color" content="#0f7180" />
 <link rel="icon" type="image/png" href="icon-192.png" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,6 +17,7 @@
   :root {
     --teal: #0f7180;
     --teal-deep: #0a2e33;
+    --teal-tint: #e3f0f1;
     --paper: #fbf7f0;
     --paper-line: #e8ddc9;
     --ink: #16262a;
@@ -27,69 +32,53 @@
   }
   * { box-sizing: border-box; }
   html { scroll-behavior: smooth; }
+  section[id], footer[id] { scroll-margin-top: 80px; }
   @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
   }
-  body {
-    margin: 0;
-    font-family: var(--body);
-    color: var(--ink);
-    background: var(--paper);
-    -webkit-font-smoothing: antialiased;
-  }
+  body { margin: 0; font-family: var(--body); color: var(--ink); background: var(--paper); -webkit-font-smoothing: antialiased; }
   a { color: inherit; }
   :focus-visible { outline: 2px solid var(--amber-deep); outline-offset: 3px; }
   .wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+  .skip { position: absolute; left: -999px; top: 8px; background: var(--teal); color: #fff; padding: 8px 12px; z-index: 50; }
+  .skip:focus { left: 8px; }
 
-  nav {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 22px 0;
-  }
-  .brand { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 700; font-size: 19px; letter-spacing: -0.01em; }
-  .brand-mark {
-    width: 30px; height: 30px; border-radius: 7px; background: var(--teal);
-    color: #fff; display: flex; align-items: center; justify-content: center;
-    font-family: var(--mono); font-size: 12px; font-weight: 500;
-  }
-  nav .links { display: flex; gap: 28px; font-size: 14px; font-weight: 500; }
-  nav .links a { text-decoration: none; color: var(--ink-soft); }
-  nav .links a:hover { color: var(--teal); }
+  /* Header */
+  .site-head { position: sticky; top: 0; z-index: 20; background: rgba(251, 247, 240, 0.92); backdrop-filter: blur(8px); border-bottom: 1px solid transparent; transition: border-color .2s; }
+  .site-head.scrolled { border-bottom-color: var(--paper-line); }
+  nav { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; gap: 16px; }
+  .brand { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 700; font-size: 19px; letter-spacing: -0.01em; text-decoration: none; }
+  .brand-mark { width: 30px; height: 30px; border-radius: 7px; background: var(--teal); color: #fff; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: 12px; font-weight: 500; }
+  .nav-links { display: flex; gap: 24px; font-size: 14px; font-weight: 500; align-items: center; }
+  .nav-links a { text-decoration: none; color: var(--ink-soft); }
+  .nav-links a:hover { color: var(--teal); }
+  .nav-actions { display: flex; gap: 10px; align-items: center; }
+  .menu-btn { display: none; background: none; border: 1.5px solid var(--paper-line); border-radius: var(--radius); padding: 8px 10px; cursor: pointer; font-size: 16px; color: var(--ink); }
 
-  .hero { padding: 56px 0 72px; display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 56px; align-items: center; }
-  .eyebrow {
-    font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--teal); display: flex; align-items: center; gap: 8px; margin-bottom: 18px;
-  }
-  .eyebrow::before { content: ''; width: 20px; height: 1px; background: var(--teal); display: inline-block; }
-  h1 {
-    font-family: var(--display); font-weight: 700; font-size: 52px; line-height: 1.04;
-    letter-spacing: -0.02em; margin: 0 0 22px;
-  }
-  h1 em { font-style: normal; color: var(--teal); }
-  .lede { font-size: 18px; line-height: 1.6; color: var(--ink-soft); max-width: 46ch; margin: 0 0 30px; }
-  .cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
-  .btn {
-    font-family: var(--body); font-weight: 600; font-size: 15px; padding: 13px 22px;
-    border-radius: var(--radius); text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
-    border: 1.5px solid transparent; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease;
-  }
+  /* Buttons */
+  .btn { font-family: var(--body); font-weight: 600; font-size: 15px; padding: 13px 22px; border-radius: var(--radius); text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1.5px solid transparent; cursor: pointer; transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease; }
   .btn:hover { transform: translateY(-1px); }
+  .btn-sm { padding: 8px 14px; font-size: 14px; }
   .btn-primary { background: var(--teal); color: #fff; box-shadow: 0 2px 0 var(--teal-deep); }
   .btn-primary:hover { box-shadow: 0 4px 0 var(--teal-deep); }
   .btn-ghost { background: transparent; border-color: var(--paper-line); color: var(--ink); }
   .btn-ghost:hover { border-color: var(--teal); }
 
-  .receipt {
-    background: #fff; border: 1px solid var(--paper-line); border-radius: var(--radius);
-    box-shadow: 0 24px 48px -20px rgba(10, 46, 51, 0.25);
-    font-family: var(--mono); font-size: 13px; color: var(--ink);
-    position: relative; transform: rotate(1.2deg);
-  }
-  .receipt::before, .receipt::after {
-    content: ''; position: absolute; left: 0; right: 0; height: 10px;
-    background: repeating-linear-gradient(-45deg, var(--paper) 0 6px, transparent 6px 12px);
-  }
+  /* Hero */
+  .hero { padding-block: 48px 72px; display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 56px; align-items: center; }
+  .eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--teal); display: flex; align-items: center; gap: 8px; margin-bottom: 18px; }
+  .eyebrow::before { content: ''; width: 20px; height: 1px; background: var(--teal); display: inline-block; }
+  h1 { font-family: var(--display); font-weight: 700; font-size: 52px; line-height: 1.04; letter-spacing: -0.02em; margin: 0 0 22px; }
+  h1 em { font-style: normal; color: var(--teal); }
+  .lede { font-size: 18px; line-height: 1.6; color: var(--ink-soft); max-width: 46ch; margin: 0 0 30px; }
+  .cta-row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .trust { display: flex; gap: 18px; flex-wrap: wrap; margin-top: 26px; font-size: 13px; color: var(--ink-soft); padding: 0; list-style: none; }
+  .trust li::before { content: '✓ '; color: var(--ok); font-weight: 700; }
+
+  /* Receipt illustration */
+  .receipt { background: #fff; border: 1px solid var(--paper-line); border-radius: var(--radius); box-shadow: 0 24px 48px -20px rgba(10, 46, 51, 0.25); font-family: var(--mono); font-size: 13px; color: var(--ink); position: relative; transform: rotate(1.2deg); }
+  .receipt::before, .receipt::after { content: ''; position: absolute; left: 0; right: 0; height: 10px; background: repeating-linear-gradient(-45deg, var(--paper) 0 6px, transparent 6px 12px); }
   .receipt::before { top: -5px; }
   .receipt::after { bottom: -5px; }
   .receipt-inner { padding: 28px 24px; }
@@ -97,19 +86,18 @@
   .receipt-head .store { font-family: var(--display); font-weight: 700; font-size: 16px; letter-spacing: 0.02em; }
   .receipt-head .sub { color: var(--ink-soft); font-size: 11px; margin-top: 3px; }
   .receipt hr { border: none; border-top: 1px dashed var(--paper-line); margin: 14px 0; }
-  .receipt-item { display: flex; justify-content: space-between; padding: 9px 0; align-items: baseline; }
+  .receipt-item { display: flex; justify-content: space-between; padding: 9px 0; align-items: baseline; gap: 12px; }
   .receipt-item .name { font-weight: 500; }
   .receipt-item .name small { display: block; color: var(--ink-soft); font-size: 10.5px; margin-top: 2px; font-family: var(--body); }
-  .receipt-item .status {
-    font-size: 10px; padding: 2px 7px; border-radius: 20px; white-space: nowrap; font-family: var(--body); font-weight: 600;
-  }
+  .receipt-item .status { font-size: 10px; padding: 2px 7px; border-radius: 20px; white-space: nowrap; font-family: var(--body); font-weight: 600; }
   .status.live { background: #e4f3ea; color: var(--ok); }
   .status.wait { background: #fdefdc; color: var(--amber-deep); }
   .receipt-total { display: flex; justify-content: space-between; padding-top: 14px; font-weight: 600; font-size: 14px; }
   .barcode { height: 34px; margin-top: 18px; background: repeating-linear-gradient(90deg, var(--ink) 0 2px, transparent 2px 3px, var(--ink) 3px 4px, transparent 4px 7px); opacity: 0.85; }
   .barcode-label { text-align: center; font-size: 10px; letter-spacing: 0.15em; color: var(--ink-soft); margin-top: 6px; }
 
-  .features { padding: 64px 0; border-top: 1px solid var(--paper-line); }
+  /* Sections */
+  .section { padding-block: 64px; border-top: 1px solid var(--paper-line); }
   .section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 36px; flex-wrap: wrap; gap: 12px; }
   h2 { font-family: var(--display); font-size: 28px; font-weight: 600; letter-spacing: -0.01em; margin: 0; }
   .section-note { font-family: var(--mono); font-size: 12px; color: var(--ink-soft); }
@@ -119,55 +107,122 @@
   .card h3 { font-family: var(--display); font-size: 17px; font-weight: 600; margin: 0 0 8px; }
   .card p { font-size: 14px; line-height: 1.55; color: var(--ink-soft); margin: 0; }
 
-  .editions { padding: 64px 0 76px; border-top: 1px solid var(--paper-line); }
+  /* Who it's for */
+  .types { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .type { background: #fff; border: 1px solid var(--paper-line); border-radius: var(--radius); padding: 18px; }
+  .type .icon { font-size: 22px; }
+  .type h3 { font-family: var(--display); font-size: 16px; margin: 8px 0 4px; }
+  .type p { font-size: 13px; color: var(--ink-soft); margin: 0; line-height: 1.5; }
+
+  /* Steps */
+  .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; counter-reset: step; padding: 0; margin: 0 0 28px; list-style: none; }
+  .steps li { counter-increment: step; border-top: 2px solid var(--teal); padding-top: 16px; }
+  .steps li::before { content: '0' counter(step); font-family: var(--mono); font-size: 12px; color: var(--teal); display: block; margin-bottom: 8px; }
+  .steps h3 { font-family: var(--display); font-size: 17px; margin: 0 0 6px; }
+  .steps p { font-size: 14px; color: var(--ink-soft); margin: 0; line-height: 1.55; }
+  .steps .time { font-family: var(--mono); font-size: 11px; color: var(--amber-deep); margin-top: 8px; display: block; }
+
+  /* Pricing */
+  .pricing { display: grid; grid-template-columns: 1.2fr 1fr; gap: 28px; align-items: start; }
+  .price-box { background: var(--teal-deep); color: #fff; border-radius: var(--radius); padding: 30px; }
+  .price-box .big { font-family: var(--display); font-size: 40px; font-weight: 700; margin: 6px 0; }
+  .price-box p { color: #cfe3e5; font-size: 15px; line-height: 1.6; margin: 0 0 18px; }
+  .price-box .btn-primary { background: var(--amber); color: var(--teal-deep); box-shadow: 0 2px 0 var(--amber-deep); }
+  .sizes { width: 100%; border-collapse: collapse; font-size: 14px; background: #fff; border: 1px solid var(--paper-line); }
+  .sizes th, .sizes td { text-align: left; padding: 12px 14px; border-bottom: 1px solid var(--paper-line); }
+  .sizes th { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); font-weight: 500; }
+
+  /* Editions */
   .ed-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
-  .ed-card { background: #fff; border: 1px solid var(--paper-line); border-radius: var(--radius); padding: 26px; display: flex; flex-direction: column; }
-  .ed-card .tag { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 14px; padding: 3px 8px; border-radius: 20px; width: fit-content; }
+  .ed-card { background: #fff; border: 1px solid var(--paper-line); border-radius: var(--radius); padding: 26px; display: flex; flex-direction: column; gap: 8px; }
+  .ed-card .tag { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; padding: 3px 8px; border-radius: 20px; width: fit-content; }
   .tag.live { background: #e4f3ea; color: var(--ok); }
   .tag.wait { background: #fdefdc; color: var(--amber-deep); }
-  .ed-card h3 { font-family: var(--display); font-size: 20px; margin: 0 0 8px; }
-  .ed-card p { font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; margin: 0 0 22px; flex-grow: 1; }
-  .ed-card .btn { justify-content: center; width: 100%; }
-  .ed-card .btn-disabled { background: var(--paper); border: 1.5px solid var(--paper-line); color: var(--ink-soft); cursor: not-allowed; }
-  .ed-card .btn-disabled:hover { transform: none; }
+  .ed-card h3 { font-family: var(--display); font-size: 20px; margin: 0; }
+  .ed-card p { font-size: 13.5px; color: var(--ink-soft); line-height: 1.6; margin: 0 0 14px; flex-grow: 1; }
+  .ed-card .btn { width: 100%; }
+
+  /* Contact */
+  .contact { display: grid; grid-template-columns: 1fr 1.2fr; gap: 36px; }
+  .contact p { color: var(--ink-soft); line-height: 1.6; }
+  .contact-ways { list-style: none; padding: 0; margin: 18px 0 0; display: grid; gap: 10px; }
+  .contact-ways a { display: flex; gap: 10px; align-items: center; text-decoration: none; padding: 12px 14px; background: #fff; border: 1px solid var(--paper-line); border-radius: var(--radius); font-weight: 500; }
+  .contact-ways a:hover { border-color: var(--teal); }
+  form.lead { background: #fff; border: 1px solid var(--paper-line); border-radius: var(--radius); padding: 24px; display: grid; gap: 14px; }
+  form.lead .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  form.lead label { font-size: 13px; font-weight: 600; display: grid; gap: 6px; }
+  form.lead input, form.lead select, form.lead textarea { font: inherit; font-weight: 400; font-size: 15px; padding: 10px 12px; border: 1.5px solid var(--paper-line); border-radius: var(--radius); background: var(--paper); color: var(--ink); }
+  form.lead input:focus, form.lead select:focus, form.lead textarea:focus { outline: none; border-color: var(--teal); }
+  form.lead .note { font-size: 12px; color: var(--ink-soft); margin: 0; }
+  .form-msg { font-size: 14px; color: var(--ok); margin: 0; min-height: 1em; }
 
   footer { border-top: 1px solid var(--paper-line); padding: 32px 0 40px; }
   .foot-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
   .foot-row, .foot-row a { font-size: 13px; color: var(--ink-soft); text-decoration: none; }
-  .foot-links { display: flex; gap: 20px; }
+  .foot-links { display: flex; gap: 20px; flex-wrap: wrap; }
   .foot-links a:hover { color: var(--teal); }
 
+  @media (max-width: 960px) {
+    .types, .steps { grid-template-columns: repeat(2, 1fr); }
+    .pricing, .contact { grid-template-columns: 1fr; }
+  }
   @media (max-width: 860px) {
-    .hero { grid-template-columns: 1fr; padding-top: 32px; }
+    .hero { grid-template-columns: 1fr; padding-top: 24px; gap: 40px; }
     h1 { font-size: 38px; }
     .grid, .ed-grid { grid-template-columns: 1fr; }
     .receipt { transform: none; max-width: 340px; margin: 0 auto; }
-    nav .links { display: none; }
+    .menu-btn { display: inline-block; }
+    .nav-links { display: none; position: absolute; left: 0; right: 0; top: 100%; background: var(--paper); border-bottom: 1px solid var(--paper-line); flex-direction: column; align-items: stretch; gap: 0; padding: 8px 24px 16px; }
+    .nav-links.open { display: flex; }
+    .nav-links a { padding: 12px 0; border-bottom: 1px solid var(--paper-line); }
+    .nav-actions .btn-ghost { display: none; }
+  }
+  @media (max-width: 520px) {
+    .types, .steps { grid-template-columns: 1fr; }
+    form.lead .row { grid-template-columns: 1fr; }
+    .nav-actions .btn-primary { padding: 8px 10px; }
   }
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to content</a>
 
-<div class="wrap">
-  <nav>
-    <div class="brand"><span class="brand-mark">SS</span> SAFE Stores</div>
-    <div class="links">
-      <a href="#features">What it does</a>
-      <a href="#download">Download</a>
-      <a href="#contact">Contact</a>
-    </div>
-  </nav>
-</div>
+<header class="site-head" id="top">
+  <div class="wrap">
+    <nav aria-label="Main">
+      <a class="brand" href="#top"><span class="brand-mark">SS</span> SAFE Stores</a>
+      <div class="nav-links" id="nav-links">
+        <a href="#features">What it does</a>
+        <a href="#who">Who it's for</a>
+        <a href="#start">How to start</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#download">Download</a>
+        <a href="#contact">Contact</a>
+      </div>
+      <div class="nav-actions">
+        <a class="btn btn-ghost btn-sm" href="https://app.safestores.name.ng/login">Sign in</a>
+        <a class="btn btn-primary btn-sm" href="https://app.safestores.name.ng/signup">Start free</a>
+        <button class="menu-btn" type="button" aria-controls="nav-links" aria-expanded="false" aria-label="Open menu">☰</button>
+      </div>
+    </nav>
+  </div>
+</header>
 
-<header class="wrap hero">
+<main id="main">
+<section class="wrap hero" aria-labelledby="hero-title">
   <div>
-    <div class="eyebrow">Inventory · POS · Marketplace</div>
-    <h1>Run your shop from<br><em>arrival to sale.</em></h1>
-    <p class="lede">Stock, checkout, replenishment, and a public storefront — in one system that keeps working even when the internet doesn't.</p>
+    <div class="eyebrow">Inventory · POS · Online shop</div>
+    <h1 id="hero-title">Run your shop from<br><em>arrival to sale.</em></h1>
+    <p class="lede">Stock, checkout, staff and your own online shop — in one system that keeps working even when the internet doesn't.</p>
     <div class="cta-row">
-      <a href="#download" class="btn btn-primary">Get SAFE Stores →</a>
+      <a href="https://app.safestores.name.ng/signup" class="btn btn-primary">Start free →</a>
       <a href="#features" class="btn btn-ghost">See what it does</a>
     </div>
+    <ul class="trust">
+      <li>No upfront fee</li>
+      <li>Works offline</li>
+      <li>Set up in a day</li>
+    </ul>
   </div>
 
   <div class="receipt" aria-hidden="true">
@@ -177,108 +232,238 @@
         <div class="sub">safestores.name.ng</div>
       </div>
       <hr>
-      <div class="receipt-item">
-        <span class="name">Web Edition<small>Any device, browser only</small></span>
-        <span class="status live">Live</span>
-      </div>
-      <div class="receipt-item">
-        <span class="name">Desktop Edition<small>Windows · Mac · Linux</small></span>
-        <span class="status live">Live</span>
-      </div>
-      <div class="receipt-item">
-        <span class="name">Android App<small>Camera scan · offline · push</small></span>
-        <span class="status wait">Coming Soon</span>
-      </div>
+      <div class="receipt-item"><span class="name">Web Edition<small>Any phone, tablet or computer</small></span><span class="status live">Live</span></div>
+      <div class="receipt-item"><span class="name">Desktop Edition<small>Windows · Mac · Linux · offline</small></span><span class="status live">Live</span></div>
+      <div class="receipt-item"><span class="name">Android App<small>Camera scan · offline · push</small></span><span class="status wait">Coming soon</span></div>
       <hr>
-      <div class="receipt-total"><span>One store, every edition</span><span>₦ —</span></div>
+      <div class="receipt-total"><span>Upfront cost</span><span>₦0</span></div>
       <div class="barcode"></div>
       <div class="barcode-label">THANK YOU FOR CHOOSING SAFE STORES</div>
     </div>
   </div>
-</header>
+</section>
 
-<section class="features wrap" id="features">
+<section class="section wrap" id="features" aria-labelledby="features-title">
   <div class="section-head">
-    <h2>What it actually does</h2>
+    <h2 id="features-title">What it actually does</h2>
     <div class="section-note">no fluff — this is the whole job</div>
   </div>
   <div class="grid">
-    <div class="card">
-      <div class="num">01</div>
-      <h3>Stock, start to finish</h3>
-      <p>Record arrivals, move stock to the shelf, count it, and track batches by expiry — with FIFO markdowns as dates approach.</p>
-    </div>
-    <div class="card">
-      <div class="num">02</div>
-      <h3>POS checkout</h3>
-      <p>Scan or add items, take payment, print a receipt. Split checkout mode lets one person scan while another handles cash.</p>
-    </div>
-    <div class="card">
-      <div class="num">03</div>
-      <h3>Smart replenishment</h3>
-      <p>Reorder suggestions from real sales velocity, not guesswork. Turns into a purchase order in one click.</p>
-    </div>
-    <div class="card">
-      <div class="num">04</div>
-      <h3>Works with no signal</h3>
-      <p>Every write queues locally and replays once you're back online. Reads fall back to the last successful load.</p>
-    </div>
-    <div class="card">
-      <div class="num">05</div>
-      <h3>Public storefront</h3>
-      <p>Opt in and shoppers can browse and order — guest checkout included. Orders land straight in your dashboard.</p>
-    </div>
-    <div class="card">
-      <div class="num">06</div>
-      <h3>Built for your whole team</h3>
-      <p>Admin, manager, cashier, stock staff, and external auditors — each sees exactly what their role needs.</p>
-    </div>
+    <div class="card"><div class="num">01</div><h3>Stock, start to finish</h3><p>Scan the supplier's invoice into the store room, hand stock to the shelves, count it, and track every batch by its expiry date.</p></div>
+    <div class="card"><div class="num">02</div><h3>Fast checkout</h3><p>Scan or search, weigh items sold by the kilo, take cash, transfer, card or split payment, and send the receipt by print or WhatsApp.</p></div>
+    <div class="card"><div class="num">03</div><h3>Works with no signal</h3><p>Sales and stock changes save on the device and sync when the internet is back. Shop computers keep each other up to date over the shop Wi-Fi.</p></div>
+    <div class="card"><div class="num">04</div><h3>Receipt check at the door</h3><p>Security scans the receipt's QR code and ticks each item against the bag. Each receipt works once, so nothing leaves unpaid.</p></div>
+    <div class="card"><div class="num">05</div><h3>Staff can't sell from home</h3><p>Switch on "in-store only" and cashiers can only sell or move stock from inside the shop. You get an alert if anyone tries from outside.</p></div>
+    <div class="card"><div class="num">06</div><h3>Your own online shop</h3><p>Your shop gets its own page with your logo and colours. Customers order for delivery or pickup, and orders land straight in your dashboard.</p></div>
+    <div class="card"><div class="num">07</div><h3>Smart reordering</h3><p>Reorder suggestions from what actually sells, turned into a purchase order in one tap.</p></div>
+    <div class="card"><div class="num">08</div><h3>Credit sales, guaranteed</h3><p>Let trusted customers buy now and pay later, backed by their bank, cooperative or pension fund after a proper KYC check.</p></div>
+    <div class="card"><div class="num">09</div><h3>A screen for every role</h3><p>Owner, manager, cashier, store manager, shelf manager and security each see only what their job needs.</p></div>
   </div>
 </section>
 
-<section class="editions wrap" id="download">
+<section class="section wrap" id="who" aria-labelledby="who-title">
   <div class="section-head">
-    <h2>Choose your edition</h2>
-    <div class="section-note">same features, different device</div>
+    <h2 id="who-title">Built for your kind of business</h2>
+    <div class="section-note">pick your trade at sign-up — the right tools switch on</div>
+  </div>
+  <div class="types">
+    <div class="type"><div class="icon" aria-hidden="true">🛒</div><h3>Supermarkets &amp; shops</h3><p>Barcodes, shelves, expiry dates and a busy till.</p></div>
+    <div class="type"><div class="icon" aria-hidden="true">🥩</div><h3>Butchers</h3><p>Sell by weight, break down carcasses into cuts, track freshness.</p></div>
+    <div class="type"><div class="icon" aria-hidden="true">🐄</div><h3>Abattoirs</h3><p>Record every animal broken down, with the real yield in kg.</p></div>
+    <div class="type"><div class="icon" aria-hidden="true">🥬</div><h3>Fresh produce</h3><p>See what spoils soon and what waste cost you this week.</p></div>
+    <div class="type"><div class="icon" aria-hidden="true">🍦</div><h3>Ice cream</h3><p>Recipes that turn milk and sugar into cups, at the true cost.</p></div>
+    <div class="type"><div class="icon" aria-hidden="true">🍞</div><h3>Bakeries</h3><p>Batch production with ingredients taken off stock automatically.</p></div>
+    <div class="type"><div class="icon" aria-hidden="true">🧵</div><h3>Tailors</h3><p>Measurements, deposits, due dates and fabric used, per job.</p></div>
+    <div class="type"><div class="icon" aria-hidden="true">🧺</div><h3>Laundries</h3><p>Job tickets from drop-off to collection, with balances owed.</p></div>
+    <div class="type"><div class="icon" aria-hidden="true">🔧</div><h3>Mechanics</h3><p>Check in cars by plate and mileage, QR-tag the keys, track parts and labour.</p></div>
+    <div class="type"><div class="icon" aria-hidden="true">📱</div><h3>Phone &amp; computer repair</h3><p>Log each device by IMEI and condition, tag it, and hand it back only to its owner.</p></div>
+    <div class="type"><div class="icon" aria-hidden="true">⚙️</div><h3>Engineering &amp; machines</h3><p>Generators, pumps and machines: fault, diagnosis, parts and notes in one ticket.</p></div>
+  </div>
+</section>
+
+<section class="section wrap" id="start" aria-labelledby="start-title">
+  <div class="section-head">
+    <h2 id="start-title">How to get started</h2>
+    <div class="section-note">most shops sell on day one</div>
+  </div>
+  <ol class="steps">
+    <li><h3>Sign up</h3><p>Your shop's name, your trade, and your login. That's it.</p><span class="time">5 minutes</span></li>
+    <li><h3>Activate</h3><p>Enter the access code from your SAFE Stores agent. Your shop opens at once.</p><span class="time">1 minute</span></li>
+    <li><h3>Add products &amp; team</h3><p>Type them in, import a spreadsheet, or photograph a supplier's invoice. Invite staff with a QR code.</p><span class="time">1–2 hours</span></li>
+    <li><h3>Start selling</h3><p>Ring up sales, issue receipts, and open your online shop when you're ready.</p><span class="time">day one</span></li>
+  </ol>
+  <div class="cta-row">
+    <a href="https://app.safestores.name.ng/signup" class="btn btn-primary">Create your shop →</a>
+    <a href="#contact" class="btn btn-ghost" data-topic="setup">Book a free setup visit</a>
+  </div>
+</section>
+
+<section class="section wrap" id="pricing" aria-labelledby="pricing-title">
+  <div class="section-head">
+    <h2 id="pricing-title">Simple pricing</h2>
+    <div class="section-note">you only pay when you sell</div>
+  </div>
+  <div class="pricing">
+    <div class="price-box">
+      <div class="section-note" style="color:#9cc6ca">No setup fee · no monthly fee</div>
+      <div class="big">A small share of each day's sales</div>
+      <p>A set percentage of your daily sales, agreed for your store when it is activated. No sales, no charge. Your Billing page shows exactly what you owe, day by day, and you can pay by transfer, USSD or card.</p>
+      <a href="#contact" class="btn btn-primary" data-topic="pricing">Ask for your rate</a>
+    </div>
+    <table class="sizes">
+      <caption class="section-note" style="text-align:left;padding-bottom:10px;caption-side:top">Pick the size that fits — change it any time</caption>
+      <thead><tr><th>Size</th><th>For</th><th>Products</th><th>Staff logins</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Mini</strong></td><td>A shop run by 1–2 people</td><td>200</td><td>3</td></tr>
+        <tr><td><strong>Midi</strong></td><td>A growing store with a team</td><td>2,000</td><td>20</td></tr>
+        <tr><td><strong>Mega</strong></td><td>Supermarkets and chains</td><td>Unlimited</td><td>Unlimited</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="section wrap" id="download" aria-labelledby="download-title">
+  <div class="section-head">
+    <h2 id="download-title">Choose your edition</h2>
+    <div class="section-note">same shop, any device</div>
   </div>
   <div class="ed-grid">
     <div class="ed-card">
       <span class="tag live">Live</span>
       <h3>Web</h3>
-      <p>No install. Works in any modern browser, on any device your staff already have. Best for multiple tills on one Wi-Fi network, or a store admin managing things remotely.</p>
-      <!-- The web app lives on its own subdomain (this landing page is on the
-           apex domain via GitHub Pages). See LAUNCH_GUIDE.md step 5. -->
+      <p>No install. Works in the browser on the phones, tablets and computers your staff already have. Best for several tills on one Wi-Fi, or managing your shop from anywhere.</p>
       <a class="btn btn-primary" href="https://app.safestores.name.ng/signup">Start free →</a>
-      <a class="btn btn-ghost" href="https://app.safestores.name.ng/login" style="margin-top:8px">Sign in</a>
+      <a class="btn btn-ghost" href="https://app.safestores.name.ng/login">Sign in</a>
     </div>
     <div class="ed-card">
       <span class="tag live">Live</span>
       <h3>Desktop</h3>
-      <p>One installer, works fully offline with its own local database. Ideal for a single till or a small shop that doesn't need a shared server.</p>
-      <!-- Point this at your hosted installer file(s) — see desktop/README.md for how to build one -->
-      <a class="btn btn-primary" href="#contact">Request Installer →</a>
+      <p>Installs on the shop computer and works fully offline with its own database. Other devices in the shop connect to it over the Wi-Fi, and it backs up online when the internet is on.</p>
+      <a class="btn btn-primary" href="#contact" data-topic="desktop">Request the installer →</a>
     </div>
     <div class="ed-card">
-      <span class="tag wait">Coming Soon</span>
+      <span class="tag wait">Coming soon</span>
       <h3>Android</h3>
-      <p>Camera barcode scanning, offline photo capture, and push notifications for new orders — built and ready, pending Google Play submission.</p>
-      <a class="btn btn-disabled" aria-disabled="true">Not Yet Published</a>
+      <p>Camera barcode scanning, offline photo capture and push alerts for new orders — built, and waiting on Google Play. Until then, the web edition works on any Android phone.</p>
+      <a class="btn btn-primary" href="#contact" data-topic="android">Tell me when it's out</a>
+      <a class="btn btn-ghost" href="https://app.safestores.name.ng/login">Use it in the browser now</a>
     </div>
   </div>
 </section>
 
-<footer class="wrap" id="contact">
+<section class="section wrap" id="contact" aria-labelledby="contact-title">
+  <div class="contact">
+    <div>
+      <h2 id="contact-title">Talk to us</h2>
+      <p>Questions, a demo, a setup visit, the desktop installer — send a message and we'll get back to you within one working day.</p>
+      <ul class="contact-ways">
+        <li><a href="mailto:support@safestores.name.ng">✉️ support@safestores.name.ng</a></li>
+        <li><a href="https://app.safestores.name.ng/marketplace-home">🛍️ Browse shops already on SAFE Stores</a></li>
+      </ul>
+    </div>
+    <form class="lead" id="lead-form" novalidate>
+      <div class="row">
+        <label>Your name<input name="name" autocomplete="name" required></label>
+        <label>Phone or WhatsApp<input name="phone" type="tel" autocomplete="tel" required></label>
+      </div>
+      <div class="row">
+        <label>Shop name<input name="shop" autocomplete="organization"></label>
+        <label>I'd like to…
+          <select name="topic" id="lead-topic">
+            <option value="demo">See a demo</option>
+            <option value="setup">Book a free setup visit</option>
+            <option value="pricing">Know my rate</option>
+            <option value="desktop">Get the desktop installer</option>
+            <option value="android">Hear when the Android app is out</option>
+            <option value="other">Something else</option>
+          </select>
+        </label>
+      </div>
+      <label>Message<textarea name="message" rows="4" placeholder="What do you sell, and how many tills or staff do you have?"></textarea></label>
+      <button class="btn btn-primary" type="submit">Send message →</button>
+      <p class="note">This opens your email app with the message ready to send.</p>
+      <p class="form-msg" id="form-msg" role="status" aria-live="polite"></p>
+    </form>
+  </div>
+</section>
+</main>
+
+<footer class="wrap">
   <div class="foot-row">
-    <span>A product of A I Brains Ventures</span>
+    <span>© <span id="year">2026</span> SAFE Stores · A product of A I Brains Ventures</span>
     <div class="foot-links">
-      <a href="mailto:support@safestores.name.ng">support@safestores.name.ng</a>
       <a href="#features">What it does</a>
+      <a href="#pricing">Pricing</a>
       <a href="https://app.safestores.name.ng/marketplace-home">Shop online</a>
+      <a href="https://app.safestores.name.ng/auditor-signup">Become an auditor</a>
       <a href="https://app.safestores.name.ng/terms">Terms</a>
       <a href="https://app.safestores.name.ng/privacy">Privacy</a>
     </div>
   </div>
 </footer>
 
+<script>
+  (function () {
+    var EMAIL = 'support@safestores.name.ng';
+    var TOPICS = {
+      demo: 'Demo request', setup: 'Free setup visit', pricing: 'Pricing question',
+      desktop: 'Desktop installer request', android: 'Android app — notify me', other: 'Question',
+    };
+
+    // Mobile menu
+    var btn = document.querySelector('.menu-btn');
+    var links = document.getElementById('nav-links');
+    function setMenu(open) {
+      links.classList.toggle('open', open);
+      btn.setAttribute('aria-expanded', String(open));
+      btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      btn.textContent = open ? '✕' : '☰';
+    }
+    btn.addEventListener('click', function () { setMenu(!links.classList.contains('open')); });
+    links.addEventListener('click', function (e) { if (e.target.tagName === 'A') setMenu(false); });
+    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') setMenu(false); });
+
+    // Header border once the page scrolls
+    var head = document.querySelector('.site-head');
+    function onScroll() { head.classList.toggle('scrolled', window.scrollY > 8); }
+    window.addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+    // Buttons that lead to the contact form pick its topic
+    var topic = document.getElementById('lead-topic');
+    document.querySelectorAll('[data-topic]').forEach(function (a) {
+      a.addEventListener('click', function () {
+        topic.value = a.getAttribute('data-topic');
+        setTimeout(function () { document.querySelector('#lead-form input[name="name"]').focus({ preventScroll: true }); }, 400);
+      });
+    });
+
+    // Contact form: compose an email (static site, no server)
+    var form = document.getElementById('lead-form');
+    var msg = document.getElementById('form-msg');
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var f = form.elements;
+      if (!f.name.value.trim() || !f.phone.value.trim()) {
+        msg.style.color = '#b3261e';
+        msg.textContent = 'Please add your name and a phone number so we can reach you.';
+        (f.name.value.trim() ? f.phone : f.name).focus();
+        return;
+      }
+      var subject = TOPICS[f.topic.value] + (f.shop.value.trim() ? ' — ' + f.shop.value.trim() : '');
+      var body = [
+        'Name: ' + f.name.value.trim(),
+        'Phone/WhatsApp: ' + f.phone.value.trim(),
+        'Shop: ' + (f.shop.value.trim() || '-'),
+        'Topic: ' + TOPICS[f.topic.value],
+        '', f.message.value.trim(),
+      ].join('\n');
+      window.location.href = 'mailto:' + EMAIL + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+      msg.style.color = '';
+      msg.textContent = 'Your email app should open with the message ready. If it does not, email ' + EMAIL + '.';
+    });
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+  })();
+</script>
 </body>
 </html>

@@ -7,6 +7,7 @@ const { emitToStore } = require('../realtime');
 const { computeTotals, discountPercentOf, refundAmountFor, allocatePayments, r2, PAYMENT_METHODS } = require('../utils/pricing');
 const { logActivity } = require('../utils/activityLog');
 const { localDate, utcWindowFor } = require('../utils/tz');
+const { parseQty, roundQty } = require('../utils/qty');
 
 // See backend/src/controllers/ordersController.js for the full rationale
 // (this is the SQLite-flavored twin for the offline desktop edition).
@@ -113,8 +114,8 @@ function recalcOrderTotals(orderId) {
 
 function addItem(req, res) {
   const { storeId, orderId } = req.params;
-  const { id, productId, quantity, addedVia } = req.body;
-  if (!productId || !quantity || quantity <= 0) return res.status(400).json({ error: 'productId and a positive quantity are required' });
+  const { id, productId, addedVia } = req.body;
+  if (!productId || !(Number(req.body.quantity) > 0)) return res.status(400).json({ error: 'productId and a positive quantity are required' });
 
   if (id) {
     const existing = db.prepare('SELECT * FROM order_items WHERE id = ?').get(id);
@@ -129,7 +130,11 @@ function addItem(req, res) {
 
   const product = db.prepare('SELECT * FROM products WHERE id = ? AND store_id = ?').get(productId, storeId);
   if (!product) return res.status(404).json({ error: 'Product not found' });
-  if (product.shelf_qty < quantity) return res.status(400).json({ error: `Only ${product.shelf_qty} on the shelf — not enough stock for this quantity` });
+  // Whole units for items sold per piece; up to 3 decimals for kg, litres, yards.
+  const pq = parseQty(req.body.quantity, product);
+  if (pq.error) return res.status(400).json({ error: pq.error });
+  const quantity = pq.value;
+  if (product.shelf_qty < quantity) return res.status(400).json({ error: `Only ${product.shelf_qty} ${product.unit || ''} on the shelf — not enough stock for this quantity` });
 
   const unitPrice = Number(product.cost_price) * Number(product.price_multiplier);
   const lineTotal = Math.round(unitPrice * quantity * 100) / 100;
@@ -333,17 +338,29 @@ function refundOrder(req, res) {
   if (!order || order.status !== 'paid') return res.status(400).json({ error: 'Only paid sales can be refunded' });
   if (method === 'credit' && !order.store_customer_id) return res.status(400).json({ error: 'Store-credit refunds need a sale linked to a customer' });
 
+  // Stores with a security post: refunds only for goods security has received back.
+  const hasSecurity = !!db.prepare(`SELECT 1 FROM users WHERE store_id = ? AND role = 'security' AND status = 'active' LIMIT 1`).get(storeId);
   const lines = [];
   let total = 0;
   for (const it of items) {
-    const qty = parseInt(it.quantity, 10);
-    if (!(qty > 0)) return res.status(400).json({ error: 'Each refund quantity must be at least 1' });
+    const qty = roundQty(it.quantity);
+    if (!(qty > 0)) return res.status(400).json({ error: 'Each refund quantity must be more than 0' });
     const line = db.prepare(
       `SELECT oi.*, COALESCE((SELECT SUM(ri.quantity) FROM refund_items ri WHERE ri.order_item_id = oi.id), 0) AS refunded_qty
        FROM order_items oi WHERE oi.id = ? AND oi.order_id = ?`
     ).get(it.orderItemId, orderId);
     if (!line) return res.status(404).json({ error: 'Item not found on this sale' });
-    if (qty > line.quantity - line.refunded_qty) return res.status(400).json({ error: `Only ${line.quantity - line.refunded_qty} of that item can still be refunded` });
+    const refundable = roundQty(Number(line.quantity) - Number(line.refunded_qty));
+    if (qty > refundable + 1e-9) return res.status(400).json({ error: `Only ${refundable} of that item can still be refunded` });
+    if (hasSecurity) {
+      const back = db.prepare('SELECT COALESCE(SUM(quantity), 0) AS n FROM security_returns WHERE order_item_id = ?').get(line.id).n;
+      if (Math.round((Number(line.refunded_qty) + qty) * 1000) > Math.round(Number(back) * 1000)) {
+        return res.status(400).json({
+          code: 'SECURITY_RETURN_REQUIRED',
+          error: `Security has confirmed ${Math.max(0, roundQty(back - line.refunded_qty))} of this item back. Send the customer to the security post with the goods and receipt first.`,
+        });
+      }
+    }
     const amount = refundAmountFor({ lineTotal: line.line_total, lineQty: line.quantity, qty, orderSubtotal: order.subtotal, orderTotal: order.total });
     total = r2(total + amount);
     lines.push({ line, qty, amount, restock: it.restock !== false });
@@ -358,6 +375,14 @@ function refundOrder(req, res) {
     for (const { line, qty, amount, restock } of lines) {
       db.prepare('INSERT INTO refund_items (id, refund_id, order_item_id, product_id, quantity, amount, restocked) VALUES (?,?,?,?,?,?,?)')
         .run(crypto.randomUUID(), refundId, line.id, line.product_id, qty, amount, restock ? 1 : 0);
+      if (hasSecurity) {
+        // The goods are with security; the store manager receives them into the
+        // store room (as customer returns) from Shelf Handovers → Returns.
+        db.prepare(`INSERT INTO stock_movements (id, store_id, product_id, type, quantity, note, performed_by) VALUES (?,?,?,'refund_out',?,?,?)`)
+          .run(crypto.randomUUID(), storeId, line.product_id, qty, `Refund on ${order.receipt_number} (goods held by security)`, req.user.sub);
+        recomputeProductQuantities(db, line.product_id);
+        continue;
+      }
       db.prepare(`INSERT INTO stock_movements (id, store_id, product_id, type, quantity, note, performed_by) VALUES (?,?,?,'return',?,?,?)`)
         .run(crypto.randomUUID(), storeId, line.product_id, qty, `Refund on ${order.receipt_number}`, req.user.sub);
       if (!restock) {

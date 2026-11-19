@@ -60,10 +60,11 @@ async function exportChanges(req, res) {
     db.query('SELECT * FROM batches WHERE store_id = $1 AND created_at > $2 ORDER BY created_at ASC', [storeId, since]),
     db.query('SELECT * FROM receipts WHERE store_id = $1 AND created_at > $2 ORDER BY created_at ASC', [storeId, since]),
     // Orders re-export when paid or cancelled later (a parked sale), not only when created.
-    db.query(`SELECT * FROM orders WHERE store_id = $1 AND (created_at > $2 OR paid_at > $2 OR cancelled_at > $2) ORDER BY created_at ASC`, [storeId, since]),
+    // …and when changed later (the exit check), via updated_at.
+    db.query(`SELECT * FROM orders WHERE store_id = $1 AND (created_at > $2 OR paid_at > $2 OR cancelled_at > $2 OR updated_at > $2) ORDER BY created_at ASC`, [storeId, since]),
     db.query(
       `SELECT oi.* FROM order_items oi JOIN orders o ON o.id = oi.order_id
-       WHERE o.store_id = $1 AND (o.created_at > $2 OR o.paid_at > $2 OR o.cancelled_at > $2)`, [storeId, since]
+       WHERE o.store_id = $1 AND (o.created_at > $2 OR o.paid_at > $2 OR o.cancelled_at > $2 OR o.updated_at > $2)`, [storeId, since]
     ),
     // updated_at, not created_at — a webhook edited (or soft-deleted) long
     // after creation still needs to show up in an incremental export.
@@ -87,7 +88,28 @@ async function exportChanges(req, res) {
     db.query('SELECT * FROM loyalty_points WHERE store_id = $1 AND created_at > $2 ORDER BY created_at ASC', [storeId, since]),
   ]);
 
+  // Shop floor: handovers, returns at security, production, service jobs.
+  // Records that change carry updated_at (latest wins); the rest never change.
+  const q = (sql) => db.query(sql, [storeId, since]).then((r) => r.rows);
+  const [handovers, handoverItems, securityReturns, recipes, recipeLines, productionRuns, productionRunLines, jobs, jobPayments, jobMaterials] = await Promise.all([
+    q('SELECT * FROM stock_handovers WHERE store_id = $1 AND updated_at > $2 ORDER BY issued_at ASC'),
+    q('SELECT i.* FROM stock_handover_items i JOIN stock_handovers h ON h.id = i.handover_id WHERE h.store_id = $1 AND h.updated_at > $2'),
+    q('SELECT * FROM security_returns WHERE store_id = $1 AND updated_at > $2 ORDER BY created_at ASC'),
+    q('SELECT * FROM production_recipes WHERE store_id = $1 AND updated_at > $2 ORDER BY created_at ASC'),
+    q('SELECT l.* FROM production_recipe_lines l JOIN production_recipes r ON r.id = l.recipe_id WHERE r.store_id = $1 AND r.updated_at > $2'),
+    q('SELECT * FROM production_runs WHERE store_id = $1 AND created_at > $2 ORDER BY created_at ASC'),
+    q('SELECT l.* FROM production_run_lines l JOIN production_runs r ON r.id = l.run_id WHERE r.store_id = $1 AND r.created_at > $2'),
+    q('SELECT * FROM job_orders WHERE store_id = $1 AND updated_at > $2 ORDER BY created_at ASC'),
+    q('SELECT p.* FROM job_payments p JOIN job_orders j ON j.id = p.job_id WHERE j.store_id = $1 AND p.created_at > $2'),
+    q('SELECT m.* FROM job_materials m JOIN job_orders j ON j.id = m.job_id WHERE j.store_id = $1 AND m.created_at > $2'),
+  ]);
+  const jobNotes = await q('SELECT n.* FROM job_notes n JOIN job_orders j ON j.id = n.job_id WHERE j.store_id = $1 AND n.created_at > $2');
+
+  const settingsRow = (await db.query(`SELECT ${SETTINGS_COLS}, settings_updated_at FROM stores WHERE id = $1 AND settings_updated_at > $2`, [storeId, since])).rows[0] || null;
+
   res.json({
+    storeSettings: settingsRow,
+    handovers, handoverItems, securityReturns, recipes, recipeLines, productionRuns, productionRunLines, jobs, jobPayments, jobMaterials, jobNotes,
     shifts: shifts.rows, orderPayments: orderPayments.rows, refunds: refunds.rows, refundItems: refundItems.rows,
     customers: customers.rows, customerLedger: customerLedger.rows, loyaltyPoints: loyaltyPoints.rows,
     serverTime: serverTime.toISOString(),
@@ -117,6 +139,8 @@ async function importChanges(req, res) {
     receipts = [], orders = [], orderItems = [], webhooks = [], cycleCounts = [],
     shifts = [], orderPayments = [], refunds = [], refundItems = [],
     customers = [], customerLedger = [], loyaltyPoints = [],
+    handovers = [], handoverItems = [], securityReturns = [], recipes = [], recipeLines = [],
+    productionRuns = [], productionRunLines = [], jobs = [], jobPayments = [], jobMaterials = [], jobNotes = [], storeSettings = null,
   } = req.body;
 
   const client = await db.pool.connect();
@@ -125,15 +149,18 @@ async function importChanges(req, res) {
     await client.query('BEGIN');
 
     // Users import FIRST, before anything that references one — see
-    // exportChanges' comment above for why. ON CONFLICT covers both the
-    // id-PK case (already synced) and the (store_id, email) UNIQUE case
-    // (this person already has a local account under a different id —
-    // resolveUser below is the safety net for that remaining case).
+    // exportChanges' comment above for why. A bare ON CONFLICT DO NOTHING
+    // covers both the id-PK case (already synced) and the (store_id, email)
+    // UNIQUE case (this person already has an account here under a
+    // different id, e.g. a till that was reinstalled). Naming only (id)
+    // let the email clash throw and roll back the whole batch, so that
+    // device could never back up again. resolveUser below handles the
+    // references to the skipped id. Same as desktop's INSERT OR IGNORE.
     for (const u of users) {
       await client.query(
         `INSERT INTO users (id, store_id, name, email, password_hash, role, status, created_at)
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-         ON CONFLICT (id) DO NOTHING`,
+         ON CONFLICT DO NOTHING`,
         [u.id, storeId, u.name, u.email, u.password_hash, u.role, u.status, u.created_at]
       );
     }
@@ -215,6 +242,11 @@ async function importChanges(req, res) {
          WHERE id = $4 AND updated_at = $5`,
         [p.barcode || null, Number(p.pack_size) || 1, p.variant_of || null, p.id, p.updated_at]
       );
+    }
+    for (const p of products) {
+      if (p.sold_by === undefined && p.shelf_life_days === undefined) continue;
+      await client.query('UPDATE products SET sold_by = $1, shelf_life_days = $2 WHERE id = $3 AND updated_at = $4',
+        [['unit', 'weight', 'volume', 'length'].includes(p.sold_by) ? p.sold_by : 'unit', Number(p.shelf_life_days) > 0 ? Number(p.shelf_life_days) : null, p.id, p.updated_at]);
     }
 
     // Movements first among these three (arrivals/audits reference product
@@ -323,14 +355,16 @@ async function importChanges(req, res) {
       const { rows: ex } = await client.query('SELECT updated_at FROM store_customers WHERE id = $1', [c.id]);
       if (!ex[0]) {
         await client.query(
-          `INSERT INTO store_customers (id, store_id, name, phone, notes, email, birthday, created_at, archived_at, updated_at)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (id) DO NOTHING`,
-          [c.id, storeId, c.name, c.phone || null, c.notes || null, c.email || null, c.birthday ? String(c.birthday).slice(0, 10) : null, c.created_at, c.archived_at || null, stamp]
+          `INSERT INTO store_customers (id, store_id, name, phone, notes, email, birthday, created_at, archived_at, updated_at, measurements)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) ON CONFLICT (id) DO NOTHING`,
+          [c.id, storeId, c.name, c.phone || null, c.notes || null, c.email || null, c.birthday ? String(c.birthday).slice(0, 10) : null, c.created_at, c.archived_at || null, stamp, asJson(c.measurements, {})]
         );
       } else if (new Date(stamp) > new Date(ex[0].updated_at)) {
         await client.query(
-          `UPDATE store_customers SET name=$1, phone=$2, notes=$3, email=$4, birthday=$5, archived_at=$6, updated_at=$7 WHERE id=$8`,
-          [c.name, c.phone || null, c.notes || null, c.email || null, c.birthday ? String(c.birthday).slice(0, 10) : null, c.archived_at || null, stamp, c.id]
+          `UPDATE store_customers SET name=$1, phone=$2, notes=$3, email=$4, birthday=$5, archived_at=$6, updated_at=$7,
+                  measurements=COALESCE($9::jsonb, measurements) WHERE id=$8`,
+          [c.name, c.phone || null, c.notes || null, c.email || null, c.birthday ? String(c.birthday).slice(0, 10) : null, c.archived_at || null, stamp, c.id,
+            c.measurements === undefined ? null : asJson(c.measurements, {})]
         );
       }
     }
@@ -381,6 +415,14 @@ async function importChanges(req, res) {
         );
         await applyOrderMoney(o);
       }
+    }
+    // The exit check happens once per receipt; take it from whichever side did it.
+    for (const o of orders) {
+      if (!o.exit_checked_at) continue;
+      await client.query(
+        `UPDATE orders SET exit_checked_at = $1, exit_checked_by = $2, exit_status = $3, exit_note = $4 WHERE id = $5 AND exit_checked_at IS NULL`,
+        [o.exit_checked_at, resolveUser(o.exit_checked_by), o.exit_status || 'passed', o.exit_note || null, o.id]
+      );
     }
     for (const item of orderItems) {
       await client.query(
@@ -464,6 +506,19 @@ async function importChanges(req, res) {
       }
     }
 
+    if (storeSettings?.settings_updated_at) {
+      const local = (await client.query('SELECT settings_updated_at FROM stores WHERE id = $1', [storeId])).rows[0];
+      if (local && newer(storeSettings.settings_updated_at, local.settings_updated_at)) {
+        const cols = SETTINGS_COLS.split(', ').filter((c) => storeSettings[c] !== undefined && !(c === 'name' && !storeSettings.name));
+        const vals = cols.map((c) => (SETTINGS_BOOLS.includes(c) ? Boolean(storeSettings[c]) && storeSettings[c] !== 0 : storeSettings[c]));
+        await client.query(
+          `UPDATE stores SET ${cols.map((c, i) => `${c} = $${i + 1}`).join(', ')}, settings_updated_at = $${cols.length + 1} WHERE id = $${cols.length + 2}`,
+          [...vals, storeSettings.settings_updated_at, storeId]
+        );
+      }
+    }
+    await importShopFloor(client, { storeId, resolveUser, handovers, handoverItems, securityReturns, recipes, recipeLines, productionRuns, productionRunLines, jobs, jobPayments, jobMaterials, jobNotes });
+
     // Recompute every touched product's quantities from the fully-merged
     // local movement log — this is what makes the merge correct regardless
     // of how many devices contributed movements or in what order.
@@ -482,6 +537,8 @@ async function importChanges(req, res) {
         webhooks: webhooks.length, cycleCounts: cycleCounts.length,
         shifts: shifts.length, orderPayments: orderPayments.length, refunds: refunds.length, refundItems: refundItems.length,
         customers: customers.length, customerLedger: customerLedger.length, loyaltyPoints: loyaltyPoints.length,
+        handovers: handovers.length, securityReturns: securityReturns.length, recipes: recipes.length,
+        productionRuns: productionRuns.length, jobs: jobs.length, jobPayments: jobPayments.length,
       },
     });
   } catch (err) {
@@ -490,6 +547,128 @@ async function importChanges(req, res) {
     res.status(500).json({ error: 'Failed to import sync batch' });
   } finally {
     client.release();
+  }
+}
+
+const parseJson = (v, fallback) => { try { return typeof v === 'string' ? JSON.parse(v) : (v ?? fallback); } catch { return fallback; } };
+function asJson(v, fallback) { return JSON.stringify(v == null ? fallback : (typeof v === 'string' ? parseJson(v, fallback) : v)); }
+const newer = (incoming, local) => !local || new Date(incoming) > new Date(local);
+// Store settings that travel between devices and the cloud (latest edit wins).
+const SETTINGS_COLS = 'name, currency_code, currency_symbol, timezone, tax_rate_pct, tax_inclusive, tax_label, tax_number, phone, address, city, receipt_header, receipt_footer, max_cashier_discount_pct, require_shift, points_per_100, point_value, points_expiry_months, daily_summary_enabled, business_type';
+const SETTINGS_BOOLS = ['tax_inclusive', 'require_shift', 'daily_summary_enabled'];
+const num = (v) => (v == null ? null : Number(v));
+
+// Handovers, returns at security, production and service jobs from a shop
+// computer. Stock itself moves through stock_movements (imported above).
+// Every UPDATE here sets updated_at itself, so the change-time trigger keeps
+// the device's time instead of restamping it (which would bounce it back).
+async function importShopFloor(client, x) {
+  const { storeId, resolveUser } = x;
+  const has = async (table, id) => !!(id && (await client.query(`SELECT 1 FROM ${table} WHERE id = $1`, [id])).rowCount);
+
+  for (const h of x.handovers) {
+    const stamp = h.updated_at || h.received_at || h.issued_at;
+    const ex = (await client.query('SELECT updated_at FROM stock_handovers WHERE id = $1', [h.id])).rows[0];
+    if (!ex) {
+      await client.query(`INSERT INTO stock_handovers (id, store_id, status, note, issued_by, issued_at, received_by, received_at, receive_note, updated_at)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT (id) DO NOTHING`,
+      [h.id, storeId, h.status, h.note || null, resolveUser(h.issued_by), h.issued_at, resolveUser(h.received_by), h.received_at || null, h.receive_note || null, stamp]);
+    } else if (newer(stamp, ex.updated_at)) {
+      await client.query('UPDATE stock_handovers SET status=$1, note=$2, received_by=$3, received_at=$4, receive_note=$5, updated_at=$6 WHERE id=$7',
+        [h.status, h.note || null, resolveUser(h.received_by), h.received_at || null, h.receive_note || null, stamp, h.id]);
+    }
+  }
+  for (const i of x.handoverItems) {
+    if (!(await has('stock_handovers', i.handover_id)) || !(await has('products', i.product_id))) continue;
+    await client.query('INSERT INTO stock_handover_items (id, handover_id, product_id, qty_issued, qty_received) VALUES ($1,$2,$3,$4,$5) ON CONFLICT (id) DO NOTHING',
+      [i.id, i.handover_id, i.product_id, Number(i.qty_issued), num(i.qty_received)]);
+    if (i.qty_received != null) await client.query('UPDATE stock_handover_items SET qty_received = $1 WHERE id = $2 AND qty_received IS NULL', [Number(i.qty_received), i.id]);
+  }
+
+  for (const r of x.securityReturns) {
+    if (!(await has('orders', r.order_id)) || !(await has('order_items', r.order_item_id))) continue;
+    const stamp = r.updated_at || r.received_at || r.created_at;
+    const ex = (await client.query('SELECT updated_at FROM security_returns WHERE id = $1', [r.id])).rows[0];
+    if (!ex) {
+      await client.query(`INSERT INTO security_returns (id, store_id, order_id, order_item_id, quantity, note, checked_by, received_by, received_at, qty_resellable, qty_damaged, receive_note, created_at, updated_at)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) ON CONFLICT (id) DO NOTHING`,
+      [r.id, storeId, r.order_id, r.order_item_id, Number(r.quantity), r.note || null, resolveUser(r.checked_by), resolveUser(r.received_by), r.received_at || null,
+        num(r.qty_resellable), num(r.qty_damaged), r.receive_note || null, r.created_at, stamp]);
+    } else if (newer(stamp, ex.updated_at)) {
+      await client.query('UPDATE security_returns SET received_by=$1, received_at=$2, qty_resellable=$3, qty_damaged=$4, receive_note=$5, updated_at=$6 WHERE id=$7',
+        [resolveUser(r.received_by), r.received_at || null, num(r.qty_resellable), num(r.qty_damaged), r.receive_note || null, stamp, r.id]);
+    }
+  }
+
+  for (const r of x.recipes) {
+    const stamp = r.updated_at || r.created_at;
+    const active = !(r.active === false || Number(r.active) === 0);
+    const ex = (await client.query('SELECT updated_at FROM production_recipes WHERE id = $1', [r.id])).rows[0];
+    if (!ex) {
+      await client.query('INSERT INTO production_recipes (id, store_id, name, kind, notes, active, created_at, updated_at) VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (id) DO NOTHING',
+        [r.id, storeId, r.name, r.kind, r.notes || null, active, r.created_at, stamp]);
+    } else if (newer(stamp, ex.updated_at)) {
+      await client.query('UPDATE production_recipes SET name=$1, notes=$2, active=$3, updated_at=$4 WHERE id=$5', [r.name, r.notes || null, active, stamp, r.id]);
+    }
+  }
+  for (const l of x.recipeLines) {
+    if (!(await has('production_recipes', l.recipe_id)) || !(await has('products', l.product_id))) continue;
+    await client.query('INSERT INTO production_recipe_lines (id, recipe_id, product_id, role, quantity) VALUES ($1,$2,$3,$4,$5) ON CONFLICT (id) DO NOTHING',
+      [l.id, l.recipe_id, l.product_id, l.role, Number(l.quantity)]);
+  }
+  for (const r of x.productionRuns) {
+    await client.query(`INSERT INTO production_runs (id, store_id, recipe_id, kind, batches, note, input_cost, performed_by, created_at)
+      VALUES ($1,$2,(SELECT id FROM production_recipes WHERE id = $3::uuid),$4,$5,$6,$7,$8,$9) ON CONFLICT (id) DO NOTHING`,
+    [r.id, storeId, r.recipe_id || null, r.kind, Number(r.batches), r.note || null, Number(r.input_cost || 0), resolveUser(r.performed_by), r.created_at]);
+  }
+  for (const l of x.productionRunLines) {
+    if (!(await has('production_runs', l.run_id)) || !(await has('products', l.product_id))) continue;
+    await client.query('INSERT INTO production_run_lines (id, run_id, product_id, role, expected_qty, quantity) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT (id) DO NOTHING',
+      [l.id, l.run_id, l.product_id, l.role, num(l.expected_qty), Number(l.quantity)]);
+  }
+
+  for (const j of x.jobs) {
+    const stamp = j.updated_at || j.collected_at || j.created_at;
+    const cust = (await has('store_customers', j.store_customer_id)) ? j.store_customer_id : null;
+    const due = j.due_date ? String(j.due_date).slice(0, 10) : null;
+    const ex = (await client.query('SELECT updated_at FROM job_orders WHERE id = $1', [j.id])).rows[0];
+    if (!ex) {
+      // Two offline devices can, rarely, pick the same job reference: keep both jobs, suffixing the newcomer's.
+      const clash = (await client.query('SELECT 1 FROM job_orders WHERE store_id = $1 AND ref = $2', [storeId, j.ref])).rowCount > 0;
+      const ref = clash ? `${j.ref}-${String(j.id).replace(/-/g, '').slice(0, 3).toUpperCase()}` : j.ref;
+      // A tag code is unique per shop; a rare clash from two offline devices gets a suffix.
+      let tag = j.tag_code || null;
+      if (tag && (await client.query('SELECT 1 FROM job_orders WHERE store_id = $1 AND tag_code = $2 AND id <> $3', [storeId, tag, j.id])).rowCount) {
+        tag = `${tag}${String(j.id).replace(/-/g, '').slice(0, 2).toUpperCase()}`.slice(0, 12);
+      }
+      await client.query(`INSERT INTO job_orders (id, store_id, ref, store_customer_id, customer_name, customer_phone, title, items, measurements, total, paid, status, due_date, notes, assigned_to, created_by, created_at, updated_at, collected_at,
+                                                  item_details, fault, condition_notes, accessories, diagnosis, tag_code)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25) ON CONFLICT (id) DO NOTHING`,
+      [j.id, storeId, ref, cust, j.customer_name, j.customer_phone || null, j.title, asJson(j.items, []), asJson(j.measurements, {}), Number(j.total), Number(j.paid),
+        j.status, due, j.notes || null, resolveUser(j.assigned_to), resolveUser(j.created_by), j.created_at, stamp, j.collected_at || null,
+        asJson(j.item_details, {}), j.fault || null, j.condition_notes || null, j.accessories || null, j.diagnosis || null, tag]);
+    } else if (newer(stamp, ex.updated_at)) {
+      await client.query(`UPDATE job_orders SET title=$1, items=$2, measurements=$3, total=$4, paid=$5, status=$6, due_date=$7, notes=$8, assigned_to=$9, collected_at=$10, updated_at=$11,
+                            item_details=$13, fault=$14, condition_notes=$15, accessories=$16, diagnosis=$17 WHERE id=$12`,
+        [j.title, asJson(j.items, []), asJson(j.measurements, {}), Number(j.total), Number(j.paid), j.status, due, j.notes || null, resolveUser(j.assigned_to), j.collected_at || null, stamp, j.id,
+          asJson(j.item_details, {}), j.fault || null, j.condition_notes || null, j.accessories || null, j.diagnosis || null]);
+    }
+  }
+  for (const p of x.jobPayments) {
+    if (!(await has('job_orders', p.job_id))) continue;
+    await client.query(`INSERT INTO job_payments (id, job_id, amount, method, kind, recorded_by, shift_id, created_at)
+      VALUES ($1,$2,$3,$4,$5,$6,(SELECT id FROM shifts WHERE id = $7::uuid),$8) ON CONFLICT (id) DO NOTHING`,
+    [p.id, p.job_id, Number(p.amount), p.method, p.kind, resolveUser(p.recorded_by), p.shift_id || null, p.created_at]);
+  }
+  for (const n of x.jobNotes || []) {
+    if (!(await has('job_orders', n.job_id))) continue;
+    await client.query('INSERT INTO job_notes (id, job_id, note, created_by, created_at) VALUES ($1,$2,$3,$4,$5) ON CONFLICT (id) DO NOTHING',
+      [n.id, n.job_id, n.note, resolveUser(n.created_by), n.created_at]);
+  }
+  for (const m of x.jobMaterials) {
+    if (!(await has('job_orders', m.job_id)) || !(await has('products', m.product_id))) continue;
+    await client.query('INSERT INTO job_materials (id, job_id, product_id, quantity, recorded_by, created_at) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT (id) DO NOTHING',
+      [m.id, m.job_id, m.product_id, Number(m.quantity), resolveUser(m.recorded_by), m.created_at]);
   }
 }
 

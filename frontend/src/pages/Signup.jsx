@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
+import { BUSINESS_TYPES } from '../utils/businessTypes.js';
 import { Alert, AuthBrand, BrandFooter } from '../components/ui.jsx';
+import PasswordInput from '../components/PasswordInput.jsx';
 
 export default function Signup() {
   const { t } = useTranslation();
@@ -11,7 +13,7 @@ export default function Signup() {
     { id: 'midi', label: t('signupPage.tierMidiLabel'), desc: t('signupPage.tierMidiDesc') },
     { id: 'mega', label: t('signupPage.tierMegaLabel'), desc: t('signupPage.tierMegaDesc') },
   ];
-  const [form, setForm] = useState({ storeName: '', adminName: '', adminEmail: '', password: '', storeTier: 'mini', referralContact: '' });
+  const [form, setForm] = useState({ storeName: '', adminName: '', adminEmail: '', password: '', storeTier: 'mini', referralContact: '', businessType: 'general' });
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -54,6 +56,12 @@ export default function Signup() {
             <input value={form.storeName} onChange={update('storeName')} required />
           </div>
           <div className="form-group">
+            <label htmlFor="su-btype">{t('businessType.label')}</label>
+            <select id="su-btype" value={form.businessType} onChange={update('businessType')}>
+              {Object.entries(BUSINESS_TYPES).map(([k, v]) => <option key={k} value={k}>{v.icon} {t(`businessType.t_${k}`)}</option>)}
+            </select>
+          </div>
+          <div className="form-group">
             <label>{t('signupPage.adminName')}</label>
             <input value={form.adminName} onChange={update('adminName')} required />
           </div>
@@ -63,11 +71,11 @@ export default function Signup() {
           </div>
           <div className="form-group">
             <label>{t('login.password')}</label>
-            <input type="password" value={form.password} onChange={update('password')} required minLength={8} autoComplete="new-password" placeholder={t('passwordHint')} />
+            <PasswordInput value={form.password} onChange={update('password')} required minLength={8} autoComplete="new-password" placeholder={t('passwordHint')} />
           </div>
           <div className="form-group">
             <label>{t('signupPage.confirmPasswordLabel')}</label>
-            <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={8} autoComplete="new-password" placeholder={t('signupPage.confirmPasswordPh')} />
+            <PasswordInput value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required minLength={8} autoComplete="new-password" placeholder={t('signupPage.confirmPasswordPh')} />
           </div>
           <div className="form-group">
             <label>{t('signupPage.storeSize')}</label>

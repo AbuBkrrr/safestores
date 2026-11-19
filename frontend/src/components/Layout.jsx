@@ -1,5 +1,6 @@
 import { Suspense, useEffect, useState } from 'react';
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
+import { useStoreProfile, MINI_HIDDEN } from '../utils/useStoreTier.js';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useSocket } from '../context/SocketContext.jsx';
@@ -17,35 +18,40 @@ import { getThemePref, setThemePref, getTextSize, setTextSize } from '../utils/p
 // i18n/locales/en.json for the source strings.
 const storeNav = [
   { group: 'overview', to: '/', navKey: 'dashboard', icon: '📊', end: true },
-  { group: 'overview', to: '/analytics', navKey: 'analytics', icon: '📈' },
+  { group: 'overview', to: '/analytics', navKey: 'analytics', icon: '📈', roles: ['admin', 'manager'] },
   { group: 'overview', to: '/insights', navKey: 'insights', icon: '💡', roles: ['admin', 'manager'] },
   { group: 'storeOperations', to: '/products', navKey: 'products', icon: '📦' },
-  { group: 'storeOperations', to: '/stock-arrival', navKey: 'stockArrival', icon: '🚚' },
-  { group: 'storeOperations', to: '/movements', navKey: 'movements', icon: '🔁' },
-  { group: 'storeOperations', to: '/labels', navKey: 'labels', icon: '🏷️' },
+  { group: 'storeOperations', to: '/stock-arrival', navKey: 'stockArrival', icon: '🚚', roles: ['admin', 'manager', 'staff', 'store_manager'] },
+  { group: 'storeOperations', to: '/jobs', navKey: 'jobs', icon: '🧵', tool: ['jobs'], roles: ['admin', 'manager', 'staff', 'cashier', 'checkout'] },
+  { group: 'storeOperations', to: '/production', navKey: 'production', icon: '🏭', tool: ['production', 'breakdown'], roles: ['admin', 'manager', 'staff', 'store_manager'] },
+  { group: 'storeOperations', to: '/waste', navKey: 'waste', icon: '🥬', tool: ['fresh'], roles: ['admin', 'manager', 'staff', 'store_manager', 'shelf_manager'] },
+  { group: 'storeOperations', to: '/handovers', navKey: 'handovers', icon: '🔀', roles: ['admin', 'manager', 'staff', 'store_manager', 'shelf_manager'] },
+  { group: 'storeOperations', to: '/movements', navKey: 'movements', icon: '🔁', roles: ['admin', 'manager', 'staff'] },
+  { group: 'storeOperations', to: '/labels', navKey: 'labels', icon: '🏷️', roles: ['admin', 'manager', 'staff', 'shelf_manager'] },
   { group: 'storeOperations', to: '/replenishment', navKey: 'replenishment', icon: '🔄', roles: ['admin', 'manager'] },
   { group: 'storeOperations', to: '/suppliers', navKey: 'suppliers', icon: '🚚', roles: ['admin', 'manager'] },
-  { group: 'storeOperations', to: '/customers', navKey: 'customers', icon: '🧾', roles: ['admin', 'manager', 'cashier', 'checkout', 'staff'] },
+  { group: 'storeOperations', to: '/customers', navKey: 'customers', icon: '🧾', roles: ['admin', 'manager', 'cashier', 'checkout'] },
   { group: 'storeOperations', to: '/expiry-tracker', navKey: 'expiryTracker', icon: '⏳', roles: ['admin', 'manager'] },
-  { group: 'storeOperations', to: '/cycle-counting', navKey: 'cycleCounting', icon: '⏱️' },
-  { group: 'storeOperations', to: '/shelf-audit', navKey: 'shelfAudit', icon: '📋' },
-  { group: 'storeOperations', to: '/audit-report', navKey: 'auditReport', icon: '📑' },
-  { group: 'storeOperations', to: '/checkout', navKey: 'checkout', icon: '🛒' },
+  { group: 'storeOperations', to: '/cycle-counting', navKey: 'cycleCounting', icon: '⏱️', roles: ['admin', 'manager', 'staff'] },
+  { group: 'storeOperations', to: '/shelf-audit', navKey: 'shelfAudit', icon: '📋', roles: ['stock_taker', 'auditor'] },
+  { group: 'storeOperations', to: '/audit-report', navKey: 'auditReport', icon: '📑', roles: ['stock_taker', 'auditor'] },
+  { group: 'storeOperations', to: '/checkout', navKey: 'checkout', icon: '🛒', roles: ['admin', 'manager', 'cashier', 'checkout'] },
   { group: 'storeOperations', to: '/sales', navKey: 'sales', icon: '🧮', roles: ['admin', 'manager', 'cashier', 'checkout'] },
   { group: 'storeOperations', to: '/shifts', navKey: 'shifts', icon: '⏰', roles: ['admin', 'manager', 'cashier', 'checkout'] },
-  { group: 'storeOperations', to: '/receipts', navKey: 'receipts', icon: '🧾' },
-  { group: 'storeOperations', to: '/camera', navKey: 'camera', icon: '📷' },
+  { group: 'storeOperations', to: '/exit-check', navKey: 'exitCheck', icon: '🛡️', roles: ['admin', 'manager', 'security'] },
+  { group: 'storeOperations', to: '/receipts', navKey: 'receipts', icon: '🧾', roles: ['admin', 'manager', 'staff', 'store_manager'] },
+  { group: 'storeOperations', to: '/camera', navKey: 'camera', icon: '📷', roles: ['admin', 'manager', 'staff'] },
   { group: 'administration', to: '/settings', navKey: 'settings', icon: '⚙️', roles: ['admin'] },
-  { group: 'administration', to: '/billing', navKey: 'billing', icon: '💰' },
-  { group: 'administration', to: '/invites', navKey: 'invites', icon: '✉️' },
-  { group: 'administration', to: '/users', navKey: 'users', icon: '👥' },
+  { group: 'administration', to: '/billing', navKey: 'billing', icon: '💰', roles: ['admin', 'manager'] },
+  { group: 'administration', to: '/invites', navKey: 'invites', icon: '✉️', roles: ['admin', 'manager'] },
+  { group: 'administration', to: '/users', navKey: 'users', icon: '👥', roles: ['admin', 'manager'] },
   { group: 'administration', to: '/export', navKey: 'export', icon: '⬇️', roles: ['admin'] },
   { group: 'administration', to: '/support', navKey: 'support', icon: '🎧', roles: ['admin', 'manager'] },
   { group: 'administration', to: '/integrations', navKey: 'integrations', icon: '🔌', roles: ['admin'] },
   { group: 'administration', to: '/activity', navKey: 'activity', icon: '🕓', roles: ['admin', 'manager'] },
   { group: 'administration', to: '/account', navKey: 'account', icon: '👤' },
   { group: 'reports', to: '/daily-report', navKey: 'dailyReport', icon: '📅', roles: ['admin', 'manager'] },
-  { group: 'reports', to: '/reports', navKey: 'reports', icon: '📄' },
+  { group: 'reports', to: '/reports', navKey: 'reports', icon: '📄', roles: ['admin', 'manager'] },
   { group: 'reports', to: '/shrinkage-report', navKey: 'shrinkage', icon: '📉', roles: ['admin', 'manager'] },
 ];
 // The auditor-marketplace flow (hiring an independent third-party auditor
@@ -57,8 +63,8 @@ const storeNav = [
 // same-store feature and works in both editions unconditionally.
 const marketplaceNav = [
   { group: 'storeOperations', to: '/transfers', navKey: 'transfers', icon: '🚛', roles: ['admin', 'manager'] },
-  { group: 'marketplace', to: '/auditor-tab', navKey: 'hireAuditor', icon: '🕵️' },
-  { group: 'marketplace', to: '/marketplace', navKey: 'marketplace', icon: '🛍️' },
+  { group: 'marketplace', to: '/auditor-tab', navKey: 'hireAuditor', icon: '🕵️', roles: ['admin', 'manager'] },
+  { group: 'marketplace', to: '/marketplace', navKey: 'marketplace', icon: '🛍️', roles: ['admin', 'manager', 'marketplace_manager'] },
   { group: 'marketplace', to: '/settlements', navKey: 'settlements', icon: '💱', roles: ['admin', 'manager'] },
   { group: 'lending', to: '/lending-partners', navKey: 'lendingPartners', icon: '🏦', roles: ['admin'] },
 ];
@@ -73,7 +79,7 @@ const superNav = [
   { group: 'Administration', to: '/super/stores', label: '🏪 Manage Stores', icon: '🏪', text: 'Manage Stores' },
   { group: 'Administration', to: '/super/referrals', label: '🎯 Referrals', icon: '🎯', text: 'Referrals' },
   { group: 'Administration', to: '/super/users', label: '👥 All Users', icon: '👥', text: 'All Users' },
-  { group: 'Administration', to: '/super/subscriptions', label: '💳 Tiers & Codes', icon: '💳', text: 'Tiers & Codes' },
+  { group: 'Administration', to: '/super/subscriptions', label: '💳 Payments, Tiers & Codes', icon: '💳', text: 'Payments, Tiers & Codes' },
   { group: 'Administration', to: '/super/billing', label: '💰 Billing Charges', icon: '💰', text: 'Billing Charges' },
   { group: 'Administration', to: '/super/support', label: '🎧 Support Tickets', icon: '🎧', text: 'Support Tickets' },
   { group: 'Administration', to: '/super/activity', label: '🕓 Activity Log', icon: '🕓', text: 'Activity Log' },
@@ -132,6 +138,7 @@ export function DisplayPrefs() {
 export default function Layout() {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
+  const { tier: storeTier, tools: storeTools } = useStoreProfile();
   const { connected, peers } = useSocket();
   const { isOnline, queuedCount } = useOffline();
   const navigate = useNavigate();
@@ -141,8 +148,8 @@ export default function Layout() {
   const isSuperAdmin = user?.role === 'super_admin';
   const nav = (isSuperAdmin
     ? (isDesktop ? superNav : [...superNav, ...superMarketplaceNav])
-    : (isDesktop ? storeNav : [...storeNav, ...marketplaceNav])
-  ).filter((item) => !item.roles || item.roles.includes(user?.role));
+    : [...storeNav, ...marketplaceNav]
+  ).filter((item) => (!item.roles || item.roles.includes(user?.role)) && !(storeTier === 'mini' && MINI_HIDDEN.includes(item.to)) && (!item.tool || item.tool.some((x) => storeTools.includes(x))));
 
   const groups = [];
   for (const item of nav) {
@@ -160,6 +167,19 @@ export default function Layout() {
   // one interaction the mockup's toggleSidebar()/overlay-click handlers
   // provide that a plain CSS class-toggle wouldn't give us for free here.
   useEffect(() => { setSidebarOpen(false); }, [location.pathname]);
+
+  // In-store only lock: any blocked action, on any page, shows one banner.
+  const [offsite, setOffsite] = useState(null);
+  const [onlineNeeded, setOnlineNeeded] = useState(null);
+  useEffect(() => {
+    const on = (e) => setOffsite(e.detail);
+    const need = (e) => setOnlineNeeded(e.detail);
+    window.addEventListener('ss:offsite', on);
+    window.addEventListener('ss:online-needed', need);
+    return () => { window.removeEventListener('ss:offsite', on); window.removeEventListener('ss:online-needed', need); };
+  }, []);
+  // A different page may not need the internet: clear the notice on navigation.
+  useEffect(() => { setOnlineNeeded(null); }, [location.pathname]);
 
   const handleLogout = () => {
     logout();
@@ -251,6 +271,18 @@ export default function Layout() {
           >
             ☰
           </button>
+          {offsite && (
+            <div className="alert error" role="alert" style={{ display: 'flex', gap: 12, alignItems: 'flex-start', justifyContent: 'space-between' }}>
+              <span>📍 <strong>{t('onsite.blockedTitle')}</strong> {offsite}</span>
+              <button type="button" className="btn small secondary" onClick={() => setOffsite(null)}>{t('onsite.dismiss')}</button>
+            </div>
+          )}
+          {onlineNeeded && (
+            <div className="alert info" role="status" style={{ display: 'flex', gap: 12, alignItems: 'flex-start', justifyContent: 'space-between' }}>
+              <span>🌐 <strong>{t('onsite.onlineTitle')}</strong> {onlineNeeded}</span>
+              <button type="button" className="btn small secondary" onClick={() => setOnlineNeeded(null)}>{t('onsite.dismiss')}</button>
+            </div>
+          )}
           <Suspense fallback={<div className="page-loading" role="status"><span className="spinner" /></div>}>
             <Outlet />
           </Suspense>

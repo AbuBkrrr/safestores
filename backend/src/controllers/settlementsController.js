@@ -88,8 +88,10 @@ async function recordOnlinePaid(client, order) {
 }
 
 /** A pay-on-delivery order was completed: the store collected the money and now owes the commission. */
-async function recordCashCompleted(client, order, userId) {
-  if (order.payment_method !== 'on_delivery' || order.payment_status === 'paid') return;
+async function recordCashCompleted(client, order, userId, { includeCredit = false } = {}) {
+  // Credit orders are only 'collected' once the guarantor settles them.
+  const methods = includeCredit ? ['on_delivery', 'on_pickup', 'credit'] : ['on_delivery', 'on_pickup'];
+  if (!methods.includes(order.payment_method) || order.payment_status === 'paid') return;
   const t = await terms(client, order.store_id);
   const pct = order.commission_pct != null ? Number(order.commission_pct) : t.commissionPct;
   const commission = r2(Number(order.total) * pct / 100);

@@ -10,7 +10,10 @@ async function listStores(req, res) {
   const { rows } = await db.query(
     `SELECT s.*, t.label AS tier_label,
             (SELECT COUNT(*) FROM users u WHERE u.store_id = s.id) AS user_count,
-            (SELECT COUNT(*) FROM products pr WHERE pr.store_id = s.id) AS product_count
+            (SELECT COUNT(*) FROM products pr WHERE pr.store_id = s.id) AS product_count,
+            (SELECT ac.code FROM access_codes ac WHERE ac.issued_for_store = s.id OR ac.used_by_store = s.id ORDER BY ac.created_at DESC LIMIT 1) AS access_code,
+            (SELECT ac.status FROM access_codes ac WHERE ac.issued_for_store = s.id OR ac.used_by_store = s.id ORDER BY ac.created_at DESC LIMIT 1) AS access_code_status,
+            (SELECT ac.expires_at FROM access_codes ac WHERE ac.issued_for_store = s.id OR ac.used_by_store = s.id ORDER BY ac.created_at DESC LIMIT 1) AS access_code_expires_at
      FROM stores s LEFT JOIN store_tiers t ON t.tier = s.store_tier
      ORDER BY s.created_at DESC`
   );
@@ -66,7 +69,7 @@ async function listReferrals(req, res) {
 async function createStore(req, res) {
   const {
     storeName, adminName, adminEmail, password,
-    storeTier, billingModel, dailyRatePercent, gracePeriodMinutes, customBillingNotes,
+    storeTier, billingModel, dailyRatePercent, gracePeriodMinutes, customBillingNotes, businessType,
   } = req.body;
 
   if (!storeName || !adminName || !adminEmail || !password) {
@@ -90,7 +93,12 @@ async function createStore(req, res) {
        VALUES ($1, $2, 'active', $3, $4, $5, $6) RETURNING *`,
       [storeName, storeTier || 'mini', billingModel || 'daily_percentage', dailyRatePercent ?? 1.0, gracePeriodMinutes ?? 5, customBillingNotes || null]
     );
-    const store = storeRes.rows[0];
+    let store = storeRes.rows[0];
+    if (require('../utils/businessTypes').TYPE_KEYS.includes(businessType)) {
+      store = (await client.query('UPDATE stores SET business_type = $1 WHERE id = $2 RETURNING *', [businessType, store.id])).rows[0];
+    }
+    // Created already active, so its code is recorded as used.
+    await issueStoreCode(client, { storeId: store.id, tier: store.store_tier, issuedBy: req.user.sub, used: true });
 
     const userRes = await client.query(
       `INSERT INTO users (store_id, name, email, password_hash, role) VALUES ($1, $2, $3, $4, 'admin')
@@ -220,9 +228,50 @@ async function listPlans(req, res) {
   res.json(rows);
 }
 
+// PUT /api/super/tiers/:tier  { label?, maxProducts, maxUsers }  (null/'' = unlimited)
+async function updateTier(req, res) {
+  const parsed = parseTierLimits(req.body);
+  if (parsed.error) return res.status(400).json({ error: parsed.error });
+  const { rows } = await db.query(
+    `UPDATE store_tiers SET label = COALESCE($1, label), max_products = $2, max_users = $3 WHERE tier = $4 RETURNING *`,
+    [parsed.label, parsed.maxProducts, parsed.maxUsers, req.params.tier]
+  );
+  if (!rows[0]) return res.status(404).json({ error: 'Tier not found' });
+  res.json(rows[0]);
+}
+
+// POST /api/super/stores/:id/access-code  { expiresInDays? } — a fresh code for one store
+async function issueCodeForStore(req, res) {
+  const days = parseExpiryDays(req.body.expiresInDays);
+  if (days.error) return res.status(400).json({ error: days.error });
+  const { rows } = await db.query('SELECT id, store_tier, requested_tier, subscription_status FROM stores WHERE id = $1', [req.params.id]);
+  const store = rows[0];
+  if (!store) return res.status(404).json({ error: 'Store not found' });
+  // Any older unused code for this store stops working.
+  await db.query(`UPDATE access_codes SET status = 'revoked' WHERE issued_for_store = $1 AND status = 'active'`, [store.id]);
+  const code = await issueStoreCode(db, {
+    storeId: store.id, tier: store.requested_tier || store.store_tier, issuedBy: req.user.sub, days: days.value,
+  });
+  res.status(201).json(code);
+}
+
 // ------------------------------------------------------------
 // Access codes
 // ------------------------------------------------------------
+
+const { parseExpiryDays, parseTierLimits } = require('../utils/codeRules');
+
+// Creates the access code that belongs to one store. `q` is the db or a
+// transaction client. `used` marks it redeemed (store created already active).
+async function issueStoreCode(q, { storeId, tier, issuedBy = null, used = false, days = 30 }) {
+  const { rows } = await q.query(
+    `INSERT INTO access_codes (code, intended_tier, issued_by, status, used_by_store, issued_for_store, expires_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+    [generateAccessCode(), ['mini', 'midi', 'mega'].includes(tier) ? tier : null, issuedBy,
+      used ? 'used' : 'active', used ? storeId : null, storeId, new Date(Date.now() + days * 86400000)]
+  );
+  return rows[0];
+}
 
 // POST /api/super/access-codes  { intendedTier? }
 async function generateCode(req, res) {
@@ -230,9 +279,11 @@ async function generateCode(req, res) {
   if (intendedTier && !['mini', 'midi', 'mega'].includes(intendedTier)) {
     return res.status(400).json({ error: 'intendedTier must be mini, midi, or mega' });
   }
+  const days = parseExpiryDays(req.body.expiresInDays);
+  if (days.error) return res.status(400).json({ error: days.error });
 
   const code = generateAccessCode();
-  const expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000); // 30 days
+  const expiresAt = new Date(Date.now() + days.value * 24 * 60 * 60 * 1000);
 
   const { rows } = await db.query(
     `INSERT INTO access_codes (code, intended_tier, issued_by, expires_at)
@@ -247,7 +298,7 @@ async function listCodes(req, res) {
   const { rows } = await db.query(
     `SELECT ac.*, s.name AS store_name
      FROM access_codes ac
-     LEFT JOIN stores s ON s.id = ac.used_by_store
+     LEFT JOIN stores s ON s.id = COALESCE(ac.used_by_store, ac.issued_for_store)
      ORDER BY ac.created_at DESC`
   );
   res.json(rows);
@@ -280,6 +331,10 @@ async function redeemCode(req, res) {
     const ac = rows[0];
     if (!ac) { await client.query('ROLLBACK'); return res.status(404).json({ error: 'Access code not found' }); }
     if (ac.status !== 'active') { await client.query('ROLLBACK'); return res.status(410).json({ error: `Code is ${ac.status}` }); }
+    if (ac.issued_for_store && ac.issued_for_store !== storeId) {
+      await client.query('ROLLBACK');
+      return res.status(403).json({ error: 'This access code was issued for a different store' });
+    }
     if (new Date(ac.expires_at) < new Date()) {
       await client.query(`UPDATE access_codes SET status = 'expired' WHERE id = $1`, [ac.id]);
       await client.query('COMMIT');
@@ -364,26 +419,102 @@ async function deleteAnyUser(req, res) {
 // all (marketplace_enabled) is deliberately NOT settable here — that's a
 // Super Admin-only switch (see storesController's updateStore) toggled
 // from the Super Admin dashboard, not something a store can flip for itself.
+const SHOP_FONTS = ['Poppins', 'Montserrat', 'Nunito', 'Playfair Display', 'Merriweather', 'Lobster', 'Oswald', 'Quicksand'];
+
 async function getMarketplaceProfile(req, res) {
   const { storeId } = req.params;
   const { rows } = await db.query(
-    'SELECT id, name, category, address, city, marketplace_enabled FROM stores WHERE id = $1', [storeId]
+    'SELECT id, name, category, address, city, marketplace_enabled, shop_slug, shop_tagline, custom_domain, shop_logo_url, shop_bg_image_url, shop_brand_color, shop_bg_color, shop_font, shop_theme FROM stores WHERE id = $1', [storeId]
   );
   if (!rows[0]) return res.status(404).json({ error: 'Store not found' });
-  res.json(rows[0]);
+  res.json({ ...rows[0], domain_target: require('../utils/customDomain').domainTarget() });
 }
 
 async function updateMarketplaceProfile(req, res) {
   const { storeId } = req.params;
-  const { category, address, city } = req.body;
+  const { category, address, city, shopSlug, shopTagline, customDomain } = req.body;
+  // Branding: undefined = leave, '' = reset to default. Colours are #rrggbb; fonts/themes from fixed lists.
+  const HEX = /^#[0-9a-f]{6}$/i;
+  const brand = {};
+  for (const [key, col] of [['brandColor', 'shop_brand_color'], ['bgColor', 'shop_bg_color']]) {
+    const v = req.body[key];
+    if (v === undefined) continue;
+    if (v && !HEX.test(v)) return res.status(400).json({ error: 'Colours must look like #1a2b3c' });
+    brand[col] = v || null;
+  }
+  if (req.body.font !== undefined) {
+    if (req.body.font && !SHOP_FONTS.includes(req.body.font)) return res.status(400).json({ error: 'Unknown font' });
+    brand.shop_font = req.body.font || null;
+  }
+  if (req.body.theme !== undefined) {
+    if (req.body.theme && !['light', 'dark'].includes(req.body.theme)) return res.status(400).json({ error: 'theme must be light or dark' });
+    brand.shop_theme = req.body.theme || null;
+  }
+  // Images are set through the upload endpoint; here they can only be cleared.
+  for (const [key, col] of [['logoUrl', 'shop_logo_url'], ['bgImageUrl', 'shop_bg_image_url']]) {
+    if (req.body[key] === '' || req.body[key] === null) brand[col] = null;
+  }
+  if (Object.keys(brand).length) {
+    const cols = Object.keys(brand);
+    await db.query(`UPDATE stores SET ${cols.map((c, i) => `${c} = $${i + 2}`).join(', ')} WHERE id = $1`, [storeId, ...cols.map((c) => brand[c])]);
+  }
+  const cd = require('../utils/customDomain');
+  let domain;
+  if (customDomain !== undefined) {
+    const parsed = cd.parseCustomDomain(customDomain);
+    if (parsed.error) return res.status(400).json({ error: parsed.error });
+    domain = parsed.value;
+    if (domain) {
+      const taken = await db.query('SELECT 1 FROM stores WHERE custom_domain = $1 AND id <> $2', [domain, storeId]);
+      if (taken.rowCount) return res.status(409).json({ error: 'That domain is already connected to another shop' });
+    }
+  }
+  // shopSlug/shopTagline: undefined = leave as is, '' = clear.
+  let slug;
+  if (shopSlug !== undefined) {
+    const parsed = require('../utils/shopSlug').parseShopSlug(shopSlug);
+    if (parsed.error) return res.status(400).json({ error: parsed.error });
+    slug = parsed.value;
+    if (slug) {
+      const taken = await db.query('SELECT 1 FROM stores WHERE shop_slug = $1 AND id <> $2', [slug, storeId]);
+      if (taken.rowCount) return res.status(409).json({ error: 'That shop address is already taken — try adding your area, e.g. -lekki' });
+    }
+  }
+  const tagline = shopTagline === undefined ? undefined : (String(shopTagline).trim().slice(0, 140) || null);
   const { rows } = await db.query(
     `UPDATE stores SET category = COALESCE($1, category), address = COALESCE($2, address),
-            city = COALESCE($3, city), updated_at = now()
-     WHERE id = $4 RETURNING id, name, category, address, city, marketplace_enabled`,
-    [category ?? null, address ?? null, city ?? null, storeId]
+            city = COALESCE($3, city),
+            shop_slug = CASE WHEN $5 THEN $6 ELSE shop_slug END,
+            shop_tagline = CASE WHEN $7 THEN $8 ELSE shop_tagline END,
+            custom_domain = CASE WHEN $9 THEN $10 ELSE custom_domain END,
+            updated_at = now()
+     WHERE id = $4 RETURNING id, name, category, address, city, marketplace_enabled, shop_slug, shop_tagline, custom_domain, shop_logo_url, shop_bg_image_url, shop_brand_color, shop_bg_color, shop_font, shop_theme`,
+    [category ?? null, address ?? null, city ?? null, storeId, slug !== undefined, slug ?? null, tagline !== undefined, tagline ?? null,
+      domain !== undefined, domain ?? null]
   );
+  if (domain !== undefined) cd.clearDomainCache();
+  if (rows[0]) rows[0].domain_target = cd.domainTarget();
   if (!rows[0]) return res.status(404).json({ error: 'Store not found' });
   res.json(rows[0]);
+}
+
+// POST /api/stores/:storeId/branding/:kind  (multipart "image") — kind: logo | background
+async function uploadBranding(req, res) {
+  const col = { logo: 'shop_logo_url', background: 'shop_bg_image_url' }[req.params.kind];
+  if (!col) return res.status(400).json({ error: 'kind must be logo or background' });
+  if (!req.file) return res.status(400).json({ error: 'Choose an image' });
+  const { url } = await require('../utils/storage').persistUpload(req.file, { keyPrefix: `stores/${req.params.storeId}/branding` });
+  await db.query(`UPDATE stores SET ${col} = $1 WHERE id = $2`, [url, req.params.storeId]);
+  res.json({ url });
+}
+
+// GET /api/stores/:storeId/custom-domain/check — is the store's domain's DNS pointed here yet?
+async function checkCustomDomain(req, res) {
+  const { rows } = await db.query('SELECT custom_domain FROM stores WHERE id = $1', [req.params.storeId]);
+  const domain = rows[0]?.custom_domain;
+  if (!domain) return res.status(404).json({ error: 'No custom domain set' });
+  const cd = require('../utils/customDomain');
+  res.json({ domain, pointsHere: await cd.dnsPointsHere(domain), target: cd.domainTarget() });
 }
 
 // GET/PATCH /api/stores/:storeId/loyalty-settings
@@ -422,9 +553,10 @@ async function updateLoyaltySettings(req, res) {
 }
 
 module.exports = {
-  listStores, listReferrals, createStore, updateStore, activateStore, suspendStore, deleteStore, listPlans,
+  uploadBranding,
+  listStores, listReferrals, createStore, updateStore, activateStore, suspendStore, deleteStore, listPlans, updateTier, issueCodeForStore, issueStoreCode,
   generateCode, listCodes, revokeCode, redeemCode,
   listAllUsers, updateAnyUserStatus, deleteAnyUser,
-  getMarketplaceProfile, updateMarketplaceProfile,
+  getMarketplaceProfile, updateMarketplaceProfile, checkCustomDomain,
   getLoyaltySettings, updateLoyaltySettings,
 };

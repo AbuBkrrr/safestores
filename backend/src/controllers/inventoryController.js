@@ -33,8 +33,9 @@ async function listArrivals(req, res) {
 // recorded offline (or synced from another device) can be replayed safely.
 async function createArrival(req, res) {
   const { storeId } = req.params;
-  const { id, movementId, productId, quantity, invoiceNumber, expiryDate, batchNumber } = req.body;
-  if (!productId || !quantity || quantity <= 0) {
+  const { id, movementId, productId, quantity, invoiceNumber, expiryDate: givenExpiry, batchNumber } = req.body;
+  let expiryDate = givenExpiry;
+  if (!productId || !quantity || Number(quantity) <= 0) {
     return res.status(400).json({ error: 'productId and a positive quantity are required' });
   }
 
@@ -45,6 +46,13 @@ async function createArrival(req, res) {
 
   const { rows: productRows } = await db.query('SELECT * FROM products WHERE id = $1 AND store_id = $2', [productId, storeId]);
   if (!productRows[0]) return res.status(404).json({ error: 'Product not found' });
+  const pq = require('../utils/qty').parseQty(quantity, productRows[0]);
+  if (pq.error) return res.status(400).json({ error: pq.error });
+  // Fresh food: no expiry given → arrival date + the product's shelf life.
+  if (!expiryDate && productRows[0].shelf_life_days) {
+    const d = new Date(); d.setDate(d.getDate() + Number(productRows[0].shelf_life_days));
+    expiryDate = d.toISOString().slice(0, 10);
+  }
 
   const client = await db.pool.connect();
   try {

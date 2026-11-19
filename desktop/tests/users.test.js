@@ -90,6 +90,7 @@ describe('Invites', () => {
 
   it('bulk-creates invites from a comma-separated name list, assigning unique emails on collision', async () => {
     const { store, token } = await createActiveStoreWithAdmin();
+    require('../server/db').prepare("UPDATE stores SET store_tier = 'midi' WHERE id = ?").run(store.id);
     await createUser(store.id, { role: 'staff', email: 'john@shop.com' });
 
     const res = await request()
@@ -151,5 +152,33 @@ describe('Invites', () => {
   it('an unknown invite code returns 404', async () => {
     const res = await request().post('/api/auth/invite/login').send({ code: 'NOPE-NOPE' });
     expect(res.status).toBe(404);
+  });
+});
+
+describe('Invite roles', () => {
+  it('accepts every store role and rejects unknown ones', async () => {
+    const { store, token } = await createActiveStoreWithAdmin();
+    require('../server/db').prepare("UPDATE stores SET store_tier = 'mega' WHERE id = ?").run(store.id);
+    for (const role of ['admin', 'manager', 'cashier', 'checkout', 'staff', 'store_manager', 'shelf_manager', 'marketplace_manager', 'security']) {
+      const res = await request().post(`/api/stores/${store.id}/invites`).set('Authorization', `Bearer ${token}`).send({ name: `P ${role}`, role });
+      expect(res.status).toBe(201);
+    }
+    // Auditors are an outside service booked through SAFE Stores, not a store role you invite.
+    expect((await request().post(`/api/stores/${store.id}/invites`).set('Authorization', `Bearer ${token}`).send({ name: 'A', role: 'auditor' })).status).toBe(400);
+    const bad = await request().post(`/api/stores/${store.id}/invites`).set('Authorization', `Bearer ${token}`).send({ name: 'X', role: 'owner' });
+    expect(bad.status).toBe(400);
+  });
+});
+
+describe('Store size rules (offline)', () => {
+  it('a Mini store takes only helpers (manager, cashier, shop assistant), up to 3 people in all', async () => {
+    const { store, token } = await createActiveStoreWithAdmin();
+    const inv = (role, name) => request().post(`/api/stores/${store.id}/invites`).set('Authorization', `Bearer ${token}`).send({ name, role });
+    expect((await inv('security', 'Guard')).status).toBe(403);
+    expect((await inv('cashier', 'Ada')).status).toBe(201);
+    expect((await inv('staff', 'Musa')).status).toBe(201);
+    const full = await inv('cashier', 'Third');
+    expect(full.status).toBe(403);
+    expect(full.body.error).toMatch(/allows 3 people/);
   });
 });

@@ -42,6 +42,12 @@ async function placeOnline(storeId, productId) {
 
 beforeEach(() => { jest.clearAllMocks(); });
 
+// Review steps a marketplace order goes through before it can be fulfilled.
+async function readyOrder(storeId, orderId, auth, method = 'pickup') {
+  await request().patch(`/api/stores/${storeId}/marketplace/orders/${orderId}/confirm`).set('Authorization', auth).send({ method });
+  await request().patch(`/api/stores/${storeId}/marketplace/orders/${orderId}/dispatch`).set('Authorization', auth).send({});
+}
+
 describe('Linking a store bank account', () => {
   it('admin links an account: subaccount created, only last 4 digits stored, online payments on', async () => {
     const { store } = await connectedStore();
@@ -143,6 +149,7 @@ describe('Bolt-style settlements', () => {
     for (let i = 0; i < 2; i += 1) {
       const o = await request().post(`/api/marketplace/${store.id}/orders`).send({ items: [{ productId: product.id, quantity: 2 }], guestName: 'Cash' });
       expect(o.body.payment_method).toBe('on_delivery');
+      await readyOrder(store.id, o.body.id, A(token).Authorization);
       expect((await request().patch(`/api/stores/${store.id}/marketplace/orders/${o.body.id}/fulfill`).set(A(token))).status).toBe(200);
     }
     let st = await request().get(`/api/stores/${store.id}/settlements`).set(A(token));

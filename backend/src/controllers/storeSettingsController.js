@@ -34,12 +34,12 @@ const FIELDS = {
   phone: 'phone', address: 'address', city: 'city', receiptHeader: 'receipt_header', receiptFooter: 'receipt_footer',
   maxCashierDiscountPct: 'max_cashier_discount_pct', requireShift: 'require_shift', name: 'name',
   pointsPer100: 'points_per_100', pointValue: 'point_value', pointsExpiryMonths: 'points_expiry_months',
-  dailySummaryEnabled: 'daily_summary_enabled',
+  dailySummaryEnabled: 'daily_summary_enabled', businessType: 'business_type',
 };
 
 async function readSettings(storeId) {
   const { rows } = await db.query(
-    `SELECT s.id, s.name, s.timezone, s.tax_rate_pct, s.tax_inclusive, s.tax_label, s.tax_number, s.phone, s.address, s.city,
+    `SELECT s.id, s.name, s.store_tier, s.business_type, s.timezone, s.tax_rate_pct, s.tax_inclusive, s.tax_label, s.tax_number, s.phone, s.address, s.city,
             s.receipt_header, s.receipt_footer, s.max_cashier_discount_pct, s.require_shift,
             s.points_per_100, s.point_value, s.points_expiry_months, s.daily_summary_enabled,
             s.currency_code AS store_currency_code, s.currency_symbol AS store_currency_symbol,
@@ -50,7 +50,7 @@ async function readSettings(storeId) {
   const r = rows[0];
   if (!r) return null;
   return {
-    ...r, tax_rate_pct: Number(r.tax_rate_pct), max_cashier_discount_pct: Number(r.max_cashier_discount_pct),
+    ...r, tools: require('../utils/businessTypes').toolsFor(r.business_type), tax_rate_pct: Number(r.tax_rate_pct), max_cashier_discount_pct: Number(r.max_cashier_discount_pct),
     points_per_100: Number(r.points_per_100), point_value: Number(r.point_value),
   };
 }
@@ -95,6 +95,9 @@ async function updateSettings(req, res) {
     body.maxCashierDiscountPct = r;
   }
   if (body.name !== undefined && !String(body.name).trim()) return res.status(400).json({ error: 'Store name cannot be empty' });
+  if (body.businessType !== undefined && !require('../utils/businessTypes').TYPE_KEYS.includes(body.businessType)) {
+    return res.status(400).json({ error: 'Unknown business type' });
+  }
 
   const sets = []; const values = [];
   for (const [k, col] of Object.entries(FIELDS)) {
@@ -106,7 +109,7 @@ async function updateSettings(req, res) {
   }
   if (!sets.length) return res.status(400).json({ error: 'Nothing to update' });
   values.push(storeId);
-  await db.query(`UPDATE stores SET ${sets.join(', ')}, updated_at = now() WHERE id = $${values.length}`, values);
+  await db.query(`UPDATE stores SET ${sets.join(', ')}, updated_at = now(), settings_updated_at = now() WHERE id = $${values.length}`, values);
   const fresh = await readSettings(storeId);
   logActivity(req, { storeId, action: 'store.settings_changed', entityType: 'store', entityId: storeId, details: { fields: Object.keys(body) } });
   res.json(fresh);
