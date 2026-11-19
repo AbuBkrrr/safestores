@@ -25,6 +25,10 @@ git fetch origin main
 git checkout -q main
 git merge --ff-only origin/main
 
+# First free local port from 8080 up (another site on this server may hold 8080).
+port_busy() { ss -ltnH "( sport = :$1 )" 2>/dev/null | grep -q .; }
+free_port() { for p in $(seq 8080 8099); do port_busy "$p" || { echo "$p"; return; }; done; echo 8099; }
+
 echo "== 3. Settings (.env)"
 if [ ! -f .env ]; then
   read -rp "   Super Admin email (your login for the platform admin): " SA_EMAIL
@@ -33,7 +37,7 @@ if [ ! -f .env ]; then
 POSTGRES_PASSWORD=$(openssl rand -hex 24)
 JWT_SECRET=$(openssl rand -hex 48)
 FRONTEND_URL=https://$APP_DOMAIN
-FRONTEND_BIND=127.0.0.1:8080
+FRONTEND_BIND=127.0.0.1:$(free_port)
 BACKEND_REPLICAS=1
 BOOTSTRAP_SUPER_ADMIN_NAME=Super Admin
 BOOTSTRAP_SUPER_ADMIN_EMAIL=$SA_EMAIL
@@ -46,10 +50,18 @@ else
   echo "   Keeping the existing .env"
 fi
 
+# Our app port: keep it unless another program has taken it.
+PORT=$(grep -E '^FRONTEND_BIND=' .env | sed -E 's/.*:([0-9]+)$/\1/'); PORT=${PORT:-8080}
+if port_busy "$PORT" && ! docker compose ps --status running frontend 2>/dev/null | grep -q frontend; then
+  PORT=$(free_port)
+  if grep -q '^FRONTEND_BIND=' .env; then sed -i "s/^FRONTEND_BIND=.*/FRONTEND_BIND=127.0.0.1:$PORT/" .env; else echo "FRONTEND_BIND=127.0.0.1:$PORT" >> .env; fi
+  echo "   port in use by another program; the app will use port $PORT"
+fi
+
 echo "== 4. Building and starting (database migrations run automatically)"
 docker compose up -d --build --remove-orphans
 for i in $(seq 1 30); do
-  if curl -fsS http://127.0.0.1:8080/api/settings/currency >/dev/null 2>&1; then echo "   app is up"; break; fi
+  if curl -fsS "http://127.0.0.1:$PORT/api/settings/currency" >/dev/null 2>&1; then echo "   app is up"; break; fi
   sleep 4
   [ "$i" = 30 ] && { echo "   app did not come up; last backend logs:"; docker compose logs --tail=60 backend; exit 1; }
 done
@@ -61,8 +73,8 @@ if [ -e /etc/nginx/sites-enabled/safestores ] && [ ! -e /root/nginx-safestores.b
   cp -L /etc/nginx/sites-enabled/safestores /root/nginx-safestores.before-deploy
   echo "   old nginx config saved in /root/nginx-safestores.before-deploy"
 fi
-if ! grep -q "$APP_DOMAIN" "$SITE" 2>/dev/null; then
-  cp deploy/vps/nginx-safestores.conf "$SITE"
+if ! grep -q "$APP_DOMAIN" "$SITE" 2>/dev/null || ! grep -q "127.0.0.1:$PORT;" "$SITE"; then
+  sed "s/127.0.0.1:8080/127.0.0.1:$PORT/" deploy/vps/nginx-safestores.conf > "$SITE"
   ln -sf "$SITE" /etc/nginx/sites-enabled/safestores
 fi
 nginx -t && systemctl reload nginx
