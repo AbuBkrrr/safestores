@@ -133,7 +133,7 @@ export default function StoreSettings() {
         <div><button className="btn">{t('common.save')}</button></div>
       </form>
       {/* Storefront payments settle straight to the store's bank (web edition only). */}
-      {import.meta.env.VITE_EDITION !== 'desktop' && <div className="mt-1"><OnlinePaymentsCard onToast={showToast} /></div>}
+      <div className="mt-1"><OnlinePaymentsCard onToast={showToast} /></div>
       {import.meta.env.VITE_EDITION !== 'desktop' && user?.role === 'admin' && <div className="mt-1"><OnsiteLockCard /></div>}
       <Toast {...(toast || {})} />
     </div>

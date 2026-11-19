@@ -105,11 +105,11 @@ router.get('/cycle-counts/history', requireRole('admin', 'manager'), cycleCountC
 router.get('/cycle-counts/accuracy', requireRole('admin', 'manager'), cycleCountCtrl.getAccuracy);
 
 // Online Marketplace — proxied to the cloud, see marketplaceController.js's header.
-router.get('/marketplace/orders', requireRole('admin', 'manager'), marketplaceCtrl.listStoreOrders);
-router.get('/marketplace/orders/:orderId', requireRole('admin', 'manager'), marketplaceCtrl.getStoreOrder);
-router.patch('/marketplace/orders/:orderId/fulfill', requireRole('admin', 'manager'), marketplaceCtrl.fulfillOrder);
-router.patch('/marketplace/orders/:orderId/cancel', requireRole('admin', 'manager'), marketplaceCtrl.cancelOrder);
-router.patch('/marketplace/orders/:orderId/refunded', requireRole('admin', 'manager'), marketplaceCtrl.markRefunded);
+router.get('/marketplace/orders', requireRole('admin', 'manager', 'marketplace_manager'), marketplaceCtrl.listStoreOrders);
+router.get('/marketplace/orders/:orderId', requireRole('admin', 'manager', 'marketplace_manager'), marketplaceCtrl.getStoreOrder);
+router.patch('/marketplace/orders/:orderId/fulfill', requireRole('admin', 'manager', 'marketplace_manager'), marketplaceCtrl.fulfillOrder);
+router.patch('/marketplace/orders/:orderId/cancel', requireRole('admin', 'manager', 'marketplace_manager'), marketplaceCtrl.cancelOrder);
+router.patch('/marketplace/orders/:orderId/refunded', requireRole('admin', 'manager', 'marketplace_manager'), marketplaceCtrl.markRefunded);
 
 // Support tickets — proxied to the cloud Super Admin queue, see supportController.js's header.
 router.get('/support/tickets', requireRole('admin', 'manager'), supportCtrl.listMyTickets);

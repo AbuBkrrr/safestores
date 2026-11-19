@@ -134,6 +134,8 @@ const NOW = "(strftime('%Y-%m-%dT%H:%M:%fZ','now'))";
 // types (weighing, shelf life, production, jobs), order cancel reasons.
 // Quantity columns need no change: SQLite keeps 1.35 in an INTEGER column.
 function applyShopFloorUpgrades(db) {
+  // 063 — when the store's settings themselves last changed (for sync)
+  ensureColumn(db, 'stores', 'settings_updated_at', 'TEXT');
   // 056 — a Mini store is the owner plus up to 2 helpers
   db.exec("UPDATE store_tiers SET max_users = 3 WHERE tier = 'mini' AND (max_users IS NULL OR max_users = 5)");
   // 035, 038, 041

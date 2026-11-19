@@ -104,7 +104,10 @@ async function exportChanges(req, res) {
     q('SELECT m.* FROM job_materials m JOIN job_orders j ON j.id = m.job_id WHERE j.store_id = $1 AND m.created_at > $2'),
   ]);
 
+  const settingsRow = (await db.query(`SELECT ${SETTINGS_COLS}, settings_updated_at FROM stores WHERE id = $1 AND settings_updated_at > $2`, [storeId, since])).rows[0] || null;
+
   res.json({
+    storeSettings: settingsRow,
     handovers, handoverItems, securityReturns, recipes, recipeLines, productionRuns, productionRunLines, jobs, jobPayments, jobMaterials,
     shifts: shifts.rows, orderPayments: orderPayments.rows, refunds: refunds.rows, refundItems: refundItems.rows,
     customers: customers.rows, customerLedger: customerLedger.rows, loyaltyPoints: loyaltyPoints.rows,
@@ -136,7 +139,7 @@ async function importChanges(req, res) {
     shifts = [], orderPayments = [], refunds = [], refundItems = [],
     customers = [], customerLedger = [], loyaltyPoints = [],
     handovers = [], handoverItems = [], securityReturns = [], recipes = [], recipeLines = [],
-    productionRuns = [], productionRunLines = [], jobs = [], jobPayments = [], jobMaterials = [],
+    productionRuns = [], productionRunLines = [], jobs = [], jobPayments = [], jobMaterials = [], storeSettings = null,
   } = req.body;
 
   const client = await db.pool.connect();
@@ -502,6 +505,17 @@ async function importChanges(req, res) {
       }
     }
 
+    if (storeSettings?.settings_updated_at) {
+      const local = (await client.query('SELECT settings_updated_at FROM stores WHERE id = $1', [storeId])).rows[0];
+      if (local && newer(storeSettings.settings_updated_at, local.settings_updated_at)) {
+        const cols = SETTINGS_COLS.split(', ').filter((c) => storeSettings[c] !== undefined && !(c === 'name' && !storeSettings.name));
+        const vals = cols.map((c) => (SETTINGS_BOOLS.includes(c) ? Boolean(storeSettings[c]) && storeSettings[c] !== 0 : storeSettings[c]));
+        await client.query(
+          `UPDATE stores SET ${cols.map((c, i) => `${c} = $${i + 1}`).join(', ')}, settings_updated_at = $${cols.length + 1} WHERE id = $${cols.length + 2}`,
+          [...vals, storeSettings.settings_updated_at, storeId]
+        );
+      }
+    }
     await importShopFloor(client, { storeId, resolveUser, handovers, handoverItems, securityReturns, recipes, recipeLines, productionRuns, productionRunLines, jobs, jobPayments, jobMaterials });
 
     // Recompute every touched product's quantities from the fully-merged
@@ -538,6 +552,9 @@ async function importChanges(req, res) {
 const parseJson = (v, fallback) => { try { return typeof v === 'string' ? JSON.parse(v) : (v ?? fallback); } catch { return fallback; } };
 function asJson(v, fallback) { return JSON.stringify(v == null ? fallback : (typeof v === 'string' ? parseJson(v, fallback) : v)); }
 const newer = (incoming, local) => !local || new Date(incoming) > new Date(local);
+// Store settings that travel between devices and the cloud (latest edit wins).
+const SETTINGS_COLS = 'name, currency_code, currency_symbol, timezone, tax_rate_pct, tax_inclusive, tax_label, tax_number, phone, address, city, receipt_header, receipt_footer, max_cashier_discount_pct, require_shift, points_per_100, point_value, points_expiry_months, daily_summary_enabled, business_type';
+const SETTINGS_BOOLS = ['tax_inclusive', 'require_shift', 'daily_summary_enabled'];
 const num = (v) => (v == null ? null : Number(v));
 
 // Handovers, returns at security, production and service jobs from a shop

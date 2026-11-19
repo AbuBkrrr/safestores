@@ -81,6 +81,7 @@ function createJob(req, res) {
   }
   const userId = req.user.sub || null;
   const id = b.id || crypto.randomUUID();
+  if (b.id && db.prepare('SELECT 1 FROM job_orders WHERE id = ? AND store_id = ?').get(b.id, storeId)) return res.status(201).json(jobRow(b.id, storeId));
   try {
     db.transaction(() => {
       if (!customer && b.saveCustomer !== false) {

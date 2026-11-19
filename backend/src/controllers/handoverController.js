@@ -28,6 +28,12 @@ async function issueHandover(req, res) {
   const items = (Array.isArray(req.body?.items) ? req.body.items : [])
     .map((i) => ({ productId: i.productId, quantity: Math.round(Number(i.quantity) * 1000) / 1000 })).filter((i) => i.productId && i.quantity > 0);
   if (!items.length) return res.status(400).json({ error: 'Add at least one product and quantity' });
+  // A client-chosen id (the app's offline queue) makes a replay a no-op.
+  const clientId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(req.body?.id || '')) ? req.body.id : null;
+  if (clientId) {
+    const done = (await db.query('SELECT * FROM stock_handovers WHERE id = $1 AND store_id = $2', [clientId, storeId])).rows[0];
+    if (done) return res.status(201).json(done);
+  }
   const client = await db.pool.connect();
   try {
     await client.query('BEGIN');
@@ -46,8 +52,8 @@ async function issueHandover(req, res) {
       }
     }
     const h = (await client.query(
-      `INSERT INTO stock_handovers (store_id, note, issued_by) VALUES ($1,$2,$3) RETURNING *`,
-      [storeId, String(req.body?.note || '').trim().slice(0, 300) || null, req.user.sub || null]
+      `INSERT INTO stock_handovers (id, store_id, note, issued_by) VALUES (COALESCE($4::uuid, gen_random_uuid()),$1,$2,$3) RETURNING *`,
+      [storeId, String(req.body?.note || '').trim().slice(0, 300) || null, req.user.sub || null, clientId]
     )).rows[0];
     for (const it of items) {
       await client.query('INSERT INTO stock_handover_items (handover_id, product_id, qty_issued) VALUES ($1,$2,$3)', [h.id, it.productId, it.quantity]);

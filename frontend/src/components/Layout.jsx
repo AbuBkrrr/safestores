@@ -148,7 +148,7 @@ export default function Layout() {
   const isSuperAdmin = user?.role === 'super_admin';
   const nav = (isSuperAdmin
     ? (isDesktop ? superNav : [...superNav, ...superMarketplaceNav])
-    : (isDesktop ? storeNav : [...storeNav, ...marketplaceNav])
+    : [...storeNav, ...marketplaceNav]
   ).filter((item) => (!item.roles || item.roles.includes(user?.role)) && !(storeTier === 'mini' && MINI_HIDDEN.includes(item.to)) && (!item.tool || item.tool.some((x) => storeTools.includes(x))));
 
   const groups = [];

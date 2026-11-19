@@ -109,7 +109,7 @@ async function updateSettings(req, res) {
   }
   if (!sets.length) return res.status(400).json({ error: 'Nothing to update' });
   values.push(storeId);
-  await db.query(`UPDATE stores SET ${sets.join(', ')}, updated_at = now() WHERE id = $${values.length}`, values);
+  await db.query(`UPDATE stores SET ${sets.join(', ')}, updated_at = now(), settings_updated_at = now() WHERE id = $${values.length}`, values);
   const fresh = await readSettings(storeId);
   logActivity(req, { storeId, action: 'store.settings_changed', entityType: 'store', entityId: storeId, details: { fields: Object.keys(body) } });
   res.json(fresh);

@@ -69,6 +69,11 @@ async function createJob(req, res) {
     return res.status(400).json({ error: "Enter the customer's name" });
   }
 
+  // A client-chosen id (the app's offline queue) makes a replay a no-op.
+  const clientId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(b.id || '')) ? b.id : null;
+  if (clientId && (await db.query('SELECT 1 FROM job_orders WHERE id = $1 AND store_id = $2', [clientId, storeId])).rowCount) {
+    return res.status(201).json(await jobRow(clientId, storeId));
+  }
   const client = await db.pool.connect();
   try {
     await client.query('BEGIN');
@@ -84,12 +89,12 @@ async function createJob(req, res) {
     for (let attempt = 0; attempt < 5 && !job; attempt += 1) {
       try {
         job = (await client.query(
-          `INSERT INTO job_orders (store_id, ref, store_customer_id, customer_name, customer_phone, title, items, measurements, total, paid, due_date, notes, assigned_to, created_by)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *`,
+          `INSERT INTO job_orders (id, store_id, ref, store_customer_id, customer_name, customer_phone, title, items, measurements, total, paid, due_date, notes, assigned_to, created_by)
+           VALUES (COALESCE($15::uuid, gen_random_uuid()),$1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *`,
           [storeId, newRef(), customer?.id || null, customer?.name || String(b.customerName).trim().slice(0, 120),
             customer?.phone || (b.customerPhone ? String(b.customerPhone).slice(0, 40) : null), String(b.title).trim().slice(0, 200),
             JSON.stringify(items), JSON.stringify(Object.keys(measurements).length ? measurements : (customer?.measurements || {})), total, deposit,
-            b.dueDate || null, b.notes ? String(b.notes).slice(0, 1000) : null, b.assignedTo || null, req.user.sub || null]
+            b.dueDate || null, b.notes ? String(b.notes).slice(0, 1000) : null, b.assignedTo || null, req.user.sub || null, clientId]
         )).rows[0];
       } catch (e) { if (e.code !== '23505') throw e; } // ref clash: try another
     }

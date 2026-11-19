@@ -88,6 +88,11 @@ async function runProduction(req, res) {
   const { storeId } = req.params;
   const batches = roundQty(req.body?.batches || 1);
   if (!(batches > 0)) return res.status(400).json({ error: 'Batches must be more than 0' });
+  // A client-chosen id (the app's offline queue) makes a replay a no-op.
+  const clientId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(String(req.body?.id || '')) ? req.body.id : null;
+  if (clientId && (await db.query('SELECT 1 FROM production_runs WHERE id = $1 AND store_id = $2', [clientId, storeId])).rowCount) {
+    return res.status(201).json({ id: clientId, alreadyRecorded: true });
+  }
   const client = await db.pool.connect();
   try {
     await client.query('BEGIN');
@@ -99,8 +104,8 @@ async function runProduction(req, res) {
     const actual = new Map((req.body?.outputs || []).map((o) => [o.productId, roundQty(o.quantity)]));
     const note = `${recipe.kind === 'breakdown' ? 'Break-down' : 'Production'}: ${recipe.name}`;
     const run = (await client.query(
-      `INSERT INTO production_runs (store_id, recipe_id, kind, batches, note, performed_by) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
-      [storeId, recipe.id, recipe.kind, batches, req.body?.note ? String(req.body.note).slice(0, 300) : null, req.user.sub || null]
+      `INSERT INTO production_runs (id, store_id, recipe_id, kind, batches, note, performed_by) VALUES (COALESCE($7::uuid, gen_random_uuid()),$1,$2,$3,$4,$5,$6) RETURNING *`,
+      [storeId, recipe.id, recipe.kind, batches, req.body?.note ? String(req.body.note).slice(0, 300) : null, req.user.sub || null, clientId]
     )).rows[0];
 
     let inputCost = 0;

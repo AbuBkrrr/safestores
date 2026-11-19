@@ -25,7 +25,8 @@ const ONLINE_ONLY = [
   { re: /^\/transfers\/[^/]+\/receive$/, any: ['admin', 'manager', 'staff'] },
   { re: /^\/transfers(\/|$)/, any: ['admin', 'manager'] },
   { re: /^\/reports\/email$/, any: ['admin', 'manager'] },
-  { re: /^\/marketplace\/orders\/[^/]+\/courier$/, any: ['admin', 'manager', 'marketplace_manager'] },
+  { re: /^\/marketplace\/orders\/[^/]+\/(courier|confirm|dispatch)$/, any: ['admin', 'manager', 'marketplace_manager'] },
+  { re: /^\/marketplace-profile$/, get: ['admin', 'manager', 'marketplace_manager'], any: ['admin', 'manager'] },
   { re: /^\/marketplace\/orders\/[^/]+\/credit-settled$/, any: ['admin', 'manager'] },
 ];
 

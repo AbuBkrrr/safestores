@@ -40,6 +40,10 @@ function issueHandover(req, res) {
     .map((i) => ({ productId: i.productId, quantity: roundQty(i.quantity) })).filter((i) => i.productId && i.quantity > 0);
   if (!items.length) return res.status(400).json({ error: 'Add at least one product and quantity' });
   const id = req.body?.id || crypto.randomUUID();
+  if (req.body?.id) {
+    const done = db.prepare('SELECT * FROM stock_handovers WHERE id = ? AND store_id = ?').get(req.body.id, storeId);
+    if (done) return res.status(201).json(done);
+  }
   try {
     const result = db.transaction(() => {
       for (const it of items) {

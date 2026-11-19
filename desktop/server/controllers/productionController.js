@@ -78,6 +78,9 @@ function runProduction(req, res) {
   const batches = roundQty(req.body?.batches || 1);
   if (!(batches > 0)) return res.status(400).json({ error: 'Batches must be more than 0' });
   const userId = req.user.sub || null;
+  if (req.body?.id && db.prepare('SELECT 1 FROM production_runs WHERE id = ? AND store_id = ?').get(req.body.id, storeId)) {
+    return res.status(201).json({ id: req.body.id, alreadyRecorded: true });
+  }
   try {
     const out = db.transaction(() => {
       const recipe = db.prepare('SELECT * FROM production_recipes WHERE id = ? AND store_id = ? AND active = 1').get(req.body?.recipeId, storeId);

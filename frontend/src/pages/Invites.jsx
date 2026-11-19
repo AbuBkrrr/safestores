@@ -13,10 +13,9 @@ function inviteLink(code) {
   return `${APP_BASE_URL}/login?invite=${code}`;
 }
 
-// Every role a store user can hold (the store auditor is time-boxed to an audit engagement).
-// Desktop has no auditor marketplace, so an outside auditor joins by invite there.
-const INVITE_ROLES = ['staff', 'cashier', 'checkout', 'store_manager', 'shelf_manager', 'marketplace_manager', 'security', 'manager', 'admin',
-  ...(import.meta.env.VITE_EDITION === 'desktop' ? ['auditor'] : [])];
+// Every role a store user can hold. Auditors are an outside service booked
+// through SAFE Stores (Hire an Auditor), not staff you invite.
+const INVITE_ROLES = ['staff', 'cashier', 'checkout', 'store_manager', 'shelf_manager', 'marketplace_manager', 'security', 'manager', 'admin'];
 
 export default function Invites() {
   const { t } = useTranslation();

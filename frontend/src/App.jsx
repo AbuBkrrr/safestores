@@ -232,15 +232,15 @@ export default function App() {
         <Route path="/products/import" element={<ImportProducts />} />
         <Route path="/labels" element={<Labels />} />
         <Route path="/insights" element={<Insights />} />
-        {EDITION !== 'desktop' && <Route path="/transfers" element={<Transfers />} />}
-        {EDITION !== 'desktop' && <Route path="/settlements" element={<Settlements />} />}
+        <Route path="/transfers" element={<Transfers />} />
+        <Route path="/settlements" element={<Settlements />} />
         <Route path="/stock-arrival" element={<StockArrival />} />
         <Route path="/movements" element={<Movements />} />
         <Route path="/replenishment" element={<Replenishment />} />
         <Route path="/shelf-audit" element={<ShelfAudit />} />
         <Route path="/audit-report" element={<AuditReport />} />
         <Route path="/shrinkage-report" element={<ShrinkageReport />} />
-        {EDITION !== 'desktop' && <Route path="/auditor-tab" element={<Auditor />} />}
+        <Route path="/auditor-tab" element={<Auditor />} />
         <Route path="/receipts" element={<Receipts />} />
         <Route path="/camera" element={<Camera />} />
         <Route path="/checkout" element={<Checkout />} />
@@ -248,8 +248,8 @@ export default function App() {
         <Route path="/shifts" element={<Shifts />} />
         <Route path="/daily-report" element={<DailyReport />} />
         <Route path="/settings" element={<StoreSettings />} />
-        {EDITION !== 'desktop' && <Route path="/marketplace" element={<Marketplace />} />}
-        {EDITION !== 'desktop' && <Route path="/lending-partners" element={<LendingPartners />} />}
+        <Route path="/marketplace" element={<Marketplace />} />
+        <Route path="/lending-partners" element={<LendingPartners />} />
         <Route path="/invites" element={<Invites />} />
         <Route path="/users" element={<Users />} />
         <Route path="/reports" element={<Reports />} />

@@ -222,7 +222,7 @@ function updateSettings(req, res) {
     sets.push(`${col} = ?`); values.push(v);
   }
   if (!sets.length) return res.status(400).json({ error: 'Nothing to update' });
-  db.prepare(`UPDATE stores SET ${sets.join(', ')} WHERE id = ?`).run(...values, storeId);
+  db.prepare(`UPDATE stores SET ${sets.join(', ')}, updated_at = ${NOW}, settings_updated_at = ${NOW} WHERE id = ?`).run(...values, storeId);
   logActivity(req, { storeId, action: 'store.settings_changed', entityType: 'store', entityId: storeId, details: { fields: Object.keys(body) } });
   res.json(readSettings(storeId));
 }

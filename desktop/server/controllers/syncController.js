@@ -11,6 +11,9 @@ const RECEIPT_STATUS_RANK = { pending: 0, applied: 1, rejected: 1 };
 const parseJson = (v, fallback) => { try { return typeof v === 'string' ? JSON.parse(v) : (v ?? fallback); } catch { return fallback; } };
 const asJson = (v, fallback) => JSON.stringify(v == null ? fallback : (typeof v === 'string' ? parseJson(v, fallback) : v));
 const newer = (incoming, local) => !local || new Date(incoming) > new Date(local);
+// Store settings that travel between devices and the cloud (latest edit wins).
+const SETTINGS_COLS = 'name, currency_code, currency_symbol, timezone, tax_rate_pct, tax_inclusive, tax_label, tax_number, phone, address, city, receipt_header, receipt_footer, max_cashier_discount_pct, require_shift, points_per_100, point_value, points_expiry_months, daily_summary_enabled, business_type';
+const SETTINGS_BOOLS = ['tax_inclusive', 'require_shift', 'daily_summary_enabled'];
 
 function exportChanges(req, res) {
   const { storeId } = req.params;
@@ -92,8 +95,12 @@ function exportChanges(req, res) {
   const jobPayments = db.prepare('SELECT p.* FROM job_payments p JOIN job_orders j ON j.id = p.job_id WHERE j.store_id = ? AND p.created_at > ?').all(storeId, since);
   const jobMaterials = db.prepare('SELECT m.* FROM job_materials m JOIN job_orders j ON j.id = m.job_id WHERE j.store_id = ? AND m.created_at > ?').all(storeId, since);
 
+  const settingsRow = db.prepare(`SELECT ${SETTINGS_COLS}, settings_updated_at FROM stores WHERE id = ? AND settings_updated_at > ?`).get(storeId, since);
+  const storeSettings = settingsRow ? Object.fromEntries(Object.entries(settingsRow).map(([k, v]) => [k, SETTINGS_BOOLS.includes(k) ? !!v : v])) : null;
+
   res.json({
     serverTime: new Date().toISOString(),
+    storeSettings,
     handovers, handoverItems, securityReturns, recipes, recipeLines, productionRuns, productionRunLines, jobs, jobPayments, jobMaterials,
     users, products, arrivals, movements, audits,
     suppliers, purchaseOrders, purchaseOrderItems, batches, receipts, orders, orderItems, webhooks, cycleCounts,
@@ -118,7 +125,7 @@ function importChanges(req, res) {
     shifts = [], orderPayments = [], refunds = [], refundItems = [],
     customers = [], customerLedger = [], loyaltyPoints = [],
     handovers = [], handoverItems = [], securityReturns = [], recipes = [], recipeLines = [],
-    productionRuns = [], productionRunLines = [], jobs = [], jobPayments = [], jobMaterials = [],
+    productionRuns = [], productionRunLines = [], jobs = [], jobPayments = [], jobMaterials = [], storeSettings = null,
   } = req.body;
   const touched = new Set();
 
@@ -410,6 +417,14 @@ function importChanges(req, res) {
       db.prepare('UPDATE orders SET refunded_total = (SELECT COALESCE(SUM(amount), 0) FROM refunds WHERE order_id = ?) WHERE id = ?').run(orderId, orderId);
     }
 
+    if (storeSettings?.settings_updated_at) {
+      const local = db.prepare('SELECT settings_updated_at FROM stores WHERE id = ?').get(storeId);
+      if (local && newer(storeSettings.settings_updated_at, local.settings_updated_at)) {
+        const cols = SETTINGS_COLS.split(', ').filter((c) => storeSettings[c] !== undefined && !(c === 'name' && !storeSettings.name));
+        db.prepare(`UPDATE stores SET ${cols.map((c) => `${c} = ?`).join(', ')}, settings_updated_at = ? WHERE id = ?`)
+          .run(...cols.map((c) => (SETTINGS_BOOLS.includes(c) ? (storeSettings[c] ? 1 : 0) : storeSettings[c])), storeSettings.settings_updated_at, storeId);
+      }
+    }
     importShopFloor({ storeId, resolveUser, handovers, handoverItems, securityReturns, recipes, recipeLines, productionRuns, productionRunLines, jobs, jobPayments, jobMaterials });
 
     for (const productId of touched) {

@@ -48,7 +48,11 @@ api.interceptors.request.use((config) => {
 // a shelf is exactly the kind of shop-floor action that needs to survive a
 // dropped connection. Its sub-action (skipping a task) stays online-only —
 // lower-stakes and not time-sensitive the way an actual count is.
-const QUEUEABLE_WRITE = /\/(arrivals|movements|audits|products|images|receipts|orders(\/[^/]+\/(items|pay|cancel|discount))?|cycle-counts|shifts(\/[^/]+\/close)?)$/;
+// Shop-floor additions that are safe to replay: issuing (client id) and
+// receiving a handover, the exit check and returns at security, receiving a
+// return into the store room, new service jobs and production runs (client
+// id). Taking money on a job stays online-only so a replay can never charge twice.
+const QUEUEABLE_WRITE = /\/(arrivals|movements|audits|products|images|receipts|orders(\/[^/]+\/(items|pay|cancel|discount))?|cycle-counts|shifts(\/[^/]+\/close)?|handovers(\/[^/]+\/receive)?|exit-check\/[^/]+(\/returns)?|returns\/[^/]+\/receive|jobs|production\/runs)$/;
 const QUEUEABLE_PUT_DELETE = /\/products\/[^/]+$/;
 // `images/:id` was missing here — deleting a captured photo while offline
 // (a stockroom with poor signal is exactly where this gets used) just
