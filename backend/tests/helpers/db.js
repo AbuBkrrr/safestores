@@ -27,7 +27,20 @@ async function getTenantTables() {
 async function resetDb() {
   const tables = await getTenantTables();
   if (!tables.length) return;
-  await pool.query(`TRUNCATE TABLE ${tables.map((t) => `"${t}"`).join(', ')} RESTART IDENTITY CASCADE`);
+  const sql = `TRUNCATE TABLE ${tables.map((t) => `"${t}"`).join(', ')} RESTART IDENTITY CASCADE`;
+  // Some endpoints do follow-up reads after replying (realtime/push side
+  // effects, e.g. createAudit). The previous test can end while one is
+  // still running, and TRUNCATE then deadlocks with it. Postgres kills one
+  // side (40P01); the read is done a moment later, so try again.
+  for (let attempt = 1; ; attempt++) {
+    try {
+      await pool.query(sql);
+      break;
+    } catch (err) {
+      if (err.code !== '40P01' || attempt >= 5) throw err;
+      await new Promise((r) => setTimeout(r, 50 * attempt));
+    }
+  }
   await restoreMutableSingletons();
 }
 
