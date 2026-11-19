@@ -34,7 +34,7 @@ async function saveTo(req, res) {
   const { canceled, filePath } = await dialog.showSaveDialog({
     title: 'Save Backup Copy',
     defaultPath: name,
-    filters: [{ name: 'SAFE Stores Backup', extensions: ['db'] }],
+    filters: [{ name: `${typeof app.getName === 'function' ? app.getName() : 'Store'} backup`, extensions: ['db'] }],
   });
   if (canceled || !filePath) return res.status(200).json({ message: 'Cancelled' });
 
@@ -50,7 +50,7 @@ async function saveTo(req, res) {
 async function restore(req, res) {
   const { canceled, filePaths } = await dialog.showOpenDialog({
     title: 'Restore From Backup',
-    filters: [{ name: 'SAFE Stores Backup', extensions: ['db'] }],
+    filters: [{ name: `${typeof app.getName === 'function' ? app.getName() : 'Store'} backup`, extensions: ['db'] }],
     properties: ['openFile'],
   });
   if (canceled || !filePaths[0]) return res.status(200).json({ message: 'Cancelled' });

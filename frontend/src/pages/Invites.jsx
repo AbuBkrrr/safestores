@@ -6,6 +6,7 @@ import { Alert, Badge, Toast } from '../components/ui.jsx';
 import { useToast } from '../components/useToast.js';
 import InviteShareModal from '../components/InviteShareModal.jsx';
 import { useStoreTier, MINI_ROLES } from '../utils/useStoreTier.js';
+import { BRAND } from '../utils/brand.js';
 
 const APP_BASE_URL = window.location.origin;
 
@@ -66,12 +67,12 @@ export default function Invites() {
 
   const share = (invite, channel) => {
     const link = inviteLink(invite.code);
-    const message = `You've been invited to join ${user.storeName || 'our store'} on SAFE Stores!\nYour invite code: ${invite.code}\nOr click: ${link}`;
+    const message = `You've been invited to join ${user.storeName || 'our store'} on ${BRAND}!\nYour invite code: ${invite.code}\nOr click: ${link}`;
     const encoded = encodeURIComponent(message);
     const urls = {
       whatsapp: `https://wa.me/?text=${encoded}`,
       sms: `sms:?&body=${encoded}`,
-      email: `mailto:${invite.email || ''}?subject=${encodeURIComponent('Your SAFE Stores Invite')}&body=${encoded}`,
+      email: `mailto:${invite.email || ''}?subject=${encodeURIComponent(`Your ${BRAND} invite`)}&body=${encoded}`,
     };
     if (channel === 'copy') {
       navigator.clipboard.writeText(message);
@@ -79,7 +80,7 @@ export default function Invites() {
       return;
     }
     if (channel === 'native' && navigator.share) {
-      navigator.share({ title: 'SAFE Stores Invite', text: message }).catch(() => {});
+      navigator.share({ title: `${BRAND} invite`, text: message }).catch(() => {});
       return;
     }
     window.open(urls[channel], '_blank');

@@ -21,6 +21,7 @@ router.post('/settlements/:storeId/entries', settlementsCtrl.recordEntry);
 router.patch('/stores/:storeId/commission', settlementsCtrl.setStoreCommission);
 router.get('/referrals', ctrl.listReferrals);
 router.post('/stores', ctrl.createStore);
+router.post('/stores/:storeId/apps', require('../controllers/storeAppsController').rebuild);
 router.patch('/stores/:id', ctrl.updateStore);
 router.get('/users', ctrl.listAllUsers);
 router.patch('/users/:id', ctrl.updateAnyUserStatus);

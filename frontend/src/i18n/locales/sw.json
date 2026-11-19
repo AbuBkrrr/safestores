@@ -2461,5 +2461,18 @@
     "partUsed": "Vipuri vilivyotumika (kutoka kwenye mali)",
     "usePart": "Rekodi kipuri",
     "partSaved": "Kipuri kimerekodiwa na kuondolewa kwenye mali."
+  },
+  "storeApps": {
+    "popupTitle": "Duka lako limesajiliwa",
+    "cardTitle": "Programu zako mwenyewe",
+    "cardSub": "Kisakinishi cha Windows na programu ya Android zenye jina la duka lako.",
+    "building": "Tunatengeneza programu za Windows na Android za {{name}}. Inachukua takriban dakika 10.",
+    "buildingHelp": "Unaweza kuacha ukurasa huu wazi, au uingie sasa: vipakuliwa vitaonekana pia kwenye Mipangilio ya Duka vikiwa tayari.",
+    "readyText": "Programu za {{name}} ziko tayari kupakuliwa.",
+    "windows": "Kisakinishi cha Windows",
+    "android": "Programu ya Android",
+    "installHelp": "Windows: endesha kisakinishi; Windows ikionya, chagua More info → Run anyway. Android: fungua faili kwenye simu na uruhusu kusakinisha kutoka kwenye kivinjari chako.",
+    "later": "Programu zako zitaonekana hapa zikiwa tayari.",
+    "continue": "Endelea kuingia"
   }
 }

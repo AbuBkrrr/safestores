@@ -118,6 +118,9 @@ function createApp() {
   });
   app.get('/sitemap.xml', publicCtrl.sitemap);
   app.get('/robots.txt', publicCtrl.robots);
+  // A store's own apps (sign-up popup polls these; the token is the store's secret link).
+  app.get('/api/store-apps/:token', require('./controllers/storeAppsController').status);
+  app.get('/api/store-apps/:token/:platform', require('./controllers/storeAppsController').download);
   app.use('/api/account', require('./routes/account'));
   app.use('/api/super', superRoutes);
   app.use('/api/stores/:storeId', storeRoutes);

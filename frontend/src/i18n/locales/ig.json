@@ -2461,5 +2461,18 @@
     "partUsed": "Akụkụ ndozi e jiri (site na ngwaahịa)",
     "usePart": "Dekọọ akụkụ ndozi",
     "partSaved": "E dekọrọ akụkụ ndozi, e wepụkwara ya na ngwaahịa."
+  },
+  "storeApps": {
+    "popupTitle": "E debanyela ụlọ ahịa gị",
+    "cardTitle": "Ngwa nke gị",
+    "cardSub": "Ihe ntinye Windows na ngwa Android nwere aha ụlọ ahịa gị.",
+    "building": "Anyị na-eme ngwa Windows na Android nke {{name}}. Ọ na-ewe ihe dịka nkeji 10.",
+    "buildingHelp": "Ị nwere ike ịhapụ nke a ka ọ mepee, ma ọ bụ banye ugbu a: nbudata ga-apụta na Ntọala ụlọ ahịa mgbe ha dị njikere.",
+    "readyText": "Ngwa {{name}} dị njikere maka nbudata.",
+    "windows": "Ihe ntinye Windows",
+    "android": "Ngwa Android",
+    "installHelp": "Windows: mepee ihe ntinye ahụ; ọ bụrụ na Windows adọọ aka na ntị, họrọ More info → Run anyway. Android: mepee faịlụ ahụ na ekwentị ma kwe ka etinye ya site na ihe nchọgharị gị.",
+    "later": "Ngwa gị ga-apụta ebe a ozugbo ha dị njikere.",
+    "continue": "Gaa n'ihu banye"
   }
 }

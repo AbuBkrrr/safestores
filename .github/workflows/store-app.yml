@@ -1,0 +1,148 @@
+name: Store apps
+
+# Builds one store's own Windows installer and Android app from the template
+# in templates/store-app: the store's name, initials icon and a unique app id,
+# with no platform branding. Started automatically by the server when a store
+# signs up (or the Super Admin presses "Rebuild"), or by hand from Actions.
+# Files land on a release tagged store-<id> (never marked latest, so the
+# landing page downloads are unaffected); the server streams them to the store
+# under the store's own file names.
+
+on:
+  workflow_dispatch:
+    inputs:
+      store_id: { description: 'Store id', required: true }
+      store_name: { description: 'Store name shown on the apps', required: true }
+      store_tier: { description: 'mini, midi or mega', required: false, default: 'mini' }
+      api_url: { description: 'Server address the Android app talks to, ending in /api', required: true }
+
+permissions:
+  contents: write
+
+concurrency:
+  group: store-app-${{ inputs.store_id }}
+  cancel-in-progress: true
+
+env:
+  STORE_ID: ${{ inputs.store_id }}
+  STORE_NAME: ${{ inputs.store_name }}
+  STORE_TIER: ${{ inputs.store_tier }}
+  API_URL: ${{ inputs.api_url }}
+
+jobs:
+  icons:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: bash templates/store-app/make-icons.sh "$STORE_NAME" icons
+      - uses: actions/upload-artifact@v4
+        with: { name: icons, path: icons, retention-days: 1 }
+
+  windows:
+    needs: icons
+    runs-on: windows-latest
+    defaults: { run: { shell: bash } }
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      VITE_APP_VARIANT: admin
+      VITE_EDITION: desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { name: icons, path: icons }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: |
+            desktop/package-lock.json
+            frontend/package-lock.json
+      - name: Make it this store's app
+        run: |
+          node templates/store-app/apply.js desktop
+          cp icons/icon.ico desktop/build/icon.ico
+          cp icons/icon.png desktop/build/icon.png
+      - name: Build the installer
+        working-directory: desktop
+        run: |
+          npm ci
+          node scripts/build-frontend.js
+          npx electron-builder --win nsis --publish never
+          mkdir -p ../out
+          cp "$(ls release/*.exe | grep -vi blockmap | head -1)" ../out/store-windows.exe
+      - uses: actions/upload-artifact@v4
+        with: { name: windows, path: out/*, retention-days: 3, if-no-files-found: error }
+
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: |
+            mobile/package-lock.json
+            frontend/package-lock.json
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: '17' }
+      - name: Make it this store's app
+        run: |
+          node templates/store-app/apply.js android
+          bash templates/store-app/make-icons.sh "$STORE_NAME" icons
+          RES=mobile/android/app/src/main/res
+          rm -rf "$RES/mipmap-anydpi-v26"
+          for d in icons/android/mipmap-*; do cp "$d"/*.png "$RES/$(basename "$d")/"; done
+          # Splash screens: the store's icon on the brand colour, same sizes as before.
+          for f in $(find "$RES" -name splash.png); do
+            size=$(identify -format '%wx%h' "$f"); short=$(identify -format '%[fx:min(w,h)]' "$f")
+            convert -size "$size" xc:'#0f7180' \( icons/icon-1024.png -resize $((short / 3))x$((short / 3)) \) -gravity center -composite "$f"
+          done
+      - name: Build the app screens
+        working-directory: mobile
+        run: |
+          npm ci
+          SAFE_STORES_API_URL="$API_URL" node scripts/build-www.js
+          npx cap sync android
+      - name: Build and sign the APK
+        working-directory: mobile/android
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          chmod +x gradlew
+          mkdir -p ../../out
+          if [ -n "$KEYSTORE_B64" ]; then
+            # Same key every time, so phones can install updates over the old app.
+            ./gradlew assembleRelease --no-daemon
+            echo "$KEYSTORE_B64" | base64 -d > release.jks
+            BT=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)
+            "$BT/zipalign" -f 4 app/build/outputs/apk/release/app-release-unsigned.apk aligned.apk
+            "$BT/apksigner" sign --ks release.jks --ks-pass env:KEYSTORE_PASSWORD --ks-key-alias "$KEY_ALIAS" \
+              --key-pass env:KEY_PASSWORD --out ../../out/store-android.apk aligned.apk
+            rm -f release.jks
+          else
+            echo "::warning::No ANDROID_KEYSTORE_BASE64 secret: building a debug-signed APK (a rebuilt app may need the old one uninstalled first)."
+            ./gradlew assembleDebug --no-daemon
+            cp app/build/outputs/apk/debug/app-debug.apk ../../out/store-android.apk
+          fi
+      - uses: actions/upload-artifact@v4
+        with: { name: android, path: out/*, retention-days: 3, if-no-files-found: error }
+
+  release:
+    needs: [windows, android]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { path: dist, merge-multiple: true, pattern: '{windows,android}' }
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: store-${{ inputs.store_id }}
+          target_commitish: ${{ github.sha }}
+          name: store-${{ inputs.store_id }}
+          prerelease: true
+          make_latest: 'false'
+          files: dist/*
+          body: Store apps for store ${{ inputs.store_id }} (downloaded through the store's own account).

@@ -2461,5 +2461,18 @@
     "partUsed": "Part used (from stock)",
     "usePart": "Record part",
     "partSaved": "Part recorded and taken off stock."
+  },
+  "storeApps": {
+    "popupTitle": "Your shop is registered",
+    "cardTitle": "Your own apps",
+    "cardSub": "A Windows installer and an Android app with your shop's name on them.",
+    "building": "We're making {{name}}'s Windows and Android apps. This takes about 10 minutes.",
+    "buildingHelp": "You can keep this open, or sign in now: the downloads also appear in Store Settings when ready.",
+    "readyText": "{{name}}'s apps are ready to download.",
+    "windows": "Windows installer",
+    "android": "Android app",
+    "installHelp": "Windows: run the installer; if Windows warns, choose More info → Run anyway. Android: open the file on the phone and allow installing from your browser.",
+    "later": "Your own apps will appear here once they are ready.",
+    "continue": "Continue to sign in"
   }
 }

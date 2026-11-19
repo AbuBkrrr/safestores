@@ -2461,5 +2461,18 @@
     "partUsed": "Ẹ̀yà àtúnṣe tí a lò (láti inú ọjà)",
     "usePart": "Kọ ẹ̀yà àtúnṣe sílẹ̀",
     "partSaved": "A ti kọ ẹ̀yà àtúnṣe sílẹ̀, a sì ti yọ ọ́ kúrò nínú ọjà."
+  },
+  "storeApps": {
+    "popupTitle": "A ti forúkọ ṣọ́ọ̀bù rẹ sílẹ̀",
+    "cardTitle": "Àwọn áàpù tìrẹ",
+    "cardSub": "Ẹ̀rọ ìfisílẹ̀ Windows àti áàpù Android tó ní orúkọ ṣọ́ọ̀bù rẹ.",
+    "building": "À ń ṣe áàpù Windows àti Android fún {{name}}. Ó máa ń gba nǹkan bí ìṣẹ́jú 10.",
+    "buildingHelp": "O lè fi èyí sílẹ̀ ní ṣíṣí, tàbí wọlé báyìí: àwọn ìgbàsílẹ̀ yóò tún hàn nínú Ètò Ṣọ́ọ̀bù nígbà tí wọ́n bá ṣetán.",
+    "readyText": "Àwọn áàpù {{name}} ti ṣetán fún ìgbàsílẹ̀.",
+    "windows": "Ẹ̀rọ ìfisílẹ̀ Windows",
+    "android": "Áàpù Android",
+    "installHelp": "Windows: ṣí ẹ̀rọ ìfisílẹ̀ náà; bí Windows bá kìlọ̀, yan More info → Run anyway. Android: ṣí fáìlì náà lórí fóònù kí o sì fàyè gba ìfisílẹ̀ láti inú aṣàwákiri rẹ.",
+    "later": "Àwọn áàpù rẹ yóò hàn níbí nígbà tí wọ́n bá ṣetán.",
+    "continue": "Tẹ̀síwájú láti wọlé"
   }
 }

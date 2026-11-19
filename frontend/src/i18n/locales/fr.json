@@ -2461,5 +2461,18 @@
     "partUsed": "Pièce utilisée (du stock)",
     "usePart": "Enregistrer la pièce",
     "partSaved": "Pièce enregistrée et retirée du stock."
+  },
+  "storeApps": {
+    "popupTitle": "Votre boutique est enregistrée",
+    "cardTitle": "Vos propres applications",
+    "cardSub": "Un installateur Windows et une application Android au nom de votre boutique.",
+    "building": "Nous préparons les applications Windows et Android de {{name}}. Cela prend environ 10 minutes.",
+    "buildingHelp": "Vous pouvez garder cette page ouverte ou vous connecter : les téléchargements apparaîtront aussi dans les paramètres de la boutique.",
+    "readyText": "Les applications de {{name}} sont prêtes à être téléchargées.",
+    "windows": "Installateur Windows",
+    "android": "Application Android",
+    "installHelp": "Windows : lancez l'installateur ; si Windows avertit, choisissez Informations complémentaires → Exécuter quand même. Android : ouvrez le fichier sur le téléphone et autorisez l'installation depuis votre navigateur.",
+    "later": "Vos applications apparaîtront ici dès qu'elles seront prêtes.",
+    "continue": "Continuer vers la connexion"
   }
 }

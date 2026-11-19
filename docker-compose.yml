@@ -54,6 +54,10 @@ services:
       BOOTSTRAP_SUPER_ADMIN_EMAIL: ${BOOTSTRAP_SUPER_ADMIN_EMAIL:-}
       BOOTSTRAP_SUPER_ADMIN_PASSWORD: ${BOOTSTRAP_SUPER_ADMIN_PASSWORD:-}
       SUPPORT_INBOX_EMAIL: ${SUPPORT_INBOX_EMAIL:-}
+      # Each store's own Windows/Android apps (templates/store-app). Optional.
+      GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+      GITHUB_REPO: ${GITHUB_REPO:-AbuBkrrr/safestores}
+      STORE_APP_API_URL: ${STORE_APP_API_URL:-}
       # Email + object storage — optional for staging, required for launch
       # (see LAUNCH_GUIDE.md steps 6–7). Empty values are simply ignored.
       PAYSTACK_SECRET_KEY: ${PAYSTACK_SECRET_KEY:-}

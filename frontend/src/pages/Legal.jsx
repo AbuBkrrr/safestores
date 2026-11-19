@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { BrandFooter } from '../components/ui.jsx';
+import { BRAND } from '../utils/brand.js';
 
 // ------------------------------------------------------------
 // Terms of Service, Privacy Policy and open-source licence notices.
@@ -19,10 +20,10 @@ const COUNTRY = import.meta.env.VITE_LEGAL_COUNTRY || 'the Federal Republic of N
 const UPDATED = '8 November 2026';
 
 function Shell({ title, children }) {
-  useEffect(() => { document.title = `${title} — SAFE Stores`; }, [title]);
+  useEffect(() => { document.title = `${title} — ${BRAND}`; }, [title]);
   return (
     <div className="legal">
-      <p><Link to="/">← SAFE Stores</Link></p>
+      <p><Link to="/">← {BRAND}</Link></p>
       <h1>{title}</h1>
       <p className="muted">Last updated: {UPDATED}</p>
       {children}
@@ -36,7 +37,7 @@ function Shell({ title, children }) {
 export function Terms() {
   return (
     <Shell title="Terms of Service">
-      <p>These terms are an agreement between you and {ENTITY} (&quot;we&quot;, &quot;us&quot;) for the use of SAFE Stores — the web app, the Android app and the desktop app (the &quot;Service&quot;). By creating an account or using the Service you agree to them. If you use it for a business, you confirm you can bind that business.</p>
+      <p>These terms are an agreement between you and {ENTITY} (&quot;we&quot;, &quot;us&quot;) for the use of {BRAND} — the web app, the Android app and the desktop app (the &quot;Service&quot;). By creating an account or using the Service you agree to them. If you use it for a business, you confirm you can bind that business.</p>
       <h2>1. Accounts</h2>
       <p>You are responsible for your account and for everyone you invite to your store, and for keeping passwords and invite codes private. Turn on two-factor sign-in for admin accounts. Tell us straight away at {CONTACT} if you think an account has been misused.</p>
       <h2>2. Your data</h2>
@@ -64,7 +65,7 @@ export function Terms() {
 export function Privacy() {
   return (
     <Shell title="Privacy Policy">
-      <p>This policy explains what personal data SAFE Stores handles, why, and your rights. {ENTITY} is the controller for account data of store owners and staff. For the data a store keeps about its own customers (names, phone numbers, purchases), the store is the controller and we process it on the store&apos;s behalf.</p>
+      <p>This policy explains what personal data {BRAND} handles, why, and your rights. {ENTITY} is the controller for account data of store owners and staff. For the data a store keeps about its own customers (names, phone numbers, purchases), the store is the controller and we process it on the store&apos;s behalf.</p>
       <h2>What we collect</h2>
       <ul>
         <li><strong>Account data:</strong> name, email, password (stored only as a one-way hash), role, two-factor settings.</li>
@@ -98,7 +99,7 @@ export function Licenses() {
   useEffect(() => { fetch('/third-party-licenses.json').then((r) => (r.ok ? r.json() : null)).then(setData).catch(() => setData(null)); }, []);
   return (
     <Shell title="Open-source licences">
-      <p>SAFE Stores is built with open-source software. We are grateful to its authors. The packages included in this app and their licences are listed below; each licence permits commercial use and requires its notice to be reproduced, which this page does.</p>
+      <p>{BRAND} is built with open-source software. We are grateful to its authors. The packages included in this app and their licences are listed below; each licence permits commercial use and requires its notice to be reproduced, which this page does.</p>
       {!data ? <p className="muted">The licence list is generated when the app is built.</p> : (
         <>
           <p className="muted">{data.packages.length} packages.</p>
