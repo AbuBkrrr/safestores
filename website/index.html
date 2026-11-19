@@ -154,8 +154,13 @@
   .contact-ways a:hover { border-color: var(--teal); }
   form.lead { background: #fff; border: 1px solid var(--paper-line); border-radius: var(--radius); padding: 24px; display: grid; gap: 14px; }
   form.lead .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  form.lead label { font-size: 13px; font-weight: 600; display: grid; gap: 6px; }
+  form.lead label { font-size: 13px; font-weight: 600; display: grid; gap: 6px; min-width: 0; }
   form.lead input, form.lead select, form.lead textarea { font: inherit; font-weight: 400; font-size: 15px; padding: 10px 12px; border: 1.5px solid var(--paper-line); border-radius: var(--radius); background: var(--paper); color: var(--ink); }
+  form.lead input, form.lead select { width: 100%; min-width: 0; box-sizing: border-box; height: 44px; }
+  form.lead select { appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 36px; text-overflow: ellipsis;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%230f7180' stroke-width='2'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 14px center; }
+  form.lead textarea { width: 100%; box-sizing: border-box; resize: vertical; }
   form.lead input:focus, form.lead select:focus, form.lead textarea:focus { outline: none; border-color: var(--teal); }
   form.lead .note { font-size: 12px; color: var(--ink-soft); margin: 0; }
   .form-msg { font-size: 14px; color: var(--ok); margin: 0; min-height: 1em; }
@@ -236,7 +241,6 @@
       <div class="nav-links" id="nav-links">
         <a href="#flow">How it works</a>
         <a href="#features">Features</a>
-        <a href="#pricing">Pricing</a>
         <a href="#download">Download</a>
         <a href="#contact">Contact</a>
       </div>
@@ -366,30 +370,6 @@
   </div>
 </section>
 
-<section class="section wrap" id="pricing" aria-labelledby="pricing-title">
-  <div class="section-head">
-    <h2 id="pricing-title">Simple pricing</h2>
-    <div class="section-note">you only pay when you sell</div>
-  </div>
-  <div class="pricing">
-    <div class="price-box">
-      <div class="section-note" style="color:#9cc6ca">No setup fee · no monthly fee</div>
-      <div class="big">A small share of each day's sales</div>
-      <p>A set percentage of your daily sales, agreed for your store when it is activated. No sales, no charge. Your Billing page shows exactly what you owe, day by day, and you can pay by transfer, USSD or card.</p>
-      <a href="#contact" class="btn btn-primary" data-topic="pricing">Ask for your rate</a>
-    </div>
-    <table class="sizes">
-      <caption class="section-note" style="text-align:left;padding-bottom:10px;caption-side:top">Pick the size that fits — change it any time</caption>
-      <thead><tr><th>Size</th><th>For</th><th>Products</th><th>Staff logins</th></tr></thead>
-      <tbody>
-        <tr><td><strong>Mini</strong></td><td>A shop run by 1–2 people</td><td>200</td><td>3</td></tr>
-        <tr><td><strong>Midi</strong></td><td>A growing store with a team</td><td>2,000</td><td>20</td></tr>
-        <tr><td><strong>Mega</strong></td><td>Supermarkets and chains</td><td>Unlimited</td><td>Unlimited</td></tr>
-      </tbody>
-    </table>
-  </div>
-</section>
-
 <section class="section wrap" id="download" aria-labelledby="download-title">
   <div class="section-head">
     <h2 id="download-title">Choose your edition</h2>
@@ -427,7 +407,7 @@
   <div class="contact">
     <div>
       <h2 id="contact-title">Talk to us</h2>
-      <p>Questions, a demo, a setup visit, the desktop installer — send a message and we'll get back to you within one working day.</p>
+      <p>Questions, a demo, a setup visit or help installing — send a message and we'll get back to you within one working day.</p>
       <ul class="contact-ways">
         <li><a href="mailto:support@safestores.name.ng">✉️ support@safestores.name.ng</a></li>
         <li><a href="https://app.safestores.name.ng/marketplace-home">🛍️ Browse shops already on SAFE Stores</a></li>
@@ -444,9 +424,8 @@
           <select name="topic" id="lead-topic">
             <option value="demo">See a demo</option>
             <option value="setup">Book a free setup visit</option>
-            <option value="pricing">Know my rate</option>
-            <option value="desktop">Get the desktop installer</option>
-            <option value="android">Hear when the Android app is out</option>
+            <option value="pricing">Ask about pricing</option>
+            <option value="install">Get help installing the app</option>
             <option value="other">Something else</option>
           </select>
         </label>
@@ -465,7 +444,6 @@
     <span>© <span id="year">2026</span> SAFE Stores · A product of A I Brains Ventures</span>
     <div class="foot-links">
       <a href="#features">What it does</a>
-      <a href="#pricing">Pricing</a>
       <a href="https://app.safestores.name.ng/marketplace-home">Shop online</a>
       <a href="https://app.safestores.name.ng/auditor-signup">Become an auditor</a>
       <a href="https://app.safestores.name.ng/terms">Terms</a>
@@ -479,7 +457,7 @@
     var EMAIL = 'support@safestores.name.ng';
     var TOPICS = {
       demo: 'Demo request', setup: 'Free setup visit', pricing: 'Pricing question',
-      desktop: 'Desktop installer request', android: 'Android app — notify me', other: 'Question',
+      install: 'Help installing the app', other: 'Question',
     };
 
     // Mobile menu
