@@ -67,26 +67,34 @@ for i in $(seq 1 30); do
 done
 docker compose logs backend 2>&1 | grep -iE "migrat|applied" | tail -5 || true
 
-echo "== 5. Web server (nginx)"
-SITE=/etc/nginx/sites-available/safestores
-if [ -e /etc/nginx/sites-enabled/safestores ] && [ ! -e /root/nginx-safestores.before-deploy ]; then
-  cp -L /etc/nginx/sites-enabled/safestores /root/nginx-safestores.before-deploy
-  echo "   old nginx config saved in /root/nginx-safestores.before-deploy"
-fi
-if ! grep -q "$APP_DOMAIN" "$SITE" 2>/dev/null || ! grep -q "127.0.0.1:$PORT;" "$SITE"; then
-  sed "s/127.0.0.1:8080/127.0.0.1:$PORT/" deploy/vps/nginx-safestores.conf > "$SITE"
-  ln -sf "$SITE" /etc/nginx/sites-enabled/safestores
-fi
-nginx -t && systemctl reload nginx
+# Who answers on port 80/443: a Caddy container (shared with other sites) or host nginx.
+CADDY=$(docker ps --format '{{.Names}} {{.Image}} {{.Ports}}' | awk '$2 ~ /^caddy/ && /:443->/ {print $1; exit}')
+if [ -n "$CADDY" ]; then
+  echo "== 5. Web server: routing through the Caddy container $CADDY"
+  bash deploy/vps/caddy-route.sh "$CADDY" "$DOMAIN"
+  echo "   (Caddy gets the HTTPS certificates itself)"
+else
+  echo "== 5. Web server (nginx)"
+  SITE=/etc/nginx/sites-available/safestores
+  if [ -e /etc/nginx/sites-enabled/safestores ] && [ ! -e /root/nginx-safestores.before-deploy ]; then
+    cp -L /etc/nginx/sites-enabled/safestores /root/nginx-safestores.before-deploy
+    echo "   old nginx config saved in /root/nginx-safestores.before-deploy"
+  fi
+  if ! grep -q "$APP_DOMAIN" "$SITE" 2>/dev/null || ! grep -q "127.0.0.1:$PORT;" "$SITE"; then
+    sed "s/127.0.0.1:8080/127.0.0.1:$PORT/" deploy/vps/nginx-safestores.conf > "$SITE"
+    ln -sf "$SITE" /etc/nginx/sites-enabled/safestores
+  fi
+  nginx -t && systemctl reload nginx
 
-echo "== 6. HTTPS certificates"
-command -v certbot >/dev/null || apt-get install -y certbot python3-certbot-nginx
-DOMAINS="-d $DOMAIN"
-for d in "www.$DOMAIN" "$APP_DOMAIN"; do getent hosts "$d" >/dev/null && DOMAINS="$DOMAINS -d $d"; done
-certbot --nginx --non-interactive --agree-tos --redirect --expand -m "support@$DOMAIN" $DOMAINS || echo "   certbot failed; see the message above"
-if ! getent hosts "$APP_DOMAIN" >/dev/null; then
-  echo "   !! $APP_DOMAIN has no DNS record yet. Add an A record: app -> $(curl -fsS -4 ifconfig.me 2>/dev/null || echo the server IP)"
-  echo "      then run this script again to get its certificate."
+  echo "== 6. HTTPS certificates"
+  command -v certbot >/dev/null || apt-get install -y certbot python3-certbot-nginx
+  DOMAINS="-d $DOMAIN"
+  for d in "www.$DOMAIN" "$APP_DOMAIN"; do getent hosts "$d" >/dev/null && DOMAINS="$DOMAINS -d $d"; done
+  certbot --nginx --non-interactive --agree-tos --redirect --expand -m "support@$DOMAIN" $DOMAINS || echo "   certbot failed; see the message above"
+  if ! getent hosts "$APP_DOMAIN" >/dev/null; then
+    echo "   !! $APP_DOMAIN has no DNS record yet. Add an A record: app -> $(curl -fsS -4 ifconfig.me 2>/dev/null || echo the server IP)"
+    echo "      then run this script again to get its certificate."
+  fi
 fi
 
 echo

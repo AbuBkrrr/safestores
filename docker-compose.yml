@@ -97,6 +97,15 @@ services:
     ports:
       - '${FRONTEND_BIND:-8080}:80'
 
+  # The public landing page (website/ folder), for servers where one reverse
+  # proxy (e.g. Caddy) routes the main domain here and app.<domain> to frontend.
+  website:
+    image: nginx:1.27-alpine
+    container_name: safestores-website
+    restart: unless-stopped
+    volumes:
+      - ./website:/usr/share/nginx/html:ro
+
 volumes:
   postgres_data:
   backend_uploads:
