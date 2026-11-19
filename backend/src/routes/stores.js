@@ -113,7 +113,8 @@ router.patch('/loyalty-settings', requireRole('admin', 'manager'), storesCtrl.up
 // Billing status/claim-payment must stay reachable even for a locked
 // store, so its admin can see why, know what's owed, and claim payment.
 router.get('/billing/status', billingCtrl.getBillingStatus);
-router.post('/billing/claim-payment', requireRole('admin', 'manager'), billingCtrl.claimPayment);
+// Multipart when a receipt is attached (field "proof"); plain JSON still works.
+router.post('/billing/claim-payment', requireRole('admin', 'manager'), (req, res, next) => require('../utils/storage').uploadDocument.single('proof')(req, res, (err) => (err ? res.status(400).json({ error: err.message }) : next())), billingCtrl.claimPayment);
 // Online payment via Paystack — an alternative to the manual claim above,
 // available only once a Super Admin has configured and enabled it (see
 // initializeGatewayPayment's own check). Same locked-store exemption as

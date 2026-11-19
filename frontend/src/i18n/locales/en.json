@@ -849,7 +849,18 @@
     "paymentVerified": "Payment confirmed — your store is now unlocked!",
     "paymentNotVerified": "We couldn't confirm this payment. If you were charged, please contact support.",
     "initializeFailed": "Could not start online payment. Please try again or use bank transfer below.",
-    "orPayOnline": "or pay online instantly"
+    "orPayOnline": "or pay online instantly",
+    "accountEnding": "account ending {{last}} — tap for details",
+    "bankOrProvider": "Bank / provider",
+    "accountNumber": "Account number",
+    "accountName": "Account name",
+    "copy": "Copy",
+    "copied": "Copied ✓",
+    "uploadReceiptConfirm": "Upload receipt & confirm payment",
+    "uploadReceiptHint": "Paid already? Send us the receipt and we'll confirm it and unlock your store.",
+    "forCharge": "For the charge of {{date}}: {{amount}}",
+    "receiptFile": "Receipt (photo or PDF)",
+    "receiptFileHint": "A screenshot of the transfer or a photo of the teller. Optional, but it gets you confirmed faster."
   },
   "supportPage": {
     "title": "Support",

@@ -39,19 +39,21 @@ async function claimPayment(req, res) {
   const charge = chargeRes.rows[0];
   if (!charge) return res.status(404).json({ error: 'Charge not found or already resolved' });
 
+  // Optional receipt (photo or PDF) so the Super Admin can check it against the account.
+  const proofUrl = req.file ? (await require('../utils/storage').persistUpload(req.file, { keyPrefix: `stores/${storeId}/billing` })).url : null;
   await db.query(
-    `UPDATE billing_charges SET claim_method = $1, claim_reference = $2, claimed_at = now() WHERE id = $3`,
-    [method, reference || null, chargeId]
+    `UPDATE billing_charges SET claim_method = $1, claim_reference = $2, claim_proof_url = COALESCE($4, claim_proof_url), claimed_at = now() WHERE id = $3`,
+    [method, reference || null, chargeId, proofUrl]
   );
 
   const storeRes = await db.query('SELECT name FROM stores WHERE id = $1', [storeId]);
   await db.query(
     `INSERT INTO notifications (type, store_id, billing_charge_id, message) VALUES ('payment_claim', $1, $2, $3)`,
     [storeId, chargeId,
-      `${storeRes.rows[0].name} claims payment of ${charge.amount_due} for ${charge.charge_date} via ${method}${reference ? ` (ref: ${reference})` : ''}. Awaiting confirmation.`]
+      `${storeRes.rows[0].name} claims payment of ${charge.amount_due} for ${charge.charge_date} via ${method}${reference ? ` (ref: ${reference})` : ''}${proofUrl ? ' — receipt attached' : ''}. Awaiting confirmation.`]
   );
 
-  res.json({ message: 'Payment claim submitted — a Super Admin will confirm and unlock your store shortly.' });
+  res.json({ message: 'Payment claim submitted — a Super Admin will confirm and unlock your store shortly.', proofUrl });
 }
 
 // GET /api/settings/payment-instructions — public to any logged-in user
