@@ -1,0 +1,86 @@
+name: Desktop installers
+
+# Builds the shop-computer (desktop) installers for Windows, Mac and Linux and
+# attaches them to a GitHub release.
+#   - Push a tag like desktop-v1.4.0  → a release named after the tag.
+#   - Or run it by hand (Actions → Desktop installers → Run workflow) → files
+#     are kept as workflow artifacts for 30 days, no release is made.
+# The Mac build is unsigned unless signing secrets are added (see desktop/README.md):
+# people open it the first time with right-click → Open.
+
+on:
+  push:
+    tags: ['desktop-v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: desktop } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: 'npm', cache-dependency-path: desktop/package-lock.json }
+      - run: npm ci
+      - run: npm test
+
+  build:
+    needs: test
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            script: build:win:admin
+            files: desktop/release/*.exe
+          - os: macos-latest
+            script: build:mac
+            files: desktop/release/*.dmg
+          - os: ubuntu-latest
+            script: build:linux
+            files: desktop/release/*.AppImage
+    runs-on: ${{ matrix.os }}
+    defaults: { run: { working-directory: desktop } }
+    env:
+      # No code-signing certificate configured yet: build unsigned instead of failing.
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: |
+            desktop/package-lock.json
+            frontend/package-lock.json
+      - run: npm ci
+      - name: Build installer (also builds the app screens in shop-computer mode)
+        run: npm run ${{ matrix.script }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installer-${{ matrix.os }}
+          path: ${{ matrix.files }}
+          retention-days: 30
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/desktop-v')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with: { path: dist, merge-multiple: true }
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: SAFE Stores for shop computers ${{ github.ref_name }}
+          files: dist/*
+          body: |
+            Install on the shop computer:
+            - **Windows:** download the `.exe` and run it.
+            - **Mac:** download the `.dmg`, drag SAFE Stores to Applications, then right-click → Open the first time.
+            - **Linux:** download the `.AppImage`, make it executable and run it.
+
+            Works fully offline; other devices in the shop connect to it over the Wi-Fi, and it backs up to your online store when the internet is on.
