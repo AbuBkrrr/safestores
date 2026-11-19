@@ -170,11 +170,16 @@ export default function Layout() {
 
   // In-store only lock: any blocked action, on any page, shows one banner.
   const [offsite, setOffsite] = useState(null);
+  const [onlineNeeded, setOnlineNeeded] = useState(null);
   useEffect(() => {
     const on = (e) => setOffsite(e.detail);
+    const need = (e) => setOnlineNeeded(e.detail);
     window.addEventListener('ss:offsite', on);
-    return () => window.removeEventListener('ss:offsite', on);
+    window.addEventListener('ss:online-needed', need);
+    return () => { window.removeEventListener('ss:offsite', on); window.removeEventListener('ss:online-needed', need); };
   }, []);
+  // A different page may not need the internet: clear the notice on navigation.
+  useEffect(() => { setOnlineNeeded(null); }, [location.pathname]);
 
   const handleLogout = () => {
     logout();
@@ -270,6 +275,12 @@ export default function Layout() {
             <div className="alert error" role="alert" style={{ display: 'flex', gap: 12, alignItems: 'flex-start', justifyContent: 'space-between' }}>
               <span>📍 <strong>{t('onsite.blockedTitle')}</strong> {offsite}</span>
               <button type="button" className="btn small secondary" onClick={() => setOffsite(null)}>{t('onsite.dismiss')}</button>
+            </div>
+          )}
+          {onlineNeeded && (
+            <div className="alert info" role="status" style={{ display: 'flex', gap: 12, alignItems: 'flex-start', justifyContent: 'space-between' }}>
+              <span>🌐 <strong>{t('onsite.onlineTitle')}</strong> {onlineNeeded}</span>
+              <button type="button" className="btn small secondary" onClick={() => setOnlineNeeded(null)}>{t('onsite.dismiss')}</button>
             </div>
           )}
           <Suspense fallback={<div className="page-loading" role="status"><span className="spinner" /></div>}>

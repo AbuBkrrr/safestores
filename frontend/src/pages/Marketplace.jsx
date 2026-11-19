@@ -20,7 +20,7 @@ export default function Marketplace() {
   const [error, setError] = useState('');
   const [toast, showToast] = useToast();
 
-  const load = () => api.get(`/stores/${user.storeId}/marketplace/orders`).then((r) => setOrders(r.data));
+  const load = () => api.get(`/stores/${user.storeId}/marketplace/orders`).then((r) => setOrders(r.data)).catch(() => {});
   useEffect(() => { load(); }, [user.storeId]);
 
   // Shop profile: custom address (/shop/<slug>), tagline, category, location.
@@ -110,7 +110,9 @@ export default function Marketplace() {
     }
   };
 
-  const storefrontUrl = `${window.location.origin}/shop/${profile?.shopSlug || user.storeId}`;
+  // On the shop computer the page is served locally; customers use the public web address.
+  const shopOrigin = import.meta.env.VITE_EDITION === 'desktop' ? (import.meta.env.VITE_PUBLIC_APP_URL || 'https://app.safestores.name.ng') : window.location.origin;
+  const storefrontUrl = `${shopOrigin}/shop/${profile?.shopSlug || user.storeId}`;
 
   return (
     <div>
@@ -129,7 +131,7 @@ export default function Marketplace() {
               <div className="form-group">
                 <label htmlFor="mp-slug">{t('marketplacePage.shopAddress')}</label>
                 <div className="flex" style={{ gap: 4, alignItems: 'center' }}>
-                  <span className="muted" style={{ fontSize: 13, whiteSpace: 'nowrap' }}>{window.location.host}/shop/</span>
+                  <span className="muted" style={{ fontSize: 13, whiteSpace: 'nowrap' }}>{shopOrigin.replace(/^https?:\/\//, '')}/shop/</span>
                   <input id="mp-slug" value={profile.shopSlug} onChange={setP('shopSlug')} placeholder="mama-ngozi-lekki" maxLength={40} style={{ flex: 1 }} />
                 </div>
                 <span className="help-text">{t('marketplacePage.shopAddressHelp')}</span>

@@ -168,6 +168,10 @@ api.interceptors.response.use(
     if (err.response?.data?.code === 'OFFSITE' && typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('ss:offsite', { detail: err.response.data.error }));
     }
+    // Shop computer: an online-only screen and no internet (or not signed in to the cloud).
+    if (['OFFLINE', 'CLOUD_SIGN_IN', 'CLOUD_NOT_CONNECTED'].includes(err.response?.data?.code) && typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('ss:online-needed', { detail: err.response.data.error }));
+    }
     return Promise.reject(err);
   }
 );

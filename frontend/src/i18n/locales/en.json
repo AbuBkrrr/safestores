@@ -2400,6 +2400,7 @@
     "whoIsExempt": "You (the owner), managers, the online market manager and booked auditors can work from anywhere. Shop computers on the shop network are always allowed. Sales made with no internet are checked by where they were made when they sync.",
     "failed": "Could not save. Try again.",
     "blockedTitle": "Blocked: not in the shop.",
-    "dismiss": "Dismiss"
+    "dismiss": "Dismiss",
+    "onlineTitle": "This screen needs the internet."
   }
 }
