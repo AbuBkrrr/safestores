@@ -1910,7 +1910,7 @@
     "portalVerified": "The guarantor confirmed this member on the partner portal.",
     "readyToApprove": "All checks done. Set the limit and approve.",
     "emailSubject": "Verification of guarantor letter for {{customer}}",
-    "emailBody": "Good day,\\n\\n{{customer}} (staff/member no. {{ref}}) has given us a guarantor declaration letter from your organisation for credit purchases of up to {{amount}} at {{store}}.\\n\\nPlease confirm by reply that your organisation issued this letter and accepts to settle these purchases.\\n\\nThank you."
+    "emailBody": "Good day,\n\n{{customer}} (staff/member no. {{ref}}) has given us a guarantor declaration letter from your organisation for credit purchases of up to {{amount}} at {{store}}.\n\nPlease confirm by reply that your organisation issued this letter and accepts to settle these purchases.\n\nThank you."
   },
   "partnerInvite": {
     "sendLink": "Send this link to the partner. It works once and expires in 14 days:",
