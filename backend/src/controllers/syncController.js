@@ -125,15 +125,18 @@ async function importChanges(req, res) {
     await client.query('BEGIN');
 
     // Users import FIRST, before anything that references one — see
-    // exportChanges' comment above for why. ON CONFLICT covers both the
-    // id-PK case (already synced) and the (store_id, email) UNIQUE case
-    // (this person already has a local account under a different id —
-    // resolveUser below is the safety net for that remaining case).
+    // exportChanges' comment above for why. A bare ON CONFLICT DO NOTHING
+    // covers both the id-PK case (already synced) and the (store_id, email)
+    // UNIQUE case (this person already has an account here under a
+    // different id, e.g. a till that was reinstalled). Naming only (id)
+    // let the email clash throw and roll back the whole batch, so that
+    // device could never back up again. resolveUser below handles the
+    // references to the skipped id. Same as desktop's INSERT OR IGNORE.
     for (const u of users) {
       await client.query(
         `INSERT INTO users (id, store_id, name, email, password_hash, role, status, created_at)
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-         ON CONFLICT (id) DO NOTHING`,
+         ON CONFLICT DO NOTHING`,
         [u.id, storeId, u.name, u.email, u.password_hash, u.role, u.status, u.created_at]
       );
     }

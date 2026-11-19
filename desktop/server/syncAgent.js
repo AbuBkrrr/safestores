@@ -136,4 +136,13 @@ function startSyncAgent(localPort, { log = () => {} } = {}) {
   };
 }
 
-module.exports = { startSyncAgent, loadConfig, configPath, syncWithRemote };
+// Merge-and-write, so turning on cloud backup keeps the LAN setting (and
+// anything else already saved) instead of wiping it.
+function saveConfig(changes) {
+  const next = { ...loadConfig(), ...changes };
+  fs.mkdirSync(path.dirname(configPath()), { recursive: true });
+  fs.writeFileSync(configPath(), JSON.stringify(next, null, 2));
+  return next;
+}
+
+module.exports = { startSyncAgent, loadConfig, saveConfig, configPath, syncWithRemote };

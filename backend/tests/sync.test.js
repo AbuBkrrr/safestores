@@ -223,3 +223,26 @@ describe('Sync: store customers', () => {
     expect(exp.body.loyaltyPoints).toHaveLength(1);
   });
 });
+
+describe('Sync: a reinstalled till', () => {
+  it('a user arriving under a new id but an email already here is skipped, and the rest of the batch still imports', async () => {
+    const { store, admin } = await createActiveStoreWithAdmin();
+    const syncKey = await getSyncKey(store.id);
+    const now = new Date().toISOString();
+    // A complete product row as a device would send it: made here, then
+    // removed, so the import has to bring it back.
+    const made = await createProduct(store.id, { name: 'Made offline' });
+    const { rows: [row] } = await pool.query('SELECT * FROM products WHERE id = $1', [made.id]);
+    await pool.query('DELETE FROM products WHERE id = $1', [made.id]);
+    const productId = made.id;
+    const res = await request().post(`/api/stores/${store.id}/sync/import`).set('x-store-sync-key', syncKey).send({
+      users: [{ id: uuidv4(), name: 'Same person, new install', email: admin.email, password_hash: 'x', role: 'admin', status: 'active', created_at: now }],
+      products: [row],
+    });
+    expect(res.status).toBe(200);
+    const { rows: users } = await pool.query('SELECT id FROM users WHERE store_id = $1 AND email = $2', [store.id, admin.email]);
+    expect(users.map((u) => u.id)).toEqual([admin.id]);
+    const { rows: products } = await pool.query('SELECT name FROM products WHERE id = $1', [productId]);
+    expect(products[0]?.name).toBe('Made offline');
+  });
+});
