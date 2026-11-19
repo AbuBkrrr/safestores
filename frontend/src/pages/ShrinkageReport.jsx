@@ -87,13 +87,26 @@ export default function ShrinkageReport() {
             <div className="label">{t('shrinkagePage.totalValueLost')}</div>
           </div>
           <div className="card metric">
-            <div className="value">{report?.totalUnitsLost ?? 0}</div>
+            <div className="value">{Math.round((report?.totalUnitsLost ?? 0) * 1000) / 1000}</div>
             <div className="label">{t('shrinkagePage.totalUnitsLost')}</div>
           </div>
           <div className="card metric">
             <div className="value">{rows.length}</div>
             <div className="label">{t('shrinkagePage.productsAffected')}</div>
           </div>
+        </div>
+      )}
+
+      {!loading && report?.bySource?.length > 0 && (
+        <div className="card">
+          <h3 style={{ marginBottom: 12 }}>{t('shrinkagePage.whereFrom')}</h3>
+          <table><tbody>{report.bySource.map((r) => (
+            <tr key={r.source}>
+              <td>{t(`shrinkagePage.source_${r.source}`)}</td>
+              <td className="muted">{t('shrinkagePage.incidents', { count: r.incidents })}</td>
+              <td style={{ textAlign: 'right' }}>{formatCurrency(r.value_lost)}</td>
+            </tr>
+          ))}</tbody></table>
         </div>
       )}
 

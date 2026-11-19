@@ -94,7 +94,7 @@ async function createJob(req, res) {
       } catch (e) { if (e.code !== '23505') throw e; } // ref clash: try another
     }
     if (deposit > 0) {
-      await client.query(`INSERT INTO job_payments (job_id, amount, method, kind, recorded_by) VALUES ($1,$2,$3,'deposit',$4)`, [job.id, deposit, b.method || 'cash', req.user.sub || null]);
+      await client.query(`INSERT INTO job_payments (job_id, amount, method, kind, recorded_by, shift_id) VALUES ($1,$2,$3,'deposit',$4,(SELECT id FROM shifts WHERE store_id = $5 AND opened_by = $4 AND status = 'open' LIMIT 1))`, [job.id, deposit, b.method || 'cash', req.user.sub || null, storeId]);
     }
     await client.query('COMMIT');
     res.status(201).json(await jobRow(job.id, storeId));
@@ -132,7 +132,7 @@ async function addPayment(req, res) {
       await client.query('ROLLBACK');
       return res.status(400).json({ error: `Only ${money(Number(j.total) - Number(j.paid))} is left to pay on this job` });
     }
-    await client.query(`INSERT INTO job_payments (job_id, amount, method, kind, recorded_by) VALUES ($1,$2,$3,'payment',$4)`, [j.id, amount, method, req.user.sub || null]);
+    await client.query(`INSERT INTO job_payments (job_id, amount, method, kind, recorded_by, shift_id) VALUES ($1,$2,$3,'payment',$4,(SELECT id FROM shifts WHERE store_id = $5 AND opened_by = $4 AND status = 'open' LIMIT 1))`, [j.id, amount, method, req.user.sub || null, req.params.storeId]);
     await client.query('UPDATE job_orders SET paid = paid + $1 WHERE id = $2', [amount, j.id]);
     await client.query('COMMIT');
     res.status(201).json(await jobRow(j.id, req.params.storeId));
@@ -156,7 +156,7 @@ async function collect(req, res) {
     if (!j || ['collected', 'cancelled'].includes(j.status)) { await client.query('ROLLBACK'); return res.status(400).json({ error: 'Job not found or already closed' }); }
     const balance = money(Number(j.total) - Number(j.paid));
     if (balance > 0) {
-      await client.query(`INSERT INTO job_payments (job_id, amount, method, kind, recorded_by) VALUES ($1,$2,$3,'balance',$4)`, [j.id, balance, method, req.user.sub || null]);
+      await client.query(`INSERT INTO job_payments (job_id, amount, method, kind, recorded_by, shift_id) VALUES ($1,$2,$3,'balance',$4,(SELECT id FROM shifts WHERE store_id = $5 AND opened_by = $4 AND status = 'open' LIMIT 1))`, [j.id, balance, method, req.user.sub || null, req.params.storeId]);
     }
     await client.query(`UPDATE job_orders SET paid = total, status = 'collected', collected_at = now() WHERE id = $1`, [j.id]);
     await client.query('COMMIT');

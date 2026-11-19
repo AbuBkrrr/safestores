@@ -53,7 +53,14 @@ async function computeTransactionTotal(client, storeId, dateStr) {
      WHERE store_id = $1 AND status = 'fulfilled' AND fulfilled_at::date = $2::date`,
     [storeId, dateStr]
   );
-  return Number(posRes.rows[0].total) + Number(marketRes.rows[0].total);
+  // Service work (tailors, laundries): money actually received that day —
+  // deposits and balances — is that day's takings, same as a till sale.
+  const jobRes = await client.query(
+    `SELECT COALESCE(SUM(jp.amount), 0) AS total FROM job_payments jp JOIN job_orders j ON j.id = jp.job_id
+     WHERE j.store_id = $1 AND jp.created_at::date = $2::date`,
+    [storeId, dateStr]
+  );
+  return Number(posRes.rows[0].total) + Number(marketRes.rows[0].total) + Number(jobRes.rows[0].total);
 }
 
 /** Ensures yesterday's charge row exists for every active daily-percentage store. */

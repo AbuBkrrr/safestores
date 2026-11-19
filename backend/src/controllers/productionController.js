@@ -94,7 +94,7 @@ async function runProduction(req, res) {
     const recipe = (await client.query('SELECT * FROM production_recipes WHERE id = $1 AND store_id = $2 AND active', [req.body?.recipeId, storeId])).rows[0];
     if (!recipe) { await client.query('ROLLBACK'); return res.status(404).json({ error: 'Recipe not found' }); }
     const lines = (await client.query(
-      `SELECT l.*, p.name, p.cost_price FROM production_recipe_lines l JOIN products p ON p.id = l.product_id WHERE l.recipe_id = $1`, [recipe.id]
+      `SELECT l.*, p.name, p.cost_price, p.price_multiplier FROM production_recipe_lines l JOIN products p ON p.id = l.product_id WHERE l.recipe_id = $1`, [recipe.id]
     )).rows;
     const actual = new Map((req.body?.outputs || []).map((o) => [o.productId, roundQty(o.quantity)]));
     const note = `${recipe.kind === 'breakdown' ? 'Break-down' : 'Production'}: ${recipe.name}`;
@@ -120,6 +120,15 @@ async function runProduction(req, res) {
     if (outputs.some((o) => !(o.qty >= 0))) { await client.query('ROLLBACK'); return res.status(400).json({ error: 'Output amounts cannot be negative' }); }
     const totalOut = outputs.reduce((s, o) => s + o.qty, 0);
     if (!(totalOut > 0)) { await client.query('ROLLBACK'); return res.status(400).json({ error: 'Enter how much was produced' }); }
+    // Share the inputs' cost out by what each output sells for (amount ×
+    // current selling price), so a kilo of offal doesn't carry the same cost
+    // as a kilo of fillet, and a hide counted in pieces gets a sensible cost.
+    // If any output has no selling price yet, fall back to sharing by amount.
+    const made = outputs.filter((o) => o.qty > 0);
+    const priceOf = (o) => Number(o.cost_price || 0) * Number(o.price_multiplier || 0);
+    const byValue = made.length > 1 && made.every((o) => priceOf(o) > 0);
+    const weightOf = (o) => (byValue ? o.qty * priceOf(o) : o.qty);
+    const totalWeight = made.reduce((s2, o) => s2 + weightOf(o), 0);
     for (const o of outputs) {
       await client.query('INSERT INTO production_run_lines (run_id, product_id, role, expected_qty, quantity) VALUES ($1,$2,$3,$4,$5)', [run.id, o.product_id, 'output', o.expected, o.qty]);
       if (o.qty > 0) {
@@ -127,9 +136,9 @@ async function runProduction(req, res) {
           `INSERT INTO stock_movements (store_id, product_id, type, quantity, note, performed_by) VALUES ($1,$2,$3,$4,$5,$6)`,
           [storeId, o.product_id, toStoreRoom ? 'production_output' : 'production_output_shelf', o.qty, note, req.user.sub || null]
         );
-        // Cost of what was made: the inputs' cost shared by output quantity.
-        if (inputCost > 0) {
-          await client.query('UPDATE products SET cost_price = $1 WHERE id = $2', [Math.round((inputCost / totalOut) * 100) / 100, o.product_id]);
+        if (inputCost > 0 && totalWeight > 0) {
+          const unitCost = (inputCost * (weightOf(o) / totalWeight)) / o.qty;
+          await client.query('UPDATE products SET cost_price = $1 WHERE id = $2', [Math.round(unitCost * 100) / 100, o.product_id]);
         }
         await recomputeProductQuantities(client, o.product_id);
       }

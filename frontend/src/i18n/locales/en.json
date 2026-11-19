@@ -1228,8 +1228,15 @@
     "noShrinkage": "No shrinkage recorded for this period — nothing counted below what movement history says should be there. That's a good sign.",
     "loadFailed": "Failed to load shrinkage data",
     "downloadCsv": "⬇ Download CSV",
-    "sourceNote": "Sources: shelf audits and cycle counts with a negative discrepancy in this period.",
-    "adminManagerOnly": "Only an Admin or Manager can view this report."
+    "sourceNote": "From your own stock counts that came up short, items written off as damaged or spoiled, and store-room handovers that arrived short.",
+    "adminManagerOnly": "Only an Admin or Manager can view this report.",
+    "whereFrom": "Where the losses came from",
+    "source_count": "Stock counts that came up short",
+    "source_damaged": "Damaged (including damaged returns)",
+    "source_spoiled": "Spoiled or expired",
+    "source_handover_short": "Handovers that arrived short",
+    "incidents_one": "{{count}} time",
+    "incidents_other": "{{count}} times"
   },
   "lendingPage": {
     "title": "🏦 Lending Partners",
@@ -1472,7 +1479,8 @@
     "noSales": "No sales on this day.",
     "byCashier": "By cashier",
     "byHour": "By hour",
-    "topItems": "Top items"
+    "topItems": "Top items",
+    "jobPayments": "Job payments ({{count}})"
   },
   "settingsPage": {
     "title": "Store Settings",
