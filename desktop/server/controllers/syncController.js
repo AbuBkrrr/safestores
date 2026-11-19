@@ -91,7 +91,8 @@ function exportChanges(req, res) {
     'SELECT l.* FROM production_run_lines l JOIN production_runs r ON r.id = l.run_id WHERE r.store_id = ? AND r.created_at > ?'
   ).all(storeId, since) : [];
   const jobs = db.prepare('SELECT * FROM job_orders WHERE store_id = ? AND COALESCE(updated_at, created_at) > ? ORDER BY created_at ASC').all(storeId, since)
-    .map((j) => ({ ...j, items: parseJson(j.items, []), measurements: parseJson(j.measurements, {}) }));
+    .map((j) => ({ ...j, items: parseJson(j.items, []), measurements: parseJson(j.measurements, {}), item_details: parseJson(j.item_details, {}) }));
+  const jobNotes = db.prepare('SELECT n.* FROM job_notes n JOIN job_orders j ON j.id = n.job_id WHERE j.store_id = ? AND n.created_at > ?').all(storeId, since);
   const jobPayments = db.prepare('SELECT p.* FROM job_payments p JOIN job_orders j ON j.id = p.job_id WHERE j.store_id = ? AND p.created_at > ?').all(storeId, since);
   const jobMaterials = db.prepare('SELECT m.* FROM job_materials m JOIN job_orders j ON j.id = m.job_id WHERE j.store_id = ? AND m.created_at > ?').all(storeId, since);
 
@@ -101,7 +102,7 @@ function exportChanges(req, res) {
   res.json({
     serverTime: new Date().toISOString(),
     storeSettings,
-    handovers, handoverItems, securityReturns, recipes, recipeLines, productionRuns, productionRunLines, jobs, jobPayments, jobMaterials,
+    handovers, handoverItems, securityReturns, recipes, recipeLines, productionRuns, productionRunLines, jobs, jobPayments, jobMaterials, jobNotes,
     users, products, arrivals, movements, audits,
     suppliers, purchaseOrders, purchaseOrderItems, batches, receipts, orders, orderItems, webhooks, cycleCounts,
     shifts, orderPayments, refunds, refundItems, customers, customerLedger, loyaltyPoints,
@@ -125,7 +126,7 @@ function importChanges(req, res) {
     shifts = [], orderPayments = [], refunds = [], refundItems = [],
     customers = [], customerLedger = [], loyaltyPoints = [],
     handovers = [], handoverItems = [], securityReturns = [], recipes = [], recipeLines = [],
-    productionRuns = [], productionRunLines = [], jobs = [], jobPayments = [], jobMaterials = [], storeSettings = null,
+    productionRuns = [], productionRunLines = [], jobs = [], jobPayments = [], jobMaterials = [], jobNotes = [], storeSettings = null,
   } = req.body;
   const touched = new Set();
 
@@ -425,7 +426,7 @@ function importChanges(req, res) {
           .run(...cols.map((c) => (SETTINGS_BOOLS.includes(c) ? (storeSettings[c] ? 1 : 0) : storeSettings[c])), storeSettings.settings_updated_at, storeId);
       }
     }
-    importShopFloor({ storeId, resolveUser, handovers, handoverItems, securityReturns, recipes, recipeLines, productionRuns, productionRunLines, jobs, jobPayments, jobMaterials });
+    importShopFloor({ storeId, resolveUser, handovers, handoverItems, securityReturns, recipes, recipeLines, productionRuns, productionRunLines, jobs, jobPayments, jobMaterials, jobNotes });
 
     for (const productId of touched) {
       if (db.prepare('SELECT id FROM products WHERE id = ?').get(productId)) {
@@ -453,6 +454,14 @@ function importChanges(req, res) {
     console.error(err);
     res.status(500).json({ error: 'Failed to import sync batch' });
   }
+}
+
+// A tag code is unique per shop; if two offline devices ever picked the same
+// one, the newcomer keeps a suffixed tag (its printed tag still finds it by ref).
+function freeTag(tag, id) {
+  if (!tag) return null;
+  const taken = db.prepare('SELECT id FROM job_orders WHERE tag_code = ?').get(tag);
+  return taken && taken.id !== id ? `${tag}${String(id).replace(/-/g, '').slice(0, 2).toUpperCase()}`.slice(0, 12) : tag;
 }
 
 // Handovers, returns at security, production and service jobs. Stock itself
@@ -527,18 +536,26 @@ function importShopFloor(x) {
       // Two offline devices can, rarely, pick the same job reference: keep both jobs, suffixing the newcomer's.
       const clash = !!db.prepare('SELECT 1 FROM job_orders WHERE store_id = ? AND ref = ?').get(storeId, j.ref);
       const ref = clash ? `${j.ref}-${String(j.id).replace(/-/g, '').slice(0, 3).toUpperCase()}` : j.ref;
-      db.prepare(`INSERT OR IGNORE INTO job_orders (id, store_id, ref, store_customer_id, customer_name, customer_phone, title, items, measurements, total, paid, status, due_date, notes, assigned_to, created_by, created_at, updated_at, collected_at)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(j.id, storeId, ref, cust, j.customer_name, j.customer_phone || null, j.title, asJson(j.items, []), asJson(j.measurements, {}),
-        Number(j.total), Number(j.paid), j.status, due, j.notes || null, resolveUser(j.assigned_to), resolveUser(j.created_by), j.created_at, stamp, j.collected_at || null);
+      db.prepare(`INSERT OR IGNORE INTO job_orders (id, store_id, ref, store_customer_id, customer_name, customer_phone, title, items, measurements, total, paid, status, due_date, notes, assigned_to, created_by, created_at, updated_at, collected_at,
+                                                    item_details, fault, condition_notes, accessories, diagnosis, tag_code)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(j.id, storeId, ref, cust, j.customer_name, j.customer_phone || null, j.title, asJson(j.items, []), asJson(j.measurements, {}),
+        Number(j.total), Number(j.paid), j.status, due, j.notes || null, resolveUser(j.assigned_to), resolveUser(j.created_by), j.created_at, stamp, j.collected_at || null,
+        asJson(j.item_details, {}), j.fault || null, j.condition_notes || null, j.accessories || null, j.diagnosis || null, freeTag(j.tag_code, j.id));
     } else if (newer(stamp, ex.updated_at)) {
-      db.prepare('UPDATE job_orders SET title=?, items=?, measurements=?, total=?, paid=?, status=?, due_date=?, notes=?, assigned_to=?, collected_at=?, updated_at=? WHERE id=?')
-        .run(j.title, asJson(j.items, []), asJson(j.measurements, {}), Number(j.total), Number(j.paid), j.status, due, j.notes || null, resolveUser(j.assigned_to), j.collected_at || null, stamp, j.id);
+      db.prepare(`UPDATE job_orders SET title=?, items=?, measurements=?, total=?, paid=?, status=?, due_date=?, notes=?, assigned_to=?, collected_at=?,
+                  item_details=?, fault=?, condition_notes=?, accessories=?, diagnosis=?, updated_at=? WHERE id=?`)
+        .run(j.title, asJson(j.items, []), asJson(j.measurements, {}), Number(j.total), Number(j.paid), j.status, due, j.notes || null, resolveUser(j.assigned_to), j.collected_at || null,
+          asJson(j.item_details, {}), j.fault || null, j.condition_notes || null, j.accessories || null, j.diagnosis || null, stamp, j.id);
     }
   }
   for (const p of x.jobPayments) {
     if (!has('job_orders', p.job_id)) continue;
     db.prepare(`INSERT OR IGNORE INTO job_payments (id, job_id, amount, method, kind, recorded_by, shift_id, created_at)
       VALUES (?,?,?,?,?,?,(SELECT id FROM shifts WHERE id = ?),?)`).run(p.id, p.job_id, Number(p.amount), p.method, p.kind, resolveUser(p.recorded_by), p.shift_id || null, p.created_at);
+  }
+  for (const n of x.jobNotes || []) {
+    if (!has('job_orders', n.job_id)) continue;
+    db.prepare('INSERT OR IGNORE INTO job_notes (id, job_id, note, created_by, created_at) VALUES (?,?,?,?,?)').run(n.id, n.job_id, n.note, resolveUser(n.created_by), n.created_at);
   }
   for (const m of x.jobMaterials) {
     if (!has('job_orders', m.job_id) || !has('products', m.product_id)) continue;

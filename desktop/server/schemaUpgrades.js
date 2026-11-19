@@ -128,6 +128,7 @@ function applySchemaUpgrades(db) {
 }
 
 const NOW = "(strftime('%Y-%m-%dT%H:%M:%fZ','now'))";
+const JOB_STATUSES = "'received', 'diagnosing', 'awaiting_approval', 'waiting_parts', 'in_progress', 'fitting', 'ready', 'collected', 'cancelled'";
 
 // Mirrors cloud migrations 035–061 that the shop floor needs with no
 // internet: exit check + returns, store room → shelf handovers, business
@@ -244,7 +245,7 @@ function applyShopFloorUpgrades(db) {
     measurements TEXT NOT NULL DEFAULT '{}',
     total REAL NOT NULL DEFAULT 0,
     paid REAL NOT NULL DEFAULT 0,
-    status TEXT NOT NULL DEFAULT 'received' CHECK (status IN ('received', 'in_progress', 'fitting', 'ready', 'collected', 'cancelled')),
+    status TEXT NOT NULL DEFAULT 'received' CHECK (status IN (${JOB_STATUSES})),
     due_date TEXT,
     notes TEXT,
     assigned_to TEXT,
@@ -274,6 +275,42 @@ function applyShopFloorUpgrades(db) {
     recorded_by TEXT,
     created_at TEXT NOT NULL DEFAULT ${NOW}
   )`);
+
+  // 064 — repair shops: the item left with the shop, its QR tag, and a notes log
+  {
+    // SQLite can't change a CHECK in place: rebuild job_orders once if it
+    // still has the old status list, keeping every row.
+    const ddl = db.prepare("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'job_orders'").get()?.sql || '';
+    if (ddl && !ddl.includes('awaiting_approval')) {
+      db.exec('PRAGMA foreign_keys = OFF');
+      db.transaction(() => {
+        db.exec('ALTER TABLE job_orders RENAME TO job_orders_old');
+        db.exec(ddl.replace(/CREATE TABLE "?job_orders_old"?|CREATE TABLE "?job_orders"?/, 'CREATE TABLE job_orders')
+          .replace(/CHECK \(status IN \([^)]*\)\)/, `CHECK (status IN (${JOB_STATUSES}))`));
+        const cols = db.prepare('PRAGMA table_info(job_orders_old)').all().map((c) => c.name).join(', ');
+        db.exec(`INSERT INTO job_orders (${cols}) SELECT ${cols} FROM job_orders_old`);
+        db.exec('DROP TABLE job_orders_old');
+        db.exec('CREATE INDEX IF NOT EXISTS idx_job_orders_store ON job_orders(store_id, status, due_date)');
+      })();
+      db.exec('PRAGMA foreign_keys = ON');
+      db.exec('DROP TRIGGER IF EXISTS job_orders_touch');
+    }
+  }
+  ensureColumn(db, 'job_orders', 'item_details', "TEXT NOT NULL DEFAULT '{}'");
+  ensureColumn(db, 'job_orders', 'fault', 'TEXT');
+  ensureColumn(db, 'job_orders', 'condition_notes', 'TEXT');
+  ensureColumn(db, 'job_orders', 'accessories', 'TEXT');
+  ensureColumn(db, 'job_orders', 'diagnosis', 'TEXT');
+  ensureColumn(db, 'job_orders', 'tag_code', 'TEXT');
+  db.exec('CREATE UNIQUE INDEX IF NOT EXISTS uniq_job_orders_tag ON job_orders(store_id, tag_code) WHERE tag_code IS NOT NULL');
+  db.exec(`CREATE TABLE IF NOT EXISTS job_notes (
+    id TEXT PRIMARY KEY,
+    job_id TEXT NOT NULL REFERENCES job_orders(id) ON DELETE CASCADE,
+    note TEXT NOT NULL,
+    created_by TEXT,
+    created_at TEXT NOT NULL DEFAULT ${NOW}
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_job_notes_job ON job_notes(job_id, created_at)');
 
   // 062 — records that change after creation carry updated_at so devices
   // and the cloud can sync the change, latest wins. The trigger stamps it on

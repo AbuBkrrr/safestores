@@ -103,12 +103,13 @@ async function exportChanges(req, res) {
     q('SELECT p.* FROM job_payments p JOIN job_orders j ON j.id = p.job_id WHERE j.store_id = $1 AND p.created_at > $2'),
     q('SELECT m.* FROM job_materials m JOIN job_orders j ON j.id = m.job_id WHERE j.store_id = $1 AND m.created_at > $2'),
   ]);
+  const jobNotes = await q('SELECT n.* FROM job_notes n JOIN job_orders j ON j.id = n.job_id WHERE j.store_id = $1 AND n.created_at > $2');
 
   const settingsRow = (await db.query(`SELECT ${SETTINGS_COLS}, settings_updated_at FROM stores WHERE id = $1 AND settings_updated_at > $2`, [storeId, since])).rows[0] || null;
 
   res.json({
     storeSettings: settingsRow,
-    handovers, handoverItems, securityReturns, recipes, recipeLines, productionRuns, productionRunLines, jobs, jobPayments, jobMaterials,
+    handovers, handoverItems, securityReturns, recipes, recipeLines, productionRuns, productionRunLines, jobs, jobPayments, jobMaterials, jobNotes,
     shifts: shifts.rows, orderPayments: orderPayments.rows, refunds: refunds.rows, refundItems: refundItems.rows,
     customers: customers.rows, customerLedger: customerLedger.rows, loyaltyPoints: loyaltyPoints.rows,
     serverTime: serverTime.toISOString(),
@@ -139,7 +140,7 @@ async function importChanges(req, res) {
     shifts = [], orderPayments = [], refunds = [], refundItems = [],
     customers = [], customerLedger = [], loyaltyPoints = [],
     handovers = [], handoverItems = [], securityReturns = [], recipes = [], recipeLines = [],
-    productionRuns = [], productionRunLines = [], jobs = [], jobPayments = [], jobMaterials = [], storeSettings = null,
+    productionRuns = [], productionRunLines = [], jobs = [], jobPayments = [], jobMaterials = [], jobNotes = [], storeSettings = null,
   } = req.body;
 
   const client = await db.pool.connect();
@@ -516,7 +517,7 @@ async function importChanges(req, res) {
         );
       }
     }
-    await importShopFloor(client, { storeId, resolveUser, handovers, handoverItems, securityReturns, recipes, recipeLines, productionRuns, productionRunLines, jobs, jobPayments, jobMaterials });
+    await importShopFloor(client, { storeId, resolveUser, handovers, handoverItems, securityReturns, recipes, recipeLines, productionRuns, productionRunLines, jobs, jobPayments, jobMaterials, jobNotes });
 
     // Recompute every touched product's quantities from the fully-merged
     // local movement log — this is what makes the merge correct regardless
@@ -635,13 +636,22 @@ async function importShopFloor(client, x) {
       // Two offline devices can, rarely, pick the same job reference: keep both jobs, suffixing the newcomer's.
       const clash = (await client.query('SELECT 1 FROM job_orders WHERE store_id = $1 AND ref = $2', [storeId, j.ref])).rowCount > 0;
       const ref = clash ? `${j.ref}-${String(j.id).replace(/-/g, '').slice(0, 3).toUpperCase()}` : j.ref;
-      await client.query(`INSERT INTO job_orders (id, store_id, ref, store_customer_id, customer_name, customer_phone, title, items, measurements, total, paid, status, due_date, notes, assigned_to, created_by, created_at, updated_at, collected_at)
-        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19) ON CONFLICT (id) DO NOTHING`,
+      // A tag code is unique per shop; a rare clash from two offline devices gets a suffix.
+      let tag = j.tag_code || null;
+      if (tag && (await client.query('SELECT 1 FROM job_orders WHERE store_id = $1 AND tag_code = $2 AND id <> $3', [storeId, tag, j.id])).rowCount) {
+        tag = `${tag}${String(j.id).replace(/-/g, '').slice(0, 2).toUpperCase()}`.slice(0, 12);
+      }
+      await client.query(`INSERT INTO job_orders (id, store_id, ref, store_customer_id, customer_name, customer_phone, title, items, measurements, total, paid, status, due_date, notes, assigned_to, created_by, created_at, updated_at, collected_at,
+                                                  item_details, fault, condition_notes, accessories, diagnosis, tag_code)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25) ON CONFLICT (id) DO NOTHING`,
       [j.id, storeId, ref, cust, j.customer_name, j.customer_phone || null, j.title, asJson(j.items, []), asJson(j.measurements, {}), Number(j.total), Number(j.paid),
-        j.status, due, j.notes || null, resolveUser(j.assigned_to), resolveUser(j.created_by), j.created_at, stamp, j.collected_at || null]);
+        j.status, due, j.notes || null, resolveUser(j.assigned_to), resolveUser(j.created_by), j.created_at, stamp, j.collected_at || null,
+        asJson(j.item_details, {}), j.fault || null, j.condition_notes || null, j.accessories || null, j.diagnosis || null, tag]);
     } else if (newer(stamp, ex.updated_at)) {
-      await client.query(`UPDATE job_orders SET title=$1, items=$2, measurements=$3, total=$4, paid=$5, status=$6, due_date=$7, notes=$8, assigned_to=$9, collected_at=$10, updated_at=$11 WHERE id=$12`,
-        [j.title, asJson(j.items, []), asJson(j.measurements, {}), Number(j.total), Number(j.paid), j.status, due, j.notes || null, resolveUser(j.assigned_to), j.collected_at || null, stamp, j.id]);
+      await client.query(`UPDATE job_orders SET title=$1, items=$2, measurements=$3, total=$4, paid=$5, status=$6, due_date=$7, notes=$8, assigned_to=$9, collected_at=$10, updated_at=$11,
+                            item_details=$13, fault=$14, condition_notes=$15, accessories=$16, diagnosis=$17 WHERE id=$12`,
+        [j.title, asJson(j.items, []), asJson(j.measurements, {}), Number(j.total), Number(j.paid), j.status, due, j.notes || null, resolveUser(j.assigned_to), j.collected_at || null, stamp, j.id,
+          asJson(j.item_details, {}), j.fault || null, j.condition_notes || null, j.accessories || null, j.diagnosis || null]);
     }
   }
   for (const p of x.jobPayments) {
@@ -649,6 +659,11 @@ async function importShopFloor(client, x) {
     await client.query(`INSERT INTO job_payments (id, job_id, amount, method, kind, recorded_by, shift_id, created_at)
       VALUES ($1,$2,$3,$4,$5,$6,(SELECT id FROM shifts WHERE id = $7::uuid),$8) ON CONFLICT (id) DO NOTHING`,
     [p.id, p.job_id, Number(p.amount), p.method, p.kind, resolveUser(p.recorded_by), p.shift_id || null, p.created_at]);
+  }
+  for (const n of x.jobNotes || []) {
+    if (!(await has('job_orders', n.job_id))) continue;
+    await client.query('INSERT INTO job_notes (id, job_id, note, created_by, created_at) VALUES ($1,$2,$3,$4,$5) ON CONFLICT (id) DO NOTHING',
+      [n.id, n.job_id, n.note, resolveUser(n.created_by), n.created_at]);
   }
   for (const m of x.jobMaterials) {
     if (!(await has('job_orders', m.job_id)) || !(await has('products', m.product_id))) continue;
