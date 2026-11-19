@@ -5,7 +5,7 @@ export default defineConfig(({ mode }) => {
   // index.html uses %VITE_APP_TITLE%: the store's name in a store's own build
   // (templates/store-app sets VITE_BRAND_NAME), the platform name otherwise.
   const env = loadEnv(mode, process.cwd(), 'VITE_');
-  process.env.VITE_APP_TITLE = (env.VITE_BRAND_NAME || '').trim() || 'SAFE Stores';
+  process.env.VITE_APP_TITLE = (env.VITE_BRAND_NAME || '').trim() || 'SAFE Stores — Enterprise Inventory System';
   return {
     plugins: [react()],
     server: {
