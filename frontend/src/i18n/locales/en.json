@@ -1271,7 +1271,7 @@
     "registrationSuccess": "Store registered! A Super Admin will assign your store size and billing plan, then you can log in.",
     "registrationFailed": "Registration failed",
     "tierMiniLabel": "Mini Store",
-    "tierMiniDesc": "Up to 200 products · 5 users — best for a single small shop",
+    "tierMiniDesc": "Up to 200 products · 3 users — for a small shop run by 1 or 2 people",
     "tierMidiLabel": "Midi Store",
     "tierMidiDesc": "Up to 2,000 products · 20 users — best for a growing store",
     "tierMegaLabel": "Mega Store",

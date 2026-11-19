@@ -16,28 +16,18 @@ The icon (`icon-192.png`) is a simple placeholder in the app's brand teal
 (`#0f7180`) — **replace this with a real designed logo before public
 launch.** It's functional, not final.
 
-## What still needs to be wired up before this goes live
+## Buttons and links
 
-Three links in the page are placeholders, clearly marked with HTML
-comments at each spot in `index.html`:
+Every button goes somewhere real:
 
-1. **"Open Web App"** — currently points to `https://safestores.name.ng/app`.
-   Update once the frontend is actually deployed there (see
-   `../DEPLOYMENT.md`).
-2. **"Request Installer"** — currently scrolls to the contact section.
-   Once you've built and hosted real desktop installers (see
-   `../desktop/README.md` for the build steps), point this at wherever
-   you're hosting those `.exe`/`.dmg`/`.AppImage` files.
-3. **Android card** — intentionally shows "Not Yet Published," matching
-   the real current state (see `../mobile/README.md`). Once the app is
-   live on Google Play, replace this card's button with a real Play Store
-   link.
+- **Start free / Create your shop / Sign in** go to the web app on
+  `app.safestores.name.ng` (`/signup`, `/login`).
+- **Request the installer, Tell me when it's out, Book a free setup
+  visit, Ask for your rate** jump to the contact form and pick its topic.
+- The **contact form** has no server: it opens the visitor's email app
+  with a message to `support@safestores.name.ng`, filled in and ready to
+  send. Swap that for a form service later if you want submissions
+  stored.
 
-## Domain note
-
-`safestores.name.ng` is noted as "subject to change." If it changes,
-this page needs the two `safestores.name.ng` references in `index.html`
-(the receipt's subtitle and the Web App link) updated to match — nothing
-elsewhere in the codebase hardcodes this domain (see `../DEPLOYMENT.md`
-and `.env` `FRONTEND_URL` for how the actual application handles this
-correctly via environment variables).
+When desktop installers are hosted, point the **Request the installer**
+button (in the Download section) at the files instead of the form.
