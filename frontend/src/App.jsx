@@ -72,6 +72,7 @@ const Storefront = lazy(() => import('./pages/Storefront.jsx'));
 const MarketplaceHome = lazy(() => import('./pages/MarketplaceHome.jsx'));
 
 const SuperDashboard = lazy(() => import('./pages/super/SuperDashboard.jsx'));
+const ConnectStore = lazy(() => import('./pages/ConnectStore.jsx'));
 const ManageStores = lazy(() => import('./pages/super/ManageStores.jsx'));
 const Subscriptions = lazy(() => import('./pages/super/Subscriptions.jsx'));
 const BillingCharges = lazy(() => import('./pages/super/BillingCharges.jsx'));
@@ -122,10 +123,20 @@ export default function App() {
   // so a failed request just means "no setup step needed" — normal login
   // screens are shown as usual.
   const [needsSetup, setNeedsSetup] = useState(false);
+  const [needsStore, setNeedsStore] = useState(false);
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    if (APP_VARIANT === 'admin') { setChecked(true); return; }
+    if (APP_VARIANT === 'admin') {
+      // Shop-computer app: until it is connected to a store, show the
+      // one-time "connect this computer" screen.
+      if (EDITION !== 'desktop') { setChecked(true); return; }
+      api.get('/setup/status')
+        .then((r) => setNeedsStore(!!r.data.needsStore))
+        .catch(() => setNeedsStore(false))
+        .finally(() => setChecked(true));
+      return;
+    }
     api.get('/setup/status')
       .then((r) => setNeedsSetup(!!r.data.needsSetup))
       .catch(() => setNeedsSetup(false))
@@ -146,6 +157,7 @@ export default function App() {
   }
   if (!checked) return null;
   if (needsSetup) return <Setup onComplete={() => setNeedsSetup(false)} />;
+  if (needsStore) return <Suspense fallback={<PageLoading />}><ConnectStore onDone={() => setNeedsStore(false)} /></Suspense>;
 
   return (
     <Suspense fallback={<PageLoading />}>

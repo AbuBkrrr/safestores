@@ -51,6 +51,7 @@ for (const f of [...walk('frontend/src'), 'frontend/public/manifest.json', 'fron
 write('frontend/.env.production.local', [
   `VITE_BRAND_NAME=${name}`, `VITE_STORE_ID=${id}`, `VITE_STORE_TIER=${tier}`,
   ...(target === 'android' && apiUrl ? [`VITE_API_URL=${apiUrl}`] : []),
+  ...(target === 'desktop' && apiUrl ? [`VITE_CLOUD_URL=${apiUrl.replace(/\/api\/?$/, '')}`] : []),
 ].join('\n') + '\n');
 
 // 2. The app itself.

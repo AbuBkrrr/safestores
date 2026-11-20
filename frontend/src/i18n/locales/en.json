@@ -2517,5 +2517,19 @@
     "help": "A square PNG or JPG works best (at least 200×200).",
     "saved": "Logo saved",
     "failed": "Could not save the logo"
+  },
+  "connectStore": {
+    "title": "Connect this computer to your store",
+    "sub": "One time only, with internet: sign in with the store owner's or a manager's online account. Your staff, products and stock are downloaded, and from then on this computer works without internet.",
+    "email": "Email",
+    "password": "Password",
+    "otp": "6-digit code from your authenticator app",
+    "whichStore": "Which store?",
+    "server": "Online store address",
+    "changeServer": "Use a different online store address",
+    "connect": "Connect",
+    "connecting": "Downloading your store…",
+    "failed": "Could not connect",
+    "help": "After this, everyone signs in with their usual email and password, even with no internet."
   }
 }
