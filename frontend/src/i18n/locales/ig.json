@@ -2517,5 +2517,19 @@
     "help": "PNG ma ọ bụ JPG nwere akụkụ anọ hara nhata kacha mma (opekata mpe 200×200).",
     "saved": "Echekwala akara",
     "failed": "Enweghị ike ịchekwa akara"
+  },
+  "connectStore": {
+    "title": "Jikọọ kọmputa a na ụlọ ahịa gị",
+    "sub": "Naanị otu ugboro, na ịntanetị: banye na akaụntụ onye nwe ụlọ ahịa ma ọ bụ onye njikwa. A ga-ebudata ndị ọrụ, ngwaahịa na ngwa gị; mgbe ahụ kọmputa a ga-arụ ọrụ n'enweghị ịntanetị.",
+    "email": "Email",
+    "password": "Okwuntughe",
+    "otp": "Koodu ọnụọgụ 6 sitere na ngwa nkwenye gị",
+    "whichStore": "Kedu ụlọ ahịa?",
+    "server": "Adreesị ụlọ ahịa ịntanetị",
+    "changeServer": "Jiri adreesị ọzọ",
+    "connect": "Jikọọ",
+    "connecting": "Na-ebudata ụlọ ahịa gị…",
+    "failed": "Enweghị ike ijikọ",
+    "help": "Mgbe nke a gasịrị, onye ọ bụla na-abanye na email na okwuntughe ya, ọbụlagodi na enweghị ịntanetị."
   }
 }

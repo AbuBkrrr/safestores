@@ -2517,5 +2517,19 @@
     "help": "PNG ko JPG mai murabba'i ya fi kyau (akalla 200×200).",
     "saved": "An adana tambari",
     "failed": "Ba a iya adana tambarin ba"
+  },
+  "connectStore": {
+    "title": "Haɗa wannan kwamfuta da shagonka",
+    "sub": "Sau ɗaya kawai, da intanet: shiga da asusun mai shago ko na manaja. Za a sauke ma'aikata, kayayyaki da hajojinka, daga nan kwamfutar za ta yi aiki ba tare da intanet ba.",
+    "email": "Imel",
+    "password": "Kalmar sirri",
+    "otp": "Lambobi 6 daga manhajar tantancewa",
+    "whichStore": "Wane shago?",
+    "server": "Adireshin shago na yanar gizo",
+    "changeServer": "Yi amfani da wani adireshi",
+    "connect": "Haɗa",
+    "connecting": "Ana sauke shagonka…",
+    "failed": "Ba a iya haɗawa ba",
+    "help": "Bayan wannan, kowa zai shiga da imel da kalmar sirrinsa, ko babu intanet."
   }
 }

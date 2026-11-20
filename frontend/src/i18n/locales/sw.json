@@ -2517,5 +2517,19 @@
     "help": "PNG au JPG ya mraba ni bora zaidi (angalau 200×200).",
     "saved": "Nembo imehifadhiwa",
     "failed": "Imeshindwa kuhifadhi nembo"
+  },
+  "connectStore": {
+    "title": "Unganisha kompyuta hii na duka lako",
+    "sub": "Mara moja tu, ukiwa na intaneti: ingia kwa akaunti ya mtandaoni ya mmiliki au meneja. Wafanyakazi, bidhaa na mali yako vitapakuliwa; kuanzia hapo kompyuta hii itafanya kazi bila intaneti.",
+    "email": "Barua pepe",
+    "password": "Nenosiri",
+    "otp": "Msimbo wa tarakimu 6 kutoka programu yako ya uthibitishaji",
+    "whichStore": "Duka lipi?",
+    "server": "Anwani ya duka la mtandaoni",
+    "changeServer": "Tumia anwani nyingine",
+    "connect": "Unganisha",
+    "connecting": "Tunapakua duka lako…",
+    "failed": "Imeshindwa kuunganisha",
+    "help": "Baada ya hapa, kila mtu huingia kwa barua pepe na nenosiri lake, hata bila intaneti."
   }
 }

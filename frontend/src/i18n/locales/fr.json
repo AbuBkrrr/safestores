@@ -2517,5 +2517,19 @@
     "help": "Un PNG ou JPG carré convient le mieux (au moins 200×200).",
     "saved": "Logo enregistré",
     "failed": "Impossible d'enregistrer le logo"
+  },
+  "connectStore": {
+    "title": "Connecter cet ordinateur à votre boutique",
+    "sub": "Une seule fois, avec internet : connectez-vous avec le compte en ligne du propriétaire ou d'un gérant. Votre équipe, vos produits et votre stock sont téléchargés ; ensuite cet ordinateur fonctionne sans internet.",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "otp": "Code à 6 chiffres de votre application d'authentification",
+    "whichStore": "Quelle boutique ?",
+    "server": "Adresse de la boutique en ligne",
+    "changeServer": "Utiliser une autre adresse",
+    "connect": "Connecter",
+    "connecting": "Téléchargement de votre boutique…",
+    "failed": "Connexion impossible",
+    "help": "Ensuite, chacun se connecte avec son e-mail et son mot de passe habituels, même sans internet."
   }
 }
