@@ -324,7 +324,12 @@
     "soldBy_length": "Ogologo (yaadị, mita)",
     "shelfLifeDays": "Ọ na-adịgide (ụbọchị)",
     "shelfLifePh": "dịka 3 — a ga-eji ya tọọ ụbọchị njedebe mgbe ngwaahịa bịarutere",
-    "perUnit": "kwa {{unit}}"
+    "perUnit": "kwa {{unit}}",
+    "addPhoto": "Tinye foto",
+    "changePhoto": "Gbanwee",
+    "removePhotoFor": "Wepụ foto {{name}}",
+    "photoSaved": "Echekwala foto",
+    "photoFailed": "Enweghị ike ịchekwa foto"
   },
   "stockArrivalPage": {
     "title": "Ngwaahịa Bịara",

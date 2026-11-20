@@ -236,4 +236,25 @@ async function restoreProduct(req, res) {
   emitToStore(storeId, 'product:updated', product);
 }
 
-module.exports = { listProducts, createProduct, updateProduct, deleteProduct, restoreProduct };
+// POST /api/stores/:storeId/products/:productId/photo  (multipart "photo")
+// A picture of the item so staff can tell look-alike products apart.
+async function setProductPhoto(req, res) {
+  const { storeId, productId } = req.params;
+  if (!req.file) return res.status(400).json({ error: 'Choose a photo first' });
+  const found = await db.query('SELECT id FROM products WHERE id = $1 AND store_id = $2', [productId, storeId]);
+  if (!found.rows[0]) return res.status(404).json({ error: 'Product not found' });
+  const { url } = await require('../utils/storage').persistUpload(req.file, { keyPrefix: `stores/${storeId}/products` });
+  const { rows } = await db.query('UPDATE products SET image_url = $1, updated_at = now() WHERE id = $2 RETURNING *', [url, productId]);
+  res.json(rows[0]);
+}
+
+// DELETE /api/stores/:storeId/products/:productId/photo
+async function removeProductPhoto(req, res) {
+  const { rows } = await db.query(
+    'UPDATE products SET image_url = NULL, updated_at = now() WHERE id = $1 AND store_id = $2 RETURNING *', [req.params.productId, req.params.storeId]
+  );
+  if (!rows[0]) return res.status(404).json({ error: 'Product not found' });
+  res.json(rows[0]);
+}
+
+module.exports = { listProducts, createProduct, updateProduct, deleteProduct, restoreProduct, setProductPhoto, removeProductPhoto };

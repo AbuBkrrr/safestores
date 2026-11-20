@@ -324,7 +324,12 @@
     "soldBy_length": "À la longueur (yard, mètre)",
     "shelfLifeDays": "Se conserve (jours)",
     "shelfLifePh": "ex. 3 — la date d'expiration est fixée à la livraison",
-    "perUnit": "par {{unit}}"
+    "perUnit": "par {{unit}}",
+    "addPhoto": "Ajouter une photo",
+    "changePhoto": "Changer",
+    "removePhotoFor": "Retirer la photo de {{name}}",
+    "photoSaved": "Photo enregistrée",
+    "photoFailed": "Impossible d'enregistrer la photo"
   },
   "stockArrivalPage": {
     "title": "Réception de stock",

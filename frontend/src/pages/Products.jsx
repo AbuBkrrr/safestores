@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
@@ -9,6 +9,7 @@ import { useToast } from '../components/useToast.js';
 import { useCurrency } from '../context/CurrencyContext.jsx';
 import { useStoreProfile } from '../utils/useStoreTier.js';
 import { BUSINESS_TYPES, SOLD_BY_UNITS, fmtQty } from '../utils/businessTypes.js';
+import { mediaUrl } from '../utils/media.js';
 
 const SYNC_EVENTS = ['product:created', 'product:updated', 'product:deleted', 'arrival:created', 'movement:created', 'audit:created'];
 const NEW_ARRIVAL_DAYS = 3;
@@ -75,6 +76,30 @@ export default function Products() {
   // info retroactively, not just new products going forward.
   const locationValue = (p) => (locationDrafts[p.id] !== undefined ? locationDrafts[p.id] : (p.location || ''));
   const handleLocationInput = (id, value) => setLocationDrafts((d) => ({ ...d, [id]: value }));
+  // Item photos: a quick picture so look-alike products are easy to tell apart.
+  const canPhoto = ['admin', 'manager', 'store_manager', 'shelf_manager'].includes(user?.role);
+  const photoInput = useRef(null);
+  const [photoFor, setPhotoFor] = useState(null);
+  const pickPhoto = (p) => { setPhotoFor(p); photoInput.current?.click(); };
+  const uploadPhoto = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !photoFor) return;
+    const fd = new FormData();
+    fd.append('photo', file);
+    try {
+      const r = await api.post(`/stores/${user.storeId}/products/${photoFor.id}/photo`, fd);
+      setProducts((list) => list.map((x) => (x.id === r.data.id ? { ...x, image_url: r.data.image_url } : x)));
+      showToast(t('products.photoSaved'), 'success');
+    } catch (err) { showToast(err.response?.data?.error || t('products.photoFailed'), 'error'); }
+  };
+  const removePhoto = async (p) => {
+    try {
+      await api.delete(`/stores/${user.storeId}/products/${p.id}/photo`);
+      setProducts((list) => list.map((x) => (x.id === p.id ? { ...x, image_url: null } : x)));
+    } catch (err) { showToast(err.response?.data?.error || t('products.photoFailed'), 'error'); }
+  };
+
   const saveLocation = async (p) => {
     const value = locationDrafts[p.id];
     if (value === undefined || value === (p.location || '')) return;
@@ -201,12 +226,24 @@ export default function Products() {
             </tr>
           </thead>
           <tbody>
+            {canPhoto && <tr hidden><td><input ref={photoInput} type="file" accept="image/*" capture="environment" onChange={uploadPhoto} aria-label={t('products.addPhoto')} /></td></tr>}
             {products.filter((p) => {
               const q = query.trim().toLowerCase();
               return !q || [p.name, p.sku, p.barcode, p.category, p.variant_label].some((v) => v && String(v).toLowerCase().includes(q));
             }).map((p) => (
               <tr key={p.id}>
                 <td>
+                  <span className="prod-thumb-wrap">
+                    {p.image_url
+                      ? <img className="prod-thumb" src={mediaUrl(p.image_url)} alt="" loading="lazy" />
+                      : <span className="prod-thumb prod-thumb-empty" aria-hidden="true">📷</span>}
+                    {canPhoto && (
+                      <span className="prod-thumb-actions">
+                        <button type="button" className="link-btn" onClick={() => pickPhoto(p)}>{p.image_url ? t('products.changePhoto') : t('products.addPhoto')}</button>
+                        {p.image_url && <button type="button" className="link-btn" onClick={() => removePhoto(p)} aria-label={t('products.removePhotoFor', { name: p.name })}>✕</button>}
+                      </span>
+                    )}
+                  </span>
                   {p.name}
                   {p.variant_label && <span className="muted"> · {p.variant_label}</span>}
                   {p.sold_by && p.sold_by !== 'unit' && <span className="muted"> · {t('products.perUnit', { unit: p.unit })}</span>}{p.pack_size > 1 && <span className="muted" title={t('products.packSize')}> · {p.pack_size}/{p.pack_unit || t('products.pack')}</span>}

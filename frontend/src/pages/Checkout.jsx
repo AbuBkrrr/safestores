@@ -10,6 +10,7 @@ import { useToast } from '../components/useToast.js';
 import { useCurrency } from '../context/CurrencyContext.jsx';
 import ReceiptView from '../components/ReceiptView.jsx';
 import PasswordInput from '../components/PasswordInput.jsx';
+import { mediaUrl } from '../utils/media.js';
 
 const SYNC_EVENTS = ['order:updated', 'order:paid', 'order:cancelled'];
 const CAN_TAKE_PAYMENT = ['admin', 'manager', 'cashier'];
@@ -377,7 +378,7 @@ export default function Checkout() {
             <div className="card" style={{ maxHeight: 200, overflowY: 'auto' }}>
               {filteredProducts.map((p) => (
                 <div key={p.id} className="flex" style={{ justifyContent: 'space-between', padding: '6px 0', cursor: 'pointer' }} onClick={() => addProduct(p.id, 'manual_search')}>
-                  <span>{p.name} ({p.sku})</span>
+                  <span className="flex" style={{ alignItems: 'center', gap: 8 }}>{p.image_url && <img className="prod-thumb" src={mediaUrl(p.image_url)} alt="" loading="lazy" />}{p.name} ({p.sku})</span>
                   <span className="muted">{t('checkout.shelf', { qty: p.shelf_qty })}</span>
                 </div>
               ))}
@@ -389,6 +390,7 @@ export default function Checkout() {
               <div className="quick-picks">
                 {quickPicks.map((p) => (
                   <button key={p.id} type="button" className="quick-pick" onClick={() => addProduct(p.id, 'manual_search')} title={p.sku}>
+                    {p.image_url && <img className="qp-img" src={mediaUrl(p.image_url)} alt="" loading="lazy" />}
                     <span className="qp-name">{p.name}</span>
                     <span className="qp-price">{formatCurrency(Number(p.cost_price) * Number(p.price_multiplier))}</span>
                   </button>

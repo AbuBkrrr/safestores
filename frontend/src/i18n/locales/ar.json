@@ -324,7 +324,12 @@
     "soldBy_length": "الطول (ياردة، متر)",
     "shelfLifeDays": "يبقى صالحًا (أيام)",
     "shelfLifePh": "مثال 3 — يُستخدم لتحديد تاريخ الانتهاء عند وصول البضاعة",
-    "perUnit": "لكل {{unit}}"
+    "perUnit": "لكل {{unit}}",
+    "addPhoto": "أضف صورة",
+    "changePhoto": "تغيير",
+    "removePhotoFor": "إزالة صورة {{name}}",
+    "photoSaved": "تم حفظ الصورة",
+    "photoFailed": "تعذّر حفظ الصورة"
   },
   "stockArrivalPage": {
     "title": "وصول المخزون",

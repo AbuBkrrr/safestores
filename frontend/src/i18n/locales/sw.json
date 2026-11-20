@@ -324,7 +324,12 @@
     "soldBy_length": "Urefu (yadi, mita)",
     "shelfLifeDays": "Hudumu (siku)",
     "shelfLifePh": "mf. 3 — hutumika kuweka tarehe ya kuisha bidhaa ikifika",
-    "perUnit": "kwa kila {{unit}}"
+    "perUnit": "kwa kila {{unit}}",
+    "addPhoto": "Ongeza picha",
+    "changePhoto": "Badilisha",
+    "removePhotoFor": "Ondoa picha ya {{name}}",
+    "photoSaved": "Picha imehifadhiwa",
+    "photoFailed": "Imeshindwa kuhifadhi picha"
   },
   "stockArrivalPage": {
     "title": "Uwasili wa Bidhaa",

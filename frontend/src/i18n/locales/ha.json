@@ -324,7 +324,12 @@
     "soldBy_length": "Tsawo (yadi, mita)",
     "shelfLifeDays": "Yana ɗaukar (kwanaki)",
     "shelfLifePh": "misali 3 — ranar ƙarewa ana saita ta daga wannan idan kaya ya iso",
-    "perUnit": "kan kowane {{unit}}"
+    "perUnit": "kan kowane {{unit}}",
+    "addPhoto": "Ƙara hoto",
+    "changePhoto": "Canza",
+    "removePhotoFor": "Cire hoton {{name}}",
+    "photoSaved": "An adana hoto",
+    "photoFailed": "Ba a iya adana hoton ba"
   },
   "stockArrivalPage": {
     "title": "Isowar Kaya",

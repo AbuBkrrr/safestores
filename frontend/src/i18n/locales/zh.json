@@ -324,7 +324,12 @@
     "soldBy_length": "长度（码、米）",
     "shelfLifeDays": "保质期（天）",
     "shelfLifePh": "例如 3 — 到货时用于设定过期日期",
-    "perUnit": "每{{unit}}"
+    "perUnit": "每{{unit}}",
+    "addPhoto": "添加照片",
+    "changePhoto": "更换",
+    "removePhotoFor": "删除 {{name}} 的照片",
+    "photoSaved": "照片已保存",
+    "photoFailed": "无法保存照片"
   },
   "stockArrivalPage": {
     "title": "到货入库",

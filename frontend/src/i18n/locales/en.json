@@ -324,7 +324,12 @@
     "soldBy_length": "Length (yard, metre)",
     "shelfLifeDays": "Keeps for (days)",
     "shelfLifePh": "e.g. 3 — expiry is set from this on delivery",
-    "perUnit": "per {{unit}}"
+    "perUnit": "per {{unit}}",
+    "addPhoto": "Add photo",
+    "changePhoto": "Change",
+    "removePhotoFor": "Remove the photo of {{name}}",
+    "photoSaved": "Photo saved",
+    "photoFailed": "Could not save the photo"
   },
   "stockArrivalPage": {
     "title": "Stock Arrival",
