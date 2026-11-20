@@ -57,6 +57,22 @@ describe('Receipts: apply', () => {
     expect(products.body.find((p) => p.id === existing.id).shelf_qty).toBe(4);
   });
 
+  it('puts new invoice items in the category the store manager chose', async () => {
+    const { store, token } = await createActiveStoreWithAdmin();
+    const receipt = await seedReceipt(store.id, [
+      { name: 'Ceiling fan 56in', quantity: 4, price: 25000 },
+      { name: 'Shower mixer tap', quantity: 6, price: 18000 },
+    ]);
+    const res = await request().post(`/api/stores/${store.id}/receipts/${receipt.id}/apply`).set('Authorization', `Bearer ${token}`)
+      .send({ items: [{ noExpiry: true, category: 'Electrical & electronics' }, { noExpiry: true, category: 'Bathroom fittings' }] });
+    expect(res.status).toBe(200);
+    const { rows } = await pool.query('SELECT name, category FROM products WHERE store_id = $1 ORDER BY name', [store.id]);
+    expect(rows).toEqual([
+      { name: 'Ceiling fan 56in', category: 'Electrical & electronics' },
+      { name: 'Shower mixer tap', category: 'Bathroom fittings' },
+    ]);
+  });
+
   it('cannot re-apply an already-applied receipt', async () => {
     const { store, token } = await createActiveStoreWithAdmin();
     const receipt = await seedReceipt(store.id, [{ name: 'X', quantity: 1 }]);

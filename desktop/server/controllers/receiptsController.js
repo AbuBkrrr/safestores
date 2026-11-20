@@ -50,7 +50,9 @@ function applyReceipt(req, res) {
   try {
     const results = db.transaction(() => {
       const out = [];
-      for (const item of items) {
+      const lineInfo = Array.isArray(req.body?.items) ? req.body.items : [];
+      for (const [idx, item] of items.entries()) {
+        const category = String((lineInfo[idx] || {}).category || item.category || '').trim().slice(0, 100) || null;
         let product = db.prepare(
           `SELECT * FROM products WHERE store_id = ? AND (LOWER(name) = LOWER(?) OR sku = ?) LIMIT 1`
         ).get(storeId, item.name, item.sku || '');
@@ -61,10 +63,10 @@ function applyReceipt(req, res) {
         } else {
           const newId = crypto.randomUUID();
           const sku = item.sku || `AUTO-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-          const location = suggestLocation(db, storeId, item.category || null);
+          const location = suggestLocation(db, storeId, category);
           db.prepare(
             `INSERT INTO products (id, store_id, name, sku, category, cost_price, location, backroom_qty) VALUES (?,?,?,?,?,?,?,0)`
-          ).run(newId, storeId, item.name, sku, item.category || null, item.price || 0, location);
+          ).run(newId, storeId, item.name, sku, category, item.price || 0, location);
           product = db.prepare('SELECT * FROM products WHERE id = ?').get(newId);
         }
 

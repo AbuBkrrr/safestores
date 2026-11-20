@@ -88,6 +88,9 @@ async function applyReceipt(req, res) {
       const li = lineInfo[idx] || {};
       const expiryDate = li.noExpiry === true ? null : li.expiryDate;
       const batchNumber = String(li.batchNumber || '').trim().slice(0, 60) || null;
+      // The store manager can put new items (anything not on the starter
+      // list) into a category while checking the invoice.
+      const category = String(li.category || item.category || '').trim().slice(0, 100) || null;
       let { rows: productRows } = await client.query(
         `SELECT * FROM products WHERE store_id = $1 AND (LOWER(name) = LOWER($2) OR sku = $3) LIMIT 1`,
         [storeId, item.name, item.sku || '']
@@ -96,12 +99,14 @@ async function applyReceipt(req, res) {
 
       if (!product) {
         const sku = item.sku || `AUTO-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-        const location = await suggestLocation(client, storeId, item.category || null);
+        const location = await suggestLocation(client, storeId, category);
         const { rows: inserted } = await client.query(
           `INSERT INTO products (store_id, name, sku, category, cost_price, location, backroom_qty) VALUES ($1,$2,$3,$4,$5,$6,0) RETURNING *`,
-          [storeId, item.name, sku, item.category || null, item.price || 0, location]
+          [storeId, item.name, sku, category, item.price || 0, location]
         );
         product = inserted[0];
+      } else if (!product.category && category) {
+        await client.query('UPDATE products SET category = $1 WHERE id = $2', [category, product.id]);
       }
       // Quantity is derived from stock_movements below, not incremented
       // here directly — see stockMath.js.

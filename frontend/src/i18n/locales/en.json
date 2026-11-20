@@ -748,7 +748,10 @@
     "noExpiry": "No expiry",
     "expiryFor": "Expiry date for {{name}}",
     "batchFor": "Batch number for {{name}}",
-    "expiryNeeded": "Enter an expiry date (or tick No expiry) for every line before applying."
+    "expiryNeeded": "Enter an expiry date (or tick No expiry) for every line before applying.",
+    "category": "Category",
+    "categoryFor": "Category for {{name}}",
+    "newItem": "New item: type or pick"
   },
   "replenishmentPage": {
     "loadingTitle": "Replenishment",

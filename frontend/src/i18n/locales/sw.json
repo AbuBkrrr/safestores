@@ -748,7 +748,10 @@
     "noExpiry": "Haina tarehe ya kuisha",
     "expiryFor": "Tarehe ya kuisha ya {{name}}",
     "batchFor": "Namba ya kundi ya {{name}}",
-    "expiryNeeded": "Weka tarehe ya kuisha (au weka alama Haina tarehe ya kuisha) kwa kila mstari kabla ya kuthibitisha."
+    "expiryNeeded": "Weka tarehe ya kuisha (au weka alama Haina tarehe ya kuisha) kwa kila mstari kabla ya kuthibitisha.",
+    "category": "Aina",
+    "categoryFor": "Aina ya {{name}}",
+    "newItem": "Bidhaa mpya: andika au chagua"
   },
   "replenishmentPage": {
     "loadingTitle": "Kujaza Upya",

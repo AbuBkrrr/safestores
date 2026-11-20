@@ -748,7 +748,10 @@
     "noExpiry": "Babu ranar ƙarewa",
     "expiryFor": "Ranar ƙarewa ta {{name}}",
     "batchFor": "Lambar rukuni ta {{name}}",
-    "expiryNeeded": "Shigar da ranar ƙarewa (ko ka zaɓi Babu ranar ƙarewa) ga kowane layi kafin a aiwatar."
+    "expiryNeeded": "Shigar da ranar ƙarewa (ko ka zaɓi Babu ranar ƙarewa) ga kowane layi kafin a aiwatar.",
+    "category": "Rukuni",
+    "categoryFor": "Rukunin {{name}}",
+    "newItem": "Sabon kaya: rubuta ko zaɓa"
   },
   "replenishmentPage": {
     "loadingTitle": "Sake Cikawa",

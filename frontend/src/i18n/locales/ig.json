@@ -748,7 +748,10 @@
     "noExpiry": "Enweghị ụbọchị njedebe",
     "expiryFor": "Ụbọchị njedebe maka {{name}}",
     "batchFor": "Nọmba batch maka {{name}}",
-    "expiryNeeded": "Tinye ụbọchị njedebe (ma ọ bụ kaa Enweghị ụbọchị njedebe) maka ahịrị ọ bụla tupu i tinye ya."
+    "expiryNeeded": "Tinye ụbọchị njedebe (ma ọ bụ kaa Enweghị ụbọchị njedebe) maka ahịrị ọ bụla tupu i tinye ya.",
+    "category": "Otu",
+    "categoryFor": "Otu {{name}}",
+    "newItem": "Ihe ọhụrụ: pịnye ma ọ bụ họrọ"
   },
   "replenishmentPage": {
     "loadingTitle": "Nkwado Ọzọ",

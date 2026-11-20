@@ -138,7 +138,7 @@ export default function Products() {
               <div className="form-group"><label htmlFor="pf-pack">{t('products.packSize')}</label><input id="pf-pack" type="number" min="1" value={form.packSize} onChange={update('packSize')} /><span className="help-text">{t('products.packSizeHelp')}</span></div>
               <div className="form-group"><label htmlFor="pf-packunit">{t('products.packUnit')}</label><input id="pf-packunit" value={form.packUnit} onChange={update('packUnit')} placeholder={t('products.packUnitPlaceholder')} /></div>
               <div className="form-group"><label>{t('products.category')}</label><input value={form.category} onChange={update('category')} list="pf-cats" />
-                <datalist id="pf-cats">{bt.categories.map((c) => <option key={c} value={c} />)}</datalist></div>
+                <datalist id="pf-cats">{[...new Set([...bt.categories, ...products.map((p) => p.category).filter(Boolean)])].sort().map((c) => <option key={c} value={c} />)}</datalist></div>
               <div className="form-group"><label>{t('products.supplier')}</label><input value={form.supplier} onChange={update('supplier')} /></div>
               <div className="form-group"><label htmlFor="pf-soldby">{t('products.soldBy')}</label>
                 <select id="pf-soldby" value={form.soldBy} onChange={(e) => setForm({ ...form, soldBy: e.target.value, unit: SOLD_BY_UNITS[e.target.value][0] })}>

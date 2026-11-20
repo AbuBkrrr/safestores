@@ -6,6 +6,8 @@ import { useRealtimeEvents } from '../context/SocketContext.jsx';
 import { Alert, Badge, Toast } from '../components/ui.jsx';
 import { useToast } from '../components/useToast.js';
 import { useCurrency } from '../context/CurrencyContext.jsx';
+import { useStoreProfile } from '../utils/useStoreTier.js';
+import { BUSINESS_TYPES } from '../utils/businessTypes.js';
 
 const SYNC_EVENTS = ['receipt:uploaded', 'receipt:applied', 'receipt:rejected'];
 
@@ -20,6 +22,13 @@ export default function Receipts() {
   const fileRef = useRef();
 
   const load = () => api.get(`/stores/${user.storeId}/receipts`).then((r) => setReceipts(r.data));
+  // Categories to suggest: the trade's starter list plus every one the store
+  // already uses; existing products show their category, new ones get a box.
+  const { businessType } = useStoreProfile();
+  const [products, setProducts] = useState([]);
+  useEffect(() => { api.get(`/stores/${user.storeId}/products`).then((r) => setProducts(Array.isArray(r.data) ? r.data : [])).catch(() => {}); }, [user.storeId]);
+  const byName = new Map(products.map((p) => [String(p.name).toLowerCase(), p]));
+  const categories = [...new Set([...(BUSINESS_TYPES[businessType] || BUSINESS_TYPES.general).categories, ...products.map((p) => p.category).filter(Boolean)])].sort();
   useEffect(() => { load(); }, [user.storeId]);
   useRealtimeEvents(SYNC_EVENTS, () => load());
 
@@ -94,7 +103,7 @@ export default function Receipts() {
               <Badge status={r.status} />
             </div>
             <table className="mt-1">
-              <thead><tr><th>{t('receiptsPage.item')}</th><th>{t('receiptsPage.qty')}</th><th>{t('receiptsPage.price')}</th>{r.status === 'pending' && <><th>{t('receiptsPage.expiry')} *</th><th>{t('receiptsPage.batch')}</th></>}</tr></thead>
+              <thead><tr><th>{t('receiptsPage.item')}</th><th>{t('receiptsPage.qty')}</th><th>{t('receiptsPage.price')}</th>{r.status === 'pending' && <><th>{t('receiptsPage.category')}</th><th>{t('receiptsPage.expiry')} *</th><th>{t('receiptsPage.batch')}</th></>}</tr></thead>
               <tbody>
                 {r.parsed_items.map((it, i) => {
                   const l = (lineInfo[r.id] || [])[i] || {};
@@ -102,6 +111,14 @@ export default function Receipts() {
                     <tr key={i} style={r.status === 'pending' && !lineReady(r.id, i) ? { background: 'var(--offline-bg)' } : undefined}>
                       <td>{it.name}</td><td>{it.quantity}</td><td>{formatCurrency(it.price)}</td>
                       {r.status === 'pending' && <>
+                        <td>
+                          {byName.get(String(it.name).toLowerCase())?.category
+                            ? <span className="muted">{byName.get(String(it.name).toLowerCase()).category}</span>
+                            : <>
+                              <input list="rc-cats" aria-label={t('receiptsPage.categoryFor', { name: it.name })} placeholder={byName.has(String(it.name).toLowerCase()) ? '' : t('receiptsPage.newItem')}
+                                value={l.category ?? it.category ?? ''} onChange={(e) => setLine(r.id, i, { category: e.target.value })} style={{ width: 150 }} />
+                            </>}
+                        </td>
                         <td style={{ whiteSpace: 'nowrap' }}>
                           <input type="date" aria-label={t('receiptsPage.expiryFor', { name: it.name })} disabled={l.noExpiry} value={l.expiryDate || ''} onChange={(e) => setLine(r.id, i, { expiryDate: e.target.value })} />
                           <label style={{ fontSize: 12, marginLeft: 6 }}><input type="checkbox" checked={!!l.noExpiry} onChange={(e) => setLine(r.id, i, { noExpiry: e.target.checked })} /> {t('receiptsPage.noExpiry')}</label>
@@ -113,6 +130,7 @@ export default function Receipts() {
                 })}
               </tbody>
             </table>
+            {r.status === 'pending' && <datalist id="rc-cats">{categories.map((c) => <option key={c} value={c} />)}</datalist>}
             {r.status === 'pending' && (
               <>
                 <div className="flex mt-1" style={{ alignItems: 'center', gap: 8 }}>

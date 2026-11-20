@@ -748,7 +748,10 @@
     "noExpiry": "无过期日期",
     "expiryFor": "{{name}} 的过期日期",
     "batchFor": "{{name}} 的批号",
-    "expiryNeeded": "确认前请为每一行输入过期日期（或勾选“无过期日期”）。"
+    "expiryNeeded": "确认前请为每一行输入过期日期（或勾选“无过期日期”）。",
+    "category": "类别",
+    "categoryFor": "{{name}} 的类别",
+    "newItem": "新商品：输入或选择"
   },
   "replenishmentPage": {
     "loadingTitle": "补货",

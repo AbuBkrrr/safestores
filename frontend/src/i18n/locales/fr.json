@@ -748,7 +748,10 @@
     "noExpiry": "Sans expiration",
     "expiryFor": "Date d'expiration pour {{name}}",
     "batchFor": "Numéro de lot pour {{name}}",
-    "expiryNeeded": "Saisissez une date d'expiration (ou cochez Sans expiration) pour chaque ligne avant d'appliquer."
+    "expiryNeeded": "Saisissez une date d'expiration (ou cochez Sans expiration) pour chaque ligne avant d'appliquer.",
+    "category": "Catégorie",
+    "categoryFor": "Catégorie de {{name}}",
+    "newItem": "Nouvel article : saisir ou choisir"
   },
   "replenishmentPage": {
     "loadingTitle": "Réapprovisionnement",

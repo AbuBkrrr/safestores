@@ -748,7 +748,10 @@
     "noExpiry": "Kò ní ọjọ́ ìparí",
     "expiryFor": "Ọjọ́ ìparí fún {{name}}",
     "batchFor": "Nọ́mbà ìpele fún {{name}}",
-    "expiryNeeded": "Tẹ ọjọ́ ìparí (tàbí sàmì sí Kò ní ọjọ́ ìparí) fún ìlà kọ̀ọ̀kan kí o tó lò ó."
+    "expiryNeeded": "Tẹ ọjọ́ ìparí (tàbí sàmì sí Kò ní ọjọ́ ìparí) fún ìlà kọ̀ọ̀kan kí o tó lò ó.",
+    "category": "Ẹ̀ka",
+    "categoryFor": "Ẹ̀ka fún {{name}}",
+    "newItem": "Ọjà tuntun: tẹ̀ tàbí yàn"
   },
   "replenishmentPage": {
     "loadingTitle": "Ìtúnkúnpọ̀",
