@@ -189,4 +189,22 @@ function removeProductPhoto(req, res) {
   res.json(db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.productId));
 }
 
-module.exports = { listProducts, createProduct, updateProduct, deleteProduct, restoreProduct, setProductPhoto, removeProductPhoto };
+// POST /api/stores/:storeId/products/markup - see the cloud edition for the rules.
+function bulkMarkup(req, res) {
+  const { storeId } = req.params;
+  const percent = Number(req.body?.percent);
+  const { scope, category } = req.body || {};
+  const ids = Array.isArray(req.body?.productIds) ? req.body.productIds.map(String) : [];
+  if (!Number.isFinite(percent) || percent < 0 || percent > 1000) return res.status(400).json({ error: 'Profit % must be between 0 and 1000' });
+  if (!['all', 'category', 'products'].includes(scope)) return res.status(400).json({ error: 'Choose all products, a category, or some products' });
+  if (scope === 'category' && !String(category || '').trim()) return res.status(400).json({ error: 'Choose a category' });
+  if (scope === 'products' && !ids.length) return res.status(400).json({ error: 'Tick the products to change' });
+  const params = [1 + percent / 100, storeId];
+  let where = 'store_id = ? AND archived_at IS NULL';
+  if (scope === 'category') { where += ' AND category = ?'; params.push(String(category).trim()); }
+  if (scope === 'products') { where += ` AND id IN (${ids.map(() => '?').join(',')})`; params.push(...ids); }
+  const r = db.prepare(`UPDATE products SET price_multiplier = ? WHERE ${where}`).run(...params);
+  res.json({ updated: r.changes, percent });
+}
+
+module.exports = { listProducts, createProduct, updateProduct, deleteProduct, restoreProduct, setProductPhoto, removeProductPhoto, bulkMarkup };

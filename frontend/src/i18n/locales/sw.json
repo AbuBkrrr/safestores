@@ -2486,5 +2486,36 @@
     "installHelp": "Windows: endesha kisakinishi; Windows ikionya, chagua More info → Run anyway. Android: fungua faili kwenye simu na uruhusu kusakinisha kutoka kwenye kivinjari chako.",
     "later": "Programu zako zitaonekana hapa zikiwa tayari.",
     "continue": "Endelea kuingia"
+  },
+  "markup": {
+    "open": "Weka faida %",
+    "title": "Weka faida % kwa bidhaa nyingi",
+    "applyTo": "Tumia kwa",
+    "all": "Bidhaa zote",
+    "category": "Aina moja",
+    "ticked": "Bidhaa nitakazochagua",
+    "whichCategory": "Aina",
+    "percent": "Faida %",
+    "apply": "Tumia kwa bidhaa {{count}}",
+    "help": "Bei ya kuuza = gharama ya kila bidhaa + asilimia hii. Bado unaweza kubadilisha bidhaa moja baadaye.",
+    "tickHelp": "Chagua bidhaa kwenye orodha hapa chini, kisha tumia.",
+    "tickFor": "Chagua {{name}}",
+    "done": "Faida ya {{pct}}% imewekwa kwa bidhaa {{count}}",
+    "failed": "Imeshindwa kubadilisha bei",
+    "lineProfit": "Faida %",
+    "lineProfitFor": "Faida % kwa {{name}}",
+    "invoiceProfit": "Faida % kwa ankara hii",
+    "alsoExisting": "Pia badilisha bei za bidhaa tulizonazo",
+    "invoiceHelp": "Bidhaa mpya zitachukua asilimia hii. Asilimia iliyoandikwa kwenye mstari ni ya mstari huo."
+  },
+  "storeLogo": {
+    "title": "Nembo ya duka",
+    "sub": "Nembo yako kwenye menyu ya programu, duka lako la mtandaoni na kurasa zake.",
+    "upload": "Pakia nembo",
+    "change": "Badilisha nembo",
+    "remove": "Ondoa",
+    "help": "PNG au JPG ya mraba ni bora zaidi (angalau 200×200).",
+    "saved": "Nembo imehifadhiwa",
+    "failed": "Imeshindwa kuhifadhi nembo"
   }
 }

@@ -2486,5 +2486,36 @@
     "installHelp": "Windows: mepee ihe ntinye ahụ; ọ bụrụ na Windows adọọ aka na ntị, họrọ More info → Run anyway. Android: mepee faịlụ ahụ na ekwentị ma kwe ka etinye ya site na ihe nchọgharị gị.",
     "later": "Ngwa gị ga-apụta ebe a ozugbo ha dị njikere.",
     "continue": "Gaa n'ihu banye"
+  },
+  "markup": {
+    "open": "Tọọ uru %",
+    "title": "Tọọ uru % na ọtụtụ ngwaahịa",
+    "applyTo": "Tinye na",
+    "all": "Ngwaahịa niile",
+    "category": "Otu otu",
+    "ticked": "Ngwaahịa m kara",
+    "whichCategory": "Otu",
+    "percent": "Uru %",
+    "apply": "Tinye na ngwaahịa {{count}}",
+    "help": "Ọnụahịa ire = ego ịzụta ihe ọ bụla + % a. Ị ka nwere ike ịgbanwe otu ngwaahịa emesịa.",
+    "tickHelp": "Kaa ngwaahịa ndị dị n'okpuru, wee tinye.",
+    "tickFor": "Họrọ {{name}}",
+    "done": "Etinyela uru {{pct}}% na ngwaahịa {{count}}",
+    "failed": "Enweghị ike ịgbanwe ọnụahịa",
+    "lineProfit": "Uru %",
+    "lineProfitFor": "Uru % maka {{name}}",
+    "invoiceProfit": "Uru % maka akwụkwọ ọnụahịa a",
+    "alsoExisting": "Gbanwekwa ọnụahịa ihe anyị nwere",
+    "invoiceHelp": "Ihe ọhụrụ ga-ewe % a. % e dere n'ahịrị bụ nke ahịrị ahụ."
+  },
+  "storeLogo": {
+    "title": "Akara ụlọ ahịa",
+    "sub": "Akara gị na menu ngwa ahụ, ụlọ ahịa ịntanetị gị na peeji ya.",
+    "upload": "Bulite akara",
+    "change": "Gbanwee akara",
+    "remove": "Wepụ",
+    "help": "PNG ma ọ bụ JPG nwere akụkụ anọ hara nhata kacha mma (opekata mpe 200×200).",
+    "saved": "Echekwala akara",
+    "failed": "Enweghị ike ịchekwa akara"
   }
 }

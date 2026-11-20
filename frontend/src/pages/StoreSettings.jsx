@@ -9,6 +9,7 @@ import { Alert, Toast } from '../components/ui.jsx';
 import { useToast } from '../components/useToast.js';
 import OnlinePaymentsCard from '../components/OnlinePaymentsCard.jsx';
 import StoreAppsCard from '../components/StoreApps.jsx';
+import StoreLogoCard from '../components/StoreLogoCard.jsx';
 import OnsiteLockCard from '../components/OnsiteLockCard.jsx';
 import { CURRENCIES, allCurrencyCodes, currencyName, formatCurrency } from '../utils/currency.js';
 
@@ -134,6 +135,7 @@ export default function StoreSettings() {
         <div><button className="btn">{t('common.save')}</button></div>
       </form>
       {/* Storefront payments settle straight to the store's bank (web edition only). */}
+      {import.meta.env.VITE_EDITION !== 'desktop' && ['admin', 'manager'].includes(user?.role) && <div className="mt-1"><StoreLogoCard onToast={showToast} /></div>}
       <div className="mt-1"><OnlinePaymentsCard onToast={showToast} /></div>
       {import.meta.env.VITE_EDITION !== 'desktop' && user?.role === 'admin' && <div className="mt-1"><OnsiteLockCard /></div>}
       {import.meta.env.VITE_EDITION !== 'desktop' && !import.meta.env.VITE_BRAND_NAME && ['admin', 'manager'].includes(user?.role) && <div className="mt-1"><StoreAppsCard storeId={user.storeId} /></div>}

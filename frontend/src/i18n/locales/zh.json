@@ -2486,5 +2486,36 @@
     "installHelp": "Windows：运行安装程序；如果 Windows 提示警告，请选择“更多信息”→“仍要运行”。Android：在手机上打开文件，并允许从浏览器安装。",
     "later": "应用准备好后会显示在这里。",
     "continue": "继续登录"
+  },
+  "markup": {
+    "open": "设置利润率",
+    "title": "批量设置利润率",
+    "applyTo": "应用于",
+    "all": "全部商品",
+    "category": "某个类别",
+    "ticked": "我勾选的商品",
+    "whichCategory": "类别",
+    "percent": "利润率 %",
+    "apply": "应用于 {{count}} 个商品",
+    "help": "售价 = 每件商品的成本 + 此百分比。之后仍可单独修改任一商品。",
+    "tickHelp": "在下方列表勾选商品后点击应用。",
+    "tickFor": "选择 {{name}}",
+    "done": "已为 {{count}} 个商品设置 {{pct}}% 利润",
+    "failed": "无法修改价格",
+    "lineProfit": "利润率 %",
+    "lineProfitFor": "{{name}} 的利润率",
+    "invoiceProfit": "本发票的利润率",
+    "alsoExisting": "同时更新已有商品的价格",
+    "invoiceHelp": "新商品使用此百分比；某行单独填写的百分比优先。"
+  },
+  "storeLogo": {
+    "title": "店铺标志",
+    "sub": "您的标志显示在应用菜单、网店及其页面上。",
+    "upload": "上传标志",
+    "change": "更换标志",
+    "remove": "移除",
+    "help": "建议使用正方形 PNG 或 JPG（至少 200×200）。",
+    "saved": "标志已保存",
+    "failed": "无法保存标志"
   }
 }
