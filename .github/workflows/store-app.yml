@@ -69,6 +69,7 @@ jobs:
         run: |
           npm ci
           node scripts/build-frontend.js
+          node scripts/fetch-ocr-data.js
           npx electron-builder --win nsis --publish never
           mkdir -p ../out
           cp "$(ls release/*.exe | grep -vi blockmap | head -1)" ../out/store-windows.exe

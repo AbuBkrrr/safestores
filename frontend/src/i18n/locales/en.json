@@ -149,7 +149,8 @@
     "twoFactorHelp": "Open your authenticator app and enter the 6-digit code for SAFE Stores.",
     "chooseStore": "Which store?",
     "chooseStoreHelp": "This email is used at more than one store. Pick the one to sign in to.",
-    "partnerLogin": "Delivery or credit partner? Log in"
+    "partnerLogin": "Delivery or credit partner? Log in",
+    "offlineNotAvailable": "No internet. To sign in offline, sign in once on this device while online (same email and password)."
   },
   "dashboard": {
     "title": "Dashboard",

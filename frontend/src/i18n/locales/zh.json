@@ -149,7 +149,8 @@
     "twoFactorHelp": "打开验证器应用，输入 SAFE Stores 的 6 位代码。",
     "chooseStore": "选择门店",
     "chooseStoreHelp": "此邮箱用于多个门店。请选择要登录的门店。",
-    "partnerLogin": "配送或信贷合作方？登录"
+    "partnerLogin": "配送或信贷合作方？登录",
+    "offlineNotAvailable": "没有网络。要离线登录，请先在联网时于此设备登录一次（相同的邮箱和密码）。"
   },
   "dashboard": {
     "title": "仪表盘",

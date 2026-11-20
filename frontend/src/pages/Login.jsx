@@ -5,6 +5,7 @@ import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { Alert, AuthBrand, BrandFooter } from '../components/ui.jsx';
 import PasswordInput from '../components/PasswordInput.jsx';
+import { rememberLogin, offlineLogin } from '../utils/offlineLogin.js';
 
 export default function Login() {
   const { t } = useTranslation();
@@ -45,9 +46,22 @@ export default function Login() {
         email, password, otp: needOtp ? otp : undefined, storeId: storeId || undefined,
       });
       login(data.token, data.user);
+      // Phone / browser apps: allow signing back in later with no internet.
+      if (import.meta.env.VITE_EDITION !== 'desktop') rememberLogin(email, password, data.token, data.user);
       // A pending store's admin gets sent to activation instead of the dashboard.
       navigate(data.user.subscriptionStatus && data.user.subscriptionStatus !== 'active' ? '/activate-store' : '/');
     } catch (err) {
+      // No connection at all (not a refused password): try this device's offline sign-in.
+      if (!err.response && import.meta.env.VITE_EDITION !== 'desktop') {
+        const saved = await offlineLogin(email, password);
+        if (saved) {
+          login(saved.token, saved.user);
+          navigate('/');
+          return;
+        }
+        setError(t('login.offlineNotAvailable'));
+        return;
+      }
       const body = err.response?.data || {};
       if (['TOTP_REQUIRED', 'TOTP_INVALID'].includes(body.code)) setNeedOtp(true);
       if (body.code === 'CHOOSE_STORE') { setStoreChoices(body.stores); setStoreId(body.stores[0]?.id || ''); return; }

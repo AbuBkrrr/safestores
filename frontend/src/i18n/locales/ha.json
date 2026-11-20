@@ -149,7 +149,8 @@
     "twoFactorHelp": "Buɗe manhajar tantancewa ka shigar da lambar lamba 6 ta SAFE Stores.",
     "chooseStore": "Wane shago?",
     "chooseStoreHelp": "Ana amfani da wannan imel a shago fiye da ɗaya. Zaɓi wanda za ka shiga.",
-    "partnerLogin": "Abokin isarwa ko bashi? Shiga"
+    "partnerLogin": "Abokin isarwa ko bashi? Shiga",
+    "offlineNotAvailable": "Babu intanet. Don shiga ba tare da intanet ba, ka fara shiga sau ɗaya a wannan na'ura da intanet (imel da kalmar sirri iri ɗaya)."
   },
   "dashboard": {
     "title": "Dashboard",

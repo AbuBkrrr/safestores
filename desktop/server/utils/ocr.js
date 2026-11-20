@@ -12,6 +12,8 @@
 // an array of { name, sku?, quantity, price }.
 // ------------------------------------------------------------
 
+const fs = require('fs');
+const path = require('path');
 const Tesseract = require('tesseract.js');
 
 const NOISE_LINE = /^(total|subtotal|sub-total|tax|vat|gst|cash|change|balance|tender|card|amount due|thank you|receipt|invoice|date|time|cashier|store|address|phone|tel|www\.|http)/i;
@@ -111,6 +113,13 @@ async function runOcr(filePath) {
   if (process.env.TESSDATA_PATH) {
     options.langPath = process.env.TESSDATA_PATH;
     options.gzip = false;
+  } else {
+    // The installer carries the English data (scripts/fetch-ocr-data.js), so
+    // invoice scanning works on a computer that has never been online.
+    const bundled = process.resourcesPath && path.join(process.resourcesPath, 'tessdata');
+    if (bundled && fs.existsSync(path.join(bundled, 'eng.traineddata.gz'))) options.langPath = bundled;
+    // Anything downloaded once is kept with the app's data, not wherever the app happens to run.
+    try { options.cachePath = require('electron').app.getPath('userData'); } catch { /* not running inside the app */ }
   }
 
   const { data } = await Tesseract.recognize(filePath, 'eng', options);
