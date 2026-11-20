@@ -2225,7 +2225,7 @@
     "t_restaurant": "Ụlọ nri",
     "t_building_materials": "Ihe owuwu ụlọ",
     "d_restaurant": "Nri a na-esi site n'ihe e ji esi ya (usoro na-ewepụ ha na ngwaahịa), a na-ere ya site na efere; ngwaahịa ọhụrụ na akwụkwọ mfu njedebe ụbọchị.",
-    "d_building_materials": "Ciment site na akpa, ígwè na ọkpọkọ site n'ogologo, ájá na nkume site na tọn; ọkwa ịzụtaghachi maka ihe na-agwụ ngwa ngwa."
+    "d_building_materials": "Ciment, ígwè, blọọkụ, ihe mkpuchi ụlọ, ọnụ ụzọ, windo, taịlụ, ihe pọmpụ, ihe ụlọ mposi, ihe ọkụ eletrik na agba: ree site na akpa, otu otu, ogologo ma ọ bụ tọn, ya na ọkwa ịzụtaghachi."
   },
   "production": {
     "title": "Mmepụta",

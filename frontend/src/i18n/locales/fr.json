@@ -2225,7 +2225,7 @@
     "t_restaurant": "Restaurant / maquis",
     "t_building_materials": "Matériaux de construction",
     "d_restaurant": "Des plats préparés à partir de vos ingrédients (les recettes les retirent du stock), vendus à l'assiette ; produits frais et registre des pertes de fin de journée.",
-    "d_building_materials": "Ciment au sac, fers et tuyaux à la longueur, sable et gravier à la tonne ; alertes de réapprovisionnement pour les articles qui partent vite."
+    "d_building_materials": "Ciment, fers, parpaings, toitures, portes, fenêtres, carrelage, plomberie, sanitaires, électricité et peinture : vente au sac, à la pièce, à la longueur ou à la tonne, avec alertes de réapprovisionnement."
   },
   "production": {
     "title": "Production",

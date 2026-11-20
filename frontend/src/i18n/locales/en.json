@@ -2225,7 +2225,7 @@
     "t_restaurant": "Restaurant / eatery",
     "t_building_materials": "Building materials",
     "d_restaurant": "Dishes made from your ingredients (recipes take them off stock), sold by the plate; fresh stock and an end-of-day waste log.",
-    "d_building_materials": "Cement by the bag, rods and pipes by the length, sand and gravel by the tonne; reorder alerts for fast movers."
+    "d_building_materials": "Cement, rods, blocks, roofing, doors, windows, tiles, plumbing, sanitary ware, electrical and paint: sell by the bag, piece, length or tonne, with reorder alerts for fast movers."
   },
   "production": {
     "title": "Production",

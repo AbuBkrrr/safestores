@@ -2225,7 +2225,7 @@
     "t_restaurant": "餐厅 / 小吃店",
     "t_building_materials": "建材",
     "d_restaurant": "用您的原料制作菜品（配方会自动扣减库存），按份出售；生鲜库存和日终损耗记录。",
-    "d_building_materials": "水泥按袋、钢筋和管材按长度、沙石按吨销售；畅销品自动补货提醒。"
+    "d_building_materials": "水泥、钢筋、砌块、屋面、门、窗、瓷砖、水暖、卫浴、电料和油漆：按袋、按件、按长度或按吨销售，并有补货提醒。"
   },
   "production": {
     "title": "生产",
