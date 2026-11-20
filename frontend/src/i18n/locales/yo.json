@@ -149,7 +149,8 @@
     "twoFactorHelp": "Ṣí áàpù ìjẹ́rìísí rẹ kí o tẹ kóòdù oní-nọ́ńbà 6 fún SAFE Stores.",
     "chooseStore": "Ṣọ́ọ̀bù wo?",
     "chooseStoreHelp": "A ń lo ímeèlì yìí ní ṣọ́ọ̀bù ju ẹyọ kan lọ. Yan èyí tí o fẹ́ wọlé sí.",
-    "partnerLogin": "Alábàáṣiṣẹ́ ìfijíṣẹ́ tàbí gbèsè? Wọlé"
+    "partnerLogin": "Alábàáṣiṣẹ́ ìfijíṣẹ́ tàbí gbèsè? Wọlé",
+    "offlineNotAvailable": "Kò sí ayélujára. Láti wọlé láìsí ayélujára, kọ́kọ́ wọlé lẹ́ẹ̀kan lórí ẹ̀rọ yìí nígbà tí ayélujára wà (ímeèlì àti ọ̀rọ̀ aṣínà kan náà)."
   },
   "dashboard": {
     "title": "Pátákó Ìdarí",

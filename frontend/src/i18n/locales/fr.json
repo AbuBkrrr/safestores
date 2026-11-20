@@ -149,7 +149,8 @@
     "twoFactorHelp": "Ouvrez votre application d'authentification et saisissez le code à 6 chiffres pour SAFE Stores.",
     "chooseStore": "Quel magasin ?",
     "chooseStoreHelp": "Cet e-mail est utilisé dans plusieurs magasins. Choisissez celui auquel vous connecter.",
-    "partnerLogin": "Partenaire de livraison ou de crédit ? Connectez-vous"
+    "partnerLogin": "Partenaire de livraison ou de crédit ? Connectez-vous",
+    "offlineNotAvailable": "Pas d'internet. Pour vous connecter hors ligne, connectez-vous d'abord une fois sur cet appareil avec internet (même e-mail et mot de passe)."
   },
   "dashboard": {
     "title": "Tableau de bord",

@@ -149,7 +149,8 @@
     "twoFactorHelp": "Fungua programu yako ya uthibitishaji na uweke msimbo wa tarakimu 6 wa SAFE Stores.",
     "chooseStore": "Duka gani?",
     "chooseStoreHelp": "Barua pepe hii inatumika katika duka zaidi ya moja. Chagua la kuingia.",
-    "partnerLogin": "Mshirika wa usafirishaji au mkopo? Ingia"
+    "partnerLogin": "Mshirika wa usafirishaji au mkopo? Ingia",
+    "offlineNotAvailable": "Hakuna intaneti. Ili kuingia bila intaneti, ingia kwanza mara moja kwenye kifaa hiki ukiwa na intaneti (barua pepe na nenosiri lile lile)."
   },
   "dashboard": {
     "title": "Dashibodi",

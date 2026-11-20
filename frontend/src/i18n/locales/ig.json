@@ -149,7 +149,8 @@
     "twoFactorHelp": "Mepee ngwa nkwenye gị ma tinye koodu ọnụọgụ 6 maka SAFE Stores.",
     "chooseStore": "Kedu ụlọ ahịa?",
     "chooseStoreHelp": "A na-eji email a n'ụlọ ahịa karịrị otu. Họrọ nke ị ga-abanye.",
-    "partnerLogin": "Onye mmekọ nnyefe ma ọ bụ kredit? Banye"
+    "partnerLogin": "Onye mmekọ nnyefe ma ọ bụ kredit? Banye",
+    "offlineNotAvailable": "Enweghị ịntanetị. Iji banye n'enweghị ịntanetị, buru ụzọ banye otu ugboro na ngwaọrụ a mgbe ịntanetị dị (otu email na okwuntughe)."
   },
   "dashboard": {
     "title": "Ogel Njikwa",
