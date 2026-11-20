@@ -55,13 +55,35 @@ describe("Store's own apps", () => {
     expect(dl.body).toBe('APKDATA');
   });
 
+  it('starts the apps for stores made by the Super Admin, on activation, and on first look', async () => {
+    process.env.GITHUB_TOKEN = 'test-token';
+    const dispatched = [];
+    global.fetch = jest.fn(async (url, opts = {}) => {
+      if (String(url).endsWith('/dispatches')) { dispatched.push(JSON.parse(opts.body).inputs.store_name); return new Response(null, { status: 204 }); }
+      return new Response(null, { status: 404 });
+    });
+    const sa = await createSuperAdmin();
+    const auth = { Authorization: `Bearer ${superToken(sa)}` };
+    const made = await request().post('/api/super/stores').set(auth)
+      .send({ storeName: 'Cyber Cafe', adminName: 'Owner', adminEmail: `${uniq()}@cafe.test`, password: 'Str0ng!pass99', storeTier: 'mini' });
+    expect(made.status).toBe(201);
+    await new Promise((r) => setTimeout(r, 50));
+    expect(dispatched).toContain('Cyber Cafe');
+
+    // A store from before this feature: the admin's first look starts it.
+    const { store, token } = await createActiveStoreWithAdmin({ name: 'Old Shop' });
+    const mine = await request().get(`/api/stores/${store.id}/apps`).set('Authorization', `Bearer ${token}`);
+    expect(mine.body.status).toBe('building');
+    expect(dispatched).toContain('Old Shop');
+  });
+
   it('keeps downloads behind the secret link and the store login', async () => {
     expect((await request().get('/api/store-apps/not-a-token')).status).toBe(404);
     expect((await request().get(`/api/store-apps/${'a'.repeat(48)}/windows`)).status).toBe(404);
     const { store, token } = await createActiveStoreWithAdmin();
     const mine = await request().get(`/api/stores/${store.id}/apps`).set('Authorization', `Bearer ${token}`);
     expect(mine.status).toBe(200);
-    expect(mine.body.status).toBe('none');
+    expect(mine.body.status).toBe('not_configured'); // no GITHUB_TOKEN in this test
   });
 
   it('lets the Super Admin rebuild a store\'s apps', async () => {

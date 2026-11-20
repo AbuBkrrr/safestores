@@ -324,7 +324,12 @@
     "soldBy_length": "Gígùn (yáàdì, mítà)",
     "shelfLifeDays": "Ó máa ń pẹ́ (ọjọ́)",
     "shelfLifePh": "àpẹẹrẹ 3 — ọjọ́ ìparí ni a ó fi èyí ṣe nígbà tí ọjà bá dé",
-    "perUnit": "fún {{unit}} kọ̀ọ̀kan"
+    "perUnit": "fún {{unit}} kọ̀ọ̀kan",
+    "addPhoto": "Fi fọ́tò kún un",
+    "changePhoto": "Yí i padà",
+    "removePhotoFor": "Yọ fọ́tò {{name}} kúrò",
+    "photoSaved": "A ti fi fọ́tò pamọ́",
+    "photoFailed": "A kò lè fi fọ́tò pamọ́"
   },
   "stockArrivalPage": {
     "title": "Ìdé Ọjà",
@@ -748,7 +753,10 @@
     "noExpiry": "Kò ní ọjọ́ ìparí",
     "expiryFor": "Ọjọ́ ìparí fún {{name}}",
     "batchFor": "Nọ́mbà ìpele fún {{name}}",
-    "expiryNeeded": "Tẹ ọjọ́ ìparí (tàbí sàmì sí Kò ní ọjọ́ ìparí) fún ìlà kọ̀ọ̀kan kí o tó lò ó."
+    "expiryNeeded": "Tẹ ọjọ́ ìparí (tàbí sàmì sí Kò ní ọjọ́ ìparí) fún ìlà kọ̀ọ̀kan kí o tó lò ó.",
+    "category": "Ẹ̀ka",
+    "categoryFor": "Ẹ̀ka fún {{name}}",
+    "newItem": "Ọjà tuntun: tẹ̀ tàbí yàn"
   },
   "replenishmentPage": {
     "loadingTitle": "Ìtúnkúnpọ̀",
@@ -2221,7 +2229,11 @@
     "t_engineering": "Ẹ̀rọ àti àtúnṣe ẹ̀rọ",
     "d_mechanic": "Forúkọ ọkọ̀ oníbàárà sílẹ̀ pẹ̀lú nọ́mbà ọkọ̀, ìrìn tí ó ti rìn àti ipò rẹ̀; àmì QR lórí kọ́kọ́rọ́; ẹ̀yà àtúnṣe láti inú ọjà, iṣẹ́ ọwọ́, àkíyèsí àti gbígbà.",
     "d_tech_repair": "Forúkọ fóònù, kọ̀ǹpútà àti àwọn ẹ̀rọ mìíràn sílẹ̀ pẹ̀lú nọ́mbà serial/IMEI àti ipò; àmì QR lórí ẹ̀rọ; àyẹ̀wò, ẹ̀yà àtúnṣe, àkíyèsí àti gbígbà.",
-    "d_engineering": "Forúkọ ẹ̀rọ amúnáwá, fáàǹpù àti ẹ̀rọ sílẹ̀ pẹ̀lú àlàyé wọn àti ìṣòro; àmì QR lórí ohun náà; ẹ̀yà àtúnṣe, iṣẹ́ ọwọ́, àkíyèsí àti gbígbà."
+    "d_engineering": "Forúkọ ẹ̀rọ amúnáwá, fáàǹpù àti ẹ̀rọ sílẹ̀ pẹ̀lú àlàyé wọn àti ìṣòro; àmì QR lórí ohun náà; ẹ̀yà àtúnṣe, iṣẹ́ ọwọ́, àkíyèsí àti gbígbà.",
+    "t_restaurant": "Ilé oúnjẹ",
+    "t_building_materials": "Ohun èlò ìkọ́lé",
+    "d_restaurant": "Oúnjẹ tí a ń sè láti inú èròjà rẹ (ìlànà ń yọ wọ́n kúrò nínú ọjà), tí a ń tà ní àwo; ọjà tútù àti ìwé àdánù ìparí ọjọ́.",
+    "d_building_materials": "Sìmẹ́ńtì, irin, búlọ́ọ̀kù, òrùlé, ilẹ̀kùn, fèrèsé, táìlì, ohun èlò omi, ohun èlò ilé ìgbọ̀nsẹ̀, iná mànàmáná àti kùn: tà ní àpò, ẹyọ, gígùn tàbí tọ́ọ̀nù, pẹ̀lú ìkìlọ̀ àtúnrà."
   },
   "production": {
     "title": "Ìṣẹ̀dá",

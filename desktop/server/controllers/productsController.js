@@ -173,4 +173,20 @@ function restoreProduct(req, res) {
   emitToStore(storeId, 'product:updated', product);
 }
 
-module.exports = { listProducts, createProduct, updateProduct, deleteProduct, restoreProduct };
+// POST /api/stores/:storeId/products/:productId/photo  (multipart "photo")
+function setProductPhoto(req, res) {
+  const { storeId, productId } = req.params;
+  if (!req.file) return res.status(400).json({ error: 'Choose a photo first' });
+  if (!db.prepare('SELECT id FROM products WHERE id = ? AND store_id = ?').get(productId, storeId)) return res.status(404).json({ error: 'Product not found' });
+  db.prepare("UPDATE products SET image_url = ? WHERE id = ?").run(`/uploads/${req.file.filename}`, productId);
+  res.json(db.prepare('SELECT * FROM products WHERE id = ?').get(productId));
+}
+
+// DELETE /api/stores/:storeId/products/:productId/photo
+function removeProductPhoto(req, res) {
+  const r = db.prepare("UPDATE products SET image_url = NULL WHERE id = ? AND store_id = ?").run(req.params.productId, req.params.storeId);
+  if (!r.changes) return res.status(404).json({ error: 'Product not found' });
+  res.json(db.prepare('SELECT * FROM products WHERE id = ?').get(req.params.productId));
+}
+
+module.exports = { listProducts, createProduct, updateProduct, deleteProduct, restoreProduct, setProductPhoto, removeProductPhoto };

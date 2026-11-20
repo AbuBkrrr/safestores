@@ -30,6 +30,12 @@ const BUSINESS_TYPES = {
     categories: ['Screens', 'Batteries', 'Charging ports', 'Chargers & cables', 'Phone parts', 'Laptop parts', 'Accessories'] },
   engineering: { tools: ['jobs', 'repair'], defaultSoldBy: 'unit', defaultUnit: 'piece',
     categories: ['Spare parts', 'Electrical', 'Plumbing', 'Welding', 'Consumables', 'Tools'] },
+  // Restaurants: dishes made from ingredients (recipes), sold by the plate; fresh stock + waste log.
+  restaurant: { tools: ['measure', 'fresh', 'production'], defaultSoldBy: 'unit', defaultUnit: 'plate', shelfLifeDays: 1,
+    categories: ['Main dishes', 'Rice dishes', 'Soups & swallow', 'Grills', 'Drinks', 'Ingredients', 'Packaging'] },
+  // Building materials: bags of cement, rods by length, sand by the tonne.
+  building_materials: { tools: ['measure'], defaultSoldBy: 'unit', defaultUnit: 'bag',
+    categories: ['Cement', 'Iron rods', 'Blocks & bricks', 'Sand & gravel', 'Roofing', 'Doors', 'Windows & glass', 'Tiles', 'Plumbing', 'Sanitary ware', 'Bathroom fittings', 'Electrical', 'Paint', 'Timber', 'Nails & fasteners', 'Tools & hardware'] },
 };
 const TYPE_KEYS = Object.keys(BUSINESS_TYPES);
 const toolsFor = (type) => (BUSINESS_TYPES[type] || BUSINESS_TYPES.general).tools;

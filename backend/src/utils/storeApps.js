@@ -65,6 +65,14 @@ async function requestBuild(store) {
   }
 }
 
+/** Starts a build if the store has none yet, or the last one could not run. */
+async function ensureBuilt(store) {
+  const { rows } = await db.query('SELECT * FROM store_apps WHERE store_id = $1', [store.id]);
+  const row = rows[0];
+  if (!row || (['not_configured', 'failed'].includes(row.status) && token())) return requestBuild(store);
+  return row;
+}
+
 /** Looks for finished files on the store's release; updates and returns the row. */
 async function refresh(row) {
   if (!row || row.status !== 'building' || !token()) return row;
@@ -121,4 +129,4 @@ function publicView(row, base = '/api/store-apps') {
   };
 }
 
-module.exports = { requestBuild, refresh, publicView, fileName, FILES };
+module.exports = { requestBuild, ensureBuilt, refresh, publicView, fileName, FILES };

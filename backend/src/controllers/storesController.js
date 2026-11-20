@@ -107,6 +107,8 @@ async function createStore(req, res) {
     );
 
     await client.query('COMMIT');
+    // The store's own Windows and Android apps (never blocks creation).
+    require('../utils/storeApps').requestBuild(store).catch(() => {});
     res.status(201).json({ store, admin: userRes.rows[0] });
   } catch (err) {
     await client.query('ROLLBACK');
@@ -167,6 +169,9 @@ async function updateStore(req, res) {
     ]
   );
   if (!rows[0]) return res.status(404).json({ error: 'Store not found' });
+  // Make sure an activated store has its own apps (built once; retried if
+  // building wasn't set up yet or the last try failed).
+  require('../utils/storeApps').ensureBuilt(rows[0]).catch(() => {});
   res.json(rows[0]);
 }
 

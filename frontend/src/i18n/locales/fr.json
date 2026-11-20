@@ -324,7 +324,12 @@
     "soldBy_length": "À la longueur (yard, mètre)",
     "shelfLifeDays": "Se conserve (jours)",
     "shelfLifePh": "ex. 3 — la date d'expiration est fixée à la livraison",
-    "perUnit": "par {{unit}}"
+    "perUnit": "par {{unit}}",
+    "addPhoto": "Ajouter une photo",
+    "changePhoto": "Changer",
+    "removePhotoFor": "Retirer la photo de {{name}}",
+    "photoSaved": "Photo enregistrée",
+    "photoFailed": "Impossible d'enregistrer la photo"
   },
   "stockArrivalPage": {
     "title": "Réception de stock",
@@ -748,7 +753,10 @@
     "noExpiry": "Sans expiration",
     "expiryFor": "Date d'expiration pour {{name}}",
     "batchFor": "Numéro de lot pour {{name}}",
-    "expiryNeeded": "Saisissez une date d'expiration (ou cochez Sans expiration) pour chaque ligne avant d'appliquer."
+    "expiryNeeded": "Saisissez une date d'expiration (ou cochez Sans expiration) pour chaque ligne avant d'appliquer.",
+    "category": "Catégorie",
+    "categoryFor": "Catégorie de {{name}}",
+    "newItem": "Nouvel article : saisir ou choisir"
   },
   "replenishmentPage": {
     "loadingTitle": "Réapprovisionnement",
@@ -2221,7 +2229,11 @@
     "t_engineering": "Ingénierie et réparation de machines",
     "d_mechanic": "Enregistrez les véhicules des clients avec plaque, kilométrage et état ; étiquette QR sur la clé ; pièces du stock, main-d'œuvre, notes et retrait.",
     "d_tech_repair": "Enregistrez téléphones, ordinateurs portables et autres appareils avec numéro de série/IMEI et état ; étiquette QR sur l'appareil ; diagnostic, pièces, notes et retrait.",
-    "d_engineering": "Enregistrez groupes électrogènes, pompes et machines avec leurs détails et la panne ; étiquette QR sur l'article ; pièces, main-d'œuvre, notes et retrait."
+    "d_engineering": "Enregistrez groupes électrogènes, pompes et machines avec leurs détails et la panne ; étiquette QR sur l'article ; pièces, main-d'œuvre, notes et retrait.",
+    "t_restaurant": "Restaurant / maquis",
+    "t_building_materials": "Matériaux de construction",
+    "d_restaurant": "Des plats préparés à partir de vos ingrédients (les recettes les retirent du stock), vendus à l'assiette ; produits frais et registre des pertes de fin de journée.",
+    "d_building_materials": "Ciment, fers, parpaings, toitures, portes, fenêtres, carrelage, plomberie, sanitaires, électricité et peinture : vente au sac, à la pièce, à la longueur ou à la tonne, avec alertes de réapprovisionnement."
   },
   "production": {
     "title": "Production",

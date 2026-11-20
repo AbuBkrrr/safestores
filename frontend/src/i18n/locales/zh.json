@@ -324,7 +324,12 @@
     "soldBy_length": "长度（码、米）",
     "shelfLifeDays": "保质期（天）",
     "shelfLifePh": "例如 3 — 到货时用于设定过期日期",
-    "perUnit": "每{{unit}}"
+    "perUnit": "每{{unit}}",
+    "addPhoto": "添加照片",
+    "changePhoto": "更换",
+    "removePhotoFor": "删除 {{name}} 的照片",
+    "photoSaved": "照片已保存",
+    "photoFailed": "无法保存照片"
   },
   "stockArrivalPage": {
     "title": "到货入库",
@@ -748,7 +753,10 @@
     "noExpiry": "无过期日期",
     "expiryFor": "{{name}} 的过期日期",
     "batchFor": "{{name}} 的批号",
-    "expiryNeeded": "确认前请为每一行输入过期日期（或勾选“无过期日期”）。"
+    "expiryNeeded": "确认前请为每一行输入过期日期（或勾选“无过期日期”）。",
+    "category": "类别",
+    "categoryFor": "{{name}} 的类别",
+    "newItem": "新商品：输入或选择"
   },
   "replenishmentPage": {
     "loadingTitle": "补货",
@@ -2221,7 +2229,11 @@
     "t_engineering": "工程与设备维修",
     "d_mechanic": "登记客户车辆的车牌、里程和车况；钥匙上贴二维码标签；从库存领用配件、工时费、备注和取车。",
     "d_tech_repair": "登记手机、电脑等设备的序列号/IMEI 和状况；设备上贴二维码标签；检测、配件、备注和取件。",
-    "d_engineering": "登记发电机、水泵和机器的详情与故障；设备上贴二维码标签；配件、工时费、备注和取件。"
+    "d_engineering": "登记发电机、水泵和机器的详情与故障；设备上贴二维码标签；配件、工时费、备注和取件。",
+    "t_restaurant": "餐厅 / 小吃店",
+    "t_building_materials": "建材",
+    "d_restaurant": "用您的原料制作菜品（配方会自动扣减库存），按份出售；生鲜库存和日终损耗记录。",
+    "d_building_materials": "水泥、钢筋、砌块、屋面、门、窗、瓷砖、水暖、卫浴、电料和油漆：按袋、按件、按长度或按吨销售，并有补货提醒。"
   },
   "production": {
     "title": "生产",

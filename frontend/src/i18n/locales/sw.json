@@ -324,7 +324,12 @@
     "soldBy_length": "Urefu (yadi, mita)",
     "shelfLifeDays": "Hudumu (siku)",
     "shelfLifePh": "mf. 3 — hutumika kuweka tarehe ya kuisha bidhaa ikifika",
-    "perUnit": "kwa kila {{unit}}"
+    "perUnit": "kwa kila {{unit}}",
+    "addPhoto": "Ongeza picha",
+    "changePhoto": "Badilisha",
+    "removePhotoFor": "Ondoa picha ya {{name}}",
+    "photoSaved": "Picha imehifadhiwa",
+    "photoFailed": "Imeshindwa kuhifadhi picha"
   },
   "stockArrivalPage": {
     "title": "Uwasili wa Bidhaa",
@@ -748,7 +753,10 @@
     "noExpiry": "Haina tarehe ya kuisha",
     "expiryFor": "Tarehe ya kuisha ya {{name}}",
     "batchFor": "Namba ya kundi ya {{name}}",
-    "expiryNeeded": "Weka tarehe ya kuisha (au weka alama Haina tarehe ya kuisha) kwa kila mstari kabla ya kuthibitisha."
+    "expiryNeeded": "Weka tarehe ya kuisha (au weka alama Haina tarehe ya kuisha) kwa kila mstari kabla ya kuthibitisha.",
+    "category": "Aina",
+    "categoryFor": "Aina ya {{name}}",
+    "newItem": "Bidhaa mpya: andika au chagua"
   },
   "replenishmentPage": {
     "loadingTitle": "Kujaza Upya",
@@ -2221,7 +2229,11 @@
     "t_engineering": "Uhandisi na ukarabati wa mitambo",
     "d_mechanic": "Sajili gari la mteja kwa namba ya usajili, kilomita na hali yake; lebo ya QR kwenye ufunguo; vipuri kutoka kwenye mali, ufundi, maelezo na kuchukua.",
     "d_tech_repair": "Sajili simu, kompyuta na vifaa vingine kwa namba ya serial/IMEI na hali; lebo ya QR kwenye kifaa; uchunguzi, vipuri, maelezo na kuchukua.",
-    "d_engineering": "Sajili jenereta, pampu na mitambo kwa maelezo yake na hitilafu; lebo ya QR kwenye kifaa; vipuri, ufundi, maelezo na kuchukua."
+    "d_engineering": "Sajili jenereta, pampu na mitambo kwa maelezo yake na hitilafu; lebo ya QR kwenye kifaa; vipuri, ufundi, maelezo na kuchukua.",
+    "t_restaurant": "Mgahawa",
+    "t_building_materials": "Vifaa vya ujenzi",
+    "d_restaurant": "Vyakula vinavyopikwa kutoka kwa malighafi zako (mapishi huziondoa kwenye mali), vinauzwa kwa sahani; bidhaa mbichi na daftari la upotevu la mwisho wa siku.",
+    "d_building_materials": "Saruji, nondo, matofali, paa, milango, madirisha, vigae, mabomba, vifaa vya choo, umeme na rangi: uza kwa mfuko, kipande, urefu au tani, pamoja na tahadhari za kuagiza upya."
   },
   "production": {
     "title": "Uzalishaji",

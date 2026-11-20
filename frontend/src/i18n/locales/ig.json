@@ -324,7 +324,12 @@
     "soldBy_length": "Ogologo (yaadị, mita)",
     "shelfLifeDays": "Ọ na-adịgide (ụbọchị)",
     "shelfLifePh": "dịka 3 — a ga-eji ya tọọ ụbọchị njedebe mgbe ngwaahịa bịarutere",
-    "perUnit": "kwa {{unit}}"
+    "perUnit": "kwa {{unit}}",
+    "addPhoto": "Tinye foto",
+    "changePhoto": "Gbanwee",
+    "removePhotoFor": "Wepụ foto {{name}}",
+    "photoSaved": "Echekwala foto",
+    "photoFailed": "Enweghị ike ịchekwa foto"
   },
   "stockArrivalPage": {
     "title": "Ngwaahịa Bịara",
@@ -748,7 +753,10 @@
     "noExpiry": "Enweghị ụbọchị njedebe",
     "expiryFor": "Ụbọchị njedebe maka {{name}}",
     "batchFor": "Nọmba batch maka {{name}}",
-    "expiryNeeded": "Tinye ụbọchị njedebe (ma ọ bụ kaa Enweghị ụbọchị njedebe) maka ahịrị ọ bụla tupu i tinye ya."
+    "expiryNeeded": "Tinye ụbọchị njedebe (ma ọ bụ kaa Enweghị ụbọchị njedebe) maka ahịrị ọ bụla tupu i tinye ya.",
+    "category": "Otu",
+    "categoryFor": "Otu {{name}}",
+    "newItem": "Ihe ọhụrụ: pịnye ma ọ bụ họrọ"
   },
   "replenishmentPage": {
     "loadingTitle": "Nkwado Ọzọ",
@@ -2221,7 +2229,11 @@
     "t_engineering": "Injinia na ndozi igwe",
     "d_mechanic": "Debanye aha ụgbọ ala onye ahịa na nọmba ụgbọ, njem o mere na ọnọdụ ya; akara QR na mkpịsị igodo; akụkụ ndozi site na ngwaahịa, ụgwọ ọrụ aka, ndetu na nnata.",
     "d_tech_repair": "Debanye aha ekwentị, kọmputa na ngwaọrụ ndị ọzọ na nọmba serial/IMEI na ọnọdụ; akara QR na ngwaọrụ; nyocha, akụkụ ndozi, ndetu na nnata.",
-    "d_engineering": "Debanye aha jenereto, pọmpụ na igwe na nkọwa ha na nsogbu; akara QR n'ihe ahụ; akụkụ ndozi, ụgwọ ọrụ aka, ndetu na nnata."
+    "d_engineering": "Debanye aha jenereto, pọmpụ na igwe na nkọwa ha na nsogbu; akara QR n'ihe ahụ; akụkụ ndozi, ụgwọ ọrụ aka, ndetu na nnata.",
+    "t_restaurant": "Ụlọ nri",
+    "t_building_materials": "Ihe owuwu ụlọ",
+    "d_restaurant": "Nri a na-esi site n'ihe e ji esi ya (usoro na-ewepụ ha na ngwaahịa), a na-ere ya site na efere; ngwaahịa ọhụrụ na akwụkwọ mfu njedebe ụbọchị.",
+    "d_building_materials": "Ciment, ígwè, blọọkụ, ihe mkpuchi ụlọ, ọnụ ụzọ, windo, taịlụ, ihe pọmpụ, ihe ụlọ mposi, ihe ọkụ eletrik na agba: ree site na akpa, otu otu, ogologo ma ọ bụ tọn, ya na ọkwa ịzụtaghachi."
   },
   "production": {
     "title": "Mmepụta",
