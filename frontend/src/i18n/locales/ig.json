@@ -2221,7 +2221,11 @@
     "t_engineering": "Injinia na ndozi igwe",
     "d_mechanic": "Debanye aha ụgbọ ala onye ahịa na nọmba ụgbọ, njem o mere na ọnọdụ ya; akara QR na mkpịsị igodo; akụkụ ndozi site na ngwaahịa, ụgwọ ọrụ aka, ndetu na nnata.",
     "d_tech_repair": "Debanye aha ekwentị, kọmputa na ngwaọrụ ndị ọzọ na nọmba serial/IMEI na ọnọdụ; akara QR na ngwaọrụ; nyocha, akụkụ ndozi, ndetu na nnata.",
-    "d_engineering": "Debanye aha jenereto, pọmpụ na igwe na nkọwa ha na nsogbu; akara QR n'ihe ahụ; akụkụ ndozi, ụgwọ ọrụ aka, ndetu na nnata."
+    "d_engineering": "Debanye aha jenereto, pọmpụ na igwe na nkọwa ha na nsogbu; akara QR n'ihe ahụ; akụkụ ndozi, ụgwọ ọrụ aka, ndetu na nnata.",
+    "t_restaurant": "Ụlọ nri",
+    "t_building_materials": "Ihe owuwu ụlọ",
+    "d_restaurant": "Nri a na-esi site n'ihe e ji esi ya (usoro na-ewepụ ha na ngwaahịa), a na-ere ya site na efere; ngwaahịa ọhụrụ na akwụkwọ mfu njedebe ụbọchị.",
+    "d_building_materials": "Ciment site na akpa, ígwè na ọkpọkọ site n'ogologo, ájá na nkume site na tọn; ọkwa ịzụtaghachi maka ihe na-agwụ ngwa ngwa."
   },
   "production": {
     "title": "Mmepụta",

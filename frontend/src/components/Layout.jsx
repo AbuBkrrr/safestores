@@ -168,6 +168,8 @@ export default function Layout() {
   // one interaction the mockup's toggleSidebar()/overlay-click handlers
   // provide that a plain CSS class-toggle wouldn't give us for free here.
   useEffect(() => { setSidebarOpen(false); }, [location.pathname]);
+  // The browser tab shows the store's own name for its staff.
+  useEffect(() => { if (!isSuperAdmin && user?.storeName) document.title = user.storeName; }, [isSuperAdmin, user?.storeName]);
 
   // In-store only lock: any blocked action, on any page, shows one banner.
   const [offsite, setOffsite] = useState(null);
@@ -218,7 +220,7 @@ export default function Layout() {
           <div className="brand">
             <div className="brand-mark">🏪</div>
             <div className="brand-text">
-              {BRAND}
+              {(!isSuperAdmin && user?.storeName) || BRAND}
               <small>{isSuperAdmin ? t('nav.systemAdministration') : t('nav.inventoryIntelligence')}</small>
             </div>
           </div>

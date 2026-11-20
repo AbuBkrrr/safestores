@@ -31,9 +31,13 @@ async function download(req, res) {
 }
 
 // GET /api/stores/:storeId/apps — the store's admin.
+// First look starts the build for stores made before this existed (or
+// before GITHUB_TOKEN was set), so every store ends up with its apps.
 async function mine(req, res) {
-  const { rows } = await db.query('SELECT * FROM store_apps WHERE store_id = $1', [req.params.storeId]);
-  res.json(storeApps.publicView(await storeApps.refresh(rows[0])));
+  const { rows: stores } = await db.query('SELECT id, name, store_tier, requested_tier FROM stores WHERE id = $1', [req.params.storeId]);
+  if (!stores[0]) return res.status(404).json({ error: 'Store not found' });
+  const row = await storeApps.ensureBuilt(stores[0]);
+  res.json(storeApps.publicView(await storeApps.refresh(row)));
 }
 
 // POST /api/super/stores/:storeId/apps — Super Admin: build or rebuild (e.g. after a rename).

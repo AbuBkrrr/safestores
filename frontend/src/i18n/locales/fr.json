@@ -2221,7 +2221,11 @@
     "t_engineering": "Ingénierie et réparation de machines",
     "d_mechanic": "Enregistrez les véhicules des clients avec plaque, kilométrage et état ; étiquette QR sur la clé ; pièces du stock, main-d'œuvre, notes et retrait.",
     "d_tech_repair": "Enregistrez téléphones, ordinateurs portables et autres appareils avec numéro de série/IMEI et état ; étiquette QR sur l'appareil ; diagnostic, pièces, notes et retrait.",
-    "d_engineering": "Enregistrez groupes électrogènes, pompes et machines avec leurs détails et la panne ; étiquette QR sur l'article ; pièces, main-d'œuvre, notes et retrait."
+    "d_engineering": "Enregistrez groupes électrogènes, pompes et machines avec leurs détails et la panne ; étiquette QR sur l'article ; pièces, main-d'œuvre, notes et retrait.",
+    "t_restaurant": "Restaurant / maquis",
+    "t_building_materials": "Matériaux de construction",
+    "d_restaurant": "Des plats préparés à partir de vos ingrédients (les recettes les retirent du stock), vendus à l'assiette ; produits frais et registre des pertes de fin de journée.",
+    "d_building_materials": "Ciment au sac, fers et tuyaux à la longueur, sable et gravier à la tonne ; alertes de réapprovisionnement pour les articles qui partent vite."
   },
   "production": {
     "title": "Production",

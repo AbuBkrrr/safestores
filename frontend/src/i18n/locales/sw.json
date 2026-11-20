@@ -2221,7 +2221,11 @@
     "t_engineering": "Uhandisi na ukarabati wa mitambo",
     "d_mechanic": "Sajili gari la mteja kwa namba ya usajili, kilomita na hali yake; lebo ya QR kwenye ufunguo; vipuri kutoka kwenye mali, ufundi, maelezo na kuchukua.",
     "d_tech_repair": "Sajili simu, kompyuta na vifaa vingine kwa namba ya serial/IMEI na hali; lebo ya QR kwenye kifaa; uchunguzi, vipuri, maelezo na kuchukua.",
-    "d_engineering": "Sajili jenereta, pampu na mitambo kwa maelezo yake na hitilafu; lebo ya QR kwenye kifaa; vipuri, ufundi, maelezo na kuchukua."
+    "d_engineering": "Sajili jenereta, pampu na mitambo kwa maelezo yake na hitilafu; lebo ya QR kwenye kifaa; vipuri, ufundi, maelezo na kuchukua.",
+    "t_restaurant": "Mgahawa",
+    "t_building_materials": "Vifaa vya ujenzi",
+    "d_restaurant": "Vyakula vinavyopikwa kutoka kwa malighafi zako (mapishi huziondoa kwenye mali), vinauzwa kwa sahani; bidhaa mbichi na daftari la upotevu la mwisho wa siku.",
+    "d_building_materials": "Saruji kwa mfuko, nondo na mabomba kwa urefu, mchanga na kokoto kwa tani; tahadhari za kuagiza upya kwa bidhaa zinazoisha haraka."
   },
   "production": {
     "title": "Uzalishaji",

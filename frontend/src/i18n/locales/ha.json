@@ -2221,7 +2221,11 @@
     "t_engineering": "Injiniyanci da gyaran injuna",
     "d_mechanic": "Shigar da motocin abokan ciniki da lambar mota, nisan tafiya da yanayi; lakabin QR a kan makulli; kayan gyara daga rumbu, aiki, bayani da karɓa.",
     "d_tech_repair": "Shigar da wayoyi, kwamfutoci da sauran na'urori da lambar serial/IMEI da yanayi; lakabin QR a kan na'ura; bincike, kayan gyara, bayani da karɓa.",
-    "d_engineering": "Shigar da janareto, famfo da injuna da bayanansu da matsalar; lakabin QR a kan kayan; kayan gyara, aiki, bayani da karɓa."
+    "d_engineering": "Shigar da janareto, famfo da injuna da bayanansu da matsalar; lakabin QR a kan kayan; kayan gyara, aiki, bayani da karɓa.",
+    "t_restaurant": "Gidan abinci",
+    "t_building_materials": "Kayan gini",
+    "d_restaurant": "Abincin da ake dafawa daga kayan haɗinka (girke-girke na cire su daga kaya), ana sayarwa da faranti; kayan sabo da littafin asara na ƙarshen yini.",
+    "d_building_materials": "Siminti da buhu, ƙarfe da bututu da tsayi, yashi da tsakuwa da tan; faɗakarwar sake saye don abubuwan da ke saurin ƙarewa."
   },
   "production": {
     "title": "Sarrafawa",

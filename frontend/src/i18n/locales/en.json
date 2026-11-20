@@ -2221,7 +2221,11 @@
     "t_engineering": "Engineering & machine repair",
     "d_mechanic": "Check in customers' vehicles with plate number, mileage and condition; QR tag on the key; parts from stock, labour, notes and collection.",
     "d_tech_repair": "Check in phones, laptops and other devices with serial/IMEI and condition; QR tag on the device; diagnosis, parts, notes and collection.",
-    "d_engineering": "Check in generators, pumps and machines with their details and fault; QR tag on the item; parts, labour, notes and collection."
+    "d_engineering": "Check in generators, pumps and machines with their details and fault; QR tag on the item; parts, labour, notes and collection.",
+    "t_restaurant": "Restaurant / eatery",
+    "t_building_materials": "Building materials",
+    "d_restaurant": "Dishes made from your ingredients (recipes take them off stock), sold by the plate; fresh stock and an end-of-day waste log.",
+    "d_building_materials": "Cement by the bag, rods and pipes by the length, sand and gravel by the tonne; reorder alerts for fast movers."
   },
   "production": {
     "title": "Production",
