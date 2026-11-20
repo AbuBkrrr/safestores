@@ -257,4 +257,26 @@ async function removeProductPhoto(req, res) {
   res.json(rows[0]);
 }
 
-module.exports = { listProducts, createProduct, updateProduct, deleteProduct, restoreProduct, setProductPhoto, removeProductPhoto };
+// POST /api/stores/:storeId/products/markup
+// body: { percent, scope: 'all' | 'category' | 'products', category?, productIds? }
+// Sets the profit % (selling price = cost x (1 + percent/100)) on every
+// product in scope. Prices are worked out from each item's own cost.
+async function bulkMarkup(req, res) {
+  const { storeId } = req.params;
+  const percent = Number(req.body?.percent);
+  const { scope, category } = req.body || {};
+  const ids = Array.isArray(req.body?.productIds) ? req.body.productIds.map(String) : [];
+  if (!Number.isFinite(percent) || percent < 0 || percent > 1000) return res.status(400).json({ error: 'Profit % must be between 0 and 1000' });
+  if (!['all', 'category', 'products'].includes(scope)) return res.status(400).json({ error: 'Choose all products, a category, or some products' });
+  if (scope === 'category' && !String(category || '').trim()) return res.status(400).json({ error: 'Choose a category' });
+  if (scope === 'products' && !ids.length) return res.status(400).json({ error: 'Tick the products to change' });
+  const params = [1 + percent / 100, storeId];
+  let where = 'store_id = $2 AND archived_at IS NULL';
+  if (scope === 'category') { params.push(String(category).trim()); where += ` AND category = $${params.length}`; }
+  if (scope === 'products') { params.push(ids); where += ` AND id::text = ANY($${params.length})`; }
+  const { rowCount } = await db.query(`UPDATE products SET price_multiplier = $1, updated_at = now() WHERE ${where}`, params);
+  logActivity(req, { storeId, action: 'product.bulk_markup', entityType: 'product', details: { percent, scope, category: category || null, count: rowCount } });
+  res.json({ updated: rowCount, percent });
+}
+
+module.exports = { listProducts, createProduct, updateProduct, deleteProduct, restoreProduct, setProductPhoto, removeProductPhoto, bulkMarkup };

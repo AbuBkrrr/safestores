@@ -54,6 +54,13 @@ export default function Receipts() {
   const [arrivalDateOverrides, setArrivalDateOverrides] = useState({});
   // Per-line expiry / batch captured on the invoice: { [receiptId]: [{ expiryDate, batchNumber, noExpiry }] }
   const [lineInfo, setLineInfo] = useState({});
+  // Profit % on the invoice (owner and managers): one figure for the whole
+  // invoice, an optional figure per line, and whether items already in stock
+  // take the new price too.
+  const canPrice = ['admin', 'manager'].includes(user?.role);
+  const [invoiceMarkup, setInvoiceMarkup] = useState({}); // { [receiptId]: { percent, existing } }
+  const setInvMk = (rid, patch) => setInvoiceMarkup((m) => ({ ...m, [rid]: { ...(m[rid] || {}), ...patch } }));
+
   const setLine = (rid, i, patch) => setLineInfo((prev) => {
     const arr = [...(prev[rid] || [])];
     arr[i] = { ...(arr[i] || {}), ...patch };
@@ -66,7 +73,8 @@ export default function Receipts() {
     try {
       const r = receipts.find((x) => x.id === id);
       const items = (r?.parsed_items || []).map((_, i) => (lineInfo[id] || [])[i] || {});
-      await api.post(`/stores/${user.storeId}/receipts/${id}/apply`, { arrivalDate, items });
+      const mk = invoiceMarkup[id] || {};
+      await api.post(`/stores/${user.storeId}/receipts/${id}/apply`, { arrivalDate, items, markupPercent: mk.percent === undefined || mk.percent === '' ? undefined : Number(mk.percent), markupExisting: !!mk.existing });
       showToast(t('receiptsPage.appliedToStock'), 'success');
       load();
     } catch (err) {
@@ -103,7 +111,7 @@ export default function Receipts() {
               <Badge status={r.status} />
             </div>
             <table className="mt-1">
-              <thead><tr><th>{t('receiptsPage.item')}</th><th>{t('receiptsPage.qty')}</th><th>{t('receiptsPage.price')}</th>{r.status === 'pending' && <><th>{t('receiptsPage.category')}</th><th>{t('receiptsPage.expiry')} *</th><th>{t('receiptsPage.batch')}</th></>}</tr></thead>
+              <thead><tr><th>{t('receiptsPage.item')}</th><th>{t('receiptsPage.qty')}</th><th>{t('receiptsPage.price')}</th>{r.status === 'pending' && <>{canPrice && <th>{t('markup.lineProfit')}</th>}<th>{t('receiptsPage.category')}</th><th>{t('receiptsPage.expiry')} *</th><th>{t('receiptsPage.batch')}</th></>}</tr></thead>
               <tbody>
                 {r.parsed_items.map((it, i) => {
                   const l = (lineInfo[r.id] || [])[i] || {};
@@ -111,6 +119,15 @@ export default function Receipts() {
                     <tr key={i} style={r.status === 'pending' && !lineReady(r.id, i) ? { background: 'var(--offline-bg)' } : undefined}>
                       <td>{it.name}</td><td>{it.quantity}</td><td>{formatCurrency(it.price)}</td>
                       {r.status === 'pending' && <>
+                        {canPrice && (
+                          <td style={{ whiteSpace: 'nowrap' }}>
+                            <input type="number" min="0" max="1000" step="0.5" aria-label={t('markup.lineProfitFor', { name: it.name })} placeholder={invoiceMarkup[r.id]?.percent || ''}
+                              value={l.markupPercent ?? ''} onChange={(e) => setLine(r.id, i, { markupPercent: e.target.value })} style={{ width: 70 }} />
+                            {(l.markupPercent ?? invoiceMarkup[r.id]?.percent) !== undefined && (l.markupPercent ?? invoiceMarkup[r.id]?.percent) !== '' && Number(it.price) > 0 && (
+                              <div className="muted" style={{ fontSize: 11 }}>→ {formatCurrency(Number(it.price) * (1 + Number(l.markupPercent || invoiceMarkup[r.id]?.percent) / 100))}</div>
+                            )}
+                          </td>
+                        )}
                         <td>
                           {byName.get(String(it.name).toLowerCase())?.category
                             ? <span className="muted">{byName.get(String(it.name).toLowerCase()).category}</span>
@@ -130,6 +147,14 @@ export default function Receipts() {
                 })}
               </tbody>
             </table>
+            {r.status === 'pending' && canPrice && (
+              <div className="flex mt-1" style={{ alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                <label htmlFor={`inv-mk-${r.id}`} style={{ fontWeight: 600 }}>💹 {t('markup.invoiceProfit')}</label>
+                <input id={`inv-mk-${r.id}`} type="number" min="0" max="1000" step="0.5" value={invoiceMarkup[r.id]?.percent ?? ''} onChange={(e) => setInvMk(r.id, { percent: e.target.value })} style={{ width: 90 }} />
+                <label style={{ fontSize: 13 }}><input type="checkbox" checked={!!invoiceMarkup[r.id]?.existing} onChange={(e) => setInvMk(r.id, { existing: e.target.checked })} /> {t('markup.alsoExisting')}</label>
+                <span className="help-text">{t('markup.invoiceHelp')}</span>
+              </div>
+            )}
             {r.status === 'pending' && <datalist id="rc-cats">{categories.map((c) => <option key={c} value={c} />)}</datalist>}
             {r.status === 'pending' && (
               <>

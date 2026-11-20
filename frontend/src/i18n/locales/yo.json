@@ -2486,5 +2486,36 @@
     "installHelp": "Windows: ṣí ẹ̀rọ ìfisílẹ̀ náà; bí Windows bá kìlọ̀, yan More info → Run anyway. Android: ṣí fáìlì náà lórí fóònù kí o sì fàyè gba ìfisílẹ̀ láti inú aṣàwákiri rẹ.",
     "later": "Àwọn áàpù rẹ yóò hàn níbí nígbà tí wọ́n bá ṣetán.",
     "continue": "Tẹ̀síwájú láti wọlé"
+  },
+  "markup": {
+    "open": "Ṣètò èrè %",
+    "title": "Ṣètò èrè % lórí ọ̀pọ̀ ọjà",
+    "applyTo": "Lò ó fún",
+    "all": "Gbogbo ọjà",
+    "category": "Ẹ̀ka kan",
+    "ticked": "Ọjà tí mo sàmì sí",
+    "whichCategory": "Ẹ̀ka",
+    "percent": "Èrè %",
+    "apply": "Lò ó fún ọjà {{count}}",
+    "help": "Iye títà = iye owó rírà ọjà kọ̀ọ̀kan + % yìí. O ṣì lè yí ọjà kan padà lẹ́yìn náà.",
+    "tickHelp": "Sàmì sí àwọn ọjà ní ìsàlẹ̀, lẹ́yìn náà lò ó.",
+    "tickFor": "Yan {{name}}",
+    "done": "A ti ṣètò èrè {{pct}}% fún ọjà {{count}}",
+    "failed": "A kò lè yí iye owó padà",
+    "lineProfit": "Èrè %",
+    "lineProfitFor": "Èrè % fún {{name}}",
+    "invoiceProfit": "Èrè % fún ìwé ọjà yìí",
+    "alsoExisting": "Tún yí iye owó ọjà tí a ti ní padà",
+    "invoiceHelp": "Ọjà tuntun yóò gba % yìí. % tí a tẹ̀ sórí ìlà kan ni ti ìlà yẹn."
+  },
+  "storeLogo": {
+    "title": "Àmì ṣọ́ọ̀bù",
+    "sub": "Àmì rẹ lórí àkójọ áàpù, ṣọ́ọ̀bù orí ayélujára rẹ àti àwọn ojú ewé rẹ̀.",
+    "upload": "Gbé àmì sókè",
+    "change": "Yí àmì padà",
+    "remove": "Yọ kúrò",
+    "help": "PNG tàbí JPG onígun mẹ́rin dọ́gba ló dára jù (ó kéré tán 200×200).",
+    "saved": "A ti fi àmì pamọ́",
+    "failed": "A kò lè fi àmì pamọ́"
   }
 }

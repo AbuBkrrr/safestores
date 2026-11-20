@@ -8,6 +8,7 @@ import { useOffline } from '../context/OfflineContext.jsx';
 import { SUPPORTED_LANGUAGES } from '../i18n/config.js';
 import { getThemePref, setThemePref, getTextSize, setTextSize } from '../utils/preferences.js';
 import { BRAND, WHITE_LABEL } from '../utils/brand.js';
+import { mediaUrl } from '../utils/media.js';
 
 // Inventory features (Products, Suppliers, Cycle Counting, etc.) work
 // identically in both editions now — Web/LAN Edition runs the same
@@ -139,7 +140,7 @@ export function DisplayPrefs() {
 export default function Layout() {
   const { t } = useTranslation();
   const { user, logout } = useAuth();
-  const { tier: storeTier, tools: storeTools } = useStoreProfile();
+  const { tier: storeTier, tools: storeTools, logoUrl: storeLogo } = useStoreProfile();
   const { connected, peers } = useSocket();
   const { isOnline, queuedCount } = useOffline();
   const navigate = useNavigate();
@@ -218,7 +219,9 @@ export default function Layout() {
         {sidebarOpen && <div className="sidebar-overlay active" onClick={() => setSidebarOpen(false)} />}
         <aside className={`sidebar${sidebarOpen ? ' open' : ''}`}>
           <div className="brand">
-            <div className="brand-mark">🏪</div>
+            {!isSuperAdmin && storeLogo
+              ? <img className="brand-mark brand-logo" src={mediaUrl(storeLogo)} alt="" />
+              : <div className="brand-mark">🏪</div>}
             <div className="brand-text">
               {(!isSuperAdmin && user?.storeName) || BRAND}
               <small>{isSuperAdmin ? t('nav.systemAdministration') : t('nav.inventoryIntelligence')}</small>

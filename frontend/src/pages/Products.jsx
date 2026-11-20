@@ -100,6 +100,25 @@ export default function Products() {
     } catch (err) { showToast(err.response?.data?.error || t('products.photoFailed'), 'error'); }
   };
 
+  // Profit % for many products at once: all, one category, or ticked ones.
+  const canPrice = ['admin', 'manager'].includes(user?.role);
+  const [markup, setMarkup] = useState(null); // { scope, category, percent }
+  const [ticked, setTicked] = useState(() => new Set());
+  const allCategories = [...new Set(products.map((p) => p.category).filter(Boolean))].sort();
+  const toggleTick = (id) => setTicked((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+  const markupCount = !markup ? 0 : markup.scope === 'all' ? products.filter((p) => !p.archived_at).length
+    : markup.scope === 'category' ? products.filter((p) => p.category === markup.category && !p.archived_at).length : ticked.size;
+  const applyMarkup = async () => {
+    try {
+      const r = await api.post(`/stores/${user.storeId}/products/markup`, {
+        scope: markup.scope, category: markup.category, percent: Number(markup.percent), productIds: [...ticked],
+      });
+      showToast(t('markup.done', { count: r.data.updated, pct: r.data.percent }), 'success');
+      setMarkup(null); setTicked(new Set());
+      const fresh = await api.get(`/stores/${user.storeId}/products`); setProducts(fresh.data);
+    } catch (err) { showToast(err.response?.data?.error || t('markup.failed'), 'error'); }
+  };
+
   const saveLocation = async (p) => {
     const value = locationDrafts[p.id];
     if (value === undefined || value === (p.location || '')) return;
@@ -218,6 +237,27 @@ export default function Products() {
       <div className="card">
         <input aria-label={t('common.search')} placeholder={t('products.searchPlaceholder')} value={query} onChange={(e) => setQuery(e.target.value)} style={{ maxWidth: 320, marginBottom: 12 }} />
         <div className="table-wrap">
+        {canPrice && !markup && <div className="flex" style={{ justifyContent: 'flex-end', marginBottom: 10 }}><button type="button" className="btn secondary small" onClick={() => setMarkup({ scope: 'all', category: allCategories[0] || '', percent: '' })}>💹 {t('markup.open')}</button></div>}
+        {canPrice && markup && (
+          <div className="card" style={{ marginBottom: 12 }}>
+            <h3 style={{ marginTop: 0 }}>💹 {t('markup.title')}</h3>
+            <div className="flex" style={{ flexWrap: 'wrap', gap: 12, alignItems: 'flex-end' }}>
+              <div className="form-group" style={{ margin: 0 }}><label htmlFor="mk-scope">{t('markup.applyTo')}</label>
+                <select id="mk-scope" value={markup.scope} onChange={(e) => setMarkup({ ...markup, scope: e.target.value })}>
+                  <option value="all">{t('markup.all')}</option>
+                  <option value="category">{t('markup.category')}</option>
+                  <option value="products">{t('markup.ticked')}</option>
+                </select></div>
+              {markup.scope === 'category' && <div className="form-group" style={{ margin: 0 }}><label htmlFor="mk-cat">{t('markup.whichCategory')}</label>
+                <select id="mk-cat" value={markup.category} onChange={(e) => setMarkup({ ...markup, category: e.target.value })}>{allCategories.map((c) => <option key={c} value={c}>{c}</option>)}</select></div>}
+              <div className="form-group" style={{ margin: 0 }}><label htmlFor="mk-pct">{t('markup.percent')}</label>
+                <input id="mk-pct" type="number" min="0" max="1000" step="0.5" value={markup.percent} onChange={(e) => setMarkup({ ...markup, percent: e.target.value })} style={{ width: 110 }} /></div>
+              <button type="button" className="btn" disabled={markup.percent === '' || !markupCount} onClick={applyMarkup}>{t('markup.apply', { count: markupCount })}</button>
+              <button type="button" className="btn secondary" onClick={() => { setMarkup(null); setTicked(new Set()); }}>{t('common.cancel')}</button>
+            </div>
+            <p className="help-text">{markup.scope === 'products' ? t('markup.tickHelp') : t('markup.help')}</p>
+          </div>
+        )}
         <table>
           <thead>
             <tr>
@@ -233,6 +273,7 @@ export default function Products() {
             }).map((p) => (
               <tr key={p.id}>
                 <td>
+                  {markup?.scope === 'products' && <input type="checkbox" checked={ticked.has(p.id)} onChange={() => toggleTick(p.id)} aria-label={t('markup.tickFor', { name: p.name })} style={{ marginRight: 8 }} />}
                   <span className="prod-thumb-wrap">
                     {p.image_url
                       ? <img className="prod-thumb" src={mediaUrl(p.image_url)} alt="" loading="lazy" />

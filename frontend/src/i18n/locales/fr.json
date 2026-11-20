@@ -2486,5 +2486,36 @@
     "installHelp": "Windows : lancez l'installateur ; si Windows avertit, choisissez Informations complémentaires → Exécuter quand même. Android : ouvrez le fichier sur le téléphone et autorisez l'installation depuis votre navigateur.",
     "later": "Vos applications apparaîtront ici dès qu'elles seront prêtes.",
     "continue": "Continuer vers la connexion"
+  },
+  "markup": {
+    "open": "Définir la marge %",
+    "title": "Définir la marge % sur plusieurs produits",
+    "applyTo": "Appliquer à",
+    "all": "Tous les produits",
+    "category": "Une catégorie",
+    "ticked": "Produits cochés",
+    "whichCategory": "Catégorie",
+    "percent": "Marge %",
+    "apply": "Appliquer à {{count}} produit(s)",
+    "help": "Prix de vente = coût de chaque article + ce %. Vous pouvez toujours modifier un produit ensuite.",
+    "tickHelp": "Cochez les produits dans la liste ci-dessous, puis appliquez.",
+    "tickFor": "Choisir {{name}}",
+    "done": "Marge de {{pct}} % appliquée à {{count}} produit(s)",
+    "failed": "Impossible de modifier les prix",
+    "lineProfit": "Marge %",
+    "lineProfitFor": "Marge % pour {{name}}",
+    "invoiceProfit": "Marge % pour cette facture",
+    "alsoExisting": "Mettre aussi à jour les articles déjà en stock",
+    "invoiceHelp": "Les nouveaux articles prennent ce %. Un % saisi sur une ligne s'applique à cette ligne."
+  },
+  "storeLogo": {
+    "title": "Logo de la boutique",
+    "sub": "Votre logo dans le menu de l'application, votre boutique en ligne et ses pages.",
+    "upload": "Téléverser le logo",
+    "change": "Changer le logo",
+    "remove": "Retirer",
+    "help": "Un PNG ou JPG carré convient le mieux (au moins 200×200).",
+    "saved": "Logo enregistré",
+    "failed": "Impossible d'enregistrer le logo"
   }
 }

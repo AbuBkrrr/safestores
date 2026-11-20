@@ -2486,5 +2486,36 @@
     "installHelp": "Windows: buɗe mai saka manhajar; idan Windows ta yi gargaɗi, zaɓi More info → Run anyway. Android: buɗe fayil ɗin a waya ka ba da izinin saka shi daga burauzarka.",
     "later": "Manhajojinka za su bayyana a nan idan sun shirya.",
     "continue": "Ci gaba zuwa shiga"
+  },
+  "markup": {
+    "open": "Saita ribar %",
+    "title": "Saita ribar % akan kayayyaki da yawa",
+    "applyTo": "Yi amfani da shi a kan",
+    "all": "Duk kayayyaki",
+    "category": "Rukuni ɗaya",
+    "ticked": "Kayan da na zaɓa",
+    "whichCategory": "Rukuni",
+    "percent": "Riba %",
+    "apply": "Yi amfani akan kaya {{count}}",
+    "help": "Farashin sayarwa = kuɗin sayan kowane kaya + wannan %. Za ka iya canza kaya ɗaya daga baya.",
+    "tickHelp": "Zaɓi kayayyakin da ke ƙasa, sannan ka yi amfani.",
+    "tickFor": "Zaɓi {{name}}",
+    "done": "An saita riba {{pct}}% akan kaya {{count}}",
+    "failed": "Ba a iya canza farashi ba",
+    "lineProfit": "Riba %",
+    "lineProfitFor": "Riba % na {{name}}",
+    "invoiceProfit": "Riba % na wannan rasit",
+    "alsoExisting": "Sake farashin kayan da muke da su ma",
+    "invoiceHelp": "Sababbin kaya za su ɗauki wannan %. % da aka rubuta a layi shi ne na wannan layin."
+  },
+  "storeLogo": {
+    "title": "Tambarin shago",
+    "sub": "Tambarinka a menu na manhajar, shagonka na yanar gizo da shafukansa.",
+    "upload": "Ɗora tambari",
+    "change": "Canza tambari",
+    "remove": "Cire",
+    "help": "PNG ko JPG mai murabba'i ya fi kyau (akalla 200×200).",
+    "saved": "An adana tambari",
+    "failed": "Ba a iya adana tambarin ba"
   }
 }

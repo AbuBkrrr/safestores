@@ -51,8 +51,14 @@ function applyReceipt(req, res) {
     const results = db.transaction(() => {
       const out = [];
       const lineInfo = Array.isArray(req.body?.items) ? req.body.items : [];
+      // Profit % from the invoice check - same rules as the cloud edition.
+      const canPrice = ['admin', 'manager'].includes(req.user.role);
+      const pct = (v) => (v === '' || v === null || v === undefined || !Number.isFinite(Number(v)) || Number(v) < 0 || Number(v) > 1000 ? null : Number(v));
+      const invoicePct = canPrice ? pct(req.body?.markupPercent) : null;
+      const repriceExisting = canPrice && req.body?.markupExisting === true;
       for (const [idx, item] of items.entries()) {
         const category = String((lineInfo[idx] || {}).category || item.category || '').trim().slice(0, 100) || null;
+        const linePct = canPrice ? pct((lineInfo[idx] || {}).markupPercent) : null;
         let product = db.prepare(
           `SELECT * FROM products WHERE store_id = ? AND (LOWER(name) = LOWER(?) OR sku = ?) LIMIT 1`
         ).get(storeId, item.name, item.sku || '');
@@ -60,6 +66,11 @@ function applyReceipt(req, res) {
         if (product) {
           // Quantity is derived from stock_movements below, not incremented
           // here directly — see stockMath.js.
+          const usePct = linePct ?? (repriceExisting ? invoicePct : null);
+          if (usePct !== null) {
+            db.prepare('UPDATE products SET cost_price = COALESCE(NULLIF(?, 0), cost_price), price_multiplier = ? WHERE id = ?')
+              .run(Number(item.price) || 0, 1 + usePct / 100, product.id);
+          }
         } else {
           const newId = crypto.randomUUID();
           const sku = item.sku || `AUTO-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
@@ -67,6 +78,8 @@ function applyReceipt(req, res) {
           db.prepare(
             `INSERT INTO products (id, store_id, name, sku, category, cost_price, location, backroom_qty) VALUES (?,?,?,?,?,?,?,0)`
           ).run(newId, storeId, item.name, sku, category, item.price || 0, location);
+          const newPct = linePct ?? invoicePct;
+          if (newPct !== null) db.prepare('UPDATE products SET price_multiplier = ? WHERE id = ?').run(1 + newPct / 100, newId);
           product = db.prepare('SELECT * FROM products WHERE id = ?').get(newId);
         }
 

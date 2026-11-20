@@ -80,6 +80,15 @@ async function applyReceipt(req, res) {
     `SELECT 1 FROM users WHERE store_id = $1 AND role IN ('store_manager', 'shelf_manager') AND status = 'active' LIMIT 1`, [storeId]
   )).rowCount > 0;
 
+  // Profit % from the invoice check (owner/manager only): one figure for the
+  // whole invoice and/or one per line. New items always take it; items the
+  // shop already stocks only when a line has its own figure or the reviewer
+  // ticked "also update items we already stock".
+  const canPrice = ['admin', 'manager'].includes(req.user.role);
+  const pct = (v) => (v === '' || v === null || v === undefined || !Number.isFinite(Number(v)) || Number(v) < 0 || Number(v) > 1000 ? null : Number(v));
+  const invoicePct = canPrice ? pct(req.body?.markupPercent) : null;
+  const repriceExisting = canPrice && req.body?.markupExisting === true;
+
   const client = await db.pool.connect();
   try {
     await client.query('BEGIN');
@@ -91,6 +100,7 @@ async function applyReceipt(req, res) {
       // The store manager can put new items (anything not on the starter
       // list) into a category while checking the invoice.
       const category = String(li.category || item.category || '').trim().slice(0, 100) || null;
+      const linePct = canPrice ? pct(li.markupPercent) : null;
       let { rows: productRows } = await client.query(
         `SELECT * FROM products WHERE store_id = $1 AND (LOWER(name) = LOWER($2) OR sku = $3) LIMIT 1`,
         [storeId, item.name, item.sku || '']
@@ -101,12 +111,21 @@ async function applyReceipt(req, res) {
         const sku = item.sku || `AUTO-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
         const location = await suggestLocation(client, storeId, category);
         const { rows: inserted } = await client.query(
-          `INSERT INTO products (store_id, name, sku, category, cost_price, location, backroom_qty) VALUES ($1,$2,$3,$4,$5,$6,0) RETURNING *`,
-          [storeId, item.name, sku, category, item.price || 0, location]
+          `INSERT INTO products (store_id, name, sku, category, cost_price, location, backroom_qty, price_multiplier)
+           VALUES ($1,$2,$3,$4,$5,$6,0, COALESCE($7::numeric, 1.3)) RETURNING *`,
+          [storeId, item.name, sku, category, item.price || 0, location, (linePct ?? invoicePct) === null ? null : 1 + (linePct ?? invoicePct) / 100]
         );
         product = inserted[0];
-      } else if (!product.category && category) {
-        await client.query('UPDATE products SET category = $1 WHERE id = $2', [category, product.id]);
+      } else {
+        if (!product.category && category) {
+          await client.query('UPDATE products SET category = $1 WHERE id = $2', [category, product.id]);
+        }
+        const usePct = linePct ?? (repriceExisting ? invoicePct : null);
+        if (usePct !== null) {
+          // New price from this invoice: its cost and the chosen profit.
+          await client.query('UPDATE products SET cost_price = COALESCE(NULLIF($1::numeric, 0), cost_price), price_multiplier = $2, updated_at = now() WHERE id = $3',
+            [Number(item.price) || 0, 1 + usePct / 100, product.id]);
+        }
       }
       // Quantity is derived from stock_movements below, not incremented
       // here directly — see stockMath.js.

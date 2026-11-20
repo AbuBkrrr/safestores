@@ -2486,5 +2486,36 @@
     "installHelp": "Windows: run the installer; if Windows warns, choose More info → Run anyway. Android: open the file on the phone and allow installing from your browser.",
     "later": "Your own apps will appear here once they are ready.",
     "continue": "Continue to sign in"
+  },
+  "markup": {
+    "open": "Set profit %",
+    "title": "Set profit % on many products",
+    "applyTo": "Apply to",
+    "all": "All products",
+    "category": "One category",
+    "ticked": "Products I tick",
+    "whichCategory": "Category",
+    "percent": "Profit %",
+    "apply": "Apply to {{count}} product(s)",
+    "help": "Selling price = each item's cost + this %. You can still change any single product afterwards.",
+    "tickHelp": "Tick the products in the list below, then apply.",
+    "tickFor": "Choose {{name}}",
+    "done": "Profit set to {{pct}}% on {{count}} product(s)",
+    "failed": "Could not change the prices",
+    "lineProfit": "Profit %",
+    "lineProfitFor": "Profit % for {{name}}",
+    "invoiceProfit": "Profit % for this invoice",
+    "alsoExisting": "Also re-price items we already stock",
+    "invoiceHelp": "New items take this %. A % typed on a line wins for that line."
+  },
+  "storeLogo": {
+    "title": "Store logo",
+    "sub": "Your logo on the app's menu, your online shop and its pages.",
+    "upload": "Upload logo",
+    "change": "Change logo",
+    "remove": "Remove",
+    "help": "A square PNG or JPG works best (at least 200×200).",
+    "saved": "Logo saved",
+    "failed": "Could not save the logo"
   }
 }
