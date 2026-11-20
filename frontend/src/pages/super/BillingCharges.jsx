@@ -1,3 +1,4 @@
+import { useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import api from '../../api/client.js';
 import { Badge, Toast } from '../../components/ui.jsx';
@@ -9,7 +10,8 @@ const METHOD_LABELS = { ussd: 'USSD', bank_transfer: 'Bank Transfer', cash: 'Cas
 export default function BillingCharges() {
   const { formatCurrency } = useCurrency();
   const [charges, setCharges] = useState([]);
-  const [filter, setFilter] = useState('');
+  const [params] = useSearchParams();
+  const [filter, setFilter] = useState(params.get('status') || '');
   const [toast, showToast] = useToast();
 
   const load = () => api.get('/super/billing-charges', { params: filter ? { status: filter } : {} }).then((r) => setCharges(r.data));

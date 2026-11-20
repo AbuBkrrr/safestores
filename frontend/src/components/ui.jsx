@@ -1,8 +1,18 @@
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext.jsx';
 import { BRAND, WHITE_LABEL } from '../utils/brand.js';
 
-export function Metric({ value, label }) {
+export function Metric({ value, label, to, hint }) {
+  if (to) {
+    return (
+      <Link to={to} className="card metric metric-link" aria-label={`${label}: ${value}. ${hint || 'Open'}`}>
+        <div className="value">{value}</div>
+        <div className="label">{label}</div>
+        <div className="metric-hint">{hint || 'View'} →</div>
+      </Link>
+    );
+  }
   return (
     <div className="card metric">
       <div className="value">{value}</div>

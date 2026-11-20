@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../api/client.js';
+import { Link } from 'react-router-dom';
 import { Metric } from '../../components/ui.jsx';
 import { useCurrency } from '../../context/CurrencyContext.jsx';
 
@@ -47,19 +48,24 @@ export default function SuperDashboard() {
   const suspended = stores.filter((s) => s.subscription_status === 'suspended').length;
 
   const ICONS = { payment_claim: '💵', overdue_warning: '⚠️', store_locked: '🔒' };
+  // Where each kind of notification is dealt with.
+  const ACTION = {
+    payment_claim: ['/super/billing?status=pending', 'Confirm payment'],
+    overdue_warning: ['/super/billing?status=overdue', 'See overdue'],
+    store_locked: ['/super/stores?status=locked', 'See store'],
+  };
 
   return (
     <div>
       <div className="topbar"><h1>⭐ Super Admin Dashboard</h1></div>
       <div className="grid grid-4">
-        <Metric value={stores.length} label="Total Stores" />
-        <Metric value={active} label="Active" />
-        <Metric value={pending} label="Pending Activation" />
-        <Metric value={suspended} label="Suspended" />
+        <Metric value={stores.length} label="Total Stores" to="/super/stores" hint="Manage stores" />
+        <Metric value={active} label="Active" to="/super/stores?status=active" hint="See active stores" />
+        <Metric value={pending} label="Pending Activation" to="/super/stores?status=pending" hint={pending ? 'Activate them' : 'See list'} />
+        <Metric value={suspended} label="Suspended" to="/super/stores?status=suspended" hint="Review or reactivate" />
       </div>
-      <div className="card metric" style={{ maxWidth: 300 }}>
-        <div className="value">{formatCurrency(revenueThisMonth)}</div>
-        <div className="label">Revenue Collected This Month</div>
+      <div style={{ maxWidth: 300 }}>
+        <Metric value={formatCurrency(revenueThisMonth)} label="Revenue Collected This Month" to="/super/billing?status=paid" hint="See payments" />
       </div>
 
       <div className="card">
@@ -75,7 +81,10 @@ export default function SuperDashboard() {
               {n.message}
               <div className="muted" style={{ fontSize: 12 }}>{new Date(n.created_at).toLocaleString()}</div>
             </div>
-            <button className="btn secondary small" onClick={() => dismiss(n.id)}>Dismiss</button>
+            <div className="flex">
+              {ACTION[n.type] && <Link className="btn small" to={ACTION[n.type][0]}>{ACTION[n.type][1]} →</Link>}
+              <button className="btn secondary small" onClick={() => dismiss(n.id)}>Dismiss</button>
+            </div>
           </div>
         ))}
       </div>
