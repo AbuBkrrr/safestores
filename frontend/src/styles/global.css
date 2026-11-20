@@ -339,6 +339,13 @@ input[type="checkbox"] { width: auto; min-height: unset; }
 }
 .card.metric .value { font-size: 28px; font-weight: 700; margin-top: 6px; color: var(--text); }
 .card.metric .label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; color: var(--muted); font-weight: 600; }
+a.metric-link { display: block; text-decoration: none; color: inherit; cursor: pointer; transition: border-color .15s ease, transform .15s ease; }
+a.metric-link:hover, a.metric-link:focus-visible { border-color: var(--primary); transform: translateY(-2px); }
+.metric-hint { font-size: 12px; color: var(--primary); margin-top: 6px; opacity: .8; }
+a.metric-link:hover .metric-hint { opacity: 1; }
+.filter-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.filter-tabs button { border: 1px solid var(--line); background: transparent; color: var(--text); border-radius: 20px; padding: 6px 12px; font-size: 13px; cursor: pointer; }
+.filter-tabs button.on { background: var(--primary); border-color: var(--primary); color: #fff; }
 
 .grid { display: grid; gap: 16px; }
 .grid-2 { grid-template-columns: repeat(2, 1fr); }

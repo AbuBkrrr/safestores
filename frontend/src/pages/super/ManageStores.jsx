@@ -1,3 +1,4 @@
+import { useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import api from '../../api/client.js';
 import { Badge, Toast, Modal } from '../../components/ui.jsx';
@@ -29,6 +30,17 @@ const cloudApiOrigin = (import.meta.env.VITE_API_URL || window.location.origin).
 
 export default function ManageStores() {
   const [stores, setStores] = useState([]);
+  const [params, setParams] = useSearchParams();
+  const view = params.get('status') || 'all';
+  const setView = (v) => setParams(v === 'all' ? {} : { status: v });
+  const VIEWS = {
+    all: ['All', () => true],
+    active: ['Active', (s) => s.subscription_status === 'active'],
+    pending: ['Pending activation', (s) => s.subscription_status === 'pending'],
+    suspended: ['Suspended', (s) => s.subscription_status === 'suspended'],
+    locked: ['Locked for non-payment', (s) => s.locked],
+  };
+  const shown = stores.filter((VIEWS[view] || VIEWS.all)[1]);
   const [toast, showToast] = useToast();
   const [creating, setCreating] = useState(false);
   const [createForm, setCreateForm] = useState(emptyCreateForm);
@@ -59,6 +71,15 @@ export default function ManageStores() {
       const r = await api.post(`/super/stores/${s.id}/apps`);
       showToast(r.data.status === 'building' ? `Building ${s.name}'s apps — ready in about 10 minutes` : 'App building is not set up on the server yet (GITHUB_TOKEN)', r.data.status === 'building' ? 'success' : 'error');
     } catch (err) { showToast(err.response?.data?.error || 'Could not start the build', 'error'); }
+  };
+  const activate = async (s) => {
+    const tier = s.requested_tier || s.store_tier || 'mini';
+    if (!window.confirm(`Activate ${s.name} as ${tier.toUpperCase()}? The owner can start using it straight away.`)) return;
+    try {
+      await api.patch(`/super/stores/${s.id}/activate`, { storeTier: tier });
+      showToast(`${s.name} is active`, 'success');
+      load();
+    } catch (err) { showToast(err.response?.data?.error || 'Could not activate the store', 'error'); }
   };
   const suspend = async (id) => { await api.patch(`/super/stores/${id}/suspend`); showToast('Store suspended', 'success'); load(); };
   const remove = async (id) => {
@@ -115,10 +136,17 @@ export default function ManageStores() {
       </div>
 
       <div className="card">
+        <div className="filter-tabs" role="tablist" aria-label="Show stores">
+          {Object.entries(VIEWS).map(([k, [label, test]]) => (
+            <button key={k} type="button" role="tab" aria-selected={view === k} className={view === k ? 'on' : ''} onClick={() => setView(k)}>
+              {label} ({stores.filter(test).length})
+            </button>
+          ))}
+        </div>
         <table>
           <thead><tr><th>Store</th><th>Tier</th><th>Status</th><th>Users</th><th>Products</th><th>Created</th><th></th></tr></thead>
           <tbody>
-            {stores.map((s) => (
+            {shown.map((s) => (
               <tr key={s.id}>
                 <td>{s.name}</td><td>{s.tier_label || s.store_tier}
                   {s.requested_tier && s.requested_tier !== s.store_tier && (
@@ -136,11 +164,15 @@ export default function ManageStores() {
                   <button className="btn secondary small" onClick={() => setViewingConnection(s)}>🔗 Connect</button>
                   <button className="btn secondary small" onClick={() => openEdit(s)}>Edit</button>
                   <button className="btn secondary small" title="Build this store's own Windows and Android apps again (e.g. after a name change)" onClick={() => rebuildApps(s)}>📲 Rebuild apps</button>
+                  {s.subscription_status !== 'active' && <button className="btn small" onClick={() => activate(s)}>✅ Activate</button>}
                   {s.subscription_status === 'active' && <button className="btn secondary small" onClick={() => suspend(s.id)}>Suspend</button>}
                   <button className="btn danger small" onClick={() => remove(s.id)}>Delete</button>
                 </td>
               </tr>
             ))}
+            {stores.length > 0 && shown.length === 0 && (
+              <tr><td colSpan={7} className="muted" style={{ textAlign: 'center', padding: 20 }}>No stores in this list.</td></tr>
+            )}
             {stores.length === 0 && (
               <tr><td colSpan={7} className="muted" style={{ textAlign: 'center', padding: 20 }}>
                 No stores yet — create one, or wait for a store admin to register via Sign Up.
