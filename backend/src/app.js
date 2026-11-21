@@ -81,7 +81,12 @@ function createApp() {
   // for local/traditional hosting, but pair with S3-compatible storage
   // (see utils/storage.js) for a serverless deployment, where uploads
   // need to persist across invocations.
-  app.use('/uploads', express.static(uploadDir));
+  app.use('/uploads', express.static(uploadDir, {
+    setHeaders: (res) => {
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('Content-Security-Policy', "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; sandbox");
+    },
+  }));
 
   app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
 

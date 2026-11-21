@@ -69,7 +69,10 @@ async function exportJson(req, res) {
   const data = {};
   for (const table of tables) {
     const { rows } = await db.query(`SELECT * FROM ${table} WHERE store_id = $1`, [storeId]);
-    data[table] = rows;
+    data[table] = rows.map((r) => {
+      const { password_hash, totp_secret, token, token_version, ...safe } = r;
+      return safe;
+    });
   }
   res.setHeader('Content-Type', 'application/json');
   res.setHeader('Content-Disposition', 'attachment; filename="safestores-backup.json"');

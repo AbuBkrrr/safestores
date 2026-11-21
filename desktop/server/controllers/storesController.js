@@ -59,7 +59,7 @@ async function createStore(req, res) {
   if (billingModel && !VALID_BILLING_MODELS.includes(billingModel)) {
     return res.status(400).json({ error: 'billingModel must be daily_percentage or custom' });
   }
-  if (password.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters' });
+  if (String(password).length < 8) return res.status(400).json({ error: 'Password must be at least 8 characters' });
 
   const linking = !!(linkedStoreId && linkedSyncKey && cloudUrl);
   if ((linkedStoreId || linkedSyncKey || cloudUrl) && !linking) {
