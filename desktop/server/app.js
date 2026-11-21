@@ -19,16 +19,36 @@ const settingsCtrl = require('./controllers/settingsController');
 function createApp() {
   const app = express();
 
+  // Basic browser protections for every device on the shop network.
+  app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    res.setHeader('Referrer-Policy', 'same-origin');
+    next();
+  });
   app.use(express.json({ limit: '5mb' }));
   app.use(morgan('dev'));
 
   // Uploaded receipt/camera images
-  app.use('/uploads', express.static(uploadsDir));
+  app.use('/uploads', express.static(uploadsDir, {
+    setHeaders: (res) => {
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+      res.setHeader('Content-Security-Policy', "default-src 'none'; img-src 'self'; style-src 'unsafe-inline'; sandbox");
+    },
+  }));
 
   app.get('/api/health', (req, res) => res.json({ status: 'ok', time: new Date().toISOString() }));
 
-  app.use('/api/setup', setupRoutes);
-  app.use('/api/auth', authRoutes);
+  // First-time setup (connecting to the store, creating the first account)
+  // can only be done on the shop computer itself, never from another
+  // device on the Wi-Fi.
+  app.use('/api/setup', (req, res, next) => {
+    if (req.method === 'GET' || require('./middleware/limits').isLocal(req)) return next();
+    res.status(403).json({ error: 'Set up the store on the shop computer itself.' });
+  }, setupRoutes);
+  // Password guessing from other devices on the Wi-Fi is slowed down.
+  app.use('/api/auth', require('./middleware/limits').authLimiter, authRoutes);
+  app.use('/api/account', require('./middleware/limits').authLimiter);
   // Readable by any logged-in user (not just super_admin), and deliberately
   // NOT behind requireActiveStore/requireNotLocked — a pending or locked
   // store's admin needs this to know how to pay in the first place.

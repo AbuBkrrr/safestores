@@ -1,5 +1,14 @@
 const { verifyToken } = require('../utils/jwt');
 const db = require('../config/db');
+const crypto = require('crypto');
+
+// Constant-time compare so the key can't be guessed one character at a time.
+function sameKey(stored, given) {
+  if (!stored || !given) return false;
+  const a = Buffer.from(String(stored));
+  const b = Buffer.from(String(given));
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
 
 /** Core JWT verification + account-status check, shared by requireAuth and
  * requireAuthOrStoreSyncKey below so the two auth paths can't silently
@@ -166,7 +175,7 @@ async function requireStoreSyncKey(req, res, next) {
   if (!key || !storeId) return res.status(401).json({ error: 'Missing sync key' });
   try {
     const { rows } = await db.query('SELECT sync_key FROM stores WHERE id = $1', [storeId]);
-    if (!rows[0] || rows[0].sync_key !== key) return res.status(401).json({ error: 'Invalid sync key' });
+    if (!rows[0] || !sameKey(rows[0].sync_key, key)) return res.status(401).json({ error: 'Invalid sync key' });
     req.user = { sub: null, role: 'sync_agent', storeId };
     next();
   } catch (err) {
@@ -195,7 +204,7 @@ function requireAuthOrStoreSyncKey(...roles) {
       if (!storeId) return res.status(401).json({ error: 'Missing sync key' });
       try {
         const { rows } = await db.query('SELECT sync_key FROM stores WHERE id = $1', [storeId]);
-        if (!rows[0] || rows[0].sync_key !== key) return res.status(401).json({ error: 'Invalid sync key' });
+        if (!rows[0] || !sameKey(rows[0].sync_key, key)) return res.status(401).json({ error: 'Invalid sync key' });
         req.user = { sub: null, role: 'sync_agent', storeId };
         return next();
       } catch (err) {

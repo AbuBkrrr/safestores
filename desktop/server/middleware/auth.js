@@ -116,7 +116,8 @@ function requireStoreSyncKey(req, res, next) {
   const { storeId } = req.params;
   if (!key || !storeId) return res.status(401).json({ error: 'Missing sync key' });
   const store = db.prepare('SELECT sync_key FROM stores WHERE id = ?').get(storeId);
-  if (!store || store.sync_key !== key) return res.status(401).json({ error: 'Invalid sync key' });
+  const cr = require('crypto'); const a = Buffer.from(String(store?.sync_key || '')), b = Buffer.from(String(key));
+  if (!store || !store.sync_key || a.length !== b.length || !cr.timingSafeEqual(a, b)) return res.status(401).json({ error: 'Invalid sync key' });
   req.user = { sub: null, role: 'sync_agent', storeId };
   next();
 }

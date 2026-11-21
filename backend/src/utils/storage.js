@@ -21,6 +21,12 @@ const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
 
+// Picture types we accept, and the only extensions files are saved with.
+const SAFE_EXT = { 'image/jpeg': '.jpg', 'image/jpg': '.jpg', 'image/png': '.png', 'image/webp': '.webp', 'image/gif': '.gif',
+  'image/heic': '.heic', 'image/heif': '.heif', 'image/bmp': '.bmp', 'application/pdf': '.pdf' };
+const safeExt = (file) => SAFE_EXT[String(file.mimetype || '').toLowerCase()] || '.bin';
+const isSafeImage = (file) => /^image\//.test(file.mimetype) && !!SAFE_EXT[String(file.mimetype).toLowerCase()];
+
 const S3_BUCKET = process.env.S3_BUCKET;
 const usingS3 = !!S3_BUCKET;
 
@@ -70,7 +76,7 @@ const storage = usingS3
       destination: (req, file, cb) => cb(null, uploadDir),
       filename: (req, file, cb) => {
         const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-        cb(null, `${unique}${path.extname(file.originalname)}`);
+        cb(null, `${unique}${safeExt(file)}`);
       },
     });
 
@@ -78,8 +84,8 @@ const upload = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
   fileFilter: (req, file, cb) => {
-    if (/^image\//.test(file.mimetype)) cb(null, true);
-    else cb(new Error('Only image uploads are allowed'));
+    if (isSafeImage(file)) cb(null, true);
+    else cb(new Error('Only photo uploads (JPG, PNG, WEBP, GIF, HEIC) are allowed'));
   },
 });
 
@@ -88,7 +94,7 @@ const uploadDocument = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
-    if (/^image\//.test(file.mimetype) || file.mimetype === 'application/pdf') cb(null, true);
+    if (isSafeImage(file) || file.mimetype === 'application/pdf') cb(null, true);
     else cb(new Error('Upload a photo or a PDF of the receipt'));
   },
 });
@@ -106,7 +112,7 @@ async function persistUpload(file, { keyPrefix = 'uploads' } = {}) {
     return { url: `/uploads/${file.filename}`, key: file.filename };
   }
 
-  const key = `${keyPrefix}/${Date.now()}-${Math.round(Math.random() * 1e9)}${path.extname(file.originalname)}`;
+  const key = `${keyPrefix}/${Date.now()}-${Math.round(Math.random() * 1e9)}${safeExt(file)}`;
   await s3Client.send(new PutObjectCommand({
     Bucket: S3_BUCKET,
     Key: key,

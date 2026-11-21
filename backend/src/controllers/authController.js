@@ -154,7 +154,8 @@ async function adminLogin(req, res) {
     user: {
       id: user.id, name: user.name, email: user.email, role: user.role,
       storeId: user.store_id, storeName: user.store_name, storeTier: user.store_tier, businessType: user.business_type, subscriptionStatus: user.subscription_status,
-      syncKey: user.sync_key, locked: !!user.locked,
+      // Only owner/manager get the store's device key (it can read and change all store data).
+      syncKey: ['admin', 'manager'].includes(user.role) ? user.sync_key : undefined, locked: !!user.locked,
       emailVerified: !!user.email_verified_at, twoFactorEnabled: !!user.totp_enabled,
     },
   });
@@ -226,7 +227,7 @@ async function inviteLogin(req, res) {
     await client.query('COMMIT');
 
     const token = signToken({ sub: userId, role: invite.role, storeId: invite.store_id, tv: tokenVersion });
-    res.json({ token, user: { id: userId, name: invite.name, role: invite.role, storeId: invite.store_id, syncKey: invite.sync_key } });
+    res.json({ token, user: { id: userId, name: invite.name, role: invite.role, storeId: invite.store_id, syncKey: ['admin', 'manager'].includes(invite.role) ? invite.sync_key : undefined } });
   } catch (err) {
     await client.query('ROLLBACK');
     console.error(err);
