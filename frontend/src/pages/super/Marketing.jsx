@@ -68,8 +68,18 @@ export default function Marketing() {
   const [qr, setQr] = useState(null); // { link, dataUrl }
   const [lang, setLang] = useState('en');
   const [picked, setPicked] = useState([]);
-  const [mail, setMail] = useState({ subject: 'Run your shop with SAFE Stores', body: 'Hello {{name}},\n\nThank you for your interest in SAFE Stores for {{shop}}. You can start free here: https://app.safestores.name.ng/signup\n\nReply to this email or WhatsApp us and we will help you set up.\n' });
+  const [mail, setMail] = useState({ subject: 'Run your shop with SAFE Stores', body: 'Hello {{name}},\n\nThank you for your interest in SAFE Stores for {{shop}}. You can start free here: {{signup}}\n\nReply to this email or WhatsApp us and we will help you set up.\n' });
   const [toast, showToast] = useToast();
+  const [urls, setUrls] = useState({ linkBase: '', landingUrl: '', signupUrl: '', effective: {} });
+  useEffect(() => { api.get('/super/marketing/settings').then((r) => setUrls(r.data)).catch(() => {}); }, []);
+  const saveUrls = async (e) => {
+    e.preventDefault();
+    try {
+      const r = await api.put('/super/marketing/settings', urls);
+      setUrls(r.data); loadAll();
+      showToast('Saved — every link and QR code now uses this address', 'success');
+    } catch (err) { showToast(err.response?.data?.error || 'Could not save', 'error'); }
+  };
 
   const loadAll = () => {
     api.get('/super/marketing/overview', { params: { days } }).then((r) => setOv(r.data)).catch(() => {});
@@ -180,6 +190,17 @@ export default function Marketing() {
 
       {tab === 'links' && (
         <>
+          <form className="card" onSubmit={saveUrls} style={{ marginBottom: 16 }}>
+            <h3>Link address</h3>
+            <p className="muted small">The web address your links and QR codes use. Change it here (e.g. to your .com.ng domain) and every link updates — including ones already printed, as long as the old address still reaches this server. The domain must already point to this server.</p>
+            <div className="grid grid-4">
+              <div className="form-group"><label htmlFor="mk-base">Links look like</label><input id="mk-base" value={urls.linkBase} onChange={(e) => setUrls({ ...urls, linkBase: e.target.value })} placeholder={urls.effective?.base || 'https://app.safestores.com.ng'} /></div>
+              <div className="form-group"><label htmlFor="mk-land">“Website” links open</label><input id="mk-land" value={urls.landingUrl} onChange={(e) => setUrls({ ...urls, landingUrl: e.target.value })} placeholder={urls.effective?.landing || 'https://safestores.com.ng'} /></div>
+              <div className="form-group"><label htmlFor="mk-sign">“Sign-up” links open</label><input id="mk-sign" value={urls.signupUrl} onChange={(e) => setUrls({ ...urls, signupUrl: e.target.value })} placeholder={urls.effective?.signup || 'https://app.safestores.com.ng/signup'} /></div>
+              <div className="form-group" style={{ alignSelf: 'end' }}><button className="btn secondary" style={{ width: '100%' }}>Save address</button></div>
+            </div>
+            <p className="muted small">Now: {urls.effective?.base}/go/… → website {urls.effective?.landing} · sign-up {urls.effective?.signup}</p>
+          </form>
           <form className="card" onSubmit={createLink}>
             <h3>New tracking link</h3>
             <p className="muted small">One link per place you share it (a flyer, a WhatsApp group, an ad…) so you can see which one works.</p>
@@ -297,7 +318,7 @@ export default function Marketing() {
           </div>
           <div className="card mt-1">
             <h3>Email the selected leads ({picked.length})</h3>
-            <p className="muted small">Only leads who ticked “you may contact me”, have an email and have not unsubscribed get it. Each email has an unsubscribe link. Use {'{{name}}'} and {'{{shop}}'}.</p>
+            <p className="muted small">Only leads who ticked “you may contact me”, have an email and have not unsubscribed get it. Each email has an unsubscribe link. Use {'{{name}}'}, {'{{shop}}'} and {'{{signup}}'} (your sign-up link).</p>
             <div className="form-group"><label htmlFor="mk-sub">Subject</label><input id="mk-sub" value={mail.subject} onChange={(e) => setMail({ ...mail, subject: e.target.value })} /></div>
             <div className="form-group"><label htmlFor="mk-body">Message</label><textarea id="mk-body" rows={6} value={mail.body} onChange={(e) => setMail({ ...mail, body: e.target.value })} /></div>
             <button className="btn" disabled={!picked.length} onClick={sendMail}>Send email</button>
