@@ -56,6 +56,18 @@ function createApp() {
     crossOriginResourcePolicy: { policy: 'cross-origin' },
   }));
   app.use(compression());
+  // Marketing: the public website (its own domain) reports page opens and
+  // demo requests here, so these few routes accept any origin (no cookies,
+  // no login) and are registered before the app-wide CORS rule.
+  const mk = require('./controllers/marketingController');
+  const mkCors = cors({ origin: true, credentials: false });
+  const mkLimit = require('express-rate-limit')({ windowMs: 10 * 60 * 1000, max: 60, standardHeaders: true, legacyHeaders: false });
+  const mkJson = express.json({ limit: '20kb', type: ['application/json', 'text/plain'] });
+  app.options('/api/m/*', mkCors);
+  app.post('/api/m/open', mkCors, mkLimit, mkJson, mk.recordOpen);
+  app.post('/api/m/lead', mkCors, mkLimit, mkJson, mk.recordLead);
+  app.get('/api/m/unsubscribe/:token', mk.unsubscribe);
+  app.get('/go/:code', mk.go);
   app.use(cors(buildCorsOptions()));
   // The `verify` callback stashes the exact raw bytes on req.rawBody
   // before JSON-parsing them — needed by the Paystack webhook route

@@ -11,6 +11,17 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 router.use(requireAuth, requireRole('super_admin'));
 
 router.get('/stores', ctrl.listStores);
+// Marketing
+const mkCtrl = require('../controllers/marketingController');
+router.get('/marketing/overview', mkCtrl.overview);
+router.get('/marketing/links', mkCtrl.listLinks);
+router.post('/marketing/links', mkCtrl.createLink);
+router.delete('/marketing/links/:id', mkCtrl.archiveLink);
+router.get('/marketing/opens', mkCtrl.listOpens);
+router.get('/marketing/leads', mkCtrl.listLeads);
+router.get('/marketing/leads.csv', mkCtrl.exportLeads);
+router.patch('/marketing/leads/:id', mkCtrl.updateLead);
+router.post('/marketing/outreach/email', mkCtrl.emailLeads);
 router.get('/activity', require('../controllers/accountController').listActivity);
 // Bolt-style settlements with stores (commission on app orders).
 const settlementsCtrl = require('../controllers/settlementsController');

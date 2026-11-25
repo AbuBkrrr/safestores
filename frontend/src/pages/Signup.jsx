@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { captureRef } from '../utils/marketingRef.js';
 import { Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
@@ -21,6 +22,7 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [appsToken, setAppsToken] = useState(null);
   const navigate = useNavigate();
+  const marketing = useMemo(() => captureRef(), []);
 
   const update = (key) => (e) => setForm({ ...form, [key]: e.target.value });
 
@@ -33,7 +35,7 @@ export default function Signup() {
     }
     setLoading(true);
     try {
-      const res = await api.post('/auth/store/signup', { ...form, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone });
+      const res = await api.post('/auth/store/signup', { ...form, ...marketing, timezone: Intl.DateTimeFormat().resolvedOptions().timeZone });
       setSuccess(t('signupPage.registrationSuccess'));
       // The store's own apps are being made: show the download pop-up (it
       // leads on to sign-in); without it, go straight to sign-in.

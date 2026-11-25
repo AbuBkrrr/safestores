@@ -45,7 +45,7 @@ async function superAdminLogin(req, res) {
 // the signer-up was referred by — see 023_referral_tracking.sql for why.
 // ------------------------------------------------------------
 async function storeSignup(req, res) {
-  const { storeName, adminName, adminEmail, password, referralContact, storeTier, timezone, businessType } = req.body;
+  const { storeName, adminName, adminEmail, password, referralContact, storeTier, timezone, businessType, refCode, refDevice } = req.body;
   if (!storeName || !adminName || !adminEmail || !password) {
     return res.status(400).json({ error: 'All fields are required' });
   }
@@ -57,14 +57,20 @@ async function storeSignup(req, res) {
     await client.query('BEGIN');
 
     const storeResult = await client.query(
-      `INSERT INTO stores (name, subscription_status, referral_contact, requested_tier, timezone, business_type)
-       VALUES ($1, 'pending', $2, $3, $4, $5) RETURNING id, name, subscription_status, store_tier, requested_tier, referral_contact, timezone`,
+      `INSERT INTO stores (name, subscription_status, referral_contact, requested_tier, timezone, business_type, ref_code, ref_device_key)
+       VALUES ($1, 'pending', $2, $3, $4, $5, $6, $7) RETURNING id, name, subscription_status, store_tier, requested_tier, referral_contact, timezone`,
       [storeName, referralContact || null, ['mini', 'midi', 'mega'].includes(storeTier) ? storeTier : null,
         // The owner's own device time zone, so "today" is right from day one.
         require('./storeSettingsController').isValidTimezone(timezone) ? timezone : 'UTC',
-        require('../utils/businessTypes').TYPE_KEYS.includes(businessType) ? businessType : 'general']
+        require('../utils/businessTypes').TYPE_KEYS.includes(businessType) ? businessType : 'general',
+        // Which marketing link (QR / share link) brought this store, if any.
+        /^[A-Za-z0-9_-]{1,16}$/.test(refCode || '') ? refCode : null,
+        /^[A-Za-z0-9-]{8,64}$/.test(refDevice || '') ? refDevice : null]
     );
     const store = storeResult.rows[0];
+    if (store && /^[A-Za-z0-9-]{8,64}$/.test(refDevice || '')) {
+      await client.query(`UPDATE marketing_leads SET status = 'registered', updated_at = now() WHERE device_key = $1 AND status <> 'registered'`, [refDevice]);
+    }
     // Every new store gets its own access code (visible to Super Admin on Manage Stores → Connect).
     await require('./storesController').issueStoreCode(client, { storeId: store.id, tier: store.requested_tier });
 
