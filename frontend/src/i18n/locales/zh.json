@@ -953,7 +953,19 @@
     "activatedSuccess": "商店已激活！正在带您前往控制台…",
     "activationFailed": "激活商店失败",
     "logOut": "← 退出登录",
-    "yourStoreFallback": "您的商店"
+    "yourStoreFallback": "您的商店",
+    "noKeyTitle": "没有激活码？",
+    "noKeyDesc": "在这里申请 — 我们会发送到此页面和你的邮箱。",
+    "requestKey": "申请激活码",
+    "yourPhone": "你的电话 / WhatsApp 号码",
+    "messageOptional": "留言（可选）",
+    "sendRequest": "发送申请",
+    "sending": "发送中…",
+    "requestSent": "申请已发送。激活码会显示在这里并发到你的邮箱。",
+    "requestFailed": "申请发送失败。请重试，或通过下方方式联系我们。",
+    "requestPending": "已于 {{date}} 发送申请。激活码会显示在这里（此页面会自动检查）并发到你的邮箱。",
+    "keyArrived": "你的激活码已到：{{code}}（有效期至 {{date}}）。已填在上方 — 点击激活。",
+    "waText": "你好，我的店铺 {{store}} 需要一个激活码。"
   },
   "auditorLoginPage": {
     "title": "审计员登录",

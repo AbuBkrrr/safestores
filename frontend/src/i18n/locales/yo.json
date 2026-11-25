@@ -953,7 +953,19 @@
     "activatedSuccess": "Ilé ìtajà ti ṣiṣẹ́! Ń mú ọ lọ sí pátákò rẹ…",
     "activationFailed": "Kíkọsẹ̀ ní mímú ilé ìtajà ṣiṣẹ́",
     "logOut": "← Jáde",
-    "yourStoreFallback": "Ilé ìtajà rẹ"
+    "yourStoreFallback": "Ilé ìtajà rẹ",
+    "noKeyTitle": "Ṣé o kò ní kọ́kọ́rọ́ ìmúṣiṣẹ́?",
+    "noKeyDesc": "Béèrè fún un níbí — a ó fi ránṣẹ́ sí ojú-ìwé yìí àti ímeèlì rẹ.",
+    "requestKey": "Béèrè kọ́kọ́rọ́ ìmúṣiṣẹ́",
+    "yourPhone": "Nọ́mbà fóònù / WhatsApp rẹ",
+    "messageOptional": "Ìfiránṣẹ́ (kò pọndandan)",
+    "sendRequest": "Fi ìbéèrè ránṣẹ́",
+    "sending": "Ń fi ránṣẹ́…",
+    "requestSent": "A ti fi ìbéèrè ránṣẹ́. Kọ́kọ́rọ́ rẹ yóò hàn níbí àti nínú ímeèlì rẹ.",
+    "requestFailed": "A kò lè fi ìbéèrè ránṣẹ́. Gbìyànjú lẹ́ẹ̀kan sí i, tàbí kàn sí wa nísàlẹ̀.",
+    "requestPending": "A fi ìbéèrè ránṣẹ́ ní {{date}}. Kọ́kọ́rọ́ rẹ yóò hàn níbí (ojú-ìwé yìí ń ṣàyẹ̀wò fúnra rẹ̀) àti nínú ímeèlì rẹ.",
+    "keyArrived": "Kọ́kọ́rọ́ ìmúṣiṣẹ́ rẹ ti dé: {{code}} (ó ń ṣiṣẹ́ títí {{date}}). A ti kọ ọ́ sókè — tẹ Mú ṣiṣẹ́.",
+    "waText": "Ẹ kú àbọ̀, mo nílò kọ́kọ́rọ́ ìmúṣiṣẹ́ fún ilé ìtajà mi {{store}}."
   },
   "auditorLoginPage": {
     "title": "Ìwọlé Olùṣàyẹ̀wò",

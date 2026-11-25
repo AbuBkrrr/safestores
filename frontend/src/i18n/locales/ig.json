@@ -953,7 +953,19 @@
     "activatedSuccess": "Emeela ka ụlọ ahịa rụọ ọrụ! Na-akpọga gị na ogwe gị…",
     "activationFailed": "Ime ka ụlọ ahịa rụọ ọrụ dara",
     "logOut": "← Pụọ",
-    "yourStoreFallback": "Ụlọ ahịa gị"
+    "yourStoreFallback": "Ụlọ ahịa gị",
+    "noKeyTitle": "Ị nweghị igodo mmalite?",
+    "noKeyDesc": "Rịọ ya ebe a — anyị ga-eziga ya na ihuenyo a na email gị.",
+    "requestKey": "Rịọ igodo mmalite",
+    "yourPhone": "Nọmba ekwentị / WhatsApp gị",
+    "messageOptional": "Ozi (ọ bụghị iwu)",
+    "sendRequest": "Zipu arịrịọ",
+    "sending": "Na-eziga…",
+    "requestSent": "Ezigala arịrịọ. Igodo gị ga-apụta ebe a na email gị.",
+    "requestFailed": "Enweghị ike iziga arịrịọ. Nwaa ọzọ, ma ọ bụ kpọtụrụ anyị n'okpuru.",
+    "requestPending": "Ezigara arịrịọ na {{date}}. Igodo gị ga-apụta ebe a (ihuenyo na-elele n'onwe ya) na email gị.",
+    "keyArrived": "Igodo mmalite gị abịala: {{code}} (ọ na-arụ ọrụ ruo {{date}}). Etinyela ya n'elu — pịa Malite.",
+    "waText": "Ndewo, achọrọ m igodo mmalite maka ụlọ ahịa m {{store}}."
   },
   "auditorLoginPage": {
     "title": "Nbanye Onye Nyocha",

@@ -953,7 +953,19 @@
     "activatedSuccess": "An kunna shago! Ana kai ka zuwa dashbord ɗinka…",
     "activationFailed": "An kasa kunna shago",
     "logOut": "← Fita",
-    "yourStoreFallback": "Shagonka"
+    "yourStoreFallback": "Shagonka",
+    "noKeyTitle": "Ba ka da maɓallin kunnawa?",
+    "noKeyDesc": "Nemi shi a nan — za mu aiko shi zuwa wannan allo da imel ɗinka.",
+    "requestKey": "Nemi maɓallin kunnawa",
+    "yourPhone": "Lambar wayarka / WhatsApp",
+    "messageOptional": "Saƙo (ba dole ba)",
+    "sendRequest": "Aika buƙata",
+    "sending": "Ana aikawa…",
+    "requestSent": "An aika buƙata. Maɓallinka zai bayyana a nan da cikin imel ɗinka.",
+    "requestFailed": "Ba a iya aika buƙatar ba. Sake gwadawa, ko tuntuɓe mu a ƙasa.",
+    "requestPending": "An aika buƙata a {{date}}. Maɓallinka zai bayyana a nan (allon yana dubawa da kansa) da cikin imel ɗinka.",
+    "keyArrived": "Maɓallin kunnawarka ya iso: {{code}} (yana aiki har {{date}}). An cike shi a sama — taɓa Kunna.",
+    "waText": "Sannu, ina buƙatar maɓallin kunnawa don shagona {{store}}."
   },
   "auditorLoginPage": {
     "title": "Shiga Mai Bincike",

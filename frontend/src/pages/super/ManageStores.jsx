@@ -66,6 +66,13 @@ export default function ManageStores() {
   };
   useEffect(() => { load(); }, []);
 
+  const sendKey = async (s) => {
+    try {
+      const r = await api.post(`/super/stores/${s.id}/access-code`, { expiresInDays: 30 });
+      showToast(r.data.emailedTo?.length ? `Key ${r.data.code} sent to ${r.data.emailedTo.join(', ')} and their activation screen` : `Key ${r.data.code} is on ${s.name}'s activation screen (email is not set up)`, 'success');
+      load();
+    } catch (err) { showToast(err.response?.data?.error || 'Could not send a key', 'error'); }
+  };
   const rebuildApps = async (s) => {
     try {
       const r = await api.post(`/super/stores/${s.id}/apps`);
@@ -164,6 +171,8 @@ export default function ManageStores() {
                   <button className="btn secondary small" onClick={() => setViewingConnection(s)}>🔗 Connect</button>
                   <button className="btn secondary small" onClick={() => openEdit(s)}>Edit</button>
                   <button className="btn secondary small" title="Build this store's own Windows and Android apps again (e.g. after a name change)" onClick={() => rebuildApps(s)}>📲 Rebuild apps</button>
+                  {s.subscription_status !== 'active' && s.key_requested_at && <span className="badge warning" title={`Asked ${new Date(s.key_requested_at).toLocaleString()}`}>🔑 Key requested</span>}
+                  {s.subscription_status !== 'active' && <button className="btn secondary small" title="Email a new activation key to the owner and show it on their activation screen" onClick={() => sendKey(s)}>🔑 Send key</button>}
                   {s.subscription_status !== 'active' && <button className="btn small" onClick={() => activate(s)}>✅ Activate</button>}
                   {s.subscription_status === 'active' && <button className="btn secondary small" onClick={() => suspend(s.id)}>Suspend</button>}
                   <button className="btn danger small" onClick={() => remove(s.id)}>Delete</button>
