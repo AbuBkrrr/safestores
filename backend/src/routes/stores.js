@@ -214,6 +214,11 @@ router.put('/products/:productId', requireRole('admin', 'manager'), productsCtrl
 // Item photos: owner, managers and the store-room / shelf managers.
 router.post('/products/:productId/photo', requireRole('admin', 'manager', 'store_manager', 'shelf_manager'), upload.single('photo'), productsCtrl.setProductPhoto);
 router.delete('/products/:productId/photo', requireRole('admin', 'manager', 'store_manager', 'shelf_manager'), productsCtrl.removeProductPhoto);
+// Camera recognition of items with no barcode (picture fingerprints).
+const looksCtrl = require('../controllers/productLooksController');
+router.get('/product-looks', looksCtrl.listLooks);
+router.post('/products/:productId/looks', requireRole('admin', 'manager', 'cashier', 'checkout', 'store_manager', 'shelf_manager'), looksCtrl.addLook);
+router.delete('/products/:productId/looks', requireRole('admin', 'manager', 'store_manager', 'shelf_manager'), looksCtrl.clearLooks);
 router.delete('/products/:productId', requireRole('admin'), productsCtrl.deleteProduct);
 router.patch('/products/:productId/restore', requireRole('admin'), productsCtrl.restoreProduct);
 

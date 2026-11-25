@@ -2532,5 +2532,17 @@
     "connecting": "Downloading your store…",
     "failed": "Could not connect",
     "help": "After this, everyone signs in with their usual email and password, even with no internet."
+  },
+  "visualScan": {
+    "start": "Identify by picture",
+    "stop": "Stop camera",
+    "capture": "Tap to identify the item",
+    "hint": "Hold the item in the box (or lay it on the counter) and tap. No barcode needed.",
+    "added": "Added: {{name}}",
+    "isItOneOf": "Which one is it?",
+    "notRecognised": "Not recognised yet — find it once and it will be next time.",
+    "searchToTeach": "Search the item (this teaches the camera)",
+    "teachFirst": "The camera learns from product photos and from items you pick here.",
+    "cameraError": "Camera not available. Allow camera access for this app."
   }
 }

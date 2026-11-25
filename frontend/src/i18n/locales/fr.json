@@ -2532,5 +2532,17 @@
     "connecting": "Téléchargement de votre boutique…",
     "failed": "Connexion impossible",
     "help": "Ensuite, chacun se connecte avec son e-mail et son mot de passe habituels, même sans internet."
+  },
+  "visualScan": {
+    "start": "Identifier par photo",
+    "stop": "Arrêter la caméra",
+    "capture": "Touchez pour identifier l'article",
+    "hint": "Tenez l'article dans le cadre (ou posez-le sur le comptoir) et touchez. Pas besoin de code-barres.",
+    "added": "Ajouté : {{name}}",
+    "isItOneOf": "Lequel est-ce ?",
+    "notRecognised": "Pas encore reconnu — trouvez-le une fois et il le sera la prochaine fois.",
+    "searchToTeach": "Cherchez l'article (cela apprend à la caméra)",
+    "teachFirst": "La caméra apprend des photos des produits et des articles choisis ici.",
+    "cameraError": "Caméra indisponible. Autorisez l'accès à la caméra pour cette application."
   }
 }

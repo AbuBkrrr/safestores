@@ -2532,5 +2532,17 @@
     "connecting": "Na-ebudata ụlọ ahịa gị…",
     "failed": "Enweghị ike ijikọ",
     "help": "Mgbe nke a gasịrị, onye ọ bụla na-abanye na email na okwuntughe ya, ọbụlagodi na enweghị ịntanetị."
+  },
+  "visualScan": {
+    "start": "Mata site na foto",
+    "stop": "Kwụsị igwefoto",
+    "capture": "Pịa ka ịmata ngwaahịa ahụ",
+    "hint": "Jide ngwaahịa ahụ n'ime igbe ahụ (ma ọ bụ tọgbọ ya na tebụl) wee pịa. Achọghị barcode.",
+    "added": "Etinyere: {{name}}",
+    "isItOneOf": "Kedu nke ọ bụ?",
+    "notRecognised": "A matabeghị ya — chọta ya otu ugboro, a ga-amata ya ọzọ.",
+    "searchToTeach": "Chọọ ngwaahịa ahụ (nke a na-akụzi igwefoto)",
+    "teachFirst": "Igwefoto na-amụta site na foto ngwaahịa na ihe ị họọrọ ebe a.",
+    "cameraError": "Igwefoto adịghị. Kwe ka ngwa a jiri igwefoto."
   }
 }

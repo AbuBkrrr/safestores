@@ -2532,5 +2532,17 @@
     "connecting": "À ń gba ṣọ́ọ̀bù rẹ sílẹ̀…",
     "failed": "A kò lè so ó mọ́",
     "help": "Lẹ́yìn èyí, gbogbo ènìyàn ń wọlé pẹ̀lú ímeèlì àti ọ̀rọ̀ aṣínà wọn, kódà láìsí ayélujára."
+  },
+  "visualScan": {
+    "start": "Dá a mọ̀ pẹ̀lú àwòrán",
+    "stop": "Dá kámẹ́rà dúró",
+    "capture": "Tẹ̀ láti dá ọjà náà mọ̀",
+    "hint": "Mú ọjà náà sínú àpótí náà (tàbí gbé e sórí tábìlì) kí o tẹ̀. Kò nílò barcode.",
+    "added": "A ti fi kún un: {{name}}",
+    "isItOneOf": "Èwo ni?",
+    "notRecognised": "A kò tíì dá a mọ̀ — wá a lẹ́ẹ̀kan, a ó dá a mọ̀ nígbà míì.",
+    "searchToTeach": "Wá ọjà náà (èyí ń kọ́ kámẹ́rà)",
+    "teachFirst": "Kámẹ́rà ń kọ́ láti inú àwòrán ọjà àti àwọn ọjà tí o yàn níbí.",
+    "cameraError": "Kámẹ́rà kò sí. Gba ohun èlò yìí láàyè láti lo kámẹ́rà."
   }
 }

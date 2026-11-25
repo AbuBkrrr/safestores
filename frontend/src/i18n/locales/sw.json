@@ -2532,5 +2532,17 @@
     "connecting": "Tunapakua duka lako…",
     "failed": "Imeshindwa kuunganisha",
     "help": "Baada ya hapa, kila mtu huingia kwa barua pepe na nenosiri lake, hata bila intaneti."
+  },
+  "visualScan": {
+    "start": "Tambua kwa picha",
+    "stop": "Zima kamera",
+    "capture": "Gusa kutambua bidhaa",
+    "hint": "Shika bidhaa ndani ya kisanduku (au iweke kaunta) kisha gusa. Hakuna haja ya barcode.",
+    "added": "Imeongezwa: {{name}}",
+    "isItOneOf": "Ni ipi?",
+    "notRecognised": "Bado haijatambuliwa — itafute mara moja, itatambuliwa wakati ujao.",
+    "searchToTeach": "Tafuta bidhaa (hii inafundisha kamera)",
+    "teachFirst": "Kamera hujifunza kutoka picha za bidhaa na bidhaa unazochagua hapa.",
+    "cameraError": "Kamera haipatikani. Ruhusu programu hii kutumia kamera."
   }
 }
