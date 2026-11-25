@@ -2556,5 +2556,26 @@
     "searchToTeach": "Nemi kayan (wannan yana koya wa kyamara)",
     "teachFirst": "Kyamara tana koyo daga hotunan kaya da kayan da ka zaɓa a nan.",
     "cameraError": "Babu kyamara. Ba wa wannan manhaja izinin amfani da kyamara."
+  },
+  "bizDash": {
+    "change": "Canza nau'in kasuwanci",
+    "jobsInProgress": "Ayyukan da ake yi",
+    "jobsReady": "A shirye don karɓa",
+    "jobsDue": "Lokaci ya yi ko ya wuce",
+    "balanceOwed": "Bashin da abokan ciniki ke da shi",
+    "batchesToday": "Rukunin da aka yi yau",
+    "breakdownsToday": "Yanka da aka yi yau",
+    "expiringSoon": "Sabbin kaya masu ƙarewa cikin kwana 2",
+    "wasteWeek": "Asara a wannan mako",
+    "a_checkout": "Sayar (wurin biya)",
+    "a_receive": "Karɓi kaya / takardar sayayya",
+    "a_markup": "Saita riba %",
+    "a_labels": "Buga alamun farashi",
+    "a_products": "Kayayyaki",
+    "a_breakdown": "Yanka gawar dabba",
+    "a_produce": "Yi rukuni",
+    "a_waste": "Rubuta asara",
+    "a_newJob": "Sabon aiki",
+    "a_jobs": "Jerin ayyuka"
   }
 }

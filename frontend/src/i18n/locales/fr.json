@@ -2556,5 +2556,26 @@
     "searchToTeach": "Cherchez l'article (cela apprend à la caméra)",
     "teachFirst": "La caméra apprend des photos des produits et des articles choisis ici.",
     "cameraError": "Caméra indisponible. Autorisez l'accès à la caméra pour cette application."
+  },
+  "bizDash": {
+    "change": "Changer de type d'activité",
+    "jobsInProgress": "Travaux en cours",
+    "jobsReady": "Prêts à récupérer",
+    "jobsDue": "À rendre ou en retard",
+    "balanceOwed": "Solde dû par les clients",
+    "batchesToday": "Fournées du jour",
+    "breakdownsToday": "Découpes du jour",
+    "expiringSoon": "Produits frais expirant sous 2 jours",
+    "wasteWeek": "Pertes cette semaine",
+    "a_checkout": "Vendre (caisse)",
+    "a_receive": "Recevoir marchandises / facture",
+    "a_markup": "Définir la marge %",
+    "a_labels": "Imprimer les étiquettes",
+    "a_products": "Produits",
+    "a_breakdown": "Découper une carcasse",
+    "a_produce": "Faire une fournée",
+    "a_waste": "Noter une perte",
+    "a_newJob": "Nouveau travail",
+    "a_jobs": "Liste des travaux"
   }
 }

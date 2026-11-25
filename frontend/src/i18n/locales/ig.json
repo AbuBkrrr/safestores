@@ -2556,5 +2556,26 @@
     "searchToTeach": "Chọọ ngwaahịa ahụ (nke a na-akụzi igwefoto)",
     "teachFirst": "Igwefoto na-amụta site na foto ngwaahịa na ihe ị họọrọ ebe a.",
     "cameraError": "Igwefoto adịghị. Kwe ka ngwa a jiri igwefoto."
+  },
+  "bizDash": {
+    "change": "Gbanwee ụdị azụmahịa",
+    "jobsInProgress": "Ọrụ na-aga n'ihu",
+    "jobsReady": "Dị njikere maka ịnara",
+    "jobsDue": "Ruru eruo ma ọ bụ gafere",
+    "balanceOwed": "Ego ndị ahịa ji",
+    "batchesToday": "Ihe e mepụtara taa",
+    "breakdownsToday": "Ịkpụ anụ taa",
+    "expiringSoon": "Ihe ọhụrụ ga-emebi n'ime ụbọchị 2",
+    "wasteWeek": "Ihe mebiri izu a",
+    "a_checkout": "Ree (ebe ịkwụ ụgwọ)",
+    "a_receive": "Nata ngwaahịa / akwụkwọ ọnụahịa",
+    "a_markup": "Tọọ uru %",
+    "a_labels": "Bipụta akara ọnụahịa",
+    "a_products": "Ngwaahịa",
+    "a_breakdown": "Kpụọ anụ",
+    "a_produce": "Mepụta otu ụzọ",
+    "a_waste": "Dee ihe mebiri",
+    "a_newJob": "Ọrụ ọhụrụ",
+    "a_jobs": "Ndepụta ọrụ"
   }
 }

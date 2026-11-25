@@ -2556,5 +2556,26 @@
     "searchToTeach": "Wá ọjà náà (èyí ń kọ́ kámẹ́rà)",
     "teachFirst": "Kámẹ́rà ń kọ́ láti inú àwòrán ọjà àti àwọn ọjà tí o yàn níbí.",
     "cameraError": "Kámẹ́rà kò sí. Gba ohun èlò yìí láàyè láti lo kámẹ́rà."
+  },
+  "bizDash": {
+    "change": "Yí irú iṣẹ́ padà",
+    "jobsInProgress": "Iṣẹ́ tí ń lọ lọ́wọ́",
+    "jobsReady": "Ṣetán fún gbígbà",
+    "jobsDue": "Ti tó àkókò tàbí ti kọjá",
+    "balanceOwed": "Gbèsè àwọn oníbàárà",
+    "batchesToday": "Àwọn ìpele tí a ṣe lónìí",
+    "breakdownsToday": "Pípín ẹran lónìí",
+    "expiringSoon": "Ọjà tuntun tí yóò bàjẹ́ ní ọjọ́ 2",
+    "wasteWeek": "Àdánù ọ̀sẹ̀ yìí",
+    "a_checkout": "Tà (ibi ìsanwó)",
+    "a_receive": "Gba ọjà / ìwé owó",
+    "a_markup": "Ṣètò èrè %",
+    "a_labels": "Tẹ àmì iye owó",
+    "a_products": "Àwọn ọjà",
+    "a_breakdown": "Pín òkú ẹran",
+    "a_produce": "Ṣe ìpele kan",
+    "a_waste": "Kọ àdánù sílẹ̀",
+    "a_newJob": "Iṣẹ́ tuntun",
+    "a_jobs": "Àkójọ iṣẹ́"
   }
 }

@@ -7,6 +7,7 @@ import { useCurrency } from '../context/CurrencyContext.jsx';
 import GettingStarted from '../components/GettingStarted.jsx';
 import StoreAppsCard from '../components/StoreApps.jsx';
 import RoleDashboard from '../components/RoleDashboard.jsx';
+import BusinessPanel from '../components/BusinessPanel.jsx';
 import { Link } from 'react-router-dom';
 import { useStoreTier } from '../utils/useStoreTier.js';
 
@@ -79,6 +80,7 @@ function StoreDashboard() {
         <button className="btn secondary" onClick={shareSummary} disabled={!summary}>{t('dashboard.shareSummary')}</button>
       </div>
       <GettingStarted />
+      <BusinessPanel storeId={user.storeId} />
       {import.meta.env.VITE_EDITION !== 'desktop' && !import.meta.env.VITE_BRAND_NAME && ['admin', 'manager'].includes(user?.role) && user?.storeId && (
         <StoreAppsCard storeId={user.storeId} />
       )}
