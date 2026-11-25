@@ -2556,5 +2556,26 @@
     "searchToTeach": "Search the item (this teaches the camera)",
     "teachFirst": "The camera learns from product photos and from items you pick here.",
     "cameraError": "Camera not available. Allow camera access for this app."
+  },
+  "bizDash": {
+    "change": "Change business type",
+    "jobsInProgress": "Jobs in progress",
+    "jobsReady": "Ready for collection",
+    "jobsDue": "Due or overdue",
+    "balanceOwed": "Balance owed by customers",
+    "batchesToday": "Batches made today",
+    "breakdownsToday": "Break-downs today",
+    "expiringSoon": "Fresh items expiring in 2 days",
+    "wasteWeek": "Waste this week",
+    "a_checkout": "Sell (checkout)",
+    "a_receive": "Receive goods / invoice",
+    "a_markup": "Set profit %",
+    "a_labels": "Print price labels",
+    "a_products": "Products",
+    "a_breakdown": "Break down a carcass",
+    "a_produce": "Make a batch",
+    "a_waste": "Log waste",
+    "a_newJob": "New job",
+    "a_jobs": "Job list"
   }
 }

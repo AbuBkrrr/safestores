@@ -2556,5 +2556,26 @@
     "searchToTeach": "搜索商品（这会教相机识别）",
     "teachFirst": "相机会从商品照片和你在这里选择的商品中学习。",
     "cameraError": "相机不可用。请允许此应用使用相机。"
+  },
+  "bizDash": {
+    "change": "更改业务类型",
+    "jobsInProgress": "进行中的工单",
+    "jobsReady": "待取件",
+    "jobsDue": "到期或逾期",
+    "balanceOwed": "客户欠款",
+    "batchesToday": "今日生产批次",
+    "breakdownsToday": "今日分割",
+    "expiringSoon": "2天内到期的生鲜",
+    "wasteWeek": "本周损耗",
+    "a_checkout": "销售（收银）",
+    "a_receive": "收货 / 发票",
+    "a_markup": "设置利润率",
+    "a_labels": "打印价签",
+    "a_products": "商品",
+    "a_breakdown": "分割屠体",
+    "a_produce": "生产一批",
+    "a_waste": "记录损耗",
+    "a_newJob": "新工单",
+    "a_jobs": "工单列表"
   }
 }

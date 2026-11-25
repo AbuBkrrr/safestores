@@ -2556,5 +2556,26 @@
     "searchToTeach": "Tafuta bidhaa (hii inafundisha kamera)",
     "teachFirst": "Kamera hujifunza kutoka picha za bidhaa na bidhaa unazochagua hapa.",
     "cameraError": "Kamera haipatikani. Ruhusu programu hii kutumia kamera."
+  },
+  "bizDash": {
+    "change": "Badilisha aina ya biashara",
+    "jobsInProgress": "Kazi zinazoendelea",
+    "jobsReady": "Tayari kuchukuliwa",
+    "jobsDue": "Zimefika au zimechelewa",
+    "balanceOwed": "Deni la wateja",
+    "batchesToday": "Bechi zilizotengenezwa leo",
+    "breakdownsToday": "Ukataji leo",
+    "expiringSoon": "Bidhaa mbichi zinazoisha ndani ya siku 2",
+    "wasteWeek": "Hasara wiki hii",
+    "a_checkout": "Uza (malipo)",
+    "a_receive": "Pokea bidhaa / ankara",
+    "a_markup": "Weka faida %",
+    "a_labels": "Chapisha lebo za bei",
+    "a_products": "Bidhaa",
+    "a_breakdown": "Kata mzoga",
+    "a_produce": "Tengeneza bechi",
+    "a_waste": "Andika hasara",
+    "a_newJob": "Kazi mpya",
+    "a_jobs": "Orodha ya kazi"
   }
 }
