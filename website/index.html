@@ -157,6 +157,8 @@
   form.lead label { font-size: 13px; font-weight: 600; display: grid; gap: 6px; min-width: 0; }
   form.lead input, form.lead select, form.lead textarea { font: inherit; font-weight: 400; font-size: 15px; padding: 10px 12px; border: 1.5px solid var(--paper-line); border-radius: var(--radius); background: var(--paper); color: var(--ink); }
   form.lead input, form.lead select { width: 100%; min-width: 0; box-sizing: border-box; height: 44px; }
+  form.lead label.consent { display: flex; align-items: flex-start; gap: 8px; font-weight: 400; }
+  form.lead label.consent input { width: auto; height: auto; margin-top: 3px; }
   form.lead select { appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 36px; text-overflow: ellipsis;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%230f7180' stroke-width='2'/%3E%3C/svg%3E");
     background-repeat: no-repeat; background-position: right 14px center; }
@@ -270,6 +272,7 @@
     .nav-actions .btn-primary { padding: 8px 10px; }
   }
 </style>
+<meta name="ss-api" content="https://app.safestores.name.ng">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -413,9 +416,11 @@
           </select>
         </label>
       </div>
+      <label>Email (optional)<input name="email" type="email" autocomplete="email"></label>
       <label>Message<textarea name="message" rows="4" placeholder="What do you sell, and how many tills or staff do you have?"></textarea></label>
+      <label class="consent"><input type="checkbox" name="consent" checked> You may contact me about SAFE Stores (you can unsubscribe any time).</label>
       <button class="btn btn-primary" type="submit">Send message →</button>
-      <p class="note">This opens your email app with the message ready to send.</p>
+      <p class="note">We reply on WhatsApp, phone or email — usually the same day.</p>
       <p class="form-msg" id="form-msg" role="status" aria-live="polite"></p>
     </form>
   </div>
@@ -470,7 +475,43 @@
       });
     });
 
-    // Contact form: compose an email (static site, no server)
+    // ---- Visit tracking for marketing links (QR codes / shared links) ----
+    // A small random id kept in this browser tells "the same phone came back"
+    // apart from "the link was passed on to someone else". No personal data.
+    var API = (document.querySelector('meta[name="ss-api"]') || {}).content || '';
+    var params = new URLSearchParams(location.search);
+    function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } return v; }
+    var deviceId = store('ss_device');
+    if (!deviceId) {
+      deviceId = (window.crypto && crypto.randomUUID) ? crypto.randomUUID() : 'd' + Date.now().toString(36) + Math.random().toString(36).slice(2, 12);
+      if (store('ss_device', deviceId) === null) deviceId = null; // storage blocked: fall back to a rough signature
+    }
+    var ref = params.get('ref') || store('ss_ref') || '';
+    if (params.get('ref')) store('ss_ref', params.get('ref'));
+    var tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
+    var signature = [navigator.userAgent, screen.width + 'x' + screen.height, window.devicePixelRatio, tz, navigator.language, navigator.hardwareConcurrency || ''].join('|');
+    function send(path, data) {
+      if (!API) return Promise.resolve(null);
+      return fetch(API + path, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(data), keepalive: true })
+        .then(function (r) { return r.ok ? r.json() : r.json().then(function (j) { throw new Error(j.error || 'Failed'); }); });
+    }
+    if (params.get('ref') || !sessionStorage.getItem('ss_seen')) {
+      try { sessionStorage.setItem('ss_seen', '1'); } catch (e) {}
+      send('/api/m/open', {
+        ref: params.get('ref') || null, deviceId: deviceId, signature: signature, tz: tz, lang: navigator.language,
+        screen: screen.width + 'x' + screen.height, referrer: document.referrer, page: 'landing',
+        utm: { source: params.get('utm_source'), medium: params.get('utm_medium'), campaign: params.get('utm_campaign') },
+      }).catch(function () {});
+    }
+    // Sign-up / sign-in buttons carry the link, so a new store is credited to it.
+    document.querySelectorAll('a[href*="/signup"]').forEach(function (a) {
+      var u = new URL(a.href);
+      if (ref) u.searchParams.set('ref', ref);
+      if (deviceId) u.searchParams.set('d', deviceId);
+      a.href = u.toString();
+    });
+
+    // Contact form: saved for our team (and emailed to support); WhatsApp/email if offline.
     var form = document.getElementById('lead-form');
     var msg = document.getElementById('form-msg');
     form.addEventListener('submit', function (e) {
@@ -483,6 +524,18 @@
         return;
       }
       var subject = TOPICS[f.topic.value] + (f.shop.value.trim() ? ' — ' + f.shop.value.trim() : '');
+      var submitBtn = form.querySelector('button[type="submit"]');
+      submitBtn.disabled = true;
+      send('/api/m/lead', {
+        ref: ref || null, deviceId: deviceId, name: f.name.value.trim(), phone: f.phone.value.trim(), email: f.email.value.trim(),
+        shop: f.shop.value.trim(), topic: f.topic.value, message: f.message.value.trim(), consent: f.consent.checked, tz: tz, lang: navigator.language,
+      }).then(function () {
+        msg.style.color = '';
+        msg.textContent = 'Thank you! We have your message and will contact you soon.';
+        form.reset();
+      }).catch(function () { openMail(); }).then(function () { submitBtn.disabled = false; });
+      return;
+      function openMail() {
       var body = [
         'Name: ' + f.name.value.trim(),
         'Phone/WhatsApp: ' + f.phone.value.trim(),
@@ -493,6 +546,7 @@
       window.location.href = 'mailto:' + EMAIL + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
       msg.style.color = '';
       msg.textContent = 'Your email app should open with the message ready. If it does not, email ' + EMAIL + '.';
+      }
     });
 
     document.getElementById('year').textContent = new Date().getFullYear();

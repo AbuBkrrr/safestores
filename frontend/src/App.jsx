@@ -82,6 +82,7 @@ const AllUsers = lazy(() => import('./pages/super/AllUsers.jsx'));
 const Referrals = lazy(() => import('./pages/super/Referrals.jsx'));
 const SupportTickets = lazy(() => import('./pages/super/SupportTickets.jsx'));
 const LendingPartnersAdmin = lazy(() => import('./pages/super/LendingPartnersAdmin.jsx'));
+const Marketing = lazy(() => import('./pages/super/Marketing.jsx'));
 
 const STORE_ROLES = ['admin', 'manager', 'staff', 'cashier', 'checkout', 'stock_taker', 'marketplace_manager', 'store_auditor', 'security', 'store_manager', 'shelf_manager'];
 
@@ -292,6 +293,7 @@ export default function App() {
           {EDITION !== 'desktop' && <Route path="/super/lending-partners" element={<LendingPartnersAdmin />} />}
           <Route path="/super/users" element={<AllUsers />} />
           <Route path="/super/referrals" element={<Referrals />} />
+          {EDITION !== 'desktop' && <Route path="/super/marketing" element={<Marketing />} />}
           <Route path="/super/support" element={<SupportTickets />} />
           <Route path="/super/activity" element={<ActivityLog />} />
           <Route path="/super/account" element={<Account />} />

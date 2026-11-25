@@ -56,6 +56,8 @@ services:
       SUPPORT_INBOX_EMAIL: ${SUPPORT_INBOX_EMAIL:-}
       SUPPORT_PHONE: ${SUPPORT_PHONE:-}
       SUPPORT_WHATSAPP: ${SUPPORT_WHATSAPP:-}
+      MARKETING_LANDING_URL: ${MARKETING_LANDING_URL:-}
+      PUBLIC_APP_URL: ${PUBLIC_APP_URL:-}
       # Each store's own Windows/Android apps (templates/store-app). Optional.
       GITHUB_TOKEN: ${GITHUB_TOKEN:-}
       GITHUB_REPO: ${GITHUB_REPO:-AbuBkrrr/safestores}

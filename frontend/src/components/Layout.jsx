@@ -80,6 +80,7 @@ const superNav = [
   { group: 'Administration', to: '/super', label: '⭐ Super Dashboard', icon: '⭐', text: 'Super Dashboard', end: true },
   { group: 'Administration', to: '/super/stores', label: '🏪 Manage Stores', icon: '🏪', text: 'Manage Stores' },
   { group: 'Administration', to: '/super/referrals', label: '🎯 Referrals', icon: '🎯', text: 'Referrals' },
+  { group: 'Administration', to: '/super/marketing', label: '📣 Marketing', icon: '📣', text: 'Marketing', cloudOnly: true },
   { group: 'Administration', to: '/super/users', label: '👥 All Users', icon: '👥', text: 'All Users' },
   { group: 'Administration', to: '/super/subscriptions', label: '💳 Payments, Tiers & Codes', icon: '💳', text: 'Payments, Tiers & Codes' },
   { group: 'Administration', to: '/super/billing', label: '💰 Billing Charges', icon: '💰', text: 'Billing Charges' },
@@ -151,7 +152,7 @@ export default function Layout() {
   const nav = (isSuperAdmin
     ? (isDesktop ? superNav : [...superNav, ...superMarketplaceNav])
     : [...storeNav, ...marketplaceNav]
-  ).filter((item) => (!item.roles || item.roles.includes(user?.role)) && !(storeTier === 'mini' && MINI_HIDDEN.includes(item.to)) && (!item.tool || item.tool.some((x) => storeTools.includes(x))));
+  ).filter((item) => (!item.roles || item.roles.includes(user?.role)) && !(storeTier === 'mini' && MINI_HIDDEN.includes(item.to)) && (!item.tool || item.tool.some((x) => storeTools.includes(x))) && !(item.cloudOnly && isDesktop));
 
   const groups = [];
   for (const item of nav) {
