@@ -15,6 +15,10 @@
 const SIZE = 64;
 const HUE = 12; const SAT = 3; const VAL = 3; // colour histogram 108
 const GRID = 4; const ORI = 8; // edge shape 128, colour layout 48
+// Grain size / texture: how quickly the picture stops matching a shifted copy
+// of itself (fine garri drops at once, big beans slowly). Measured on a
+// sharper 160px copy so small grains still show.
+const TEX = 160; const SHIFTS = [1, 2, 3, 4, 5, 6, 8, 10, 13, 16, 20];
 
 function rgbToHsv(r, g, b) {
   const max = Math.max(r, g, b); const min = Math.min(r, g, b); const d = max - min;
@@ -91,10 +95,38 @@ export function lookOf(source) {
     }
   }
   for (let g = 0; g < GRID * GRID; g += 1) for (let c = 0; c < 3; c += 1) layout[g * 3 + c] /= (layoutW[g] || 1) * 255;
+  const texture = textureOf(source, sw, sh, side);
   for (let i = 0; i < colour.length; i += 1) colour[i] = Math.sqrt(colour[i]);
   for (let i = 0; i < shape.length; i += 1) shape[i] = Math.sqrt(shape[i]);
-  const out = new Float32Array(colour.length + layout.length + shape.length);
+  const out = new Float32Array(colour.length + layout.length + shape.length + texture.length);
   out.set(l2(colour), 0); out.set(l2(layout), colour.length); out.set(l2(shape), colour.length + layout.length);
+  out.set(texture, colour.length + layout.length + shape.length);
+  return out;
+}
+
+function textureOf(source, sw, sh, side) {
+  const c = document.createElement('canvas'); c.width = TEX; c.height = TEX;
+  const ctx = c.getContext('2d', { willReadFrequently: true });
+  // Inner part only: the grains in a bowl/heap, not the bowl's rim.
+  const inner = side * 0.7;
+  ctx.drawImage(source, (sw - inner) / 2, (sh - inner) / 2, inner, inner, 0, 0, TEX, TEX);
+  const d = ctx.getImageData(0, 0, TEX, TEX).data;
+  const g = new Float32Array(TEX * TEX); let mean = 0;
+  for (let i = 0; i < g.length; i += 1) { g[i] = 0.299 * d[i * 4] + 0.587 * d[i * 4 + 1] + 0.114 * d[i * 4 + 2]; mean += g[i]; }
+  mean /= g.length; let varr = 0;
+  for (let i = 0; i < g.length; i += 1) { g[i] -= mean; varr += g[i] * g[i]; }
+  varr = varr / g.length || 1;
+  const out = new Float32Array(SHIFTS.length);
+  SHIFTS.forEach((r, k) => {
+    let sum = 0; let n = 0;
+    for (let y = 0; y < TEX - r; y += 2) {
+      for (let x = 0; x < TEX - r; x += 2) {
+        const i = y * TEX + x;
+        sum += g[i] * (g[i + r] + g[i + r * TEX]) / 2; n += 1; // across and down: any grain direction
+      }
+    }
+    out[k] = Math.min(1, Math.max(0, (sum / n / varr + 1) / 2)); // -1..1 → 0..1
+  });
   return out;
 }
 
@@ -113,7 +145,9 @@ export function unpackLook(text) {
   } catch { return null; }
 }
 
-const PARTS = [[0, HUE * SAT * VAL, 0.4], [HUE * SAT * VAL, HUE * SAT * VAL + GRID * GRID * 3, 0.25], [HUE * SAT * VAL + GRID * GRID * 3, Infinity, 0.35]];
+const C_END = HUE * SAT * VAL; const L_END = C_END + GRID * GRID * 3; const S_END = L_END + GRID * GRID * ORI;
+const PARTS = [[0, C_END, 0.3], [C_END, L_END, 0.15], [L_END, S_END, 0.25]];
+const TEX_WEIGHT = 0.3;
 function similarity(a, b) {
   if (!a || !b || a.length !== b.length) return 0;
   let total = 0;
@@ -122,6 +156,10 @@ function similarity(a, b) {
     for (let i = from; i < Math.min(to, a.length); i += 1) { dot += a[i] * b[i]; na += a[i] * a[i]; nb += b[i] * b[i]; }
     total += weight * (dot / (Math.sqrt(na * nb) || 1));
   }
+  // Grain size / texture: closeness of the two decay curves.
+  let diff = 0;
+  for (let i = S_END; i < a.length; i += 1) diff += Math.abs(a[i] - b[i]);
+  total += TEX_WEIGHT * Math.max(0, 1 - (diff / (a.length - S_END)) * 6);
   return total;
 }
 
@@ -142,7 +180,7 @@ export function rankProducts(look, looks, limit = 3) {
 /** Sure enough to add without asking: a strong match well ahead of the next product. */
 export function isConfident(ranked) {
   if (!ranked[0]) return false;
-  return ranked[0].score >= 0.9 && ranked[0].score - (ranked[1]?.score || 0) >= 0.05;
+  return ranked[0].score >= 0.9 && ranked[0].score - (ranked[1]?.score || 0) >= 0.08;
 }
 
 /** Look of an image file (e.g. a product photo being uploaded). */
