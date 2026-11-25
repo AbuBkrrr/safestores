@@ -14,6 +14,8 @@ router.get('/stores', ctrl.listStores);
 // Marketing
 const mkCtrl = require('../controllers/marketingController');
 router.get('/marketing/overview', mkCtrl.overview);
+router.get('/marketing/settings', mkCtrl.getSettings);
+router.put('/marketing/settings', mkCtrl.saveSettings);
 router.get('/marketing/links', mkCtrl.listLinks);
 router.post('/marketing/links', mkCtrl.createLink);
 router.delete('/marketing/links/:id', mkCtrl.archiveLink);

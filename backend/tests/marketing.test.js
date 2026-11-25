@@ -55,3 +55,20 @@ describe('Marketing tracking', () => {
     expect((await request().get('/api/super/marketing/links')).status).toBe(401);
   });
 });
+
+describe('Marketing link address', () => {
+  it('Super Admin sets the domain; links and the QR redirect follow it', async () => {
+    const sa = { Authorization: `Bearer ${superToken(await createSuperAdmin())}` };
+    const bad = await request().put('/api/super/marketing/settings').set(sa).send({ linkBase: 'not a url' });
+    expect(bad.status).toBe(400);
+    const r = await request().put('/api/super/marketing/settings').set(sa)
+      .send({ linkBase: 'https://app.safestores.com.ng/', landingUrl: 'https://safestores.com.ng' });
+    expect(r.body.effective).toMatchObject({ base: 'https://app.safestores.com.ng', landing: 'https://safestores.com.ng/', signup: 'https://app.safestores.com.ng/signup' });
+    const link = (await request().post('/api/super/marketing/links').set(sa).send({ label: 'Com.ng test' })).body;
+    expect(link.url).toBe(`https://app.safestores.com.ng/go/${link.code}`);
+    const listed = (await request().get('/api/super/marketing/links').set(sa)).body.find((l) => l.code === link.code);
+    expect(listed.url).toBe(`https://app.safestores.com.ng/go/${link.code}`);
+    expect((await request().get(`/go/${link.code}`)).headers.location).toBe(`https://safestores.com.ng/?ref=${link.code}`);
+    await request().put('/api/super/marketing/settings').set(sa).send({}); // back to defaults
+  });
+});

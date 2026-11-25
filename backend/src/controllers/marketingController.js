@@ -9,8 +9,21 @@ const { sendMail } = require('../utils/mailer');
 const CHANNELS = ['whatsapp', 'facebook', 'instagram', 'tiktok', 'x', 'linkedin', 'telegram', 'youtube', 'email', 'sms', 'flyer', 'poster', 'event', 'radio', 'partner', 'other'];
 const clip = (v, n) => (v === undefined || v === null || v === '' ? null : String(v).slice(0, n));
 const codeOk = (c) => typeof c === 'string' && /^[A-Za-z0-9_-]{1,16}$/.test(c);
-const LANDING = () => (process.env.MARKETING_LANDING_URL || 'https://safestores.name.ng/').replace(/\/?$/, '/');
-const APP = () => (process.env.PUBLIC_APP_URL || process.env.FRONTEND_URL?.split(',')[0] || 'https://app.safestores.name.ng').replace(/\/+$/, '');
+const trimUrl = (u) => String(u || '').trim().replace(/\/+$/, '');
+// Where links point: Super Admin's setting (Marketing → Link address), else the server's settings.
+let cache = null; let cacheAt = 0;
+async function urls() {
+  if (!cache || Date.now() - cacheAt > 30000) {
+    cache = (await db.query("SELECT link_base, landing_url, signup_url FROM marketing_settings WHERE id = 'default'").catch(() => ({ rows: [] }))).rows[0] || {};
+    cacheAt = Date.now();
+  }
+  const app = trimUrl(process.env.PUBLIC_APP_URL || process.env.FRONTEND_URL?.split(',')[0] || 'https://app.safestores.name.ng');
+  return {
+    base: trimUrl(cache.link_base) || app,
+    landing: `${trimUrl(cache.landing_url || process.env.MARKETING_LANDING_URL || 'https://safestores.name.ng')}/`,
+    signup: trimUrl(cache.signup_url) || `${trimUrl(cache.link_base) || app}/signup`,
+  };
+}
 
 // ---------------------------------------------------------------- public
 
@@ -19,8 +32,9 @@ async function go(req, res) {
   const code = codeOk(req.params.code) ? req.params.code : null;
   const link = code && (await db.query('SELECT code, target FROM marketing_links WHERE code = $1', [code])).rows[0];
   const qs = link ? `ref=${encodeURIComponent(link.code)}` : '';
-  if (link?.target === 'signup') return res.redirect(302, `${APP()}/signup?${qs}`);
-  res.redirect(302, `${LANDING()}${qs ? `?${qs}` : ''}`);
+  const u = await urls();
+  if (link?.target === 'signup') return res.redirect(302, `${u.signup}?${qs}`);
+  res.redirect(302, `${u.landing}${qs ? `?${qs}` : ''}`);
 }
 
 // POST /api/m/open — the page reports it was opened. body: { ref, deviceId, signature, tz, lang, screen, referrer, page, utm }
@@ -114,7 +128,8 @@ async function listLinks(req, res) {
   // Opens that came with no tracking link at all.
   const none = (await db.query(`SELECT COUNT(*)::int AS opens, COUNT(DISTINCT device_key)::int AS devices, MAX(created_at) AS last_open
     FROM marketing_opens WHERE link_code IS NULL OR link_code NOT IN (SELECT code FROM marketing_links)`)).rows[0];
-  const out = rows.map((l) => ({ ...l, url: `${APP().replace(/\/$/, '')}/go/${l.code}`, verdict: verdict(l.opens, l.devices) }));
+  const { base } = await urls();
+  const out = rows.map((l) => ({ ...l, url: `${base}/go/${l.code}`, verdict: verdict(l.opens, l.devices) }));
   if (none.opens) out.push({ id: null, code: null, label: '(no label)', channel: 'direct', ...none, repeat_opens: none.opens - none.devices, leads: 0, signups: 0, active_stores: 0, verdict: verdict(none.opens, none.devices) });
   res.json(out);
 }
@@ -130,7 +145,7 @@ async function createLink(req, res) {
     try {
       const { rows } = await db.query('INSERT INTO marketing_links (code, label, channel, target, created_by) VALUES ($1,$2,$3,$4,$5) RETURNING *',
         [code, label, channel, target, req.user.sub]);
-      return res.status(201).json({ ...rows[0], url: `${APP()}/go/${code}` });
+      return res.status(201).json({ ...rows[0], url: `${(await urls()).base}/go/${code}` });
     } catch (err) { if (err.code !== '23505') throw err; }
   }
   res.status(500).json({ error: 'Could not make a link code, try again' });
@@ -221,9 +236,10 @@ async function emailLeads(req, res) {
   const { rows } = await db.query(
     `SELECT id, name, shop, email, unsubscribe_token FROM marketing_leads
      WHERE id::text = ANY($1) AND consent AND email IS NOT NULL AND unsubscribed_at IS NULL`, [ids]);
-  const api = APP();
+  const u = await urls();
+  const api = u.base;
   for (const l of rows) {
-    const text = body.replace(/\{\{\s*name\s*\}\}/g, l.name || '').replace(/\{\{\s*shop\s*\}\}/g, l.shop || 'your shop')
+    const text = body.replace(/\{\{\s*name\s*\}\}/g, l.name || '').replace(/\{\{\s*shop\s*\}\}/g, l.shop || 'your shop').replace(/\{\{\s*signup\s*\}\}/g, u.signup)
       + `\n\n—\nYou are getting this because you asked SAFE Stores to contact you. Unsubscribe: ${api}/api/m/unsubscribe/${l.unsubscribe_token}`;
     sendMail({ to: l.email, subject, text });
   }
@@ -231,4 +247,25 @@ async function emailLeads(req, res) {
   res.json({ sent: rows.length, skipped: ids.length - rows.length });
 }
 
-module.exports = { go, recordOpen, recordLead, unsubscribe, listLinks, createLink, archiveLink, listOpens, overview, listLeads, updateLead, exportLeads, emailLeads, CHANNELS };
+// GET/PUT /api/super/marketing/settings  { linkBase, landingUrl, signupUrl }
+async function getSettings(req, res) {
+  cache = null;
+  const u = await urls();
+  res.json({ linkBase: cache.link_base || '', landingUrl: cache.landing_url || '', signupUrl: cache.signup_url || '', effective: u });
+}
+async function saveSettings(req, res) {
+  const clean = (v) => {
+    const s = trimUrl(v);
+    if (!s) return null;
+    if (!/^https?:\/\/[a-z0-9.-]+\.[a-z]{2,}(:\d+)?(\/[^\s]*)?$/i.test(s)) throw Object.assign(new Error(`Check the address: ${s}`), { status: 400 });
+    return s;
+  };
+  let vals;
+  try { vals = [clean(req.body?.linkBase), clean(req.body?.landingUrl), clean(req.body?.signupUrl)]; } catch (err) { return res.status(400).json({ error: err.message }); }
+  await db.query(`INSERT INTO marketing_settings (id, link_base, landing_url, signup_url, updated_at) VALUES ('default', $1, $2, $3, now())
+    ON CONFLICT (id) DO UPDATE SET link_base = $1, landing_url = $2, signup_url = $3, updated_at = now()`, vals);
+  cache = null;
+  return getSettings(req, res);
+}
+
+module.exports = { getSettings, saveSettings, go, recordOpen, recordLead, unsubscribe, listLinks, createLink, archiveLink, listOpens, overview, listLeads, updateLead, exportLeads, emailLeads, CHANNELS };
