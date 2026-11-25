@@ -953,7 +953,19 @@
     "activatedSuccess": "Store activated! Taking you to your dashboard…",
     "activationFailed": "Failed to activate store",
     "logOut": "← Log out",
-    "yourStoreFallback": "Your store"
+    "yourStoreFallback": "Your store",
+    "noKeyTitle": "Don't have an activation key?",
+    "noKeyDesc": "Ask us for one here — we send it to this screen and to your email.",
+    "requestKey": "Request activation key",
+    "yourPhone": "Your phone / WhatsApp number",
+    "messageOptional": "Message (optional)",
+    "sendRequest": "Send request",
+    "sending": "Sending…",
+    "requestSent": "Request sent. Your key will appear here and in your email.",
+    "requestFailed": "Could not send the request. Try again, or contact us below.",
+    "requestPending": "Request sent on {{date}}. Your key will appear here (this screen checks by itself) and in your email.",
+    "keyArrived": "Your activation key has arrived: {{code}} (works until {{date}}). It is filled in above — tap Activate.",
+    "waText": "Hello, I need an activation key for my store {{store}}."
   },
   "auditorLoginPage": {
     "title": "Auditor Login",

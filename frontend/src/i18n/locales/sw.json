@@ -953,7 +953,19 @@
     "activatedSuccess": "Duka limewashwa! Tunakupeleka kwenye dashibodi yako…",
     "activationFailed": "Imeshindwa kuwasha duka",
     "logOut": "← Toka",
-    "yourStoreFallback": "Duka lako"
+    "yourStoreFallback": "Duka lako",
+    "noKeyTitle": "Huna ufunguo wa kuwezesha?",
+    "noKeyDesc": "Uombe hapa — tutautuma kwenye skrini hii na barua pepe yako.",
+    "requestKey": "Omba ufunguo wa kuwezesha",
+    "yourPhone": "Nambari yako ya simu / WhatsApp",
+    "messageOptional": "Ujumbe (si lazima)",
+    "sendRequest": "Tuma ombi",
+    "sending": "Inatuma…",
+    "requestSent": "Ombi limetumwa. Ufunguo wako utaonekana hapa na kwenye barua pepe yako.",
+    "requestFailed": "Imeshindwa kutuma ombi. Jaribu tena, au wasiliana nasi hapa chini.",
+    "requestPending": "Ombi lilitumwa {{date}}. Ufunguo wako utaonekana hapa (skrini hii hukagua yenyewe) na kwenye barua pepe yako.",
+    "keyArrived": "Ufunguo wako wa kuwezesha umefika: {{code}} (unafanya kazi hadi {{date}}). Umejazwa hapo juu — gusa Wezesha.",
+    "waText": "Habari, nahitaji ufunguo wa kuwezesha duka langu {{store}}."
   },
   "auditorLoginPage": {
     "title": "Kuingia kwa Mkaguzi",

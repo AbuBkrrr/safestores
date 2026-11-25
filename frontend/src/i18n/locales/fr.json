@@ -953,7 +953,19 @@
     "activatedSuccess": "Magasin activé ! Redirection vers votre tableau de bord…",
     "activationFailed": "Échec de l'activation du magasin",
     "logOut": "← Se déconnecter",
-    "yourStoreFallback": "Votre magasin"
+    "yourStoreFallback": "Votre magasin",
+    "noKeyTitle": "Vous n'avez pas de clé d'activation ?",
+    "noKeyDesc": "Demandez-la ici — nous l'envoyons sur cet écran et par e-mail.",
+    "requestKey": "Demander une clé d'activation",
+    "yourPhone": "Votre numéro de téléphone / WhatsApp",
+    "messageOptional": "Message (facultatif)",
+    "sendRequest": "Envoyer la demande",
+    "sending": "Envoi…",
+    "requestSent": "Demande envoyée. Votre clé apparaîtra ici et dans votre e-mail.",
+    "requestFailed": "Impossible d'envoyer la demande. Réessayez ou contactez-nous ci-dessous.",
+    "requestPending": "Demande envoyée le {{date}}. Votre clé apparaîtra ici (l'écran vérifie tout seul) et dans votre e-mail.",
+    "keyArrived": "Votre clé d'activation est arrivée : {{code}} (valable jusqu'au {{date}}). Elle est remplie ci-dessus — touchez Activer.",
+    "waText": "Bonjour, j'ai besoin d'une clé d'activation pour ma boutique {{store}}."
   },
   "auditorLoginPage": {
     "title": "Connexion Auditeur",

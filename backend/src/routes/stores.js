@@ -104,6 +104,9 @@ router.use(requireAuth, scopeToOwnStore);
 // Subscription activation — deliberately NOT behind requireActiveStore,
 // since this is how a pending store's admin activates it in the first place.
 router.post('/redeem-code', requireRole('admin'), storesCtrl.redeemCode);
+// Asking for an activation key / receiving it in the app (before the store is active).
+router.get('/activation', requireRole('admin'), require('../controllers/activationController').status);
+router.post('/activation/request', requireRole('admin'), require('../controllers/activationController').requestKey);
 // The store's own Windows and Android apps (also before activation).
 router.get('/apps', requireRole('admin', 'manager'), require('../controllers/storeAppsController').mine);
 

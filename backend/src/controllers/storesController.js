@@ -13,7 +13,8 @@ async function listStores(req, res) {
             (SELECT COUNT(*) FROM products pr WHERE pr.store_id = s.id) AS product_count,
             (SELECT ac.code FROM access_codes ac WHERE ac.issued_for_store = s.id OR ac.used_by_store = s.id ORDER BY ac.created_at DESC LIMIT 1) AS access_code,
             (SELECT ac.status FROM access_codes ac WHERE ac.issued_for_store = s.id OR ac.used_by_store = s.id ORDER BY ac.created_at DESC LIMIT 1) AS access_code_status,
-            (SELECT ac.expires_at FROM access_codes ac WHERE ac.issued_for_store = s.id OR ac.used_by_store = s.id ORDER BY ac.created_at DESC LIMIT 1) AS access_code_expires_at
+            (SELECT ac.expires_at FROM access_codes ac WHERE ac.issued_for_store = s.id OR ac.used_by_store = s.id ORDER BY ac.created_at DESC LIMIT 1) AS access_code_expires_at,
+            (SELECT st.created_at FROM support_tickets st WHERE st.store_id = s.id AND st.subject = 'Activation key request' AND st.status IN ('open','in_progress') ORDER BY st.created_at DESC LIMIT 1) AS key_requested_at
      FROM stores s LEFT JOIN store_tiers t ON t.tier = s.store_tier
      ORDER BY s.created_at DESC`
   );
@@ -257,7 +258,9 @@ async function issueCodeForStore(req, res) {
   const code = await issueStoreCode(db, {
     storeId: store.id, tier: store.requested_tier || store.store_tier, issuedBy: req.user.sub, days: days.value,
   });
-  res.status(201).json(code);
+  // Sent to the owner straight away: their activation screen and their email.
+  const emailedTo = await require('./activationController').deliverKey(store.id, code).catch(() => []);
+  res.status(201).json({ ...code, emailedTo });
 }
 
 // ------------------------------------------------------------
