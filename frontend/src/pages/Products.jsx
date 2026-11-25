@@ -10,6 +10,7 @@ import { useCurrency } from '../context/CurrencyContext.jsx';
 import { useStoreProfile } from '../utils/useStoreTier.js';
 import { BUSINESS_TYPES, SOLD_BY_UNITS, fmtQty } from '../utils/businessTypes.js';
 import { mediaUrl } from '../utils/media.js';
+import { lookOfFile, packLook } from '../utils/visualMatch.js';
 
 const SYNC_EVENTS = ['product:created', 'product:updated', 'product:deleted', 'arrival:created', 'movement:created', 'audit:created'];
 const NEW_ARRIVAL_DAYS = 3;
@@ -91,6 +92,9 @@ export default function Products() {
       const r = await api.post(`/stores/${user.storeId}/products/${photoFor.id}/photo`, fd);
       setProducts((list) => list.map((x) => (x.id === r.data.id ? { ...x, image_url: r.data.image_url } : x)));
       showToast(t('products.photoSaved'), 'success');
+      // The photo also teaches the till camera what this item looks like.
+      const look = await lookOfFile(file);
+      if (look) api.post(`/stores/${user.storeId}/products/${photoFor.id}/looks`, { sig: packLook(look) }).catch(() => {});
     } catch (err) { showToast(err.response?.data?.error || t('products.photoFailed'), 'error'); }
   };
   const removePhoto = async (p) => {

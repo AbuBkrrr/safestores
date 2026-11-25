@@ -11,6 +11,7 @@ import { useCurrency } from '../context/CurrencyContext.jsx';
 import ReceiptView from '../components/ReceiptView.jsx';
 import PasswordInput from '../components/PasswordInput.jsx';
 import { mediaUrl } from '../utils/media.js';
+import VisualScan from '../components/VisualScan.jsx';
 
 const SYNC_EVENTS = ['order:updated', 'order:paid', 'order:cancelled'];
 const CAN_TAKE_PAYMENT = ['admin', 'manager', 'cashier'];
@@ -28,6 +29,7 @@ export default function Checkout() {
   const [products, setProducts] = useState([]);
   const [search, setSearch] = useState('');
   const [scanning, setScanning] = useState(false);
+  const [lookScan, setLookScan] = useState(false); // recognise items by picture
   const [paymentMethod, setPaymentMethod] = useState('cash');
   const [received, setReceived] = useState('');
   const [splitMode, setSplitMode] = useState(false);
@@ -367,7 +369,11 @@ export default function Checkout() {
             <button className={`btn ${scanning ? 'secondary' : ''} small`} onClick={() => setScanning((s) => !s)}>
               {scanning ? t('checkout.stopScanning') : t('checkout.scanBarcode')}
             </button>
+            <button className={`btn ${lookScan ? 'secondary' : ''} small`} onClick={() => { setLookScan((s) => !s); setScanning(false); }}>
+              {lookScan ? t('visualScan.stop') : `📷 ${t('visualScan.start')}`}
+            </button>
           </div>
+          {lookScan && <VisualScan storeId={user.storeId} products={products} onPick={(id) => addProduct(id, 'photo')} />}
           {scanning && <video ref={videoRef} autoPlay playsInline style={{ width: '100%', marginTop: 8, borderRadius: 8, background: '#000', maxHeight: 200, objectFit: 'cover' }} />}
 
           <div className="form-group mt-1">

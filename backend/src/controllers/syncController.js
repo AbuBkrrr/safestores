@@ -104,12 +104,13 @@ async function exportChanges(req, res) {
     q('SELECT m.* FROM job_materials m JOIN job_orders j ON j.id = m.job_id WHERE j.store_id = $1 AND m.created_at > $2'),
   ]);
   const jobNotes = await q('SELECT n.* FROM job_notes n JOIN job_orders j ON j.id = n.job_id WHERE j.store_id = $1 AND n.created_at > $2');
+  const productLooks = await q('SELECT * FROM product_looks WHERE store_id = $1 AND created_at > $2 ORDER BY created_at ASC');
 
   const settingsRow = (await db.query(`SELECT ${SETTINGS_COLS}, settings_updated_at FROM stores WHERE id = $1 AND settings_updated_at > $2`, [storeId, since])).rows[0] || null;
 
   res.json({
     storeSettings: settingsRow,
-    handovers, handoverItems, securityReturns, recipes, recipeLines, productionRuns, productionRunLines, jobs, jobPayments, jobMaterials, jobNotes,
+    handovers, handoverItems, securityReturns, recipes, recipeLines, productionRuns, productionRunLines, jobs, jobPayments, jobMaterials, jobNotes, productLooks,
     shifts: shifts.rows, orderPayments: orderPayments.rows, refunds: refunds.rows, refundItems: refundItems.rows,
     customers: customers.rows, customerLedger: customerLedger.rows, loyaltyPoints: loyaltyPoints.rows,
     serverTime: serverTime.toISOString(),
@@ -140,7 +141,7 @@ async function importChanges(req, res) {
     shifts = [], orderPayments = [], refunds = [], refundItems = [],
     customers = [], customerLedger = [], loyaltyPoints = [],
     handovers = [], handoverItems = [], securityReturns = [], recipes = [], recipeLines = [],
-    productionRuns = [], productionRunLines = [], jobs = [], jobPayments = [], jobMaterials = [], jobNotes = [], storeSettings = null,
+    productionRuns = [], productionRunLines = [], jobs = [], jobPayments = [], jobMaterials = [], jobNotes = [], productLooks = [], storeSettings = null,
   } = req.body;
 
   const client = await db.pool.connect();
@@ -517,7 +518,7 @@ async function importChanges(req, res) {
         );
       }
     }
-    await importShopFloor(client, { storeId, resolveUser, handovers, handoverItems, securityReturns, recipes, recipeLines, productionRuns, productionRunLines, jobs, jobPayments, jobMaterials, jobNotes });
+    await importShopFloor(client, { storeId, resolveUser, handovers, handoverItems, securityReturns, recipes, recipeLines, productionRuns, productionRunLines, jobs, jobPayments, jobMaterials, jobNotes, productLooks });
 
     // Recompute every touched product's quantities from the fully-merged
     // local movement log — this is what makes the merge correct regardless
@@ -669,6 +670,11 @@ async function importShopFloor(client, x) {
     if (!(await has('job_orders', m.job_id)) || !(await has('products', m.product_id))) continue;
     await client.query('INSERT INTO job_materials (id, job_id, product_id, quantity, recorded_by, created_at) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT (id) DO NOTHING',
       [m.id, m.job_id, m.product_id, Number(m.quantity), resolveUser(m.recorded_by), m.created_at]);
+  }
+  for (const l of x.productLooks || []) {
+    if (typeof l.sig !== 'string' || l.sig.length > 800 || !(await has('products', l.product_id))) continue;
+    await client.query('INSERT INTO product_looks (id, store_id, product_id, sig, created_by, created_at) VALUES ($1,$2,$3,$4,$5,$6) ON CONFLICT (id) DO NOTHING',
+      [l.id, x.storeId, l.product_id, l.sig, resolveUser(l.created_by), l.created_at]);
   }
 }
 

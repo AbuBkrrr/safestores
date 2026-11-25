@@ -2532,5 +2532,17 @@
     "connecting": "Ana sauke shagonka…",
     "failed": "Ba a iya haɗawa ba",
     "help": "Bayan wannan, kowa zai shiga da imel da kalmar sirrinsa, ko babu intanet."
+  },
+  "visualScan": {
+    "start": "Gane ta hoto",
+    "stop": "Kashe kyamara",
+    "capture": "Taɓa don gane kayan",
+    "hint": "Riƙe kayan a cikin akwatin (ko ajiye shi a kan teburi) ka taɓa. Ba a buƙatar barcode.",
+    "added": "An ƙara: {{name}}",
+    "isItOneOf": "Wanne ne?",
+    "notRecognised": "Ba a gane shi ba tukuna — nemo shi sau ɗaya, za a gane shi nan gaba.",
+    "searchToTeach": "Nemi kayan (wannan yana koya wa kyamara)",
+    "teachFirst": "Kyamara tana koyo daga hotunan kaya da kayan da ka zaɓa a nan.",
+    "cameraError": "Babu kyamara. Ba wa wannan manhaja izinin amfani da kyamara."
   }
 }

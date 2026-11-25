@@ -93,6 +93,7 @@ function exportChanges(req, res) {
   const jobs = db.prepare('SELECT * FROM job_orders WHERE store_id = ? AND COALESCE(updated_at, created_at) > ? ORDER BY created_at ASC').all(storeId, since)
     .map((j) => ({ ...j, items: parseJson(j.items, []), measurements: parseJson(j.measurements, {}), item_details: parseJson(j.item_details, {}) }));
   const jobNotes = db.prepare('SELECT n.* FROM job_notes n JOIN job_orders j ON j.id = n.job_id WHERE j.store_id = ? AND n.created_at > ?').all(storeId, since);
+  const productLooks = db.prepare('SELECT * FROM product_looks WHERE store_id = ? AND created_at > ? ORDER BY created_at ASC').all(storeId, since);
   const jobPayments = db.prepare('SELECT p.* FROM job_payments p JOIN job_orders j ON j.id = p.job_id WHERE j.store_id = ? AND p.created_at > ?').all(storeId, since);
   const jobMaterials = db.prepare('SELECT m.* FROM job_materials m JOIN job_orders j ON j.id = m.job_id WHERE j.store_id = ? AND m.created_at > ?').all(storeId, since);
 
@@ -102,7 +103,7 @@ function exportChanges(req, res) {
   res.json({
     serverTime: new Date().toISOString(),
     storeSettings,
-    handovers, handoverItems, securityReturns, recipes, recipeLines, productionRuns, productionRunLines, jobs, jobPayments, jobMaterials, jobNotes,
+    handovers, handoverItems, securityReturns, recipes, recipeLines, productionRuns, productionRunLines, jobs, jobPayments, jobMaterials, jobNotes, productLooks,
     users, products, arrivals, movements, audits,
     suppliers, purchaseOrders, purchaseOrderItems, batches, receipts, orders, orderItems, webhooks, cycleCounts,
     shifts, orderPayments, refunds, refundItems, customers, customerLedger, loyaltyPoints,
@@ -126,7 +127,7 @@ function importChanges(req, res) {
     shifts = [], orderPayments = [], refunds = [], refundItems = [],
     customers = [], customerLedger = [], loyaltyPoints = [],
     handovers = [], handoverItems = [], securityReturns = [], recipes = [], recipeLines = [],
-    productionRuns = [], productionRunLines = [], jobs = [], jobPayments = [], jobMaterials = [], jobNotes = [], storeSettings = null,
+    productionRuns = [], productionRunLines = [], jobs = [], jobPayments = [], jobMaterials = [], jobNotes = [], productLooks = [], storeSettings = null,
   } = req.body;
   const touched = new Set();
 
@@ -426,7 +427,7 @@ function importChanges(req, res) {
           .run(...cols.map((c) => (SETTINGS_BOOLS.includes(c) ? (storeSettings[c] ? 1 : 0) : storeSettings[c])), storeSettings.settings_updated_at, storeId);
       }
     }
-    importShopFloor({ storeId, resolveUser, handovers, handoverItems, securityReturns, recipes, recipeLines, productionRuns, productionRunLines, jobs, jobPayments, jobMaterials, jobNotes });
+    importShopFloor({ storeId, resolveUser, handovers, handoverItems, securityReturns, recipes, recipeLines, productionRuns, productionRunLines, jobs, jobPayments, jobMaterials, jobNotes, productLooks });
 
     for (const productId of touched) {
       if (db.prepare('SELECT id FROM products WHERE id = ?').get(productId)) {
@@ -561,6 +562,11 @@ function importShopFloor(x) {
     if (!has('job_orders', m.job_id) || !has('products', m.product_id)) continue;
     db.prepare('INSERT OR IGNORE INTO job_materials (id, job_id, product_id, quantity, recorded_by, created_at) VALUES (?,?,?,?,?,?)')
       .run(m.id, m.job_id, m.product_id, Number(m.quantity), resolveUser(m.recorded_by), m.created_at);
+  }
+  for (const l of x.productLooks || []) {
+    if (typeof l.sig !== 'string' || l.sig.length > 800 || !has('products', l.product_id)) continue;
+    db.prepare('INSERT OR IGNORE INTO product_looks (id, store_id, product_id, sig, created_by, created_at) VALUES (?,?,?,?,?,?)')
+      .run(l.id, x.storeId, l.product_id, l.sig, resolveUser(l.created_by), l.created_at);
   }
 }
 

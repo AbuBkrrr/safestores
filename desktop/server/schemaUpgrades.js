@@ -322,6 +322,17 @@ function applyShopFloorUpgrades(db) {
       WHEN NEW.updated_at IS OLD.updated_at
       BEGIN UPDATE ${t} SET updated_at = ${NOW} WHERE id = NEW.id; END`);
   }
+  // 068 — camera recognition: picture fingerprints per product.
+  db.exec(`CREATE TABLE IF NOT EXISTS product_looks (
+    id TEXT PRIMARY KEY,
+    store_id TEXT NOT NULL REFERENCES stores(id) ON DELETE CASCADE,
+    product_id TEXT NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    sig TEXT NOT NULL,
+    created_by TEXT,
+    created_at TEXT NOT NULL DEFAULT ${NOW}
+  )`);
+  db.exec('CREATE INDEX IF NOT EXISTS idx_product_looks_store ON product_looks(store_id, created_at)');
+  db.exec('CREATE INDEX IF NOT EXISTS idx_product_looks_product ON product_looks(product_id, created_at)');
 }
 
 module.exports = { applySchemaUpgrades, ensureColumn };
