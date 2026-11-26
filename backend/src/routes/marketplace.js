@@ -11,6 +11,14 @@ router.post('/orders/:token/verify', storePaymentsCtrl.verifyOrderPayment);
 // A shop can be addressed by its custom slug as well as its id.
 router.param('storeId', require('../utils/shopSlug').shopParam);
 
+// Public forms anyone can post to are limited per address, so robots can't
+// flood shops with fake messages, orders or accounts.
+const rateLimit = require('express-rate-limit');
+const limit = (max, msg) => rateLimit({ windowMs: 15 * 60 * 1000, max, standardHeaders: true, legacyHeaders: false, message: { error: msg } });
+const messageLimit = limit(15, 'Too many messages. Please wait a few minutes.');
+const orderLimit = limit(30, 'Too many orders from this connection. Please wait a few minutes.');
+const accountLimit = limit(20, 'Too many attempts. Please wait a few minutes and try again.');
+
 // Public — a shopper can browse without an account
 router.get('/stores', ctrl.listStores);
 router.get('/search-products', ctrl.searchProducts);
@@ -19,15 +27,15 @@ const shopper = require('../controllers/shopperController');
 router.get('/discover', shopper.discover);
 router.get('/compare', shopper.compare);
 router.get('/inquiries/:token', shopper.getInquiry);
-router.post('/inquiries/:token/reply', shopper.shopperReply);
-router.post('/:storeId/inquiries', shopper.createInquiry);
+router.post('/inquiries/:token/reply', messageLimit, shopper.shopperReply);
+router.post('/:storeId/inquiries', messageLimit, shopper.createInquiry);
 router.get('/:storeId/products', ctrl.browseProducts);
-router.post('/:storeId/signup', ctrl.customerSignup);
-router.post('/:storeId/login', ctrl.customerLogin);
+router.post('/:storeId/signup', accountLimit, ctrl.customerSignup);
+router.post('/:storeId/login', accountLimit, ctrl.customerLogin);
 
 // Guest-or-authenticated: an account is optional at checkout — see
 // placeOrder's guest-contact-details path.
-router.post('/:storeId/orders', optionalAuth, ctrl.placeOrder);
+router.post('/:storeId/orders', orderLimit, optionalAuth, ctrl.placeOrder);
 
 // Customer-authenticated only — order history needs an account to attach to.
 router.get('/:storeId/my-orders', requireAuth, requireRole('customer'), ctrl.listMyOrders);

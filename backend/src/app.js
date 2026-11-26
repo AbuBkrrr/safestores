@@ -48,7 +48,12 @@ function createApp() {
   // Trust the first hop proxy (Render/Railway/Fly/nginx/Netlify/etc.) so
   // req.ip and the rate limiter see the real client IP instead of the
   // proxy's IP.
-  app.set('trust proxy', 1);
+  // How many proxies stand between the visitor and this app. Behind Caddy
+  // (or the host's nginx) AND the frontend's nginx there are 2; the rate
+  // limits key on the visitor's real address only when this is right —
+  // too low and every visitor looks like the proxy (one shared limit);
+  // too high and a visitor could fake their address.
+  app.set('trust proxy', Number(process.env.TRUST_PROXY) || 1);
 
   app.use(helmet({
     // Uploaded receipt/camera images are served cross-origin to the frontend,

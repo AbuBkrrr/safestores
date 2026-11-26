@@ -72,3 +72,20 @@ describe('Marketing link address', () => {
     await request().put('/api/super/marketing/settings').set(sa).send({}); // back to defaults
   });
 });
+
+describe('Marketing: robots are not counted as shoppers', () => {
+  it('ignores link-preview robots and keeps server-like visits out of the numbers', async () => {
+    const sa = { Authorization: `Bearer ${superToken(await createSuperAdmin())}` };
+    const link = (await request().post('/api/super/marketing/links').set(sa).send({ label: 'Bot test' })).body;
+    const open = (ua, deviceId, tz) => request().post('/api/m/open').set('User-Agent', ua).set('Content-Type', 'text/plain')
+      .send(JSON.stringify({ ref: link.code, deviceId, tz }));
+    expect((await open('WhatsApp/2.23.20 A', 'bot00001-aaaa', null)).body.ignored).toBe(true);
+    expect((await open('Mozilla/5.0 (X11; Linux x86_64) HeadlessChrome/120', 'bot00002-aaaa', 'UTC')).body.ignored).toBe(true);
+    expect((await open('Mozilla/5.0 (X11; Linux x86_64) Chrome/120', 'bot00003-aaaa', 'Etc/UTC')).body.automated).toBe(true);
+    await open('Mozilla/5.0 (Linux; Android 14; Pixel 7) Chrome/120 Mobile Safari WhatsApp/2.24', 'human001-aaaa', 'Africa/Lagos');
+    const row = (await request().get('/api/super/marketing/links').set(sa)).body.find((l) => l.code === link.code);
+    expect(row).toMatchObject({ opens: 1, devices: 1 });
+    const bots = (await request().get('/api/super/marketing/opens').query({ bots: 1 }).set(sa)).body;
+    expect(bots.some((o) => o.link_code === link.code && o.is_bot)).toBe(true);
+  });
+});

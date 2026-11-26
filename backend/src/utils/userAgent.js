@@ -58,4 +58,22 @@ function countryOf(req, timezone) {
   return { country: null, countryCode: null };
 }
 
-module.exports = { parseUserAgent, countryOf };
+// Robots: link previews, search engines, uptime checkers, scanners, scripts and
+// headless browsers. They are not counted as shoppers.
+const BOT_UA = /bot\b|bot\/|crawl|spider|slurp|facebookexternalhit|facebot|TelegramBot|Twitterbot|LinkedInBot|Slackbot|Discordbot|Embedly|quora link|vkShare|SkypeUriPreview|Applebot|bingpreview|Google-InspectionTool|Lighthouse|PageSpeed|GTmetrix|Pingdom|UptimeRobot|StatusCake|HeadlessChrome|PhantomJS|Selenium|puppeteer|playwright|curl\/|wget\/|python-|python\/|aiohttp|httpx|axios\/|node-fetch|undici|Go-http-client|Java\/|okhttp|libwww|Scrapy|zgrab|masscan|nmap|nikto|sqlmap|censys|shodan|expanse|nuclei/i;
+// Apps' link-preview fetchers (no normal browser signature). Their in-app
+// browsers used by real shoppers say "Mozilla/…" and are kept.
+const PREVIEW_UA = /WhatsApp\/|Pinterest|preview|Instagram|FBAV/i;
+function isBot(ua = '') {
+  const s = String(ua);
+  return !s || BOT_UA.test(s) || (!/Mozilla\//.test(s) && PREVIEW_UA.test(s)) || !/Mozilla\//.test(s);
+}
+/** No hard robot signature, but the signs of a server rather than a person. */
+function looksAutomated({ ua = '', tz, webdriver }) {
+  if (webdriver) return true;
+  const linuxDesktop = /Linux/i.test(ua) && !/Android|CrOS/i.test(ua);
+  const serverClock = !tz || /^(UTC|GMT|Etc\/|Universal|Zulu)/i.test(tz);
+  return linuxDesktop && serverClock;
+}
+
+module.exports = { parseUserAgent, countryOf, isBot, looksAutomated };

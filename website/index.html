@@ -499,7 +499,7 @@
       try { sessionStorage.setItem('ss_seen', '1'); } catch (e) {}
       send('/api/m/open', {
         ref: params.get('ref') || null, deviceId: deviceId, signature: signature, tz: tz, lang: navigator.language,
-        screen: screen.width + 'x' + screen.height, referrer: document.referrer, page: 'landing',
+        screen: screen.width + 'x' + screen.height, referrer: document.referrer, page: 'landing', webdriver: navigator.webdriver === true,
         utm: { source: params.get('utm_source'), medium: params.get('utm_medium'), campaign: params.get('utm_campaign') },
       }).catch(function () {});
     }

@@ -86,7 +86,7 @@ export default function Marketing() {
     api.get('/super/marketing/links').then((r) => setLinks(r.data)).catch(() => {});
     api.get('/super/marketing/leads').then((r) => setLeads(r.data)).catch(() => {});
   };
-  const loadOpens = () => api.get('/super/marketing/opens', { params: { link: openFilter || undefined, limit: 200 } }).then((r) => setOpens(r.data)).catch(() => {});
+  const loadOpens = () => api.get('/super/marketing/opens', { params: openFilter === 'bots' ? { bots: 1, limit: 200 } : { link: openFilter || undefined, limit: 200 } }).then((r) => setOpens(r.data)).catch(() => {});
   useEffect(() => { loadAll(); const i = setInterval(loadAll, 30000); return () => clearInterval(i); }, [days]); // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { loadOpens(); const i = setInterval(loadOpens, 15000); return () => clearInterval(i); }, [openFilter]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -149,6 +149,7 @@ export default function Marketing() {
             <Metric value={T.signups ?? '—'} label={`Store sign-ups (${T.tracked_signups ?? 0} from links)`} />
             <Metric value={T.activated ?? '—'} label="Activated stores" />
             <Metric value={pct(T.signups || 0, T.devices || 0)} label="Devices → sign-up" />
+            <Metric value={T.bots ?? '—'} label="🤖 Robots filtered out (previews, scanners)" />
           </div>
           <div className="card mt-1">
             <h3>Same device or shared?</h3>
@@ -254,6 +255,7 @@ export default function Marketing() {
               <option value="">All links</option>
               {tracked.map((l) => <option key={l.code} value={l.code}>{l.label}</option>)}
               <option value="none">(no label)</option>
+              <option value="bots">🤖 Robots (not counted)</option>
             </select>
           </div>
           <table className="table">
