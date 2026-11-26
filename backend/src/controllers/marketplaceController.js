@@ -21,7 +21,8 @@ async function browseProducts(req, res) {
 
   const { rows } = await db.query(
     `SELECT id, name, brand, category, unit, location, image_url,
-            ROUND(cost_price * price_multiplier, 2) AS price,
+            ${require('../utils/price').priceSql('products')} AS price, ${require('../utils/price').regularSql('products')} AS regular_price,
+            ${require('../utils/price').onSaleSql('products')} AS on_sale, promo_label, promo_ends_at,
             (shelf_qty + backroom_qty) > 0 AS in_stock
      FROM products WHERE ${conditions.join(' AND ')} ORDER BY name ASC`,
     params
@@ -64,7 +65,8 @@ async function searchProducts(req, res) {
 
   const { rows } = await db.query(
     `SELECT p.id, p.name, p.brand, p.category, p.unit, p.sold_by, p.location, p.image_url,
-            ROUND(p.cost_price * p.price_multiplier, 2) AS price,
+            ${require('../utils/price').priceSql('p')} AS price, ${require('../utils/price').regularSql('p')} AS regular_price,
+            ${require('../utils/price').onSaleSql('p')} AS on_sale, p.promo_label, p.promo_ends_at,
             (p.shelf_qty + p.backroom_qty) > 0 AS in_stock,
             s.id AS store_id, s.name AS store_name, s.city AS store_city
      FROM products p JOIN stores s ON s.id = p.store_id
@@ -162,7 +164,7 @@ async function placeOrder(req, res) {
       if (!prod) { await client.query('ROLLBACK'); return res.status(404).json({ error: `Product ${productId} not found` }); }
       const pq = require('../utils/qty').parseQty(quantity, prod);
       if (pq.error) { await client.query('ROLLBACK'); return res.status(400).json({ error: pq.error }); }
-      const unitPrice = Number(prod.cost_price) * Number(prod.price_multiplier);
+      const unitPrice = require('../utils/price').effectivePrice(prod);
       const lineTotal = Math.round(unitPrice * quantity * 100) / 100;
       subtotal += lineTotal;
       await client.query(

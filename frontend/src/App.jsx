@@ -70,6 +70,7 @@ const PartnerLogin = lazy(() => import('./pages/PartnerLogin.jsx'));
 const PartnerPortal = lazy(() => import('./pages/PartnerPortal.jsx'));
 const Storefront = lazy(() => import('./pages/Storefront.jsx'));
 const MarketplaceHome = lazy(() => import('./pages/MarketplaceHome.jsx'));
+const ShopperApp = lazy(() => import('./pages/ShopperApp.jsx'));
 
 const SuperDashboard = lazy(() => import('./pages/super/SuperDashboard.jsx'));
 const ConnectStore = lazy(() => import('./pages/ConnectStore.jsx'));
@@ -188,6 +189,7 @@ export default function App() {
           marketplace below: this cloud service has no presence on the
           desktop edition at all. */}
       {EDITION !== 'desktop' && <Route path="/marketplace-home" element={<MarketplaceHome />} />}
+      {EDITION !== 'desktop' && <Route path="/market" element={<ShopperApp />} />}
 
       <Route
         element={

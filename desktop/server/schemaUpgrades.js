@@ -322,6 +322,11 @@ function applyShopFloorUpgrades(db) {
       WHEN NEW.updated_at IS OLD.updated_at
       BEGIN UPDATE ${t} SET updated_at = ${NOW} WHERE id = NEW.id; END`);
   }
+  // 073 — items on sale (promotion price until a date).
+  ensureColumn(db, 'products', 'promo_price', 'REAL');
+  ensureColumn(db, 'products', 'promo_ends_at', 'TEXT');
+  ensureColumn(db, 'products', 'promo_label', 'TEXT');
+
   // 072 — Mini stores: up to 5 people; received stock straight to the shelf (NULL = by store size).
   ensureColumn(db, 'stores', 'auto_shelf', 'INTEGER');
   db.exec("UPDATE store_tiers SET max_users = 5 WHERE tier = 'mini' AND (max_users IS NULL OR max_users < 5)");

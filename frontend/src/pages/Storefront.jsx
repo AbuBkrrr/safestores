@@ -1,4 +1,6 @@
 import TransferDetails from '../components/TransferDetails.jsx';
+import AskShopDialog from '../components/AskShopDialog.jsx';
+import { shopper } from '../utils/shopperLocal.js';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -38,6 +40,8 @@ export default function Storefront() {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [placed, setPlaced] = useState(null);
+  const [ask, setAsk] = useState(null); // { kind, product }
+  const [, setFavTick] = useState(0);
   const [myOrders, setMyOrders] = useState([]);
   const [guestName, setGuestName] = useState('');
   const [guestEmail, setGuestEmail] = useState('');
@@ -64,8 +68,16 @@ export default function Storefront() {
   const formatCurrency = (n) => format(n, currency);
 
   useEffect(() => {
-    client.get(`/public/stores/${storeId}`).then((r) => setStore(r.data)).catch(() => setStore(null));
-    client.get(`/marketplace/${storeId}/products`).then((r) => setProducts(r.data)).catch(() => setError(t('storefrontPage.orderFailed')));
+    client.get(`/public/stores/${storeId}`).then((r) => {
+      setStore(r.data);
+      shopper.visitStore({ id: r.data.id, name: r.data.name, city: r.data.city, slug: r.data.shop_slug, logo: r.data.shop_logo_url });
+    }).catch(() => setStore(null));
+    client.get(`/marketplace/${storeId}/products`).then((r) => {
+      setProducts(r.data);
+      // Opened from the shopper app with "add this item": it is in the cart already.
+      const add = new URLSearchParams(window.location.search).get('add');
+      if (add && r.data.some((p) => p.id === add && p.in_stock)) setCart((c) => ({ ...c, [add]: c[add] || 1 }));
+    }).catch(() => setError(t('storefrontPage.orderFailed')));
   }, [storeId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -171,6 +183,8 @@ export default function Storefront() {
       const { data } = await client.post(`/marketplace/${storeId}/orders`, body, config);
       setCart({});
       setPlaced(data); // tracking link stays available even if starting payment fails
+      shopper.addOrder({ token: data.tracking_token, storeId: store.id, storeName: store.name, total: data.total, at: Date.now(),
+        items: cartItems.map((i) => ({ id: i.id, name: i.name, price: i.price, image_url: i.image_url, storeId: store.id, storeName: store.name })) });
       if (method === 'credit') loadCredit();
       if (method === 'online') {
         // Paystack checkout: the money goes straight to this store's bank.
@@ -258,6 +272,8 @@ export default function Storefront() {
             </div>
           )}
           {products.length > 0 && visible.length === 0 && <p className="muted sf-empty">{t('storefrontPage.noMatches')}</p>}
+          {store && <p className="small"><button type="button" className="link-btn" onClick={() => setAsk({ kind: 'request' })}>🙋 {t('shopper.cantFind')}</button></p>}
+          {ask && store && <AskShopDialog store={store} product={ask.product} kind={ask.kind} onClose={() => setAsk(null)} />}
           <div className="product-grid">
             {visible.map((p) => (
               <div key={p.id} className={`product-tile${p.in_stock ? '' : ' out'}`}>
@@ -266,8 +282,16 @@ export default function Storefront() {
                   : <div className="pt-ph" aria-hidden="true">{p.name.trim().charAt(0).toUpperCase()}</div>}
                 <div className="pt-name">{p.name}</div>
                 {p.category && <div className="muted pt-cat">{p.category}</div>}
+                <div className="flex" style={{ gap: 6 }}>
+                  <button type="button" className="link-btn small" onClick={() => setAsk({ kind: 'question', product: p })}>💬 {t('shopper.ask')}</button>
+                  <button type="button" className="link-btn small" aria-label={t('shopper.save')} onClick={() => { shopper.toggleFav('items', { id: p.id, name: p.name, price: p.price, image_url: p.image_url, storeId: store.id, storeName: store.name }); setFavTick((n) => n + 1); }}>{shopper.isFav('items', p.id) ? '❤️' : '🤍'}</button>
+                </div>
                 <div className="pt-foot">
-                  <strong>{formatCurrency(p.price)}{p.sold_by && p.sold_by !== 'unit' ? <span className="muted" style={{ fontWeight: 400 }}>/{p.unit}</span> : null}</strong>
+                  <strong>
+                    {p.on_sale && <span className="badge active" style={{ marginRight: 4 }}>{p.promo_label || t('shopper.sale')}</span>}
+                    {formatCurrency(p.price)}{p.sold_by && p.sold_by !== 'unit' ? <span className="muted" style={{ fontWeight: 400 }}>/{p.unit}</span> : null}
+                    {p.on_sale && <s className="muted" style={{ fontWeight: 400, marginLeft: 4, fontSize: 12 }}>{formatCurrency(p.regular_price)}</s>}
+                  </strong>
                   {!p.in_stock
                     ? <span className="muted">{t('storefrontPage.outOfStockTag')}</span>
                     : cart[p.id]
