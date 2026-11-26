@@ -481,8 +481,10 @@
     // apart from "the link was passed on to someone else". No personal data.
     // The app server for whichever address this page was opened on (old or new).
     var host = location.hostname.replace(/^www\./, '');
-    var API = /\./.test(host) && !/^(localhost|[\d.]+)$/.test(host) ? 'https://app.' + host
-      : ((document.querySelector('meta[name="ss-api"]') || {}).content || '');
+    var META_API = (document.querySelector('meta[name="ss-api"]') || {}).content || '';
+    var APIS = (/\./.test(host) && !/^(localhost|[\d.]+)$/.test(host) ? ['https://app.' + host] : []);
+    if (META_API && APIS.indexOf(META_API) < 0) APIS.push(META_API);
+    var API = APIS[0] || '';
     var params = new URLSearchParams(location.search);
     function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } return v; }
     var deviceId = store('ss_device');
@@ -494,10 +496,17 @@
     if (params.get('ref')) store('ss_ref', params.get('ref'));
     var tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
     var signature = [navigator.userAgent, screen.width + 'x' + screen.height, window.devicePixelRatio, tz, navigator.language, navigator.hardwareConcurrency || ''].join('|');
-    function send(path, data) {
-      if (!API) return Promise.resolve(null);
-      return fetch(API + path, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(data), keepalive: true })
-        .then(function (r) { return r.ok ? r.json() : r.json().then(function (j) { throw new Error(j.error || 'Failed'); }); });
+    // Tries each app server address in turn (this site's own first).
+    function send(path, data, i) {
+      i = i || 0;
+      if (!APIS[i]) return Promise.reject(new Error('offline'));
+      return fetch(APIS[i] + path, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(data), keepalive: true })
+        .then(function (r) {
+          if (r.ok) return r.json();
+          if (r.status >= 400 && r.status < 500) return r.json().then(function (j) { var e = new Error(j.error || 'Failed'); e.final = true; throw e; });
+          throw new Error('server');
+        })
+        .catch(function (e) { if (e.final) throw e; return send(path, data, i + 1); });
     }
     if (params.get('ref') || !sessionStorage.getItem('ss_seen')) {
       try { sessionStorage.setItem('ss_seen', '1'); } catch (e) {}
@@ -537,20 +546,11 @@
         msg.style.color = '';
         msg.textContent = 'Thank you! We have your message and will contact you soon.';
         form.reset();
-      }).catch(function () { openMail(); }).then(function () { submitBtn.disabled = false; });
-      return;
-      function openMail() {
-      var body = [
-        'Name: ' + f.name.value.trim(),
-        'Phone/WhatsApp: ' + f.phone.value.trim(),
-        'Shop: ' + (f.shop.value.trim() || '-'),
-        'Topic: ' + TOPICS[f.topic.value],
-        '', f.message.value.trim(),
-      ].join('\n');
-      window.location.href = 'mailto:' + EMAIL + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-      msg.style.color = '';
-      msg.textContent = 'Your email app should open with the message ready. If it does not, email ' + EMAIL + '.';
-      }
+      }).catch(function (e) {
+        // Never lose the message silently: say so and offer WhatsApp/phone.
+        msg.style.color = '#b3261e';
+        msg.textContent = e.final ? e.message : 'Could not send right now — check your internet and tap Send again, or WhatsApp us using the number on this page.';
+      }).then(function () { submitBtn.disabled = false; });
     });
 
     document.getElementById('year').textContent = new Date().getFullYear();
