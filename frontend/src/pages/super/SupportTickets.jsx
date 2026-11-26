@@ -56,7 +56,7 @@ export default function SupportTickets() {
             <tbody>
               {tickets.map((t) => (
                 <tr key={t.id}>
-                  <td>{t.store_name}</td>
+                  <td>{t.store_id ? t.store_name : <>🌐 {t.contact_name || 'Website visitor'}</>}</td>
                   <td>{t.subject}</td>
                   <td>{t.priority}</td>
                   <td><Badge status={t.status} /></td>
@@ -78,6 +78,15 @@ export default function SupportTickets() {
             </div>
             <Badge status={selected.status} />
           </div>
+          {!selected.store_id && (
+            <div className="card mt-1" style={{ background: 'var(--bg-soft, #f6f7f9)' }}>
+              <strong>🌐 From the website:</strong> {selected.contact_name}
+              {selected.contact_phone && <> · <a href={`tel:${selected.contact_phone}`}>{selected.contact_phone}</a>
+                {' '}· <a href={`https://wa.me/${selected.contact_phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer">WhatsApp</a></>}
+              {selected.contact_email && <> · <a href={`mailto:${selected.contact_email}`}>{selected.contact_email}</a></>}
+              <div className="muted">{selected.contact_email ? 'Your reply below is emailed to them.' : 'No email given — reply by phone or WhatsApp.'}</div>
+            </div>
+          )}
           <p className="mt-1">{selected.message}</p>
 
           <div className="mt-1" style={{ borderTop: '1px solid var(--line)', paddingTop: 10 }}>
@@ -91,7 +100,7 @@ export default function SupportTickets() {
           </div>
 
           <div className="mt-1">
-            <textarea rows={3} placeholder="Reply to the store..." value={replyText} onChange={(e) => setReplyText(e.target.value)} />
+            <textarea rows={3} placeholder={selected.store_id ? "Reply to the store..." : "Reply (emailed to them)..."} value={replyText} onChange={(e) => setReplyText(e.target.value)} />
             <div className="flex mt-1">
               <button className="btn" onClick={sendReply}>Send Reply</button>
               <button className="btn small secondary" onClick={() => setStatus(selected.id, 'resolved')}>Mark Resolved</button>

@@ -96,6 +96,15 @@ async function recordLead(req, res) {
      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id`,
     [codeOk(b.ref) ? b.ref : null, deviceKey, name.slice(0, 120), phone, email, clip(b.shop, 160), clip(b.topic, 30), clip(b.message, 2000),
       countryOf(req, tz).country, clip(b.lang, 20), b.consent === true]);
+  // Also into Super Admin → Support Tickets, so the team sees and answers it there.
+  const TOPICS = { demo: 'Demo request', setup: 'Free setup visit', pricing: 'Pricing question', install: 'Help installing the app', other: 'Question' };
+  const shop = clip(b.shop, 160);
+  await db.query(
+    `INSERT INTO support_tickets (store_id, source, subject, message, priority, contact_name, contact_phone, contact_email, created_by_name, lead_id)
+     VALUES (NULL, 'website', $1, $2, $3, $4, $5, $6, $4, $7)`,
+    [`Website: ${TOPICS[b.topic] || 'Message'}${shop ? ` — ${shop}` : ''}`.slice(0, 200),
+      clip(b.message, 2000) || '(no message)', b.topic === 'setup' || b.topic === 'demo' ? 'high' : 'normal',
+      name.slice(0, 120), phone, email, rows[0].id]);
   if (process.env.SUPPORT_INBOX_EMAIL) {
     sendMail({ to: process.env.SUPPORT_INBOX_EMAIL, subject: `[SAFE Stores] New lead: ${name}${b.shop ? ` (${b.shop})` : ''}`,
       text: `Name: ${name}\nPhone: ${phone || '-'}\nEmail: ${email || '-'}\nShop: ${b.shop || '-'}\nWants: ${b.topic || '-'}\n\n${b.message || ''}\n\nSee Super Admin → Marketing → Leads.` });

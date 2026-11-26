@@ -121,13 +121,13 @@ async function listAllTicketsSuper(req, res) {
   const { status } = req.query;
   const { rows } = status
     ? await db.query(
-        `SELECT t.*, s.name AS store_name FROM support_tickets t
-         JOIN stores s ON s.id = t.store_id WHERE t.status = $1 ORDER BY t.updated_at DESC`,
+        `SELECT t.*, COALESCE(s.name, 'Website visitor') AS store_name FROM support_tickets t
+         LEFT JOIN stores s ON s.id = t.store_id WHERE t.status = $1 ORDER BY t.updated_at DESC`,
         [status]
       )
     : await db.query(
-        `SELECT t.*, s.name AS store_name FROM support_tickets t
-         JOIN stores s ON s.id = t.store_id ORDER BY t.updated_at DESC`
+        `SELECT t.*, COALESCE(s.name, 'Website visitor') AS store_name FROM support_tickets t
+         LEFT JOIN stores s ON s.id = t.store_id ORDER BY t.updated_at DESC`
       );
   res.json(rows);
 }
@@ -136,8 +136,8 @@ async function listAllTicketsSuper(req, res) {
 async function getTicketSuper(req, res) {
   const { id } = req.params;
   const { rows } = await db.query(
-    `SELECT t.*, s.name AS store_name FROM support_tickets t
-     JOIN stores s ON s.id = t.store_id WHERE t.id = $1`, [id]
+    `SELECT t.*, COALESCE(s.name, 'Website visitor') AS store_name FROM support_tickets t
+     LEFT JOIN stores s ON s.id = t.store_id WHERE t.id = $1`, [id]
   );
   if (!rows[0]) return res.status(404).json({ error: 'Ticket not found' });
   const { rows: replies } = await db.query(
@@ -157,7 +157,7 @@ async function updateTicketStatusSuper(req, res) {
     `UPDATE support_tickets SET status = $1, updated_at = now() WHERE id = $2 RETURNING *`, [status, id]
   );
   if (!rows[0]) return res.status(404).json({ error: 'Ticket not found' });
-  emitToStore(rows[0].store_id, 'support_ticket:updated', rows[0]);
+  if (rows[0].store_id) emitToStore(rows[0].store_id, 'support_ticket:updated', rows[0]);
   res.json(rows[0]);
 }
 
@@ -178,6 +178,12 @@ async function addReplySuper(req, res) {
   );
   await db.query(`UPDATE support_tickets SET status = 'in_progress', updated_at = now() WHERE id = $1`, [id]);
 
+  const t = ticketRows[0];
+  if (!t.store_id) {
+    // A website visitor: no store app to notify, so the reply goes by email.
+    if (t.contact_email) sendMail({ to: t.contact_email, subject: `Re: ${t.subject.replace(/^Website: /, '')}`, text: `${message}\n\n— SAFE Stores support` });
+    return res.status(201).json(rows[0]);
+  }
   emitToStore(ticketRows[0].store_id, 'support_ticket:replied', { ticketId: id, reply: rows[0] });
   sendPushToStore(ticketRows[0].store_id, {
     title: 'Support replied to your ticket',
