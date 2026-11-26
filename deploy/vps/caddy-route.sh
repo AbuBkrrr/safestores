@@ -19,10 +19,10 @@ cp "$FILE" "$BACKUP"
 # address already points at this same server, so nobody is sent to a dead site.
 REDIRECT=${REDIRECT_OLD:-auto}
 if [ "$REDIRECT" = auto ]; then
-  NEW_IP=$(getent hosts "app.$DOMAIN" | awk '{print $1; exit}')
+  NEW_IP=$( (getent hosts "app.$DOMAIN" || true) | awk '{print $1; exit}')
   REDIRECT=0
   for D in $EXTRA_DOMAINS; do
-    OLD_IP=$(getent hosts "app.$D" | awk '{print $1; exit}')
+    OLD_IP=$( (getent hosts "app.$D" || true) | awk '{print $1; exit}')
     [ -n "$NEW_IP" ] && [ "$NEW_IP" = "$OLD_IP" ] && REDIRECT=1
   done
   [ "$REDIRECT" = 1 ] && echo "   app.$DOMAIN points here: old addresses will forward to it" \
