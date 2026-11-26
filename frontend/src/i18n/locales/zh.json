@@ -1137,7 +1137,10 @@
     "cashCollected": "已收款",
     "paidByGuarantor": "担保方已付款",
     "paidByTransfer": "已通过银行转账支付",
-    "checkTransfer": "银行转账 — 请查看你的账户"
+    "checkTransfer": "银行转账 — 请查看你的账户",
+    "customerSaysPaid": "客户表示已付款——请查看银行账户",
+    "moneyReceived": "已收到款项",
+    "confirmTransferReceived": "{{total}} 已到账了吗？这会将订单标记为已付款。"
   },
   "storefrontPage": {
     "title": "🛍️ 商店",
@@ -1712,7 +1715,9 @@
     "emailPrompt": "用于接收付款收据的邮箱：",
     "refundPending": "您已在线付款，门店将为您退款。如几天内仍未收到，请联系门店。",
     "refundDone": "门店已标记您的退款已发出。",
-    "storeNote": "商家留言"
+    "storeNote": "商家留言",
+    "paymentSentButton": "我已转账",
+    "paymentSentDone": "谢谢！我们已通知商店，款项到账后他们会确认。"
   },
   "onboarding": {
     "title": "准备好您的门店",
@@ -2836,6 +2841,8 @@
   "orderAlert": {
     "title": "新的线上订单！",
     "body": "刚收到一笔 {{total}} 的订单。",
-    "view": "查看订单"
+    "view": "查看订单",
+    "paidTitle": "客户表示已付款",
+    "paidBody": "订单 {{ref}} 的转账 {{total}}。请查看银行账户，然后点“已收到款项”。"
   }
 }

@@ -28,6 +28,26 @@ describe('Bank transfer on the storefront', () => {
     expect(order.body.transfer.accountName).toBe('I&I General Ent');
     const track = await request().get(`/api/public/marketplace-orders/${order.body.tracking_token}`);
     expect(track.body.transfer.accountNumber).toBe('8012345678');
+
+    // Shopper taps "I've sent the payment": the shop is told (socket + push).
+    const realtime = require('../src/realtime');
+    const emit = jest.spyOn(realtime, 'emitToStore');
+    const sent = await request().post(`/api/public/marketplace-orders/${order.body.tracking_token}/payment-sent`);
+    expect(sent.status).toBe(200);
+    expect(sent.body.transfer_sent_at).toBeTruthy();
+    expect(emit).toHaveBeenCalledWith(store.id, 'marketplace:payment_sent', expect.objectContaining({ id: order.body.id }));
+    emit.mockRestore();
+    expect((await request().get(`/api/public/marketplace-orders/${order.body.tracking_token}`)).body.transfer_sent_at).toBeTruthy();
+    expect((await request().post('/api/public/marketplace-orders/not-a-real-token/payment-sent')).status).toBe(404);
+
+    // The shop sees the money in its bank and confirms.
+    const got = await request().patch(`/api/stores/${store.id}/marketplace/orders/${order.body.id}/transfer-received`).set(auth);
+    expect(got.status).toBe(200);
+    expect(got.body.payment_status).toBe('paid');
+    expect((await request().get(`/api/public/marketplace-orders/${order.body.tracking_token}`)).body.payment_status).toBe('paid');
+    // A cashier can't mark money received.
+    const cashier = await createUser(store.id, { role: 'cashier' });
+    expect((await request().patch(`/api/stores/${store.id}/marketplace/orders/${order.body.id}/transfer-received`).set('Authorization', `Bearer ${tokenFor(cashier)}`)).status).toBe(403);
   });
 
   it('a store manager can add products', async () => {

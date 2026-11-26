@@ -94,6 +94,7 @@ router.patch('/marketplace/orders/:orderId/confirm', requireAuthOrStoreSyncKey('
 router.patch('/marketplace/orders/:orderId/dispatch', requireAuthOrStoreSyncKey('admin', 'manager', 'marketplace_manager'), marketplaceCtrl.dispatchOrder);
 router.patch('/marketplace/orders/:orderId/fulfill', requireAuthOrStoreSyncKey('admin', 'manager', 'marketplace_manager'), marketplaceCtrl.fulfillOrder);
 router.patch('/marketplace/orders/:orderId/cancel', requireAuthOrStoreSyncKey('admin', 'manager', 'marketplace_manager'), marketplaceCtrl.cancelOrder);
+router.patch('/marketplace/orders/:orderId/transfer-received', requireAuthOrStoreSyncKey('admin', 'manager', 'marketplace_manager'), marketplaceCtrl.transferReceived);
 router.patch('/marketplace/orders/:orderId/refunded', requireAuthOrStoreSyncKey('admin', 'manager', 'marketplace_manager'), marketplaceCtrl.markRefunded);
 
 // Everything else on this router is a specific staff member's action

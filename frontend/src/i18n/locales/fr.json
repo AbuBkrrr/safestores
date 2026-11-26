@@ -1137,7 +1137,10 @@
     "cashCollected": "Espèces encaissées",
     "paidByGuarantor": "Réglé par le garant",
     "paidByTransfer": "Payé par virement",
-    "checkTransfer": "Virement — vérifiez votre compte"
+    "checkTransfer": "Virement — vérifiez votre compte",
+    "customerSaysPaid": "Le client dit avoir payé — vérifiez votre banque",
+    "moneyReceived": "Argent reçu",
+    "confirmTransferReceived": "Les {{total}} sont-ils arrivés sur votre compte ? La commande sera marquée payée."
   },
   "storefrontPage": {
     "title": "🛍️ Boutique",
@@ -1712,7 +1715,9 @@
     "emailPrompt": "Votre adresse e-mail pour le reçu de paiement :",
     "refundPending": "Vous avez payé en ligne, le magasin va donc vous rembourser. Contactez le magasin si vous n'avez rien reçu d'ici quelques jours.",
     "refundDone": "Le magasin a indiqué que votre remboursement a été envoyé.",
-    "storeNote": "Message de la boutique"
+    "storeNote": "Message de la boutique",
+    "paymentSentButton": "J'ai envoyé le paiement",
+    "paymentSentDone": "Merci ! Nous avons prévenu la boutique. Elle confirmera dès réception de l'argent."
   },
   "onboarding": {
     "title": "Préparez votre magasin",
@@ -2836,6 +2841,8 @@
   "orderAlert": {
     "title": "Nouvelle commande en ligne !",
     "body": "Une commande de {{total}} vient d'arriver.",
-    "view": "Voir la commande"
+    "view": "Voir la commande",
+    "paidTitle": "Le client dit avoir payé",
+    "paidBody": "Virement de {{total}} pour la commande {{ref}}. Vérifiez votre banque, puis touchez Argent reçu."
   }
 }

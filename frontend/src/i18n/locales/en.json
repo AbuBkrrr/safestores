@@ -1137,7 +1137,10 @@
     "cashCollected": "Cash collected",
     "paidByGuarantor": "Settled by guarantor",
     "paidByTransfer": "Paid by bank transfer",
-    "checkTransfer": "Bank transfer — check your account"
+    "checkTransfer": "Bank transfer — check your account",
+    "customerSaysPaid": "Customer says paid — check your bank",
+    "moneyReceived": "Money received",
+    "confirmTransferReceived": "Has {{total}} arrived in your bank account? This marks the order as paid."
   },
   "storefrontPage": {
     "title": "🛍️ Shop",
@@ -1712,7 +1715,9 @@
     "emailPrompt": "Your email address for the payment receipt:",
     "refundPending": "You paid online, so the store will refund you. Contact the store if you have not received it within a few days.",
     "refundDone": "The store has marked your refund as sent.",
-    "storeNote": "Message from the store"
+    "storeNote": "Message from the store",
+    "paymentSentButton": "I've sent the payment",
+    "paymentSentDone": "Thank you! We told the shop. They will confirm as soon as the money arrives."
   },
   "onboarding": {
     "title": "Get your store ready",
@@ -2836,6 +2841,8 @@
   "orderAlert": {
     "title": "New online order!",
     "body": "An order for {{total}} just came in.",
-    "view": "View order"
+    "view": "View order",
+    "paidTitle": "Customer says they have paid",
+    "paidBody": "Transfer of {{total}} for order {{ref}}. Check your bank, then tap Money received."
   }
 }

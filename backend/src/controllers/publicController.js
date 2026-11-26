@@ -16,7 +16,7 @@ const UUID = /^[0-9a-f-]{36}$/i;
 async function trackOrder(req, res) {
   const { rows } = await db.query(
     `SELECT mo.id, mo.status, mo.subtotal, mo.total, mo.created_at, mo.fulfilled_at, mo.loyalty_discount_pct,
-            mo.payment_method, mo.payment_status, mo.paid_at, mo.cancel_reason, mo.fulfilment_method, mo.status_note, mo.confirmed_at, mo.dispatched_at, s.online_payments_enabled AND s.payout_subaccount_code IS NOT NULL AS can_pay_online,
+            mo.payment_method, mo.payment_status, mo.paid_at, mo.transfer_sent_at, mo.cancel_reason, mo.fulfilment_method, mo.status_note, mo.confirmed_at, mo.dispatched_at, s.online_payments_enabled AND s.payout_subaccount_code IS NOT NULL AS can_pay_online,
             CASE WHEN mo.payment_method = 'transfer' THEN json_build_object('bankName', s.transfer_bank_name, 'accountNumber', s.transfer_account_number,
               'accountName', s.transfer_account_name, 'note', s.transfer_note) END AS transfer,
             s.name AS store_name, s.phone AS store_phone, s.address AS store_address, s.city AS store_city,
@@ -32,6 +32,33 @@ async function trackOrder(req, res) {
   ).catch(() => ({ rows: [] }));
   const { id, ...order } = rows[0];
   res.json({ ...order, reference: id.slice(0, 8).toUpperCase(), items });
+}
+
+// POST /api/public/marketplace-orders/:token/payment-sent
+// The shopper says they have made the bank transfer: tell the shop (chime
+// on their screens + phone push) so they can check their bank and confirm.
+async function paymentSent(req, res) {
+  const { rows } = await db.query(
+    `UPDATE marketplace_orders SET transfer_sent_at = now()
+      WHERE tracking_token = $1 AND payment_method = 'transfer' AND payment_status <> 'paid' AND status <> 'cancelled'
+        AND (transfer_sent_at IS NULL OR transfer_sent_at < now() - interval '10 minutes')
+      RETURNING id, store_id, total, transfer_sent_at`,
+    [req.params.token]
+  );
+  if (!rows[0]) {
+    const { rows: o } = await db.query('SELECT transfer_sent_at FROM marketplace_orders WHERE tracking_token = $1', [req.params.token]);
+    if (!o[0]) return res.status(404).json({ error: 'Order not found' });
+    return res.json({ transfer_sent_at: o[0].transfer_sent_at }); // already told the shop just now, or not a transfer order
+  }
+  const o = rows[0];
+  const reference = o.id.slice(0, 8).toUpperCase();
+  try { require('../realtime').emitToStore(o.store_id, 'marketplace:payment_sent', { id: o.id, total: o.total, reference }); } catch { /* best-effort */ }
+  require('../utils/push').sendPushToStore(o.store_id, {
+    title: 'Customer says they have paid',
+    body: `Transfer of ${Number(o.total).toFixed(2)} for order ${reference} — check your bank, then tap Money received.`,
+    data: { type: 'marketplace.payment_sent', orderId: o.id },
+  }).catch(() => {});
+  res.json({ transfer_sent_at: o.transfer_sent_at });
 }
 
 async function shareShop(req, res) {
@@ -87,4 +114,4 @@ async function storeInfo(req, res) {
   res.json({ ...rows[0], payments });
 }
 
-module.exports = { trackOrder, shareShop, sitemap, robots, storeInfo };
+module.exports = { paymentSent, trackOrder, shareShop, sitemap, robots, storeInfo };
