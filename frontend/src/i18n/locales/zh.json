@@ -2747,7 +2747,8 @@
     "you": "你",
     "replyPh": "回复顾客",
     "send": "回复",
-    "close": "完成"
+    "close": "完成",
+    "aboutOrder": "订单 {{ref}}"
   },
   "installMarket": {
     "title": "把 SAFE Stores 商城装到手机上",
@@ -2843,6 +2844,16 @@
     "body": "刚收到一笔 {{total}} 的订单。",
     "view": "查看订单",
     "paidTitle": "客户表示已付款",
-    "paidBody": "订单 {{ref}} 的转账 {{total}}。请查看银行账户，然后点“已收到款项”。"
+    "paidBody": "订单 {{ref}} 的转账 {{total}}。请查看银行账户，然后点“已收到款项”。",
+    "msgTitle": "关于订单 {{ref}} 的消息"
+  },
+  "orderChat": {
+    "title": "就此订单与 {{store}} 聊天",
+    "empty": "发送消息或照片（例如转账凭证）。商店会在这里回复。",
+    "photo": "照片",
+    "attach": "附加照片",
+    "placeholder": "输入消息…",
+    "send": "发送",
+    "failed": "发送失败。请检查网络后重试。"
   }
 }

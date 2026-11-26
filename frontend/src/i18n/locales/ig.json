@@ -2747,7 +2747,8 @@
     "you": "Gị",
     "replyPh": "Zaa onye ahịa",
     "send": "Zaa",
-    "close": "Emechaala"
+    "close": "Emechaala",
+    "aboutOrder": "Gbasara ọda {{ref}}"
   },
   "installMarket": {
     "title": "Nweta Ahịa SAFE Stores na ekwentị gị",
@@ -2843,6 +2844,16 @@
     "body": "Ọda {{total}} batara ugbu a.",
     "view": "Lee ọda",
     "paidTitle": "Onye ahịa kwuru na ọ kwụrụla ụgwọ",
-    "paidBody": "E zigara {{total}} maka ọda {{ref}}. Lelee ụlọ akụ gị, wee pịa Ego abatala."
+    "paidBody": "E zigara {{total}} maka ọda {{ref}}. Lelee ụlọ akụ gị, wee pịa Ego abatala.",
+    "msgTitle": "Ozi gbasara ọda {{ref}}"
+  },
+  "orderChat": {
+    "title": "Kparịta ụka na {{store}} gbasara ọda a",
+    "empty": "Zipu ozi ma ọ bụ foto (dịka akwụkwọ nnata ego i zigara). Ụlọ ahịa ga-aza ebe a.",
+    "photo": "Foto",
+    "attach": "Tinye foto",
+    "placeholder": "Dee ozi…",
+    "send": "Zipu",
+    "failed": "Ezighi ya. Lelee ịntanetị gị ma nwaa ọzọ."
   }
 }

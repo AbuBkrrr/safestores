@@ -2747,7 +2747,8 @@
     "you": "Kai",
     "replyPh": "Amsa wa mai saye",
     "send": "Amsa",
-    "close": "An gama"
+    "close": "An gama",
+    "aboutOrder": "Game da oda {{ref}}"
   },
   "installMarket": {
     "title": "Saka Kasuwar SAFE Stores a wayarka",
@@ -2843,6 +2844,16 @@
     "body": "Oda ta {{total}} ta shigo yanzu.",
     "view": "Duba oda",
     "paidTitle": "Abokin ciniki ya ce ya biya",
-    "paidBody": "An tura {{total}} don oda {{ref}}. Duba bankinka, sannan ka danna An karɓi kuɗi."
+    "paidBody": "An tura {{total}} don oda {{ref}}. Duba bankinka, sannan ka danna An karɓi kuɗi.",
+    "msgTitle": "Saƙo game da oda {{ref}}"
+  },
+  "orderChat": {
+    "title": "Yi hira da {{store}} game da wannan oda",
+    "empty": "Aika saƙo ko hoto (misali rasitin tura kuɗi). Shagon zai amsa a nan.",
+    "photo": "Hoto",
+    "attach": "Haɗa hoto",
+    "placeholder": "Rubuta saƙo…",
+    "send": "Aika",
+    "failed": "Ba a aika ba. Duba intanet ka sake gwadawa."
   }
 }

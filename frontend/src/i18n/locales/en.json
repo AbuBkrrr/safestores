@@ -2747,7 +2747,8 @@
     "you": "You",
     "replyPh": "Reply to the shopper",
     "send": "Reply",
-    "close": "Mark done"
+    "close": "Mark done",
+    "aboutOrder": "About order {{ref}}"
   },
   "installMarket": {
     "title": "Get SAFE Stores Market on your phone",
@@ -2843,6 +2844,16 @@
     "body": "An order for {{total}} just came in.",
     "view": "View order",
     "paidTitle": "Customer says they have paid",
-    "paidBody": "Transfer of {{total}} for order {{ref}}. Check your bank, then tap Money received."
+    "paidBody": "Transfer of {{total}} for order {{ref}}. Check your bank, then tap Money received.",
+    "msgTitle": "Message about order {{ref}}"
+  },
+  "orderChat": {
+    "title": "Chat with {{store}} about this order",
+    "empty": "Send a message or a photo (for example your transfer receipt). The shop replies here.",
+    "photo": "Photo",
+    "attach": "Attach a photo",
+    "placeholder": "Type a message…",
+    "send": "Send",
+    "failed": "Could not send. Check your internet and try again."
   }
 }

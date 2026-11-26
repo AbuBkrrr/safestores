@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useRealtimeEvents } from '../context/SocketContext.jsx';
+import { mediaUrl } from '../utils/media.js';
 
 /** Questions and item requests from shoppers, with a reply box. */
 export default function CustomerMessages() {
@@ -27,12 +28,13 @@ export default function CustomerMessages() {
         return (
           <div key={i.id} style={{ borderTop: '1px solid var(--border, #e5e7eb)', padding: '10px 0' }}>
             <div className="flex" style={{ justifyContent: 'space-between', gap: 8 }}>
-              <strong>{i.kind === 'request' ? `🙋 ${t('inbox.request')}` : `💬 ${t('inbox.question')}`}{i.product_name ? ` · ${i.product_name}` : ''}</strong>
+              <strong>{i.order_ref ? `📦 ${t('inbox.aboutOrder', { ref: i.order_ref })}` : i.kind === 'request' ? `🙋 ${t('inbox.request')}` : `💬 ${t('inbox.question')}`}{i.product_name ? ` · ${i.product_name}` : ''}</strong>
               <span className={`badge ${i.status === 'open' ? 'pending' : 'active'}`}>{t(`inbox.s_${i.status}`)}</span>
             </div>
             <div className="muted small">{i.name} · {i.phone || i.email} · {new Date(i.updated_at).toLocaleString()}</div>
             {(i.messages || []).map((m, k) => (
-              <div key={k} className="small" style={{ margin: '4px 0', paddingLeft: m.from_store ? 16 : 0 }}><strong>{m.from_store ? `${m.author_name || t('inbox.you')}: ` : `${i.name}: `}</strong>{m.body}</div>
+              <div key={k} className="small" style={{ margin: '4px 0', paddingLeft: m.from_store ? 16 : 0 }}><strong>{m.from_store ? `${m.author_name || t('inbox.you')}: ` : `${i.name}: `}</strong>{m.body}
+                {m.image_url && <a href={mediaUrl(m.image_url)} target="_blank" rel="noreferrer"><img src={mediaUrl(m.image_url)} alt={t('orderChat.photo')} style={{ display: 'block', maxWidth: 220, maxHeight: 220, borderRadius: 8, marginTop: 4 }} /></a>}</div>
             ))}
             {i.status !== 'closed' && (
               <div className="flex" style={{ gap: 6, marginTop: 6, flexWrap: 'nowrap' }}>

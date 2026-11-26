@@ -87,7 +87,7 @@ async function threadOf(where, params) {
             s.name AS store_name, s.phone AS store_phone, p.name AS product_name, p.id AS product_id
      FROM store_inquiries i JOIN stores s ON s.id = i.store_id LEFT JOIN products p ON p.id = i.product_id WHERE ${where}`, params)).rows[0];
   if (!inq) return null;
-  inq.messages = (await db.query('SELECT from_store, author_name, body, created_at FROM store_inquiry_messages WHERE inquiry_id = $1 ORDER BY created_at', [inq.id])).rows;
+  inq.messages = (await db.query('SELECT from_store, author_name, body, image_url, created_at FROM store_inquiry_messages WHERE inquiry_id = $1 ORDER BY created_at', [inq.id])).rows;
   return inq;
 }
 
@@ -116,8 +116,9 @@ async function shopperReply(req, res) {
 async function listForStore(req, res) {
   const { rows } = await db.query(
     `SELECT i.id, i.kind, i.status, i.name, i.phone, i.email, i.created_at, i.updated_at, p.name AS product_name,
-            (SELECT body FROM store_inquiry_messages m WHERE m.inquiry_id = i.id ORDER BY created_at DESC LIMIT 1) AS last_message,
-            (SELECT json_agg(json_build_object('from_store', m.from_store, 'author_name', m.author_name, 'body', m.body, 'created_at', m.created_at) ORDER BY m.created_at)
+            CASE WHEN i.order_id IS NOT NULL THEN upper(substr(i.order_id::text, 1, 8)) END AS order_ref,
+            (SELECT COALESCE(body, '📷') FROM store_inquiry_messages m WHERE m.inquiry_id = i.id ORDER BY created_at DESC LIMIT 1) AS last_message,
+            (SELECT json_agg(json_build_object('from_store', m.from_store, 'author_name', m.author_name, 'body', m.body, 'image_url', m.image_url, 'created_at', m.created_at) ORDER BY m.created_at)
                FROM store_inquiry_messages m WHERE m.inquiry_id = i.id) AS messages
      FROM store_inquiries i LEFT JOIN products p ON p.id = i.product_id
      WHERE i.store_id = $1 ORDER BY (i.status = 'open') DESC, i.updated_at DESC LIMIT 200`, [req.params.storeId]);

@@ -731,3 +731,7 @@ img, video, canvas, iframe { max-width: 100%; }
 .order-alert-actions { display: flex; gap: 6px; flex-shrink: 0; }
 @keyframes order-pop { from { transform: translateY(-20px); opacity: 0; } to { transform: none; opacity: 1; } }
 @media print { .order-alerts { display: none; } }
+
+/* ---- Chat about an order (tracking page) ---- */
+.order-chat { border: 1px solid var(--line); border-radius: 12px; padding: 10px; }
+.order-chat-body { display: flex; flex-direction: column; gap: 6px; max-height: 280px; overflow-y: auto; padding: 8px 0; }

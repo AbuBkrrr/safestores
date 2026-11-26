@@ -2747,7 +2747,8 @@
     "you": "Vous",
     "replyPh": "Répondre au client",
     "send": "Répondre",
-    "close": "Terminer"
+    "close": "Terminer",
+    "aboutOrder": "Commande {{ref}}"
   },
   "installMarket": {
     "title": "Installez le Marché SAFE Stores",
@@ -2843,6 +2844,16 @@
     "body": "Une commande de {{total}} vient d'arriver.",
     "view": "Voir la commande",
     "paidTitle": "Le client dit avoir payé",
-    "paidBody": "Virement de {{total}} pour la commande {{ref}}. Vérifiez votre banque, puis touchez Argent reçu."
+    "paidBody": "Virement de {{total}} pour la commande {{ref}}. Vérifiez votre banque, puis touchez Argent reçu.",
+    "msgTitle": "Message sur la commande {{ref}}"
+  },
+  "orderChat": {
+    "title": "Discuter avec {{store}} de cette commande",
+    "empty": "Envoyez un message ou une photo (par ex. votre reçu de virement). La boutique répond ici.",
+    "photo": "Photo",
+    "attach": "Joindre une photo",
+    "placeholder": "Écrivez un message…",
+    "send": "Envoyer",
+    "failed": "Envoi impossible. Vérifiez votre connexion et réessayez."
   }
 }

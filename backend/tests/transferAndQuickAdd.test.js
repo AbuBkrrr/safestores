@@ -40,6 +40,23 @@ describe('Bank transfer on the storefront', () => {
     expect((await request().get(`/api/public/marketplace-orders/${order.body.tracking_token}`)).body.transfer_sent_at).toBeTruthy();
     expect((await request().post('/api/public/marketplace-orders/not-a-real-token/payment-sent')).status).toBe(404);
 
+    // Chat about the order from the tracking page: text, then a receipt photo.
+    const tok = order.body.tracking_token;
+    expect((await request().get(`/api/public/marketplace-orders/${tok}/chat`)).body).toEqual([]);
+    expect((await request().post(`/api/public/marketplace-orders/${tok}/chat`).field('message', '')).status).toBe(400);
+    expect((await request().post(`/api/public/marketplace-orders/${tok}/chat`).field('message', 'I have paid, see receipt')).status).toBe(201);
+    const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==', 'base64');
+    expect((await request().post(`/api/public/marketplace-orders/${tok}/chat`).attach('photo', png, { filename: 'receipt.png', contentType: 'image/png' })).status).toBe(201);
+    const inbox = (await request().get(`/api/stores/${store.id}/inquiries`).set(auth)).body;
+    const thread = inbox.find((i) => i.order_ref === order.body.id.slice(0, 8).toUpperCase());
+    expect(thread.name).toBe('Ada');
+    expect(thread.messages).toHaveLength(2);
+    expect(thread.messages[1].image_url).toBeTruthy();
+    await request().post(`/api/stores/${store.id}/inquiries/${thread.id}/reply`).set(auth).send({ message: 'Received, thank you!' });
+    const chat = (await request().get(`/api/public/marketplace-orders/${tok}/chat`)).body;
+    expect(chat.map((m) => [m.from_store, m.body])).toEqual([[false, 'I have paid, see receipt'], [false, null], [true, 'Received, thank you!']]);
+    expect((await request().get('/api/public/marketplace-orders/nope/chat')).status).toBe(404);
+
     // The shop sees the money in its bank and confirms.
     const got = await request().patch(`/api/stores/${store.id}/marketplace/orders/${order.body.id}/transfer-received`).set(auth);
     expect(got.status).toBe(200);
