@@ -5,9 +5,13 @@ import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { Alert } from '../components/ui.jsx';
+import QuickAddProduct from '../components/QuickAddProduct.jsx';
+import { formatCurrency } from '../utils/currency.js';
 
-const TEMPLATE = 'Name,SKU,Barcode,Category,Brand,Supplier,Unit,Cost Price,Selling Price,Stock,Reorder Level,Units per carton\n'
-  + 'Peak Milk 400g,PK400,6151234567890,Dairy,Peak,FrieslandCampina,tin,1200,1500,24,6,12\n';
+// Only Name and Price are needed; the rest can be left empty.
+const TEMPLATE = 'Name,Price,Stock,Cost,Category\n'
+  + 'Peak Milk 400g,1500,24,1200,Dairy\n'
+  + 'Indomie Chicken 70g,250,40,200,Noodles\n';
 
 async function parseFile(file) {
   const name = file.name.toLowerCase();
@@ -28,6 +32,7 @@ export default function ImportProducts() {
   const navigate = useNavigate();
   const [existing, setExisting] = useState([]);
   const [scanned, setScanned] = useState(null); // existing product a scan matched
+  const [byHand, setByHand] = useState(false);
 
   const { t } = useTranslation();
   const { user } = useAuth();
@@ -81,6 +86,17 @@ export default function ImportProducts() {
       <div className="topbar"><div><h1>{t('importPage.title')}</h1><p className="muted">{t('importPage.subtitle')}</p></div><Link className="btn secondary small" to="/products">← {t('nav.products')}</Link></div>
       <Alert type="error">{error}</Alert>
       <div className="card">
+        <h3 style={{ marginBottom: 6 }}>✍️ {t('importPage.byHandTitle')}</h3>
+        <p className="muted" style={{ marginBottom: 8 }}>{t('importPage.byHandHelp')}</p>
+        {!byHand && <button type="button" className="btn" onClick={() => setByHand(true)}>➕ {t('importPage.byHandButton')}</button>}
+      </div>
+      {byHand && (
+        <QuickAddProduct storeId={user.storeId} products={existing}
+          categories={[...new Set(existing.map((p) => p.category).filter(Boolean))]}
+          onAdded={(p) => setExisting((l) => [p, ...l])} onClose={() => setByHand(false)} />
+      )}
+      <div className="card">
+        <h3 style={{ marginBottom: 6 }}>📄 {t('importPage.sheetTitle')}</h3>
         <ol className="muted" style={{ paddingLeft: 18, lineHeight: 1.7 }}>
           <li>{t('importPage.step1')} <button className="btn small secondary" onClick={downloadTemplate}>{t('importPage.template')}</button></li>
           <li>{t('importPage.step2')}</li>
@@ -119,11 +135,29 @@ export default function ImportProducts() {
                 <tbody>{check.errors.map((e) => <tr key={e.row}><td>{e.row}</td><td>{e.error}</td></tr>)}</tbody></table>
             </div>
           )}
+          {(check.warnings || []).map((w) => <Alert key={w} type="error">⚠️ {w}</Alert>)}
+          {check.columns && (
+            <p className="help-text">
+              {t('importPage.readAs')}{' '}
+              {Object.entries(check.columns).filter(([, k]) => k).map(([h, k]) => `${h} → ${t(`importPage.field.${k}`)}`).join(' · ')}
+              {Object.values(check.columns).some((k) => !k) && <><br />{t('importPage.ignored')} {Object.entries(check.columns).filter(([, k]) => !k).map(([h]) => h).join(', ')}</>}
+            </p>
+          )}
           <h4 className="mt-1">{t('importPage.preview')}</h4>
-          <div className="table-wrap" style={{ maxHeight: 260, overflowY: 'auto' }}>
-            <table><thead><tr>{headers.map((h) => <th key={h}>{h}</th>)}</tr></thead>
-              <tbody>{rows.slice(0, 20).map((r, i) => <tr key={i}>{headers.map((h) => <td key={h}>{String(r[h] ?? '')}</td>)}</tr>)}</tbody></table>
-          </div>
+          {check.preview ? (
+            <div className="table-wrap">
+              <table><thead><tr><th>{t('importPage.field.name')}</th><th>{t('importPage.field.costPrice')}</th><th>{t('importPage.field.sellingPrice')}</th><th>{t('importPage.field.openingStock')}</th></tr></thead>
+                <tbody>{check.preview.map((r) => (
+                  <tr key={r.sku}><td>{r.name}</td><td>{r.cost == null ? '—' : formatCurrency(r.cost)}</td>
+                    <td style={{ fontWeight: 700, color: r.price > 0 ? undefined : '#d92d20' }}>{r.price > 0 ? formatCurrency(r.price) : '₦0 ⚠️'}</td><td>{r.stock}</td></tr>
+                ))}</tbody></table>
+            </div>
+          ) : (
+            <div className="table-wrap" style={{ maxHeight: 260, overflowY: 'auto' }}>
+              <table><thead><tr>{headers.map((h) => <th key={h}>{h}</th>)}</tr></thead>
+                <tbody>{rows.slice(0, 20).map((r, i) => <tr key={i}>{headers.map((h) => <td key={h}>{String(r[h] ?? '')}</td>)}</tr>)}</tbody></table>
+            </div>
+          )}
           <button className="btn mt-1" disabled={busy || check.create + check.update === 0} onClick={doImport}>{t('importPage.importNow', { count: check.create + check.update })}</button>
         </div>
       )}

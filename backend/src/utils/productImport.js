@@ -21,10 +21,42 @@ const ALIASES = {
   location: ['location', 'shelf', 'bin'],
 };
 
+function clean(header) {
+  return String(header || '').toLowerCase().replace(/[\u00a0_\-/():.,#*₦$€£]+/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+/** Which product field a column is, from its heading. Exact names first, then
+ * the words in it ("Reference Cost", "Selling Price (₦)", "Brand / Company"…).
+ * Columns about prices but not a price itself ("Price Basis", "Price Source")
+ * are left out. */
 function canonicalKey(header) {
-  const h = String(header || '').trim().toLowerCase().replace(/[_-]+/g, ' ').replace(/\s+/g, ' ');
+  const h = clean(header);
+  if (!h) return null;
   for (const [key, names] of Object.entries(ALIASES)) if (names.includes(h)) return key;
+  if (/\b(basis|source|url|link|note|notes|research|date|comment|remark|vat|tax|discount|margin|profit|markup|total|value)\b/.test(h)) return null;
+  if (/barcode|\bean\b|\bupc\b|gtin|bar code/.test(h)) return 'barcode';
+  if (/\bsku\b|item code|product code|stock code|part (no|number)/.test(h)) return 'sku';
+  if (/reorder|re order|min(imum)? (stock|level|qty)/.test(h)) return 'reorderLevel';
+  if (/units? per|pack size|carton size|case size/.test(h)) return 'packSize';
+  if (/\bcost\b|buying|purchase|cost price|landed/.test(h)) return 'costPrice';
+  if (/sell|retail|\bprice\b|\bamount\b|\brate\b/.test(h)) return 'sellingPrice';
+  if (/opening|\bstock\b|\bqty\b|quantity|on hand|in stock|\bcount\b/.test(h)) return 'openingStock';
+  if (/categor|department|\bgroup\b|\btype\b/.test(h)) return 'category';
+  if (/brand|make|manufacturer|company/.test(h)) return 'brand';
+  if (/supplier|vendor/.test(h)) return 'supplier';
+  if (/\bunit\b|\buom\b/.test(h)) return 'unit';
+  if (/location|shelf|\bbin\b|aisle/.test(h)) return 'location';
+  if (/\bname\b|product|\bitem\b|description|title/.test(h)) return 'name';
   return null;
+}
+
+/** A SKU made from the name, the same every time — so a sheet without SKUs
+ * still updates the same products when it is uploaded again. */
+function skuFromName(name) {
+  let h = 2166136261;
+  for (const ch of String(name).trim().toLowerCase()) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619) >>> 0; }
+  const stem = String(name).replace(/[^A-Za-z0-9]/g, '').slice(0, 6).toUpperCase() || 'ITEM';
+  return `${stem}-${h.toString(36).toUpperCase().slice(0, 5)}`;
 }
 
 function num(v) {
@@ -43,7 +75,6 @@ function normalizeRow(row) {
     if (k && v[k] === undefined) v[k] = typeof val === 'string' ? val.trim() : val;
   }
   if (!v.name) return { ok: false, error: 'Missing product name' };
-  if (!v.sku && !v.barcode) return { ok: false, error: 'Needs a SKU or a barcode' };
   const cost = num(v.costPrice);
   const price = num(v.sellingPrice);
   const reorder = num(v.reorderLevel);
@@ -63,7 +94,7 @@ function normalizeRow(row) {
     ok: true,
     value: {
       name: String(v.name).slice(0, 200),
-      sku: String(v.sku || v.barcode).slice(0, 60),
+      sku: String(v.sku || v.barcode || skuFromName(v.name)).slice(0, 60),
       barcode: v.barcode ? String(v.barcode).slice(0, 64) : null,
       category: v.category || null, brand: v.brand || null, supplier: v.supplier || null, unit: v.unit || null,
       location: v.location || null,
@@ -75,4 +106,15 @@ function normalizeRow(row) {
   };
 }
 
-module.exports = { normalizeRow, canonicalKey, ALIASES };
+/** How each heading of a sheet will be read: { heading: field or null }. */
+function columnMap(headers) {
+  const used = new Set(); const out = {};
+  for (const h of headers || []) {
+    const k = canonicalKey(h);
+    out[h] = k && !used.has(k) ? k : null;
+    if (k) used.add(k);
+  }
+  return out;
+}
+
+module.exports = { normalizeRow, canonicalKey, columnMap, skuFromName, ALIASES };

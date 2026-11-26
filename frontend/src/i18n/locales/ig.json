@@ -1565,7 +1565,7 @@
   "importPage": {
     "title": "Bubata Ngwa Ahịa",
     "subtitle": "Webata ndepụta ngwa ahịa gị niile site na mpempe akwụkwọ (CSV ma ọ bụ Excel).",
-    "step1": "Budata ndebiri, ma ọ bụ jiri mpempe nke gị — a na-amata aha kọlụm ndị a na-ahụkarị (Aha, SKU, Barcode, Ọnụ ịzụ, Ọnụahịa, Ngwa ahịa…) n'onwe ya.",
+    "step1": "Budata template dị mfe (naanị Aha na Ọnụahịa ka achọrọ), ma ọ bụ jiri nke gị — anyị na-amata aha kọlụm dịka Aha ngwaahịa, Ọnụ ego ịzụta, Ọnụahịa ire, Ngwa dị.",
     "step2": "Họrọ faịlụ dị n'okpuru. Anyị na-enyocha ahịrị ọ bụla tupu echekwa ihe ọ bụla.",
     "step3": "Lelee nyocha ahụ, wee bubata. A na-emelite SKU dị adị (anaghị ede ngwa ahịa n'elu ya); a na-emepụta ndị ọhụrụ na ngwa ahịa mmalite ha.",
     "template": "Budata ndebiri",
@@ -1578,14 +1578,35 @@
     "skipped": "Ahịrị {{count}} nwere nsogbu (a wụgara ha)",
     "row": "Ahịrị",
     "problem": "Nsogbu",
-    "preview": "Nlele (ahịrị 20 mbụ)",
+    "preview": "Otu ngwaahịa gị ga-esi bata (5 mbụ)",
     "importNow": "Bubata ngwa ahịa {{count}}",
     "done": "Emechara: e mepụtara {{created}}, e melitere {{updated}}.",
     "viewProducts": "Lee ngwa ahịa",
     "scanTitle": "Nyochaa ngwa ahịa otu otu",
     "scanHelp": "Nyochaa koodu ngwa ahịa site na igwefoto ma ọ bụ USB. Koodu ọhụrụ na-emepe fọm ngwa ahịa; nke ịnwere na-eduga gị ịnata ngwa ahịa.",
     "scanExisting": "{{name}} adịlarịrị na ngwa ahịa gị.",
-    "receiveStock": "Nata ngwa ahịa →"
+    "receiveStock": "Nata ngwa ahịa →",
+    "byHandTitle": "Tinye ngwaahịa n'aka",
+    "byHandHelp": "Dee aha na ọnụahịa, tinye foto ma ọ bụrụ na ịchọrọ, ọ dịkwa njikere ire. Ọ kacha mma maka ngwa ole na ole.",
+    "byHandButton": "Tinye ngwaahịa",
+    "sheetTitle": "Tinye ọtụtụ ngwaahịa site na spreadsheet",
+    "readAs": "Anyị gụrụ kọlụm gị dịka:",
+    "ignored": "Ejighi ya:",
+    "field": {
+      "name": "Aha",
+      "costPrice": "Ọnụ ego ịzụta",
+      "sellingPrice": "Ọnụahịa ire",
+      "openingStock": "Ngwa dị",
+      "sku": "SKU",
+      "barcode": "Barcode",
+      "category": "Ụdị",
+      "brand": "Akara",
+      "supplier": "Onye na-ebubata",
+      "unit": "Nkeji",
+      "reorderLevel": "Ọkwa ịtụ ọzọ",
+      "packSize": "Ngwa n'igbe",
+      "location": "Ebe"
+    }
   },
   "labelsPage": {
     "title": "Akara na Barcode / QR",
@@ -1844,7 +1865,8 @@
     "transferNotePh": "dịka Zipu ihe akaebe na WhatsApp 0803…",
     "transferSave": "Chekwaa nkọwa ụlọ akụ",
     "transferSaved": "Echekwala nkọwa ụlọ akụ",
-    "acceptTransfer": "Nara nyefe ego n'ụlọ ahịa ịntanetị m"
+    "acceptTransfer": "Nara nyefe ego n'ụlọ ahịa ịntanetị m",
+    "noConnection": "Enweghị ike iru sava. Lelee ịntanetị gị ma nwaa ọzọ."
   },
   "settlementsPage": {
     "title": "Mmezi Ego",
@@ -2625,7 +2647,11 @@
     "needName": "Tinye aha ngwaahịa",
     "needPrice": "Tinye ọnụahịa ire",
     "more": "Nkọwa ndị ọzọ (ọnụahịa ịzụta, ụdị, barcode / QR)",
-    "helpShort": "Aha, ọnụahịa na ole. Tinye foto ka ọ dị mfe ịchọta."
+    "helpShort": "Aha, ọnụahịa na ole. Tinye foto ka ọ dị mfe ịchọta.",
+    "photoTake": "See foto nke ngwaahịa ahụ",
+    "photoRetake": "See foto ọzọ",
+    "photoHelp": "Igwefoto na-amụta otu o si dị, ka onye na-anata ego nwee ike nyochaa ya na-enweghị barcode.",
+    "looksLike": "Nke a yiri {{name}}, nke dị na ngwaahịa gị. Ọ bụrụ otu ihe ahụ, nabata ngwa ọhụrụ kama ịtinye ya ọzọ."
   },
   "shopper": {
     "title": "Ahịa SAFE Stores",

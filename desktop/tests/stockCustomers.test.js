@@ -22,7 +22,8 @@ describe('pure helpers', () => {
     const r = normalizeRow({ 'Product Name': 'Peak Milk 400g', Code: 'PK400', 'Cost Price': '1,200', 'Selling Price': '1500', Qty: '24', 'Units per carton': '12' });
     expect(r.ok).toBe(true);
     expect(r.value).toMatchObject({ name: 'Peak Milk 400g', sku: 'PK400', costPrice: 1200, priceMultiplier: 1.25, openingStock: 24, packSize: 12 });
-    expect(normalizeRow({ Name: 'X' }).ok).toBe(false);
+    expect(normalizeRow({ SKU: 'X' }).ok).toBe(false); // no name
+    expect(normalizeRow({ Name: 'X' }).value.sku).toMatch(/^X-/); // a SKU is made from the name
     expect(normalizeRow({ Name: 'X', SKU: 'x', Price: 'abc' }).ok).toBe(false);
   });
 
@@ -49,11 +50,11 @@ describe('Product import', () => {
     const rows = [
       { Name: 'New Thing', SKU: 'NEW-1', Barcode: '6151234567890', Cost: '100', Price: '150', Stock: '20', Category: 'Snacks' },
       { Name: 'Renamed', SKU: 'EXIST-1', Cost: '12' },
-      { Name: 'Broken row' },
+      { SKU: 'NO-NAME-1', Price: '5' },
     ];
     const dry = await request().post(`/api/stores/${store.id}/products/import`).set(A(token)).send({ rows, dryRun: true });
     expect(dry.body).toMatchObject({ dryRun: true, create: 1, update: 1 });
-    expect(dry.body.errors).toEqual([{ row: 4, error: 'Needs a SKU or a barcode' }]);
+    expect(dry.body.errors).toEqual([{ row: 4, error: 'Missing product name' }]);
 
     const res = await request().post(`/api/stores/${store.id}/products/import`).set(A(token)).send({ rows });
     expect(res.body).toMatchObject({ created: 1, updated: 1 });

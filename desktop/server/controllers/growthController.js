@@ -6,7 +6,7 @@
 const crypto = require('crypto');
 const db = require('../db');
 const insights = require('../utils/insights');
-const { normalizeRow } = require('../utils/productImport');
+const { normalizeRow, columnMap } = require('../utils/productImport');
 const { pointsEarned, balance, expiryDate } = require('../utils/loyalty');
 const { r2 } = require('../utils/pricing');
 const { recomputeProductQuantities } = require('../utils/stockMath');
@@ -80,7 +80,15 @@ function importProducts(req, res) {
   if (max != null && bySku.size + toCreate.length > max) {
     return res.status(403).json({ error: `This import would take you past your plan's ${max}-product limit (${bySku.size} now, ${toCreate.length} new).` });
   }
-  if (req.body?.dryRun) return res.json({ dryRun: true, create: toCreate.length, update: toUpdate.length, errors });
+  if (req.body?.dryRun) {
+    const columns = columnMap(Object.keys(rows[0] || {}));
+    const fields = new Set(Object.values(columns));
+    const warnings = [];
+    if (!fields.has('sellingPrice') && !fields.has('costPrice')) warnings.push('No price column was found, so prices would be 0. Name the column "Price" (or "Selling Price").');
+    else if (valid.length && valid.every((v) => !(v.costPrice > 0))) warnings.push('The price cells came out empty. If they are formulas, open the file in Excel, select the price columns, Copy, then Paste → Values, save, and upload again.');
+    const preview = valid.slice(0, 5).map((v) => ({ name: v.name, sku: v.sku, cost: v.costPrice, price: v.costPrice == null ? null : Math.round(v.costPrice * (v.priceMultiplier ?? 1) * 100) / 100, stock: v.openingStock }));
+    return res.json({ dryRun: true, create: toCreate.length, update: toUpdate.length, errors, columns, warnings, preview });
+  }
 
   try {
     db.transaction(() => {

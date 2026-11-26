@@ -48,12 +48,17 @@ export default function OnlinePaymentsCard({ onToast }) {
   };
 
   const [tr, setTr] = useState(null);
+  const [trError, setTrError] = useState('');
+  // Say what actually went wrong (no connection, no permission, server error…).
+  const why = (err) => err.response?.data?.error
+    || (!err.response ? t('paymentsCard.noConnection') : `${t('common.errorGeneric')} (${err.response.status})`);
   const saveTransfer = async (enable) => {
-    setError('');
+    setTrError('');
     try {
-      setP((await api.patch(base, { transfer: tr || {}, ...(enable === undefined ? {} : { transferEnabled: enable }) })).data);
+      const { data } = await api.patch(base, { transfer: tr || {}, ...(enable === undefined ? {} : { transferEnabled: enable }) });
+      setP(data); setTr(null);
       onToast?.(t('paymentsCard.transferSaved'), 'success');
-    } catch (err) { setError(err.response?.data?.error || t('common.errorGeneric')); }
+    } catch (err) { setTrError(why(err)); }
   };
   const toggleTransfer = (on) => saveTransfer(on);
   const toggle = async (key, value) => {
@@ -117,7 +122,8 @@ export default function OnlinePaymentsCard({ onToast }) {
             <div className="form-group"><label htmlFor="tr-note">{t('paymentsCard.transferNote')}</label><input id="tr-note" value={trv.note} onChange={(e) => setTr({ ...trv, note: e.target.value })} placeholder={t('paymentsCard.transferNotePh')} /></div>
           </div>
           <div className="flex" style={{ gap: 8 }}>
-            <button type="button" className="btn small" onClick={saveTransfer}>{t('paymentsCard.transferSave')}</button>
+            {trError && <Alert type="error">{trError}</Alert>}
+            <button type="button" className="btn small" onClick={() => saveTransfer()}>{t('paymentsCard.transferSave')}</button>
           </div>
         </div>
       )}

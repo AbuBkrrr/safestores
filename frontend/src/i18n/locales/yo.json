@@ -1565,7 +1565,7 @@
   "importPage": {
     "title": "Kó Ọjà Wọlé",
     "subtitle": "Kó gbogbo àtòjọ ọjà rẹ wọlé láti inú ìwé ìṣirò (CSV tàbí Excel).",
-    "step1": "Ṣe ìgbàsílẹ̀ àwòṣe, tàbí lo ìwé tìrẹ — a ń dá orúkọ ọ̀wọ̀n tó wọ́pọ̀ (Orúkọ, SKU, Barcode, Iye rírà, Iye, Ọjà…) mọ̀ fúnra wa.",
+    "step1": "Ṣe igbasilẹ àwòṣe tó rọrùn (Orúkọ àti Iye nìkan ni a nílò), tàbí lo tìrẹ — a mọ orúkọ ọ̀wọ̀n bí Orúkọ ọjà, Iye rírà, Iye títà, Iye tó wà.",
     "step2": "Yan fáìlì ìsàlẹ̀. A ń ṣàyẹ̀wò ìlà kọ̀ọ̀kan kí a tó fi ohunkóhun pamọ́.",
     "step3": "Ṣàyẹ̀wò àbájáde, lẹ́yìn náà kó wọlé. A ń ṣe àtúnṣe SKU tó wà tẹ́lẹ̀ (a kì í kọ ọjà lé e lórí); a ń ṣẹ̀dá tuntun pẹ̀lú ọjà ìbẹ̀rẹ̀ wọn.",
     "template": "Ṣe ìgbàsílẹ̀ àwòṣe",
@@ -1578,14 +1578,35 @@
     "skipped": "Ìlà {{count}} tó ní ìṣòro (a fò wọ́n)",
     "row": "Ìlà",
     "problem": "Ìṣòro",
-    "preview": "Àyẹ̀wò ṣáájú (ìlà 20 àkọ́kọ́)",
+    "preview": "Bí àwọn ọjà rẹ yóò ṣe wọlé (5 àkọ́kọ́)",
     "importNow": "Kó ọjà {{count}} wọlé",
     "done": "Ó ti parí: a ṣẹ̀dá {{created}}, a ṣe àtúnṣe {{updated}}.",
     "viewProducts": "Wo ọjà",
     "scanTitle": "Ṣayẹwo ọja ni ọkọọkan",
     "scanHelp": "Ṣayẹwo koodu ọja pẹlu kamẹra tabi ẹrọ USB. Koodu tuntun ṣii fọọmu ọja; eyi ti o ti ni mu ọ lọ si gbigba ọja.",
     "scanExisting": "{{name}} ti wa ninu awọn ọja rẹ.",
-    "receiveStock": "Gba ọja →"
+    "receiveStock": "Gba ọja →",
+    "byHandTitle": "Fi ọjà kún pẹ̀lú ọwọ́",
+    "byHandHelp": "Tẹ orúkọ àti iye, fi fọ́tò kún tí o bá fẹ́, ó sì ti ṣetán fún títà. Ó dára jù fún ọjà díẹ̀.",
+    "byHandButton": "Fi ọjà kún",
+    "sheetTitle": "Fi ọ̀pọ̀ ọjà kún láti spreadsheet",
+    "readAs": "A ka àwọn ọ̀wọ̀n rẹ báyìí:",
+    "ignored": "A kò lò wọ́n:",
+    "field": {
+      "name": "Orúkọ",
+      "costPrice": "Iye rírà",
+      "sellingPrice": "Iye títà",
+      "openingStock": "Iye tó wà",
+      "sku": "SKU",
+      "barcode": "Barcode",
+      "category": "Ẹ̀ka",
+      "brand": "Àmì",
+      "supplier": "Olùpèsè",
+      "unit": "Ìwọ̀n",
+      "reorderLevel": "Ìpele àtúnrà",
+      "packSize": "Ẹyọ nínú páálí",
+      "location": "Ibi"
+    }
   },
   "labelsPage": {
     "title": "Àmì àti Barcode / QR",
@@ -1844,7 +1865,8 @@
     "transferNotePh": "àpẹẹrẹ Fi ẹ̀rí ìsanwó ránṣẹ́ lórí WhatsApp 0803…",
     "transferSave": "Fi àlàyé báńkì pamọ́",
     "transferSaved": "A ti fi àlàyé báńkì pamọ́",
-    "acceptTransfer": "Gba ìsanwó báńkì lórí ṣọ́ọ̀bù ayélujára mi"
+    "acceptTransfer": "Gba ìsanwó báńkì lórí ṣọ́ọ̀bù ayélujára mi",
+    "noConnection": "A kò rí sáfà. Ṣàyẹ̀wò íntánẹ́ẹ̀tì rẹ kí o sì tún gbìyànjú."
   },
   "settlementsPage": {
     "title": "Ìsanwó Ìṣirò",
@@ -2625,7 +2647,11 @@
     "needName": "Kọ orúkọ ọjà",
     "needPrice": "Kọ iye títà",
     "more": "Àlàyé síi (iye tí o rà á, ẹ̀ka, barcode / QR)",
-    "helpShort": "Orúkọ, iye owó àti iye mélòó. Fi àwòrán kún kí ó rọrùn láti rí."
+    "helpShort": "Orúkọ, iye owó àti iye mélòó. Fi àwòrán kún kí ó rọrùn láti rí.",
+    "photoTake": "Ya fọ́tò ọjà náà",
+    "photoRetake": "Tún fọ́tò ya",
+    "photoHelp": "Kámẹ́rà ń kọ́ bí ó ṣe rí, kí olùgbowó lè ṣàyẹ̀wò rẹ̀ láìsí barcode.",
+    "looksLike": "Èyí jọ {{name}}, tí ó ti wà nínú àwọn ọjà rẹ. Tí ó bá jẹ́ ọjà kan náà, gba ọjà tuntun dípò kí o tún fi kún."
   },
   "shopper": {
     "title": "Ọjà SAFE Stores",

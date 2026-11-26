@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import { Alert } from './ui.jsx';
-import { lookOfFile, packLook } from '../utils/visualMatch.js';
+import { lookOfFile, packLook, rankProducts } from '../utils/visualMatch.js';
 
 /**
  * The fast way to add a product: photo, name, what it cost, what it sells
@@ -10,11 +10,34 @@ import { lookOfFile, packLook } from '../utils/visualMatch.js';
  * else (SKU, unit, reorder level…) gets a sensible default and can be edited
  * later. "Save & next" keeps the category so a whole delivery goes in quickly.
  */
-export default function QuickAddProduct({ storeId, categories = [], defaultUnit = 'piece', autoShelf = false, onAdded, onClose }) {
+export default function QuickAddProduct({ storeId, categories = [], defaultUnit = 'piece', autoShelf = false, products, onAdded, onClose }) {
   const { t } = useTranslation();
   const empty = { name: '', cost: '', price: '', qty: '', category: '', barcode: '', onShelf: true };
   const [f, setF] = useState(empty);
   const [photo, setPhoto] = useState(null);
+  const [preview, setPreview] = useState('');
+  const [like, setLike] = useState(null); // an existing product the photo looks like
+  const known = useRef(null);
+
+  // A photo of the item: shown, and checked against products the app already
+  // knows by sight, so the same item isn't added twice.
+  const choosePhoto = async (file) => {
+    setPhoto(file || null); setLike(null);
+    setPreview((old) => { if (old) URL.revokeObjectURL(old); return file ? URL.createObjectURL(file) : ''; });
+    if (!file) return;
+    try {
+      if (!known.current) {
+        const [looks, list] = await Promise.all([
+          api.get(`/stores/${storeId}/product-looks`).then((r) => (Array.isArray(r.data) ? r.data : [])),
+          products ? Promise.resolve(products) : api.get(`/stores/${storeId}/products`).then((r) => r.data),
+        ]);
+        known.current = { looks, byId: new Map(list.map((p) => [p.id, p])) };
+      }
+      const look = await lookOfFile(file);
+      const ranked = look ? rankProducts(look, known.current.looks.filter((l) => known.current.byId.has(l.product_id))) : [];
+      if (ranked[0] && ranked[0].score >= 0.85) setLike(known.current.byId.get(ranked[0].productId));
+    } catch { /* recognition is a help, never a blocker */ }
+  };
   const [more, setMore] = useState(false); // buying price, category, barcode/QR: only if wanted
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -48,7 +71,7 @@ export default function QuickAddProduct({ storeId, categories = [], defaultUnit 
       setDone(t('quickAdd.added', { name: p.name }));
       onAdded?.(p);
       setF({ ...empty, category: f.category });
-      setPhoto(null);
+      choosePhoto(null);
       if (next) setTimeout(() => nameRef.current?.focus(), 50); else onClose?.();
     } catch (err) {
       setError(err.response?.data?.error || t('common.errorGeneric'));
@@ -61,6 +84,13 @@ export default function QuickAddProduct({ storeId, categories = [], defaultUnit 
       <p className="help-text">{t('quickAdd.helpShort')}</p>
       <Alert type="error">{error}</Alert>
       <Alert type="success">{done}</Alert>
+      <div className="form-group">
+        <label htmlFor="qa-photo" className="btn secondary" style={{ display: 'inline-flex', gap: 6, cursor: 'pointer' }}>📷 {photo ? t('quickAdd.photoRetake') : t('quickAdd.photoTake')}</label>
+        <input id="qa-photo" type="file" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={(e) => choosePhoto(e.target.files?.[0])} />
+        {preview && <img src={preview} alt="" style={{ display: 'block', marginTop: 8, maxWidth: 160, maxHeight: 160, borderRadius: 8, objectFit: 'cover' }} />}
+        <span className="help-text">{t('quickAdd.photoHelp')}</span>
+      </div>
+      {like && <Alert type="info">{t('quickAdd.looksLike', { name: like.name })}</Alert>}
       <div className="grid grid-2">
         <div className="form-group"><label htmlFor="qa-name">{t('quickAdd.name')}</label><input id="qa-name" ref={nameRef} value={f.name} onChange={set('name')} autoFocus autoComplete="off" /></div>
         <div className="form-group">
@@ -69,10 +99,6 @@ export default function QuickAddProduct({ storeId, categories = [], defaultUnit 
           {markup !== null && <span className="help-text">{t('quickAdd.profit', { pct: markup })}</span>}
         </div>
         <div className="form-group"><label htmlFor="qa-qty">{t('quickAdd.qty')}</label><input id="qa-qty" type="number" inputMode="numeric" min="0" step="1" value={f.qty} onChange={set('qty')} /></div>
-        <div className="form-group">
-          <label htmlFor="qa-photo">📷 {t('quickAdd.photo')}</label>
-          <input id="qa-photo" type="file" accept="image/*" capture="environment" onChange={(e) => setPhoto(e.target.files?.[0] || null)} />
-        </div>
       </div>
       {!more && <button type="button" className="link-btn" onClick={() => setMore(true)}>➕ {t('quickAdd.more')}</button>}
       {more && (

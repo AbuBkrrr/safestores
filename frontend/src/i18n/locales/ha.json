@@ -1565,7 +1565,7 @@
   "importPage": {
     "title": "Shigo da Kaya",
     "subtitle": "Kawo dukkan jerin kayanka daga takardar lissafi (CSV ko Excel).",
-    "step1": "Sauke samfuri, ko yi amfani da takardarka — ana gane sunayen ginshiƙai na yau da kullum (Suna, SKU, Barcode, Kuɗin saye, Farashi, Kaya…) kai tsaye.",
+    "step1": "Sauke samfurin mai sauƙi (Suna da Farashi kawai ake bukata), ko ka yi amfani da naka — muna gane sunayen ginshiƙi kamar Sunan kaya, Kuɗin saye, Farashin sayarwa, Adadi.",
     "step2": "Zaɓi fayil ɗin da ke ƙasa. Muna duba kowane layi kafin a ajiye komai.",
     "step3": "Duba sakamakon binciken, sannan ka shigo da su. Ana sabunta SKU da ke akwai (ba a taɓa share kaya ba); ana ƙirƙirar sababbi da kayansu na farko.",
     "template": "Sauke samfuri",
@@ -1578,14 +1578,35 @@
     "skipped": "Layi {{count}} masu matsala (an tsallake)",
     "row": "Layi",
     "problem": "Matsala",
-    "preview": "Samfoti (layi 20 na farko)",
+    "preview": "Yadda kayanka za su shigo (na farko 5)",
     "importNow": "Shigo da kaya {{count}}",
     "done": "An gama: an ƙirƙiri {{created}}, an sabunta {{updated}}.",
     "viewProducts": "Duba kaya",
     "scanTitle": "Duba kaya ɗaya bayan ɗaya",
     "scanHelp": "Duba lambar kaya da kyamara ko na USB. Sabuwar lamba tana buɗe fom ɗin kaya; wadda kake da ita tana kai ka karɓar kaya.",
     "scanExisting": "{{name}} yana cikin kayayyakinka tuni.",
-    "receiveStock": "Karɓi kaya →"
+    "receiveStock": "Karɓi kaya →",
+    "byHandTitle": "Ƙara kaya da hannu",
+    "byHandHelp": "Rubuta suna da farashi, ƙara hoto idan kana so, kuma ya shirya don sayarwa. Ya fi dacewa da kaya kaɗan.",
+    "byHandButton": "Ƙara kaya",
+    "sheetTitle": "Ƙara kaya da yawa daga takardar lissafi",
+    "readAs": "Mun karanta ginshiƙanka kamar haka:",
+    "ignored": "Ba a yi amfani da su ba:",
+    "field": {
+      "name": "Suna",
+      "costPrice": "Kuɗin saye",
+      "sellingPrice": "Farashin sayarwa",
+      "openingStock": "Adadi",
+      "sku": "SKU",
+      "barcode": "Lambar barcode",
+      "category": "Rukuni",
+      "brand": "Alama",
+      "supplier": "Mai kawo kaya",
+      "unit": "Ma'auni",
+      "reorderLevel": "Matakin sake oda",
+      "packSize": "Guda a kwali",
+      "location": "Wuri"
+    }
   },
   "labelsPage": {
     "title": "Lambobi da Barcode / QR",
@@ -1844,7 +1865,8 @@
     "transferNotePh": "misali Aiko shaidar biya ta WhatsApp 0803…",
     "transferSave": "Ajiye bayanan banki",
     "transferSaved": "An ajiye bayanan banki",
-    "acceptTransfer": "Karɓi tura kuɗi ta banki a shagona na intanet"
+    "acceptTransfer": "Karɓi tura kuɗi ta banki a shagona na intanet",
+    "noConnection": "Ba a samu sabar ba. Duba intanet ɗinka ka sake gwadawa."
   },
   "settlementsPage": {
     "title": "Sasantawa",
@@ -2625,7 +2647,11 @@
     "needName": "Shigar da sunan kaya",
     "needPrice": "Shigar da farashin sayarwa",
     "more": "Ƙarin bayani (farashin saye, rukuni, barcode / QR)",
-    "helpShort": "Suna, farashi da yawa. Ƙara hoto domin a gane shi da sauƙi."
+    "helpShort": "Suna, farashi da yawa. Ƙara hoto domin a gane shi da sauƙi.",
+    "photoTake": "Ɗauki hoton kayan",
+    "photoRetake": "Sake ɗaukar hoto",
+    "photoHelp": "Kyamara tana koyon yadda yake, don mai karɓar kuɗi ya iya duba shi ba tare da barcode ba.",
+    "looksLike": "Wannan yana kama da {{name}}, wanda yake cikin kayanka. Idan iri ɗaya ne, karɓi sabon kaya maimakon sake ƙara shi."
   },
   "shopper": {
     "title": "Kasuwar SAFE Stores",
