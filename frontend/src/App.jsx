@@ -31,6 +31,8 @@ import Layout from './components/Layout.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import LiveChat from './components/LiveChat.jsx';
 import OrderAlerts from './components/OrderAlerts.jsx';
+import SupportCallStore from './components/SupportCallStore.jsx';
+import SupportCallAdmin from './components/SupportCallAdmin.jsx';
 import { useAuth } from './context/AuthContext.jsx';
 
 const Dashboard = lazy(() => import('./pages/Dashboard.jsx'));
@@ -310,6 +312,7 @@ export default function App() {
     </Routes>
     {EDITION !== 'desktop' && <LiveChat />}
     <OrderAlerts />
+    {EDITION !== 'desktop' && <><SupportCallStore /><SupportCallAdmin /></>}
     </Suspense>
   );
 }

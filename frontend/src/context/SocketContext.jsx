@@ -21,13 +21,14 @@ export function SocketProvider({ children }) {
     // Super admins aren't scoped to a store and desktop-edition builds may
     // not run a realtime server at all — in either case this simply never
     // connects, and every page still works fine over plain REST calls.
-    if (!user || user.role === 'super_admin' || !user.storeId) return undefined;
+    // Super admins connect too (no store room): they receive support calls.
+    if (!user || (!user.storeId && user.role !== 'super_admin')) return undefined;
 
     const token = localStorage.getItem('ss_token');
     if (!token) return undefined;
 
     const socket = io(SOCKET_ORIGIN, {
-      auth: { token },
+      auth: { token, name: user.name || '' },
       // WebSocket only: with several API copies behind the load balancer,
       // long-polling would need sticky sessions; a websocket stays on one copy.
       transports: ['websocket'],

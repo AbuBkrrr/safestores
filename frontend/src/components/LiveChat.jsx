@@ -79,6 +79,11 @@ export default function LiveChat() {
             <div><strong>💬 SAFE Stores support</strong><div className="livechat-sub">We usually reply within minutes</div></div>
             <button type="button" className="livechat-x" onClick={() => setOpen(false)} aria-label="Close chat">✕</button>
           </div>
+          {user?.storeId && (
+            <button type="button" className="btn small" style={{ margin: '8px 12px 0' }} onClick={() => { window.dispatchEvent(new Event('ss:call-support')); setOpen(false); }}>
+              📞 {t('supportCall.button')}
+            </button>
+          )}
           <div className="livechat-body">
             <div className="livechat-msg support">Hello 👋 How can we help you today?</div>
             {msgs.map((m) => (

@@ -86,7 +86,7 @@ export default function SupportTickets() {
             <Badge status={selected.status} />
           </div>
           {!selected.store_id && (
-            <div className="card mt-1" style={{ background: 'var(--bg-soft, #f6f7f9)' }}>
+            <div className="card mt-1" style={{ background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--line)' }}>
               <strong>{selected.source === 'chat' ? '💬 Live chat' : '🌐 From the website'}:</strong> {selected.contact_name}
               {selected.contact_phone && <> · <a href={`tel:${selected.contact_phone}`}>{selected.contact_phone}</a>
                 {' '}· <a href={`https://wa.me/${selected.contact_phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer">WhatsApp</a></>}
@@ -113,6 +113,11 @@ export default function SupportTickets() {
               <button className="btn" onClick={sendReply}>Send Reply</button>
               <button className="btn small secondary" onClick={() => setStatus(selected.id, 'resolved')}>Mark Resolved</button>
               <button className="btn small secondary" onClick={() => setStatus(selected.id, 'closed')}>Close Ticket</button>
+              {selected.store_id && selected.created_by && (
+                <button className="btn small" onClick={() => window.dispatchEvent(new CustomEvent('ss:support-ring', { detail: { userId: selected.created_by, name: selected.created_by_name, storeName: selected.store_name } }))}>
+                  📞 Call (voice + screen)
+                </button>
+              )}
               {selected.status !== 'open' && (
                 <button className="btn small secondary" onClick={() => setStatus(selected.id, 'open')}>Reopen</button>
               )}
