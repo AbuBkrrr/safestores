@@ -13,6 +13,7 @@ const db = require('../config/db');
 const { logActivity } = require('../utils/activityLog');
 const { findOrCreateSupplier } = require('../utils/supplierLookup');
 const { emitToStore } = require('../realtime');
+const { forViewer } = require('../utils/costVisibility');
 
 // GET /api/stores/:storeId/products
 async function listProducts(req, res) {
@@ -34,7 +35,7 @@ async function listProducts(req, res) {
      ORDER BY p.name ASC`,
     [storeId]
   );
-  res.json(rows);
+  res.json(forViewer(req, rows));
 }
 
 // POST /api/stores/:storeId/products

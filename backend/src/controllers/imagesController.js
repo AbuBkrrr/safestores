@@ -56,7 +56,7 @@ async function barcodeLookup(req, res) {
     [storeId, code]
   );
   if (!rows[0]) return res.status(404).json({ error: 'No product found for this code' });
-  res.json(rows[0]);
+  res.json(require('../utils/costVisibility').forViewer(req, rows[0]))
 }
 
 module.exports = { listImages, uploadImage, deleteImage, barcodeLookup };

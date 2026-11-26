@@ -2,6 +2,7 @@ const crypto = require('crypto');
 const db = require('../db');
 const { findOrCreateSupplier } = require('../utils/supplierLookup');
 const { emitToStore } = require('../realtime');
+const { forViewer } = require('../utils/costVisibility');
 
 // GET /api/stores/:storeId/products
 function listProducts(req, res) {
@@ -20,7 +21,7 @@ function listProducts(req, res) {
      LEFT JOIN receipts r ON r.id = la.receipt_id
      WHERE p.store_id = ? ${req.query.includeArchived === 'true' ? '' : 'AND p.archived_at IS NULL'} ORDER BY p.name ASC`
   ).all(storeId);
-  res.json(rows);
+  res.json(forViewer(req, rows));
 }
 
 // POST /api/stores/:storeId/products

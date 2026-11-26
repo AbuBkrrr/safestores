@@ -76,7 +76,10 @@ function normalizeRow(row) {
   }
   if (!v.name) return { ok: false, error: 'Missing product name' };
   const cost = num(v.costPrice);
-  const price = num(v.sellingPrice);
+  let price = num(v.sellingPrice);
+  // A selling price of 0 is never meant (often a formula cell that came out
+  // empty): keep the markup the product already has instead of pricing it at 0.
+  if (price === 0) price = null;
   const reorder = num(v.reorderLevel);
   const stock = num(v.openingStock);
   const pack = num(v.packSize);

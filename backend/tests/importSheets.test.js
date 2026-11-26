@@ -38,3 +38,40 @@ describe('Product import from a shop’s own sheet', () => {
     expect(check.body.warnings[0]).toMatch(/empty/);
   });
 });
+
+describe('Selling prices that come out 0', () => {
+  it('are ignored, and a product stuck at ×0 is repaired on re-import', async () => {
+    const s = await createActiveStoreWithAdmin();
+    const url = `/api/stores/${s.store.id}/products/import`;
+    await request().post(url).set(A(s.token)).send({ rows: [{ SKU: 'Z-1', Name: 'Mouse', 'Reference Cost': 100, 'Selling Price': 0 }] });
+    const { pool } = require('../src/config/db');
+    let p = (await pool.query("SELECT cost_price, price_multiplier FROM products WHERE sku = 'Z-1' AND store_id = $1", [s.store.id])).rows[0];
+    expect(Number(p.cost_price)).toBe(100);
+    expect(Number(p.price_multiplier)).toBeGreaterThan(0); // never priced at ₦0
+    await pool.query("UPDATE products SET price_multiplier = 0 WHERE sku = 'Z-1' AND store_id = $1", [s.store.id]); // as left by the old import
+    const check = await request().post(url).set(A(s.token)).send({ dryRun: true, rows: [{ SKU: 'Z-1', Name: 'Mouse', 'Reference Cost': 100, 'Selling Price': 0 }] });
+    expect(check.body.warnings[0]).toMatch(/Selling Price cells came out empty or 0/);
+    await request().post(url).set(A(s.token)).send({ rows: [{ SKU: 'Z-1', Name: 'Mouse', 'Reference Cost': 100, 'Selling Price': 0 }] });
+    p = (await pool.query("SELECT price_multiplier FROM products WHERE sku = 'Z-1' AND store_id = $1", [s.store.id])).rows[0];
+    expect(Number(p.price_multiplier)).toBe(1.3);
+  });
+});
+
+describe('Who sees what a product costs', () => {
+  it('cashiers get the selling price but no cost or markup', async () => {
+    const { createProduct, createUser, tokenFor } = require('./helpers/factories');
+    const s = await createActiveStoreWithAdmin();
+    await createProduct(s.store.id, { sku: 'C-1', costPrice: 100, priceMultiplier: 1.25 });
+    const cashier = await createUser(s.store.id, { role: 'cashier' });
+    const asCashier = (await request().get(`/api/stores/${s.store.id}/products`).set(A(tokenFor(cashier)))).body[0];
+    expect(asCashier.cost_price).toBeUndefined();
+    expect(asCashier.price_multiplier).toBeUndefined();
+    expect(asCashier.stock_value).toBeUndefined();
+    expect(Number(asCashier.selling_price)).toBe(125);
+    const scan = (await request().get(`/api/stores/${s.store.id}/barcode-lookup`).query({ code: 'C-1' }).set(A(tokenFor(cashier)))).body;
+    expect(scan.cost_price).toBeUndefined();
+    expect(Number(scan.selling_price)).toBe(125);
+    const asAdmin = (await request().get(`/api/stores/${s.store.id}/products`).set(A(s.token))).body[0];
+    expect(Number(asAdmin.cost_price)).toBe(100);
+  });
+});

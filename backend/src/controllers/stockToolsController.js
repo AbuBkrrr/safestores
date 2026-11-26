@@ -49,6 +49,7 @@ async function importProducts(req, res) {
     const fields = new Set(Object.values(columns));
     const warnings = [];
     if (!fields.has('sellingPrice') && !fields.has('costPrice')) warnings.push('No price column was found, so prices would be 0. Name the column "Price" (or "Selling Price").');
+    else if (fields.has('sellingPrice') && valid.length && valid.every((v) => v.priceMultiplier == null)) warnings.push('The Selling Price cells came out empty or 0 (they are probably formulas). Costs will be saved and existing selling prices kept. To bring the selling prices in, open the file in Excel, select the Selling Price column, Copy, then Paste → Values, save and upload again — or use "Set profit %" on the Products page.');
     else if (valid.length && valid.every((v) => !(v.costPrice > 0))) warnings.push('The price cells came out empty. If they are formulas, open the file in Excel, select the price columns, Copy, then Paste → Values, save, and upload again.');
     const preview = valid.slice(0, 5).map((v) => ({ name: v.name, sku: v.sku, cost: v.costPrice, price: v.costPrice == null ? null : Math.round(v.costPrice * (v.priceMultiplier ?? 1) * 100) / 100, stock: v.openingStock }));
     return res.json({ dryRun: true, create: toCreate.length, update: toUpdate.length, errors, columns, warnings, preview });
@@ -83,6 +84,7 @@ async function importProducts(req, res) {
       add('cost_price', v.costPrice); add('price_multiplier', v.priceMultiplier); add('reorder_level', v.reorderLevel); add('pack_size', v.packSize);
       if (v.supplier) { add('supplier', v.supplier); add('supplier_id', await findOrCreateSupplier(client, storeId, v.supplier)); }
       vals.push(bySku.get(v.sku.toLowerCase()), storeId);
+      if (v.priceMultiplier == null) sets.push('price_multiplier = CASE WHEN price_multiplier > 0 THEN price_multiplier ELSE 1.3 END');
       await client.query(`UPDATE products SET ${sets.join(', ')}, updated_at = now() WHERE id = $${vals.length - 1} AND store_id = $${vals.length}`, vals);
     }
     await client.query('COMMIT');
