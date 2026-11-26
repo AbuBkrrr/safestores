@@ -146,3 +146,16 @@ describe('Products API', () => {
     expect(res.body.error).toMatch(/plan limit/i);
   });
 });
+
+describe('Mini store: received stock goes straight to the shelf (offline)', () => {
+  it('an arrival is sellable at once in a Mini store', async () => {
+    const { createActiveStoreWithAdmin: mk, createProduct: mp } = require('./helpers/factories');
+    const dbx = require('../server/db');
+    const { store, token } = mk({ autoShelf: null });
+    const p = mp(store.id, { costPrice: 100 });
+    const before = dbx.prepare('SELECT shelf_qty FROM products WHERE id = ?').get(p.id).shelf_qty;
+    const r = await require('./helpers/app').request().post(`/api/stores/${store.id}/arrivals`).set('Authorization', `Bearer ${token}`).send({ productId: p.id, quantity: 7 });
+    expect(r.status).toBe(201);
+    expect(dbx.prepare('SELECT shelf_qty FROM products WHERE id = ?').get(p.id).shelf_qty).toBe(before + 7);
+  });
+});

@@ -68,7 +68,7 @@ async function restoreMutableSingletons() {
   `);
   await pool.query(`UPDATE currency_settings SET code = 'NGN', symbol = '₦' WHERE id = 'default'`);
   // Tier limits can be edited by a Super Admin test; put the migration defaults back.
-  await pool.query(`UPDATE store_tiers SET max_products = 200, max_users = 3 WHERE tier = 'mini'`);
+  await pool.query(`UPDATE store_tiers SET max_products = 200, max_users = 5 WHERE tier = 'mini'`);
   await pool.query(`UPDATE store_tiers SET max_products = 2000, max_users = 20 WHERE tier = 'midi'`);
   await pool.query(`UPDATE store_tiers SET max_products = NULL, max_users = NULL WHERE tier = 'mega'`);
 }

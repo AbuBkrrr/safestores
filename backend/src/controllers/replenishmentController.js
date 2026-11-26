@@ -218,6 +218,7 @@ async function receivePurchaseOrder(req, res) {
         [storeId, item.product_id, receivedQty, `Received from purchase order ${po.id.slice(0, 8)}`, req.user.sub]
       );
       await recomputeProductQuantities(client, item.product_id);
+      await require('../utils/autoShelf').autoShelf(client, storeId, item.product_id, receivedQty, req.user.sub);
       await client.query('UPDATE purchase_order_items SET received_quantity = $1 WHERE id = $2', [receivedQty, item.id]);
     }
 

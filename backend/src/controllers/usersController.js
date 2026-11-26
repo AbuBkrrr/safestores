@@ -77,7 +77,7 @@ async function teamProblem(storeId, role, adding = 1) {
   const s = rows[0];
   if (!s) return 'Store not found';
   if (s.store_tier === 'mini' && !MINI_ROLES.includes(role)) {
-    return 'A Mini store is run by the owner with up to 2 helpers (manager, cashier or shop assistant). Upgrade to Midi to add store managers, shelf managers, security and online market managers.';
+    return 'A Mini store is run by the owner alone or with up to 4 helpers (5 people in all) as manager, cashier or shop assistant. Upgrade to Midi for store managers, shelf managers, security and online market managers.';
   }
   if (s.max_users) {
     const { rows: c } = await db.query(

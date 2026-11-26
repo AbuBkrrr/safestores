@@ -565,7 +565,7 @@
     "bulkCreationFailed": "Bulk creation failed",
     "allPendingCopied": "All pending codes copied to clipboard",
     "inviteMessageCopied": "Invite message copied",
-    "miniNote": "Mini store: you run the shop, with up to 2 helpers (a manager, cashier or shop assistant). Upgrade to Midi to add store and shelf managers, security and an online market manager.",
+    "miniNote": "Mini store: run it on your own, or with up to 4 helpers (5 people in all) as manager, cashier or shop assistant. You can do every task yourself. Upgrade to Midi for store and shelf managers, security and an online market manager.",
     "needsMidi": "Midi / Mega"
   },
   "usersPage": {
@@ -1307,7 +1307,7 @@
     "registrationSuccess": "Store registered! A Super Admin will assign your store size and billing plan, then you can log in.",
     "registrationFailed": "Registration failed",
     "tierMiniLabel": "Mini Store",
-    "tierMiniDesc": "Up to 200 products · 3 users — for a small shop run by 1 or 2 people",
+    "tierMiniDesc": "Up to 200 products · up to 5 people — for a small shop, even one run by one person",
     "tierMidiLabel": "Midi Store",
     "tierMidiDesc": "Up to 2,000 products · 20 users — best for a growing store",
     "tierMegaLabel": "Mega Store",
@@ -2592,7 +2592,9 @@
     "a_produce": "Make a batch",
     "a_waste": "Log waste",
     "a_newJob": "New job",
-    "a_jobs": "Job list"
+    "a_jobs": "Job list",
+    "a_quickAdd": "Quick add product",
+    "a_today": "Today's summary"
   },
   "quickAdd": {
     "button": "Quick add",

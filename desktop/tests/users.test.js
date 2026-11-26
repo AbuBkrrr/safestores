@@ -171,14 +171,16 @@ describe('Invite roles', () => {
 });
 
 describe('Store size rules (offline)', () => {
-  it('a Mini store takes only helpers (manager, cashier, shop assistant), up to 3 people in all', async () => {
+  it('a Mini store takes only helpers (manager, cashier, shop assistant), up to 5 people in all', async () => {
     const { store, token } = await createActiveStoreWithAdmin();
     const inv = (role, name) => request().post(`/api/stores/${store.id}/invites`).set('Authorization', `Bearer ${token}`).send({ name, role });
     expect((await inv('security', 'Guard')).status).toBe(403);
     expect((await inv('cashier', 'Ada')).status).toBe(201);
     expect((await inv('staff', 'Musa')).status).toBe(201);
-    const full = await inv('cashier', 'Third');
+    expect((await inv('manager', 'Third')).status).toBe(201);
+    expect((await inv('staff', 'Fourth')).status).toBe(201);
+    const full = await inv('cashier', 'Fifth helper');
     expect(full.status).toBe(403);
-    expect(full.body.error).toMatch(/allows 3 people/);
+    expect(full.body.error).toMatch(/allows 5 people/);
   });
 });

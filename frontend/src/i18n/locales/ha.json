@@ -565,7 +565,7 @@
     "bulkCreationFailed": "Ƙirƙirar da yawa ta kasa",
     "allPendingCopied": "An kwafi duk lambobin da ke jira",
     "inviteMessageCopied": "An kwafi saƙon gayyata",
-    "miniNote": "Ƙaramin shago: kai ne ke gudanar da shagon, tare da mataimaka har 2 (manaja, mai karɓar kuɗi ko mai taimako). Ƙara zuwa Midi don ƙara manajan rumbu, manajan shiryayye, tsaro da manajan kasuwar intanet.",
+    "miniNote": "Ƙaramin shago: gudanar da shi kai kaɗai, ko tare da mataimaka har 4 (mutane 5 gaba ɗaya) a matsayin manaja, mai karɓar kuɗi ko mai taimako. Kana iya yin kowane aiki da kanka. Haɓaka zuwa Midi don manajan shago da na shiryayye, tsaro da manajan kasuwar intanet.",
     "needsMidi": "Midi / Mega"
   },
   "usersPage": {
@@ -2592,7 +2592,9 @@
     "a_produce": "Yi rukuni",
     "a_waste": "Rubuta asara",
     "a_newJob": "Sabon aiki",
-    "a_jobs": "Jerin ayyuka"
+    "a_jobs": "Jerin ayyuka",
+    "a_quickAdd": "Ƙara kaya da sauri",
+    "a_today": "Taƙaitaccen yau"
   },
   "quickAdd": {
     "button": "Ƙara da sauri",

@@ -565,7 +565,7 @@
     "bulkCreationFailed": "Ịmepụta ọtụtụ dara",
     "allPendingCopied": "Edetuola koodu niile na-eche",
     "inviteMessageCopied": "Edetuola ozi ọkpụkpọ",
-    "miniNote": "Ụlọ ahịa Mini: ị na-agba ụlọ ahịa ahụ, ya na ndị inyeaka ruru 2 (onye njikwa, onye na-anata ego ma ọ bụ onye inyeaka). Kwalite gaa Midi iji tinye onye njikwa ụlọ nkwakọba, onye njikwa shelf, onye nche na onye njikwa ahịa ịntanetị.",
+    "miniNote": "Obere ụlọ ahịa: jiri naanị gị jikwaa ya, ma ọ bụ ya na ndị inyeaka ruru 4 (mmadụ 5 niile) dịka onye njikwa, onye na-anara ego ma ọ bụ onye inyeaka. Ị nwere ike ịrụ ọrụ niile n'onwe gị. Kwalite gaa Midi maka ndị njikwa ụlọ ahịa na shelf, nchekwa na onye njikwa ahịa ịntanetị.",
     "needsMidi": "Midi / Mega"
   },
   "usersPage": {
@@ -2592,7 +2592,9 @@
     "a_produce": "Mepụta otu ụzọ",
     "a_waste": "Dee ihe mebiri",
     "a_newJob": "Ọrụ ọhụrụ",
-    "a_jobs": "Ndepụta ọrụ"
+    "a_jobs": "Ndepụta ọrụ",
+    "a_quickAdd": "Tinye ngwaahịa ngwa ngwa",
+    "a_today": "Nchịkọta taa"
   },
   "quickAdd": {
     "button": "Tinye ngwa ngwa",

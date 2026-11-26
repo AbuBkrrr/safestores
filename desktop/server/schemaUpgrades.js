@@ -138,7 +138,7 @@ function applyShopFloorUpgrades(db) {
   // 063 — when the store's settings themselves last changed (for sync)
   ensureColumn(db, 'stores', 'settings_updated_at', 'TEXT');
   // 056 — a Mini store is the owner plus up to 2 helpers
-  db.exec("UPDATE store_tiers SET max_users = 3 WHERE tier = 'mini' AND (max_users IS NULL OR max_users = 5)");
+  // (was: cap Mini at 3 people — raised back to 5 in 072 below)
   // 035, 038, 041
   ensureColumn(db, 'stores', 'daily_summary_enabled', 'INTEGER NOT NULL DEFAULT 0');
   ensureColumn(db, 'stores', 'last_summary_on', 'TEXT');
@@ -322,6 +322,10 @@ function applyShopFloorUpgrades(db) {
       WHEN NEW.updated_at IS OLD.updated_at
       BEGIN UPDATE ${t} SET updated_at = ${NOW} WHERE id = NEW.id; END`);
   }
+  // 072 — Mini stores: up to 5 people; received stock straight to the shelf (NULL = by store size).
+  ensureColumn(db, 'stores', 'auto_shelf', 'INTEGER');
+  db.exec("UPDATE store_tiers SET max_users = 5 WHERE tier = 'mini' AND (max_users IS NULL OR max_users < 5)");
+
   // 068 — camera recognition: picture fingerprints per product.
   db.exec(`CREATE TABLE IF NOT EXISTS product_looks (
     id TEXT PRIMARY KEY,

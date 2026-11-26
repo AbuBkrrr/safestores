@@ -95,6 +95,7 @@ function importProducts(req, res) {
           db.prepare(`INSERT INTO stock_movements (id, store_id, product_id, type, quantity, note, performed_by) VALUES (?,?,?,'arrival',?,'Opening stock (import)',?)`)
             .run(crypto.randomUUID(), storeId, id, v.openingStock, req.user.sub);
           recomputeProductQuantities(db, id);
+          require('../utils/autoShelf').autoShelf(db, storeId, id, v.openingStock, req.user.sub);
         }
       }
       for (const v of toUpdate) {

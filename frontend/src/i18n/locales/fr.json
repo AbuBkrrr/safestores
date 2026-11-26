@@ -565,7 +565,7 @@
     "bulkCreationFailed": "Échec de la création groupée",
     "allPendingCopied": "Tous les codes en attente copiés dans le presse-papiers",
     "inviteMessageCopied": "Message d'invitation copié",
-    "miniNote": "Boutique Mini : vous tenez la boutique avec jusqu'à 2 aides (un gérant, un caissier ou un vendeur). Passez à Midi pour ajouter des magasiniers, des responsables de rayon, la sécurité et un gestionnaire de boutique en ligne.",
+    "miniNote": "Petite boutique : gérez-la seul ou avec jusqu'à 4 aides (5 personnes en tout) comme gérant, caissier ou vendeur. Vous pouvez tout faire vous-même. Passez à Midi pour les responsables de magasin et de rayon, la sécurité et un gestionnaire de boutique en ligne.",
     "needsMidi": "Midi / Mega"
   },
   "usersPage": {
@@ -2592,7 +2592,9 @@
     "a_produce": "Faire une fournée",
     "a_waste": "Noter une perte",
     "a_newJob": "Nouveau travail",
-    "a_jobs": "Liste des travaux"
+    "a_jobs": "Liste des travaux",
+    "a_quickAdd": "Ajout rapide de produit",
+    "a_today": "Résumé du jour"
   },
   "quickAdd": {
     "button": "Ajout rapide",

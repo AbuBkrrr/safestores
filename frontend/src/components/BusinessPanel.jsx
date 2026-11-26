@@ -26,14 +26,14 @@ const ACTIONS = {
 const ACTION = {
   checkout: ['🧾', '/checkout'], receive: ['📥', '/receipts'], markup: ['💹', '/products'], labels: ['🏷️', '/labels'],
   products: ['📦', '/products'], breakdown: ['🔪', '/production'], produce: ['🍳', '/production'], waste: ['🗑️', '/waste'],
-  newJob: ['➕', '/jobs'], jobs: ['📋', '/jobs'],
+  newJob: ['➕', '/jobs'], jobs: ['📋', '/jobs'], quickAdd: ['⚡', '/products?quick=1'], today: ['📅', '/daily-report'],
 };
 
 /** The top of the owner/manager dashboard, shaped by the business type chosen at sign-up. */
 export default function BusinessPanel({ storeId }) {
   const { t } = useTranslation();
   const { formatCurrency } = useCurrency();
-  const { businessType = 'general', tools = [] } = useStoreProfile();
+  const { businessType = 'general', tools = [], tier } = useStoreProfile();
   const type = BUSINESS_TYPES[businessType] ? businessType : 'general';
   const [jobs, setJobs] = useState(null);
   const [waste, setWaste] = useState(null);
@@ -80,7 +80,10 @@ export default function BusinessPanel({ storeId }) {
         <Link to="/settings" className="muted small">{t('bizDash.change')}</Link>
       </div>
       <div className="flex mt-1" style={{ flexWrap: 'wrap', gap: 8 }}>
-        {(ACTIONS[type] || ACTIONS.general).map((a) => (
+        {(tier === 'mini'
+          // One person runs a Mini store: sell, add stock and see the day, first.
+          ? [...new Set(['checkout', 'quickAdd', 'receive', ...(ACTIONS[type] || ACTIONS.general), 'today'])].slice(0, 6)
+          : (ACTIONS[type] || ACTIONS.general)).map((a) => (
           <Link key={a} to={ACTION[a][1]} className="btn secondary small" style={{ textDecoration: 'none' }}>{ACTION[a][0]} {t(`bizDash.a_${a}`)}</Link>
         ))}
       </div>
