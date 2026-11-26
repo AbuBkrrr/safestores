@@ -3,7 +3,7 @@
 // from the website form, sign-ups each link brought, and outreach.
 const crypto = require('crypto');
 const db = require('../config/db');
-const { parseUserAgent, countryOf } = require('../utils/userAgent');
+const { parseUserAgent, countryOf, isBot, looksAutomated } = require('../utils/userAgent');
 const { sendMail } = require('../utils/mailer');
 
 const CHANNELS = ['whatsapp', 'facebook', 'instagram', 'tiktok', 'x', 'linkedin', 'telegram', 'youtube', 'email', 'sms', 'flyer', 'poster', 'event', 'radio', 'partner', 'other'];
@@ -45,9 +45,13 @@ async function recordOpen(req, res) {
   const sig = typeof b.signature === 'string' ? crypto.createHash('sha256').update(b.signature).digest('hex').slice(0, 32) : null;
   const deviceKey = id || (sig && `sig:${sig}`);
   if (!deviceKey) return res.status(400).json({ error: 'Missing device' });
-  const ua = parseUserAgent(req.headers['user-agent']);
+  const uaText = req.headers['user-agent'] || '';
+  // Known robots are not recorded at all; look-alikes are kept but marked.
+  if (isBot(uaText)) return res.json({ ignored: true });
+  const ua = parseUserAgent(uaText);
   if (ua.deviceType === 'bot') return res.json({ ignored: true });
   const tz = clip(b.tz, 60);
+  const bot = looksAutomated({ ua: uaText, tz, webdriver: b.webdriver === true });
   const place = countryOf(req, tz);
   const utm = b.utm || {};
 
@@ -64,13 +68,13 @@ async function recordOpen(req, res) {
     const openNo = prior ? Number(prior.opens) + 1 : 1;
     await client.query(
       `INSERT INTO marketing_opens (link_code, device_key, device_key_kind, device_no, open_no, device_type, os, browser, model, in_app,
-        country, country_code, timezone, language, screen, referrer, page, utm_source, utm_medium, utm_campaign)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)`,
+        country, country_code, timezone, language, screen, referrer, page, utm_source, utm_medium, utm_campaign, is_bot)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)`,
       [ref, deviceKey, id ? 'id' : 'signature', deviceNo, openNo, ua.deviceType, ua.os, ua.browser, clip(ua.model, 80), ua.inApp,
         place.country, place.countryCode, tz, clip(b.lang, 20), clip(b.screen, 20), clip(b.referrer, 300), clip(b.page, 60),
-        clip(utm.source, 60), clip(utm.medium, 60), clip(utm.campaign, 80)]);
+        clip(utm.source, 60), clip(utm.medium, 60), clip(utm.campaign, 80), bot]);
     await client.query('COMMIT');
-    res.json({ deviceNo, openNo, newDevice: openNo === 1 });
+    res.json({ deviceNo, openNo, newDevice: openNo === 1, ...(bot ? { automated: true } : {}) });
   } catch (err) {
     await client.query('ROLLBACK');
     throw err;
@@ -121,13 +125,13 @@ const LINK_STATS = `
          (SELECT COUNT(*) FROM stores s WHERE s.ref_code = l.code AND s.subscription_status = 'active')::int AS active_stores
   FROM marketing_links l
   LEFT JOIN (SELECT link_code, COUNT(*) AS opens, COUNT(DISTINCT device_key) AS devices, MAX(created_at) AS last_open
-             FROM marketing_opens GROUP BY link_code) o ON o.link_code = l.code`;
+             FROM marketing_opens WHERE NOT is_bot GROUP BY link_code) o ON o.link_code = l.code`;
 
 async function listLinks(req, res) {
   const { rows } = await db.query(`${LINK_STATS} WHERE l.archived_at IS NULL ORDER BY l.created_at DESC`);
   // Opens that came with no tracking link at all.
   const none = (await db.query(`SELECT COUNT(*)::int AS opens, COUNT(DISTINCT device_key)::int AS devices, MAX(created_at) AS last_open
-    FROM marketing_opens WHERE link_code IS NULL OR link_code NOT IN (SELECT code FROM marketing_links)`)).rows[0];
+    FROM marketing_opens WHERE NOT is_bot AND (link_code IS NULL OR link_code NOT IN (SELECT code FROM marketing_links))`)).rows[0];
   const { base } = await urls();
   const out = rows.map((l) => ({ ...l, url: `${base}/go/${l.code}`, verdict: verdict(l.opens, l.devices) }));
   if (none.opens) out.push({ id: null, code: null, label: '(no label)', channel: 'direct', ...none, repeat_opens: none.opens - none.devices, leads: 0, signups: 0, active_stores: 0, verdict: verdict(none.opens, none.devices) });
@@ -160,12 +164,13 @@ async function archiveLink(req, res) {
 async function listOpens(req, res) {
   const limit = Math.min(500, Math.max(1, parseInt(req.query.limit, 10) || 100));
   const params = [limit];
-  let where = '';
-  if (req.query.link === 'none') where = 'WHERE o.link_code IS NULL';
-  else if (codeOk(req.query.link)) { params.push(req.query.link); where = 'WHERE o.link_code = $2'; }
+  // ?bots=1 shows the automated visits instead of people.
+  let where = req.query.bots === '1' ? 'WHERE o.is_bot' : 'WHERE NOT o.is_bot';
+  if (req.query.link === 'none') where += ' AND o.link_code IS NULL';
+  else if (codeOk(req.query.link)) { params.push(req.query.link); where += ' AND o.link_code = $2'; }
   const { rows } = await db.query(
     `SELECT o.id, o.link_code, COALESCE(l.label, '(no label)') AS label, o.device_no, o.open_no, o.device_key_kind,
-            o.device_type, o.os, o.browser, o.model, o.in_app, o.country, o.timezone, o.language, o.screen, o.referrer, o.created_at
+            o.device_type, o.os, o.browser, o.model, o.in_app, o.country, o.timezone, o.language, o.screen, o.referrer, o.created_at, o.is_bot
      FROM marketing_opens o LEFT JOIN marketing_links l ON l.code = o.link_code ${where}
      ORDER BY o.created_at DESC LIMIT $1`, params);
   res.json(rows);
@@ -178,20 +183,22 @@ async function overview(req, res) {
   const q = async (sql) => (await db.query(sql)).rows;
   const [totals] = await q(`SELECT COUNT(*)::int AS opens, COUNT(DISTINCT device_key)::int AS devices,
       (COUNT(*) - COUNT(DISTINCT (COALESCE(link_code, ''), device_key)))::int AS repeat_opens,
-      COUNT(DISTINCT country)::int AS countries FROM marketing_opens WHERE created_at > ${since}`);
+      COUNT(DISTINCT country)::int AS countries,
+      (SELECT COUNT(*) FROM marketing_opens WHERE is_bot AND created_at > ${since})::int AS bots
+      FROM marketing_opens WHERE NOT is_bot AND created_at > ${since}`);
   const [funnel] = await q(`SELECT
       (SELECT COUNT(*) FROM marketing_leads WHERE created_at > ${since})::int AS leads,
       (SELECT COUNT(*) FROM stores WHERE created_at > ${since})::int AS signups,
       (SELECT COUNT(*) FROM stores WHERE created_at > ${since} AND ref_code IS NOT NULL)::int AS tracked_signups,
       (SELECT COUNT(*) FROM stores WHERE created_at > ${since} AND subscription_status = 'active')::int AS activated`);
   const by = (col) => q(`SELECT COALESCE(${col}, 'Unknown') AS name, COUNT(*)::int AS opens, COUNT(DISTINCT device_key)::int AS devices
-      FROM marketing_opens WHERE created_at > ${since} GROUP BY 1 ORDER BY devices DESC, opens DESC LIMIT 12`);
+      FROM marketing_opens WHERE NOT is_bot AND created_at > ${since} GROUP BY 1 ORDER BY devices DESC, opens DESC LIMIT 12`);
   const [countries, devices, systems, sources, languages] = await Promise.all([
     by('country'), by('device_type'), by('os'), by(`COALESCE(in_app, utm_source, CASE WHEN referrer IS NULL OR referrer = '' THEN 'Direct / QR' ELSE substring(referrer from '^https?://([^/]+)') END)`), by('language'),
   ]);
   const daily = await q(`SELECT to_char(date_trunc('day', created_at), 'YYYY-MM-DD') AS day, COUNT(*)::int AS opens, COUNT(DISTINCT device_key)::int AS devices
-      FROM marketing_opens WHERE created_at > ${since} GROUP BY 1 ORDER BY 1`);
-  const hours = await q(`SELECT EXTRACT(HOUR FROM created_at)::int AS hour, COUNT(*)::int AS opens FROM marketing_opens WHERE created_at > ${since} GROUP BY 1 ORDER BY 1`);
+      FROM marketing_opens WHERE NOT is_bot AND created_at > ${since} GROUP BY 1 ORDER BY 1`);
+  const hours = await q(`SELECT EXTRACT(HOUR FROM created_at)::int AS hour, COUNT(*)::int AS opens FROM marketing_opens WHERE NOT is_bot AND created_at > ${since} GROUP BY 1 ORDER BY 1`);
   res.json({ days, totals: { ...totals, ...funnel }, countries, devices, systems, sources, languages, daily, hours });
 }
 

@@ -19,7 +19,7 @@ export function captureRef() {
     let tz = ''; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone; } catch { /* old browser */ }
     api.post('/m/open', {
       ref, deviceId, tz, lang: navigator.language, screen: `${window.screen.width}x${window.screen.height}`,
-      referrer: document.referrer, page: 'signup', signature: [navigator.userAgent, window.screen.width, window.screen.height, tz, navigator.language].join('|'),
+      referrer: document.referrer, page: 'signup', webdriver: navigator.webdriver === true, signature: [navigator.userAgent, window.screen.width, window.screen.height, tz, navigator.language].join('|'),
     }).catch(() => {});
   }
   return { refCode: get('ss_ref'), refDevice: deviceId };
