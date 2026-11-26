@@ -14,10 +14,24 @@ NET=$(docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{en
 docker network connect "$NET" "$CADDY" 2>/dev/null || true
 BACKUP="$FILE.before-safestores-$(date +%Y%m%d%H%M%S)"
 cp "$FILE" "$BACKUP"
+# Old addresses forward people to the new one (pages only: installed apps keep
+# talking to /api, /socket.io, /uploads on the old address). Only when the new
+# address already points at this same server, so nobody is sent to a dead site.
+REDIRECT=${REDIRECT_OLD:-auto}
+if [ "$REDIRECT" = auto ]; then
+  NEW_IP=$(getent hosts "app.$DOMAIN" | awk '{print $1; exit}')
+  REDIRECT=0
+  for D in $EXTRA_DOMAINS; do
+    OLD_IP=$(getent hosts "app.$D" | awk '{print $1; exit}')
+    [ -n "$NEW_IP" ] && [ "$NEW_IP" = "$OLD_IP" ] && REDIRECT=1
+  done
+  [ "$REDIRECT" = 1 ] && echo "   app.$DOMAIN points here: old addresses will forward to it" \
+    || echo "   app.$DOMAIN does not point at this server yet: old addresses keep serving the app (no forwarding)"
+fi
 for D in $DOMAIN $EXTRA_DOMAINS; do
-python3 - "$FILE" "$D" <<'PY'
+python3 - "$FILE" "$D" "$DOMAIN" "$REDIRECT" <<'PY'
 import re, sys
-path, dom = sys.argv[1], sys.argv[2]
+path, dom, primary, redirect = sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4] == '1'
 text = open(path).read()
 out, i, n = [], 0, len(text)
 lines = text.split('\n')
@@ -34,6 +48,30 @@ for line in lines:
             skip, depth = False, 0
         continue
     res.append(line)
+old = redirect and dom != primary
+if old:
+    body = '\n'.join(res).rstrip() + f'''
+
+{dom}, www.{dom} {{
+	redir https://{primary}{{uri}} permanent
+}}
+
+app.{dom} {{
+	encode gzip zstd
+	request_body {{
+		max_size 30MB
+	}}
+	@apps path /api/* /socket.io/* /uploads/* /go/* /share/* /sw.js /manifest.json /market.webmanifest
+	handle @apps {{
+		reverse_proxy safestores-frontend-1:80
+	}}
+	handle {{
+		redir https://app.{primary}{{uri}} permanent
+	}}
+}}
+'''
+    open(path, 'w').write(body)
+    sys.exit(0)
 body = '\n'.join(res).rstrip() + f'''
 
 {dom}, www.{dom} {{
