@@ -89,9 +89,20 @@ export default function OrderAlerts() {
         }
       } catch { /* */ }
     };
+    const onMsg = (m) => {
+      setAlerts((a) => [{ id: `msg-${m?.id}-${Date.now()}`, msg: true, ref: m?.reference, who: m?.name || '', text: m?.photo ? `📷 ${m?.text || ''}` : (m?.text || '') }, ...a].slice(0, 3));
+      playOrderChime();
+      try {
+        if ('Notification' in window && Notification.permission === 'granted' && document.visibilityState !== 'visible') {
+          const n = new Notification(t('orderAlert.msgTitle', { ref: m?.reference || '' }), { body: `${m?.name || ''}: ${m?.text || ''}`, tag: `msg-${m?.id}` });
+          n.onclick = () => { window.focus(); navigate('/marketplace'); n.close(); };
+        }
+      } catch { /* */ }
+    };
     socket.on('marketplace:order_placed', onOrder);
     socket.on('marketplace:payment_sent', onPaid);
-    return () => { socket.off('marketplace:order_placed', onOrder); socket.off('marketplace:payment_sent', onPaid); };
+    socket.on('marketplace:order_message', onMsg);
+    return () => { socket.off('marketplace:order_placed', onOrder); socket.off('marketplace:payment_sent', onPaid); socket.off('marketplace:order_message', onMsg); };
   }, [socket]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Staff who can't open the orders page (cashiers…) still hear and see the
@@ -103,8 +114,8 @@ export default function OrderAlerts() {
       {alerts.map((a) => (
         <div key={a.id} className="order-alert">
           <div>
-            <strong>{a.paid ? `💸 ${t('orderAlert.paidTitle')}` : `🔔 ${t('orderAlert.title')}`}</strong>
-            <div>{a.paid ? t('orderAlert.paidBody', { total: a.total, ref: a.ref || '' }) : t('orderAlert.body', { total: a.total })}{a.who ? ` — ${a.who}` : ''}</div>
+            <strong>{a.msg ? `💬 ${t('orderAlert.msgTitle', { ref: a.ref || '' })}` : a.paid ? `💸 ${t('orderAlert.paidTitle')}` : `🔔 ${t('orderAlert.title')}`}</strong>
+            <div>{a.msg ? `${a.who}: ${a.text}` : <>{a.paid ? t('orderAlert.paidBody', { total: a.total, ref: a.ref || '' }) : t('orderAlert.body', { total: a.total })}{a.who ? ` — ${a.who}` : ''}</>}</div>
           </div>
           <div className="order-alert-actions">
             {canOpenOrders && <button type="button" className="btn small" onClick={() => { setAlerts((l) => l.filter((x) => x.id !== a.id)); navigate('/marketplace'); }}>{t('orderAlert.view')}</button>}

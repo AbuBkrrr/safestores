@@ -61,6 +61,51 @@ async function paymentSent(req, res) {
   res.json({ transfer_sent_at: o.transfer_sent_at });
 }
 
+// ---- Chat about an order, from its tracking page (no login: the tracking
+// link is the key). Uses the shop's customer-messages inbox.
+async function orderForChat(token) {
+  const { rows } = await db.query(
+    `SELECT mo.id, mo.store_id, COALESCE(c.name, mo.guest_name, 'Customer') AS name, COALESCE(c.phone, mo.guest_phone) AS phone
+       FROM marketplace_orders mo LEFT JOIN customers c ON c.id = mo.customer_id WHERE mo.tracking_token = $1`, [String(token).slice(0, 80)]);
+  return rows[0] || null;
+}
+
+// GET /api/public/marketplace-orders/:token/chat
+async function orderChat(req, res) {
+  const o = await orderForChat(req.params.token);
+  if (!o) return res.status(404).json({ error: 'Order not found' });
+  const { rows } = await db.query(
+    `SELECT m.from_store, m.author_name, m.body, m.image_url, m.created_at FROM store_inquiry_messages m
+       JOIN store_inquiries i ON i.id = m.inquiry_id WHERE i.order_id = $1 ORDER BY m.created_at`, [o.id]);
+  res.json(rows);
+}
+
+// POST /api/public/marketplace-orders/:token/chat  (multipart: message, photo?)
+async function orderChatSend(req, res) {
+  const o = await orderForChat(req.params.token);
+  if (!o) return res.status(404).json({ error: 'Order not found' });
+  const body = String(req.body?.message || '').trim().slice(0, 2000) || null;
+  let imageUrl = null;
+  if (req.file) imageUrl = (await require('../utils/storage').persistUpload(req.file, { keyPrefix: `stores/${o.store_id}/order-chat` })).url;
+  if (!body && !imageUrl) return res.status(400).json({ error: 'Write a message or add a photo' });
+  const { rows } = await db.query(
+    `INSERT INTO store_inquiries (store_id, order_id, kind, name, phone) VALUES ($1, $2, 'question', $3, $4)
+     ON CONFLICT (order_id) WHERE order_id IS NOT NULL DO UPDATE SET status = 'open', updated_at = now() RETURNING id`,
+    [o.store_id, o.id, String(o.name).slice(0, 120), o.phone ? String(o.phone).slice(0, 40) : null]);
+  await db.query('INSERT INTO store_inquiry_messages (inquiry_id, from_store, author_name, body, image_url) VALUES ($1, false, $2, $3, $4)',
+    [rows[0].id, o.name, body, imageUrl]);
+  const reference = o.id.slice(0, 8).toUpperCase();
+  try {
+    const rt = require('../realtime');
+    rt.emitToStore(o.store_id, 'inquiry:new', { id: rows[0].id });
+    rt.emitToStore(o.store_id, 'marketplace:order_message', { id: o.id, reference, name: o.name, text: body || '📷', photo: !!imageUrl });
+  } catch { /* realtime is optional */ }
+  require('../utils/push').sendPushToStore(o.store_id, {
+    title: `Message about order ${reference}`, body: body ? body.slice(0, 120) : `${o.name} sent a photo`, data: { type: 'inquiry', orderId: o.id },
+  }).catch(() => {});
+  res.status(201).json({ ok: true });
+}
+
 async function shareShop(req, res) {
   const target = `${frontendBase()}/shop/${encodeURIComponent(req.params.storeId)}`;
   let store = null;
@@ -114,4 +159,4 @@ async function storeInfo(req, res) {
   res.json({ ...rows[0], payments });
 }
 
-module.exports = { paymentSent, trackOrder, shareShop, sitemap, robots, storeInfo };
+module.exports = { orderChat, orderChatSend, paymentSent, trackOrder, shareShop, sitemap, robots, storeInfo };

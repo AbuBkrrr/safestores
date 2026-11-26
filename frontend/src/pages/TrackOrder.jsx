@@ -5,6 +5,7 @@ import api from '../api/client.js';
 import { formatCurrency } from '../utils/currency.js';
 import { BrandFooter } from '../components/ui.jsx';
 import TransferDetails from '../components/TransferDetails.jsx';
+import OrderChat from '../components/OrderChat.jsx';
 
 // Steps follow the store's choice of pickup or delivery once it has reviewed the order.
 const stepsFor = (method) => (method === 'delivery'
@@ -99,6 +100,7 @@ export default function TrackOrder() {
               {o.items.map((i, idx) => <div key={idx} className="flex-between"><span>{i.name} × {i.quantity}</span><span>{formatCurrency(i.unit_price * i.quantity, c)}</span></div>)}
               <div className="flex-between" style={{ fontWeight: 700, marginTop: 6 }}><span>{t('checkout.total')}</span><span>{formatCurrency(o.total, c)}</span></div>
             </div>
+            <OrderChat token={token} storeName={o.store_name} />
             {o.store_phone && <p className="mt-1">{t('trackPage.questions')} <a href={`tel:${o.store_phone}`}>{o.store_phone}</a></p>}
           </>
         )}

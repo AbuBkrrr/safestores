@@ -2747,7 +2747,8 @@
     "you": "Ìwọ",
     "replyPh": "Dá oníbàárà lóhùn",
     "send": "Dáhùn",
-    "close": "Ti parí"
+    "close": "Ti parí",
+    "aboutOrder": "Nípa àṣẹ {{ref}}"
   },
   "installMarket": {
     "title": "Gba Ọjà SAFE Stores sórí fóònù rẹ",
@@ -2843,6 +2844,16 @@
     "body": "Àṣẹ ọjà {{total}} ṣẹ̀ṣẹ̀ dé.",
     "view": "Wo àṣẹ náà",
     "paidTitle": "Oníbàárà sọ pé òun ti sanwó",
-    "paidBody": "Owó {{total}} fún àṣẹ {{ref}}. Ṣàyẹ̀wò báǹkì rẹ, lẹ́yìn náà tẹ Owó ti dé."
+    "paidBody": "Owó {{total}} fún àṣẹ {{ref}}. Ṣàyẹ̀wò báǹkì rẹ, lẹ́yìn náà tẹ Owó ti dé.",
+    "msgTitle": "Ọ̀rọ̀ nípa àṣẹ {{ref}}"
+  },
+  "orderChat": {
+    "title": "Bá {{store}} sọ̀rọ̀ nípa àṣẹ yìí",
+    "empty": "Fi ọ̀rọ̀ tàbí fọ́tò ránṣẹ́ (bí ìwé-ẹ̀rí owó tí o fi ránṣẹ́). Ṣọ́ọ̀bù yóò dáhùn níbí.",
+    "photo": "Fọ́tò",
+    "attach": "So fọ́tò mọ́",
+    "placeholder": "Tẹ ọ̀rọ̀…",
+    "send": "Fi ránṣẹ́",
+    "failed": "Kò lọ. Ṣàyẹ̀wò íntánẹ́ẹ̀tì rẹ kí o tún gbìyànjú."
   }
 }

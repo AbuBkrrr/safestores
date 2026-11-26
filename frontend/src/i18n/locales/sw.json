@@ -2747,7 +2747,8 @@
     "you": "Wewe",
     "replyPh": "Mjibu mnunuzi",
     "send": "Jibu",
-    "close": "Imekamilika"
+    "close": "Imekamilika",
+    "aboutOrder": "Kuhusu oda {{ref}}"
   },
   "installMarket": {
     "title": "Pata Soko la SAFE Stores kwenye simu yako",
@@ -2843,6 +2844,16 @@
     "body": "Oda ya {{total}} imeingia sasa hivi.",
     "view": "Tazama oda",
     "paidTitle": "Mteja anasema amelipa",
-    "paidBody": "Uhamisho wa {{total}} kwa oda {{ref}}. Angalia benki yako, kisha bonyeza Pesa imepokelewa."
+    "paidBody": "Uhamisho wa {{total}} kwa oda {{ref}}. Angalia benki yako, kisha bonyeza Pesa imepokelewa.",
+    "msgTitle": "Ujumbe kuhusu oda {{ref}}"
+  },
+  "orderChat": {
+    "title": "Ongea na {{store}} kuhusu oda hii",
+    "empty": "Tuma ujumbe au picha (mfano risiti ya uhamisho). Duka litajibu hapa.",
+    "photo": "Picha",
+    "attach": "Ambatisha picha",
+    "placeholder": "Andika ujumbe…",
+    "send": "Tuma",
+    "failed": "Imeshindwa kutuma. Angalia intaneti ujaribu tena."
   }
 }
