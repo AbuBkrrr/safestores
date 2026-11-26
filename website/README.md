@@ -1,6 +1,6 @@
 # SAFE Stores — Public Website
 
-A single-file static landing/download page for `safestores.name.ng` — this
+A single-file static landing/download page for `safestore.com.ng` — this
 is what Slide 16 of the company walkthrough calls "the missing first
 step": a public page where someone can actually get the app.
 
@@ -21,7 +21,7 @@ launch.** It's functional, not final.
 Every button goes somewhere real:
 
 - **Start free / Create your shop / Sign in** go to the web app on
-  `app.safestores.name.ng` (`/signup`, `/login`).
+  `app.safestore.com.ng` (`/signup`, `/login`).
 - **Request the installer, Tell me when it's out, Book a free setup
   visit, Ask for your rate** jump to the contact form and pick its topic.
 - The **contact form** has no server: it opens the visitor's email app

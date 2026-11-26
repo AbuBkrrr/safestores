@@ -113,6 +113,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./website:/usr/share/nginx/html:ro
+      - ./website/nginx.conf:/etc/nginx/conf.d/default.conf:ro
 
 volumes:
   postgres_data:

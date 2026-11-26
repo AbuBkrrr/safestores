@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useCurrency } from '../context/CurrencyContext.jsx';
+import FullCamera from '../components/FullCamera.jsx';
 
 // Security post. Exit: scan the receipt, tick every item against the goods
 // going out, then let out (or report a mismatch to the manager).
@@ -75,18 +76,18 @@ export default function ExitCheck() {
 
   useEffect(() => {
     if (!camera || !videoRef.current) return undefined;
-    let stream; let done = false;
+    let stream; let done = false; let controls;
     const reader = new BrowserMultiFormatReader();
     navigator.mediaDevices?.getUserMedia({ video: { facingMode: 'environment' } }).then((s) => {
       stream = s;
       if (!videoRef.current) return;
       videoRef.current.srcObject = s;
-      reader.decodeFromVideoElement(videoRef.current, (result) => {
+      controls = reader.decodeFromVideoElement(videoRef.current, (result) => {
         if (!result || done) return;
         done = true; setCamera(false); setCode(result.getText()); check(result.getText());
       }).catch(() => {});
     }).catch(() => { setCamera(false); setVerdict({ tone: 'bad', text: t('exitCheck.cameraError') }); });
-    return () => { try { reader.reset?.(); } catch { /* ignore */ } stream?.getTracks().forEach((tr) => tr.stop()); };
+    return () => { Promise.resolve(controls).then((c) => c?.stop()).catch(() => {}); stream?.getTracks().forEach((tr) => tr.stop()); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [camera]);
 
@@ -112,7 +113,7 @@ export default function ExitCheck() {
             <button className="btn secondary" disabled={busy || !code.trim()}>{t('exitCheck.check')}</button>
           </form>
         </div>
-        {camera && <video ref={videoRef} autoPlay playsInline muted style={{ width: '100%', marginTop: 10, borderRadius: 8, background: '#000', maxHeight: 280, objectFit: 'cover' }} />}
+        {camera && <FullCamera onClose={() => setCamera(false)}><video ref={videoRef} autoPlay playsInline muted /><div className="camera-guide" /></FullCamera>}
       </div>
 
       {verdict && (

@@ -257,7 +257,8 @@
     "pricePer": "{{price}} kwa kila {{unit}}",
     "enterAmount": "Kiasi gani? ({{unit}}) — soma kwenye mizani",
     "lineTotal": "Bei",
-    "addToOrder": "Ongeza kwenye oda"
+    "addToOrder": "Ongeza kwenye oda",
+    "inStoreRoom": "{{qty}} stoo — weka kwenye rafu kwanza"
   },
   "products": {
     "title": "Usimamizi wa Bidhaa",
@@ -319,7 +320,7 @@
     "markupHelp": "Faida: {{pct}}% juu ya gharama",
     "enterCostFirst": "Weka bei ya gharama kwanza",
     "soldBy": "Tunauza kwa",
-    "soldBy_unit": "Kipande (idadi kamili)",
+    "soldBy_unit": "Vipande / kimoja kimoja (bidhaa nzima)",
     "soldBy_weight": "Uzito (kg, g)",
     "soldBy_volume": "Ujazo (lita, ml)",
     "soldBy_length": "Urefu (yadi, mita)",
@@ -564,7 +565,8 @@
     "bulkCreationFailed": "Uundaji wa wingi umeshindwa",
     "allPendingCopied": "Misimbo yote inayosubiri imenakiliwa",
     "inviteMessageCopied": "Ujumbe wa mwaliko umenakiliwa",
-    "miniNote": "Duka dogo (Mini): wewe ndiye unaendesha duka, pamoja na wasaidizi hadi 2 (meneja, keshia au msaidizi). Panda hadi Midi ili kuongeza msimamizi wa ghala, msimamizi wa rafu, mlinzi na meneja wa soko la mtandaoni."
+    "miniNote": "Duka dogo (Mini): wewe ndiye unaendesha duka, pamoja na wasaidizi hadi 2 (meneja, keshia au msaidizi). Panda hadi Midi ili kuongeza msimamizi wa ghala, msimamizi wa rafu, mlinzi na meneja wa soko la mtandaoni.",
+    "needsMidi": "Midi / Mega"
   },
   "usersPage": {
     "title": "Usimamizi wa Watumiaji",
@@ -1118,7 +1120,9 @@
     "courierSet": "Msafirishaji amesasishwa",
     "courierPicked": "Msafirishaji ameichukua",
     "cashCollected": "Pesa imekusanywa",
-    "paidByGuarantor": "Mdhamini amelipa"
+    "paidByGuarantor": "Mdhamini amelipa",
+    "paidByTransfer": "Imelipwa kwa benki",
+    "checkTransfer": "Uhamisho — angalia akaunti yako"
   },
   "storefrontPage": {
     "title": "🛍️ Duka",
@@ -1195,7 +1199,11 @@
     "creditAwaiting": "Ombi lako la mkopo linasubiri idhini.",
     "creditApplyBelow": "Omba mkopo hapa chini ili kutumia hii.",
     "creditOff": "Duka hili bado halitoi mkopo.",
-    "payOnCredit": "Nunua kwa mkopo"
+    "payOnCredit": "Nunua kwa mkopo",
+    "payByTransfer": "Lipa kwa uhamisho wa benki",
+    "transferTitle": "Hamisha {{amount}} kwenda:",
+    "transferRef": "Andika {{ref}} kama maelezo ya uhamisho ili duka likutambue.",
+    "copy": "Nakili"
   },
   "marketplaceHomePage": {
     "title": "🏪 Soko la SAFE Stores",
@@ -1819,7 +1827,15 @@
     "privacy": "Tunampa Paystack namba ya akaunti na tunabaki na tarakimu 4 za mwisho tu.",
     "linked": "Akaunti ya benki imeunganishwa — malipo ya mtandaoni yamewashwa",
     "acceptOnline": "Pokea malipo ya mtandaoni kwenye duka langu",
-    "acceptOnDelivery": "Pokea malipo unapochukua / unapoletewa"
+    "acceptOnDelivery": "Pokea malipo unapochukua / unapoletewa",
+    "transferTitle": "Uhamisho wa benki",
+    "transferHelp": "Wanunuzi wanaweza kulipa moja kwa moja kwenye akaunti yako. Wataona maelezo haya baada ya kuagiza; utathibitisha pesa zikifika.",
+    "transferAccountName": "Jina la akaunti",
+    "transferNote": "Ujumbe kwa wanunuzi (si lazima)",
+    "transferNotePh": "mf. Tuma uthibitisho wa malipo WhatsApp 0803…",
+    "transferSave": "Hifadhi maelezo ya benki",
+    "transferSaved": "Maelezo ya benki yamehifadhiwa",
+    "acceptTransfer": "Pokea uhamisho wa benki kwenye duka langu la mtandaoni"
   },
   "settlementsPage": {
     "title": "Malipo ya Hesabu",
@@ -2577,5 +2593,25 @@
     "a_waste": "Andika hasara",
     "a_newJob": "Kazi mpya",
     "a_jobs": "Orodha ya kazi"
+  },
+  "quickAdd": {
+    "button": "Ongeza haraka",
+    "title": "Ongeza bidhaa haraka",
+    "help": "Jina, bei na idadi — inaenda moja kwa moja kwenye rafu, tayari kuuzwa. Ongeza picha ili wahudumu waitambue (na kamera iitambue).",
+    "name": "Jina la bidhaa",
+    "photo": "Picha (si lazima)",
+    "cost": "Bei ya kununua",
+    "price": "Bei ya kuuza",
+    "profit": "Faida: {{pct}}%",
+    "qty": "Idadi",
+    "category": "Aina",
+    "barcode": "Barcode (si lazima)",
+    "onShelf": "Weka zote kwenye rafu sasa (zinauzwa mara moja)",
+    "saveNext": "Hifadhi na ongeza nyingine",
+    "saveClose": "Hifadhi na funga",
+    "saving": "Inahifadhi…",
+    "added": "Imeongezwa: {{name}}",
+    "needName": "Weka jina la bidhaa",
+    "needPrice": "Weka bei ya kuuza"
   }
 }

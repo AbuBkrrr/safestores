@@ -76,7 +76,7 @@ describe('Shopper pays online', () => {
   it('checkout names the store subaccount; verify marks the order paid', async () => {
     const { store, product } = await connectedStore();
     const info = await request().get(`/api/public/stores/${store.id}`);
-    expect(info.body.payments).toEqual({ online: true, payOnDelivery: true, cashPausedForBalance: false });
+    expect(info.body.payments).toEqual({ online: true, payOnDelivery: true, transfer: null, cashPausedForBalance: false });
 
     const order = await placeOnline(store.id, product.id);
     expect(order.payment_method).toBe('online');

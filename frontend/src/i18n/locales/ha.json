@@ -257,7 +257,8 @@
     "pricePer": "{{price}} kan kowane {{unit}}",
     "enterAmount": "Nawa? ({{unit}}) — karanta a kan sikeli",
     "lineTotal": "Farashi",
-    "addToOrder": "Saka a oda"
+    "addToOrder": "Saka a oda",
+    "inStoreRoom": "{{qty}} a ɗakin ajiya — fara kai shi kan shiryayye"
   },
   "products": {
     "title": "Sarrafa Kayayyaki",
@@ -319,7 +320,7 @@
     "markupHelp": "Riba: {{pct}}% sama da kuɗin saye",
     "enterCostFirst": "Shigar da kuɗin saye tukuna",
     "soldBy": "Ana sayarwa da",
-    "soldBy_unit": "Ɗaya-ɗaya (cikakkun kaya)",
+    "soldBy_unit": "Guda-guda (kaya cikakku)",
     "soldBy_weight": "Nauyi (kg, g)",
     "soldBy_volume": "Yawan ruwa (lita, ml)",
     "soldBy_length": "Tsawo (yadi, mita)",
@@ -564,7 +565,8 @@
     "bulkCreationFailed": "Ƙirƙirar da yawa ta kasa",
     "allPendingCopied": "An kwafi duk lambobin da ke jira",
     "inviteMessageCopied": "An kwafi saƙon gayyata",
-    "miniNote": "Ƙaramin shago: kai ne ke gudanar da shagon, tare da mataimaka har 2 (manaja, mai karɓar kuɗi ko mai taimako). Ƙara zuwa Midi don ƙara manajan rumbu, manajan shiryayye, tsaro da manajan kasuwar intanet."
+    "miniNote": "Ƙaramin shago: kai ne ke gudanar da shagon, tare da mataimaka har 2 (manaja, mai karɓar kuɗi ko mai taimako). Ƙara zuwa Midi don ƙara manajan rumbu, manajan shiryayye, tsaro da manajan kasuwar intanet.",
+    "needsMidi": "Midi / Mega"
   },
   "usersPage": {
     "title": "Sarrafa Masu Amfani",
@@ -1118,7 +1120,9 @@
     "courierSet": "An sabunta mai isarwa",
     "courierPicked": "Mai isarwa ya ɗauka",
     "cashCollected": "An karɓi kuɗi hannu",
-    "paidByGuarantor": "Mai lamuni ya biya"
+    "paidByGuarantor": "Mai lamuni ya biya",
+    "paidByTransfer": "An biya ta banki",
+    "checkTransfer": "Tura kuɗi — duba asusunka"
   },
   "storefrontPage": {
     "title": "🛍️ Shago",
@@ -1195,7 +1199,11 @@
     "creditAwaiting": "Neman bashinka yana jiran amincewa.",
     "creditApplyBelow": "Nemi bashi a ƙasa don amfani da wannan.",
     "creditOff": "Wannan shagon ba ya ba da bashi tukuna.",
-    "payOnCredit": "Saya a bashi"
+    "payOnCredit": "Saya a bashi",
+    "payByTransfer": "Biya ta tura kuɗi a banki",
+    "transferTitle": "Tura {{amount}} zuwa:",
+    "transferRef": "Rubuta {{ref}} a bayanin turawa domin shagon ya gane kai ne.",
+    "copy": "Kwafa"
   },
   "marketplaceHomePage": {
     "title": "🏪 Kasuwar SAFE Stores",
@@ -1819,7 +1827,15 @@
     "privacy": "Muna tura lambar asusu ga Paystack kuma muna riƙe lambobi 4 na ƙarshe kawai.",
     "linked": "An haɗa asusun banki — biyan kuɗi ta yanar gizo yana kunne",
     "acceptOnline": "Karɓi biyan kuɗi ta yanar gizo a shagona",
-    "acceptOnDelivery": "Karɓi biya idan an karɓa / an kawo"
+    "acceptOnDelivery": "Karɓi biya idan an karɓa / an kawo",
+    "transferTitle": "Tura kuɗi ta banki",
+    "transferHelp": "Masu saye za su iya tura kuɗi kai tsaye zuwa asusunka. Za su ga bayanan bayan oda; kai ka tabbatar idan kuɗin ya iso.",
+    "transferAccountName": "Sunan asusu",
+    "transferNote": "Saƙo ga masu saye (ba dole ba)",
+    "transferNotePh": "misali Aiko shaidar biya ta WhatsApp 0803…",
+    "transferSave": "Ajiye bayanan banki",
+    "transferSaved": "An ajiye bayanan banki",
+    "acceptTransfer": "Karɓi tura kuɗi ta banki a shagona na intanet"
   },
   "settlementsPage": {
     "title": "Sasantawa",
@@ -2577,5 +2593,25 @@
     "a_waste": "Rubuta asara",
     "a_newJob": "Sabon aiki",
     "a_jobs": "Jerin ayyuka"
+  },
+  "quickAdd": {
+    "button": "Ƙara da sauri",
+    "title": "Ƙara kaya da sauri",
+    "help": "Suna, farashi da yawa — zai tafi kan shiryayye kai tsaye, a shirye don sayarwa. Ƙara hoto domin masu karɓar kuɗi su gane shi (kuma kyamara ta gane shi).",
+    "name": "Sunan kaya",
+    "photo": "Hoto (ba dole ba)",
+    "cost": "Farashin saye (abin da ka biya)",
+    "price": "Farashin sayarwa",
+    "profit": "Riba: {{pct}}%",
+    "qty": "Yawa",
+    "category": "Rukuni",
+    "barcode": "Barcode (ba dole ba)",
+    "onShelf": "Saka duka a kan shiryayye yanzu (ana iya sayarwa nan take)",
+    "saveNext": "Ajiye ka ƙara wani",
+    "saveClose": "Ajiye ka rufe",
+    "saving": "Ana ajiyewa…",
+    "added": "An ƙara: {{name}}",
+    "needName": "Shigar da sunan kaya",
+    "needPrice": "Shigar da farashin sayarwa"
   }
 }

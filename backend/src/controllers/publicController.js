@@ -17,6 +17,8 @@ async function trackOrder(req, res) {
   const { rows } = await db.query(
     `SELECT mo.id, mo.status, mo.subtotal, mo.total, mo.created_at, mo.fulfilled_at, mo.loyalty_discount_pct,
             mo.payment_method, mo.payment_status, mo.paid_at, mo.cancel_reason, mo.fulfilment_method, mo.status_note, mo.confirmed_at, mo.dispatched_at, s.online_payments_enabled AND s.payout_subaccount_code IS NOT NULL AS can_pay_online,
+            CASE WHEN mo.payment_method = 'transfer' THEN json_build_object('bankName', s.transfer_bank_name, 'accountNumber', s.transfer_account_number,
+              'accountName', s.transfer_account_name, 'note', s.transfer_note) END AS transfer,
             s.name AS store_name, s.phone AS store_phone, s.address AS store_address, s.city AS store_city,
             COALESCE(s.currency_code, c.code) AS currency_code, COALESCE(s.currency_symbol, c.symbol) AS currency_symbol
      FROM marketplace_orders mo JOIN stores s ON s.id = mo.store_id LEFT JOIN currency_settings c ON c.id = 'default'

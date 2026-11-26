@@ -1,3 +1,4 @@
+import TransferDetails from '../components/TransferDetails.jsx';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -52,10 +53,12 @@ export default function Storefront() {
   const [credit, setCredit] = useState({ guarantors: [], account: null });
   const [applyForm, setApplyForm] = useState(null); // { guarantorId, memberRef, requestedLimit } while open
   const creditOk = credit.account?.status === 'approved';
-  const payOptions = [canPayOnline && 'online', canPayOnDelivery && 'cash', creditOk && 'credit'].filter(Boolean);
+  const canTransfer = !!store?.payments?.transfer;
+  const payOptions = [canPayOnline && 'online', canTransfer && 'transfer', canPayOnDelivery && 'cash', creditOk && 'credit'].filter(Boolean);
   const payChoice = payOptions.includes(payMethod) ? payMethod : payOptions[0];
-  const method = payChoice === 'online' || payChoice === 'credit' ? payChoice : receive === 'pickup' ? 'on_pickup' : 'on_delivery';
+  const method = ['online', 'credit', 'transfer'].includes(payChoice) ? payChoice : receive === 'pickup' ? 'on_pickup' : 'on_delivery';
   const payLabel = (o) => (o === 'online' ? `💳 ${t('storefrontPage.payNowOnline')}`
+    : o === 'transfer' ? `🏦 ${t('storefrontPage.payByTransfer')}`
     : o === 'credit' ? `🤝 ${t('storefrontPage.buyOnCredit', { available: format(credit.account?.available || 0, currency) })}`
       : `💵 ${receive === 'pickup' ? t('storefrontPage.payOnPickup') : t('storefrontPage.payOnDelivery')}`);
   const formatCurrency = (n) => format(n, currency);
@@ -288,6 +291,7 @@ export default function Storefront() {
             <div className="alert success">
               {message}{' '}
               {trackingPath && <Link to={trackingPath}>{t('storefrontPage.trackOrder')}</Link>}
+              {placed.transfer && <TransferDetails transfer={placed.transfer} amount={formatCurrency(placed.total)} reference={String(placed.id || '').slice(0, 8).toUpperCase()} />}
             </div>
           )}
           {!placed && message && <div className="alert info">{message}</div>}
@@ -321,7 +325,7 @@ export default function Storefront() {
               ) : (
                 <fieldset className="pay-choice">
                   <legend>{t('storefrontPage.howToPay')}</legend>
-                  {['online', 'cash', 'credit'].map((o) => {
+                  {['online', ...(canTransfer ? ['transfer'] : []), 'cash', 'credit'].map((o) => {
                     const ok = payOptions.includes(o);
                     const why = o === 'online' ? t('storefrontPage.onlineOff')
                       : o === 'cash' ? t('storefrontPage.cashOff')

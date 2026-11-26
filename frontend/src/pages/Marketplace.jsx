@@ -111,7 +111,7 @@ export default function Marketplace() {
   };
 
   // On the shop computer the page is served locally; customers use the public web address.
-  const shopOrigin = import.meta.env.VITE_EDITION === 'desktop' ? (import.meta.env.VITE_PUBLIC_APP_URL || 'https://app.safestores.name.ng') : window.location.origin;
+  const shopOrigin = import.meta.env.VITE_EDITION === 'desktop' ? (import.meta.env.VITE_PUBLIC_APP_URL || 'https://app.safestore.com.ng') : window.location.origin;
   const storefrontUrl = `${shopOrigin}/shop/${profile?.shopSlug || user.storeId}`;
 
   return (
@@ -180,7 +180,7 @@ export default function Marketplace() {
                 <td>{o.customer_name}</td><td>{o.customer_phone || '—'}</td>
                 <td>{formatCurrency(o.total)}</td>
                 <td>{o.delivery_address || '—'}</td>
-                <td><Badge status={o.status} />{o.fulfilment_method && <span className="muted" style={{ fontSize: 12 }}> · {t(`marketplacePage.method_${o.fulfilment_method}`)}</span>} {o.payment_status === 'refund_due' ? <span className="badge pending">{t('marketplacePage.refundDue')}</span> : o.payment_status === 'refunded' ? <span className="badge closed">{t('marketplacePage.refunded')}</span> : o.payment_status === 'paid' ? <span className="badge active">{t(o.payment_method === 'online' ? 'marketplacePage.paidOnline' : o.payment_method === 'credit' ? 'marketplacePage.paidByGuarantor' : 'marketplacePage.cashCollected')}</span> : o.payment_method === 'online' ? <span className="badge pending">{t('marketplacePage.awaitingPayment')}</span> : <span className="badge closed">{o.payment_method === 'credit' ? t('marketplacePage.onCredit') : o.payment_method === 'on_pickup' ? t('marketplacePage.payOnPickup') : t('marketplacePage.payOnDelivery')}</span>}</td>
+                <td><Badge status={o.status} />{o.fulfilment_method && <span className="muted" style={{ fontSize: 12 }}> · {t(`marketplacePage.method_${o.fulfilment_method}`)}</span>} {o.payment_status === 'refund_due' ? <span className="badge pending">{t('marketplacePage.refundDue')}</span> : o.payment_status === 'refunded' ? <span className="badge closed">{t('marketplacePage.refunded')}</span> : o.payment_status === 'paid' ? <span className="badge active">{t(o.payment_method === 'online' ? 'marketplacePage.paidOnline' : o.payment_method === 'credit' ? 'marketplacePage.paidByGuarantor' : o.payment_method === 'transfer' ? 'marketplacePage.paidByTransfer' : 'marketplacePage.cashCollected')}</span> : o.payment_method === 'online' ? <span className="badge pending">{t('marketplacePage.awaitingPayment')}</span> : <span className="badge closed">{o.payment_method === 'credit' ? t('marketplacePage.onCredit') : o.payment_method === 'transfer' ? t('marketplacePage.checkTransfer') : o.payment_method === 'on_pickup' ? t('marketplacePage.payOnPickup') : t('marketplacePage.payOnDelivery')}</span>}</td>
                 <td>{new Date(o.created_at).toLocaleString()}</td>
                 <td style={{ whiteSpace: 'nowrap' }}>
                   <button className={`btn small${o.status === 'placed' ? '' : ' secondary'}`} onClick={() => openOrder(o)}>{o.status === 'placed' ? t('marketplacePage.review') : t('marketplacePage.view')}</button>{' '}

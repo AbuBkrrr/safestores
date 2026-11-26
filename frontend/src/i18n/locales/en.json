@@ -257,7 +257,8 @@
     "pricePer": "{{price}} per {{unit}}",
     "enterAmount": "How much? ({{unit}}) — read it off the scale",
     "lineTotal": "Price",
-    "addToOrder": "Add to order"
+    "addToOrder": "Add to order",
+    "inStoreRoom": "{{qty}} in store room — move to shelf first"
   },
   "products": {
     "title": "Product Management",
@@ -319,7 +320,7 @@
     "markupHelp": "Markup: {{pct}}% over cost",
     "enterCostFirst": "Enter the cost price first",
     "soldBy": "Sold by",
-    "soldBy_unit": "Each (whole items)",
+    "soldBy_unit": "Pieces / each (whole items)",
     "soldBy_weight": "Weight (kg, g)",
     "soldBy_volume": "Volume (litre, ml)",
     "soldBy_length": "Length (yard, metre)",
@@ -564,7 +565,8 @@
     "bulkCreationFailed": "Bulk creation failed",
     "allPendingCopied": "All pending codes copied to clipboard",
     "inviteMessageCopied": "Invite message copied",
-    "miniNote": "Mini store: you run the shop, with up to 2 helpers (a manager, cashier or shop assistant). Upgrade to Midi to add store and shelf managers, security and an online market manager."
+    "miniNote": "Mini store: you run the shop, with up to 2 helpers (a manager, cashier or shop assistant). Upgrade to Midi to add store and shelf managers, security and an online market manager.",
+    "needsMidi": "Midi / Mega"
   },
   "usersPage": {
     "title": "User Management",
@@ -1118,7 +1120,9 @@
     "courierSet": "Courier updated",
     "courierPicked": "Courier has picked it up",
     "cashCollected": "Cash collected",
-    "paidByGuarantor": "Settled by guarantor"
+    "paidByGuarantor": "Settled by guarantor",
+    "paidByTransfer": "Paid by bank transfer",
+    "checkTransfer": "Bank transfer — check your account"
   },
   "storefrontPage": {
     "title": "🛍️ Shop",
@@ -1195,7 +1199,11 @@
     "creditAwaiting": "Your credit application is awaiting approval.",
     "creditApplyBelow": "Apply for credit below to use this.",
     "creditOff": "This shop doesn't offer credit yet.",
-    "payOnCredit": "Buy on credit"
+    "payOnCredit": "Buy on credit",
+    "payByTransfer": "Pay by bank transfer",
+    "transferTitle": "Transfer {{amount}} to:",
+    "transferRef": "Write {{ref}} as the transfer narration so the shop knows it is you.",
+    "copy": "Copy"
   },
   "marketplaceHomePage": {
     "title": "🏪 SAFE Stores Marketplace",
@@ -1819,7 +1827,15 @@
     "privacy": "We pass the account number to Paystack and keep only its last 4 digits.",
     "linked": "Bank account linked — online payments are on",
     "acceptOnline": "Accept online payments on my storefront",
-    "acceptOnDelivery": "Accept pay on collection / delivery"
+    "acceptOnDelivery": "Accept pay on collection / delivery",
+    "transferTitle": "Bank transfer",
+    "transferHelp": "Shoppers can pay straight into your bank account. They see these details after ordering; you confirm the order when the money arrives.",
+    "transferAccountName": "Account name",
+    "transferNote": "Note for shoppers (optional)",
+    "transferNotePh": "e.g. Send proof of payment on WhatsApp 0803…",
+    "transferSave": "Save transfer details",
+    "transferSaved": "Bank transfer details saved",
+    "acceptTransfer": "Accept bank transfer on my storefront"
   },
   "settlementsPage": {
     "title": "Settlements",
@@ -2577,5 +2593,25 @@
     "a_waste": "Log waste",
     "a_newJob": "New job",
     "a_jobs": "Job list"
+  },
+  "quickAdd": {
+    "button": "Quick add",
+    "title": "Quick add a product",
+    "help": "Name, price and how many — it goes straight on the shelf, ready to sell. Add a photo so cashiers can spot it (and the camera can recognise it).",
+    "name": "Product name",
+    "photo": "Photo (optional)",
+    "cost": "Buying price (what you paid)",
+    "price": "Selling price",
+    "profit": "Profit: {{pct}}%",
+    "qty": "How many",
+    "category": "Category",
+    "barcode": "Barcode (optional)",
+    "onShelf": "Put it all on the shelf now (sellable at once)",
+    "saveNext": "Save & add next",
+    "saveClose": "Save & close",
+    "saving": "Saving…",
+    "added": "Added: {{name}}",
+    "needName": "Enter the product name",
+    "needPrice": "Enter the selling price"
   }
 }

@@ -41,7 +41,7 @@ function CrashFallback({ error, resetError }) {
 
 // A store's own custom domain (shop.example.com) opens straight into its
 // storefront. Hosts in VITE_MAIN_HOSTS (and their subdomains) are the app itself.
-const MAIN_HOSTS = (import.meta.env.VITE_MAIN_HOSTS || 'safestores.name.ng,localhost,127.0.0.1').split(',').map((h) => h.trim()).filter(Boolean);
+const MAIN_HOSTS = (import.meta.env.VITE_MAIN_HOSTS || 'safestore.com.ng,app.safestore.com.ng,safestores.name.ng,app.safestores.name.ng,localhost,127.0.0.1').split(',').map((h) => h.trim()).filter(Boolean);
 function isCustomShopHost() {
   const h = window.location.hostname;
   if (!/^https?:$/.test(window.location.protocol) || !h || /^\d+\.\d+\.\d+\.\d+$/.test(h)) return false;

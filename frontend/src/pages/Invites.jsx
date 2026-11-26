@@ -101,7 +101,7 @@ export default function Invites() {
             <div className="form-group">
               <label>{t('invitesPage.role')}</label>
               <select value={single.role} onChange={(e) => setSingle({ ...single, role: e.target.value })}>
-                {roleOptions.map((r) => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}
+                {INVITE_ROLES.map((r) => <option key={r} value={r} disabled={!roleOptions.includes(r)}>{t(`roles.${r}`)}{roleOptions.includes(r) ? '' : ` — ${t('invitesPage.needsMidi')}`}</option>)}
               </select>
             </div>
             <button className="btn">{t('invitesPage.createInvite')}</button>
@@ -122,7 +122,7 @@ export default function Invites() {
             <div className="form-group">
               <label>{t('invitesPage.roleAppliedToAll')}</label>
               <select value={bulk.role} onChange={(e) => setBulk({ ...bulk, role: e.target.value })}>
-                {roleOptions.map((r) => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}
+                {INVITE_ROLES.map((r) => <option key={r} value={r} disabled={!roleOptions.includes(r)}>{t(`roles.${r}`)}{roleOptions.includes(r) ? '' : ` — ${t('invitesPage.needsMidi')}`}</option>)}
               </select>
             </div>
             <button className="btn">{t('invitesPage.createBulkInvites')}</button>

@@ -47,12 +47,22 @@ export default function OnlinePaymentsCard({ onToast }) {
     } catch (err) { setError(err.response?.data?.error || t('common.errorGeneric')); } finally { setBusy(false); }
   };
 
+  const [tr, setTr] = useState(null);
+  const saveTransfer = async (enable) => {
+    setError('');
+    try {
+      setP((await api.patch(base, { transfer: tr || {}, ...(enable === undefined ? {} : { transferEnabled: enable }) })).data);
+      onToast?.(t('paymentsCard.transferSaved'), 'success');
+    } catch (err) { setError(err.response?.data?.error || t('common.errorGeneric')); }
+  };
+  const toggleTransfer = (on) => saveTransfer(on);
   const toggle = async (key, value) => {
     setError('');
     try { setP((await api.patch(base, { [key]: value })).data); } catch (err) { setError(err.response?.data?.error || t('common.errorGeneric')); }
   };
 
   if (!p) return null;
+  const trv = tr ?? { bankName: p.transfer_bank_name || '', accountNumber: p.transfer_account_number || '', accountName: p.transfer_account_name || '', note: p.transfer_note || '' };
   const unavailable = !p.gatewayConfigured ? t('paymentsCard.notConfigured') : !p.currencySupported ? t('paymentsCard.currencyUnsupported', { currency: p.currency }) : '';
 
   return (
@@ -97,7 +107,24 @@ export default function OnlinePaymentsCard({ onToast }) {
       )}
 
       {isAdmin && (
+        <div className="mt-1" style={{ borderTop: '1px solid var(--border, #e5e7eb)', paddingTop: 10 }}>
+          <strong>🏦 {t('paymentsCard.transferTitle')}</strong>
+          <p className="help-text">{t('paymentsCard.transferHelp')}</p>
+          <div className="grid grid-2">
+            <div className="form-group"><label htmlFor="tr-bank">{t('paymentsCard.bank')}</label><input id="tr-bank" value={trv.bankName} onChange={(e) => setTr({ ...trv, bankName: e.target.value })} placeholder="e.g. GTBank, Opay, Moniepoint" /></div>
+            <div className="form-group"><label htmlFor="tr-acct">{t('paymentsCard.accountNumber')}</label><input id="tr-acct" inputMode="numeric" value={trv.accountNumber} onChange={(e) => setTr({ ...trv, accountNumber: e.target.value.replace(/[^0-9A-Za-z-]/g, '') })} /></div>
+            <div className="form-group"><label htmlFor="tr-name">{t('paymentsCard.transferAccountName')}</label><input id="tr-name" value={trv.accountName} onChange={(e) => setTr({ ...trv, accountName: e.target.value })} /></div>
+            <div className="form-group"><label htmlFor="tr-note">{t('paymentsCard.transferNote')}</label><input id="tr-note" value={trv.note} onChange={(e) => setTr({ ...trv, note: e.target.value })} placeholder={t('paymentsCard.transferNotePh')} /></div>
+          </div>
+          <div className="flex" style={{ gap: 8 }}>
+            <button type="button" className="btn small" onClick={saveTransfer}>{t('paymentsCard.transferSave')}</button>
+          </div>
+        </div>
+      )}
+
+      {isAdmin && (
         <div className="mt-1">
+          <label className="flex"><input type="checkbox" checked={!!p.transfer_enabled} onChange={(e) => toggleTransfer(e.target.checked)} /> {t('paymentsCard.acceptTransfer')}</label>
           <label className="flex"><input type="checkbox" checked={!!p.online_payments_enabled} disabled={!p.connected} onChange={(e) => toggle('onlinePaymentsEnabled', e.target.checked)} /> {t('paymentsCard.acceptOnline')}</label>
           <label className="flex"><input type="checkbox" checked={p.pay_on_delivery_enabled !== false} onChange={(e) => toggle('payOnDeliveryEnabled', e.target.checked)} /> {t('paymentsCard.acceptOnDelivery')}</label>
         </div>

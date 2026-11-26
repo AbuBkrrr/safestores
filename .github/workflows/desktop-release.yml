@@ -91,7 +91,7 @@ jobs:
       - name: Build the app screens for the phone
         working-directory: mobile
         env:
-          SAFE_STORES_API_URL: https://app.safestores.name.ng/api
+          SAFE_STORES_API_URL: https://app.safestore.com.ng/api
         run: |
           npm ci
           node scripts/build-www.js

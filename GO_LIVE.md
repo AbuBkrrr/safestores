@@ -23,7 +23,7 @@ Get these first; several steps below stall without them.
 |---|---|---|
 | A hosting provider (Render/Railway/Fly.io, or any VPS) | Running the backend | Varies, ~$5-25/mo to start |
 | A Postgres provider (or use the hosting provider's managed one) | The database | Often bundled with hosting |
-| Domain registrar access for `safestores.name.ng` | Pointing DNS at your host | Already registered per your note |
+| Domain registrar access for `safestore.com.ng` | Pointing DNS at your host | Already registered per your note |
 | Sentry (sentry.io, free tier) | Error monitoring | Free |
 | Firebase (console.firebase.google.com) | Android push notifications | Free |
 | Google Play Console | Publishing the Android app | $25 one-time |
@@ -82,7 +82,7 @@ DATABASE_URL=<from Step 2>
 DATABASE_SSL=require          # unless self-hosting Postgres without TLS
 JWT_SECRET=<generate, see Step 1>
 JWT_EXPIRES_IN=7d
-FRONTEND_URL=https://safestores.name.ng
+FRONTEND_URL=https://safestore.com.ng
 S3_BUCKET=<see note below>
 BOOTSTRAP_SUPER_ADMIN_EMAIL=super@safestores.name.ng
 BOOTSTRAP_SUPER_ADMIN_PASSWORD=<a real password, not the .env.example default>
@@ -98,7 +98,7 @@ forget this.
 ```bash
 git clone <your repo> && cd safe-stores-v22
 cp .env.staging.example .env
-# fill in POSTGRES_PASSWORD, JWT_SECRET, FRONTEND_URL=https://safestores.name.ng
+# fill in POSTGRES_PASSWORD, JWT_SECRET, FRONTEND_URL=https://safestore.com.ng
 docker compose up --build -d
 ```
 Put this behind Caddy or nginx on the host for TLS (a few lines of
@@ -107,7 +107,7 @@ start: staging on a single server" section for the exact setup.
 
 **Verify it's really live:**
 ```bash
-curl https://api.safestores.name.ng/api/settings/currency
+curl https://api.safestore.com.ng/api/settings/currency
 # should return {"code":"NGN","symbol":"₦"}
 ```
 
@@ -144,7 +144,7 @@ Cloudflare Pages) or serve it via the `frontend/Dockerfile` + nginx
 setup (already wired to reverse-proxy `/api`, `/uploads`, `/socket.io`
 to the backend — see `frontend/nginx.conf`).
 
-Point `safestores.name.ng` (or a subdomain like `app.safestores.name.ng`)
+Point `safestore.com.ng` (or a subdomain like `app.safestore.com.ng`)
 at wherever this lands. Update `FRONTEND_URL` in the backend's
 environment (Step 3) to match exactly, including protocol — the backend
 refuses CORS requests from anything not listed there.
@@ -181,7 +181,7 @@ Full detail in `mobile/README.md`. In order:
 4. Build pointed at your real deployed backend:
    ```bash
    cd mobile && npm install
-   SAFE_STORES_API_URL=https://api.safestores.name.ng/api node scripts/build-www.js
+   SAFE_STORES_API_URL=https://api.safestore.com.ng/api node scripts/build-www.js
    npx cap sync android
    ```
 5. Generate a signing keystore **on your own machine, once, and back it

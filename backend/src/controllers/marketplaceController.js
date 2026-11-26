@@ -13,7 +13,7 @@ const { recomputeProductQuantities } = require('../utils/stockMath');
 async function browseProducts(req, res) {
   const { storeId } = req.params;
   const { search, category, brand } = req.query;
-  const conditions = ['store_id = $1'];
+  const conditions = ['store_id = $1', 'archived_at IS NULL'];
   const params = [storeId];
   if (search) { params.push(`%${search}%`); conditions.push(`(name ILIKE $${params.length} OR brand ILIKE $${params.length})`); }
   if (category) { params.push(category); conditions.push(`category = $${params.length}`); }
@@ -54,7 +54,7 @@ async function listStores(req, res) {
 // each result.
 async function searchProducts(req, res) {
   const { search, category, brand, city, storeId } = req.query;
-  const conditions = [`s.subscription_status = 'active'`, 's.marketplace_enabled = true'];
+  const conditions = [`s.subscription_status = 'active'`, 's.marketplace_enabled = true', 'p.archived_at IS NULL'];
   const params = [];
   if (search) { params.push(`%${search}%`); conditions.push(`(p.name ILIKE $${params.length} OR p.brand ILIKE $${params.length})`); }
   if (category) { params.push(category); conditions.push(`p.category = $${params.length}`); }
@@ -68,7 +68,7 @@ async function searchProducts(req, res) {
             (p.shelf_qty + p.backroom_qty) > 0 AS in_stock,
             s.id AS store_id, s.name AS store_name, s.city AS store_city
      FROM products p JOIN stores s ON s.id = p.store_id
-     WHERE ${conditions.join(' AND ')} ORDER BY p.name ASC LIMIT 200`,
+     WHERE ${conditions.join(' AND ')} ORDER BY (p.shelf_qty + p.backroom_qty) > 0 DESC, (p.image_url IS NOT NULL) DESC, p.name ASC LIMIT 200`,
     params
   );
   res.json(rows);
@@ -118,7 +118,7 @@ async function placeOrder(req, res) {
   // How the shopper gets it (delivery | pickup) and pays (online now, or cash on delivery / pickup).
   const fulfilmentMethod = ['delivery', 'pickup'].includes(req.body.fulfilmentMethod) ? req.body.fulfilmentMethod
     : req.body.paymentMethod === 'on_pickup' ? 'pickup' : null;
-  const paymentMethod = ['online', 'credit'].includes(req.body.paymentMethod) ? req.body.paymentMethod : fulfilmentMethod === 'pickup' ? 'on_pickup' : 'on_delivery';
+  const paymentMethod = ['online', 'credit', 'transfer'].includes(req.body.paymentMethod) ? req.body.paymentMethod : fulfilmentMethod === 'pickup' ? 'on_pickup' : 'on_delivery';
   if (fulfilmentMethod === 'delivery' && !String(deliveryAddress || '').trim()) {
     return res.status(400).json({ error: 'A delivery address is required for delivery' });
   }
@@ -128,8 +128,9 @@ async function placeOrder(req, res) {
   }
   const options = await require('./storePaymentsController').paymentOptionsFor(storeId);
   if (paymentMethod === 'online' && !options.online) return res.status(400).json({ error: 'This store does not take online payments' });
-  if (!options.online && !options.payOnDelivery) return res.status(400).json({ error: 'This store is not taking online orders right now' });
-  if (!['online', 'credit'].includes(paymentMethod) && !options.payOnDelivery) return res.status(400).json({ error: 'This store only takes online payment right now' });
+  if (paymentMethod === 'transfer' && !options.transfer) return res.status(400).json({ error: 'This store does not take bank transfers' });
+  if (!options.online && !options.payOnDelivery && !options.transfer) return res.status(400).json({ error: 'This store is not taking online orders right now' });
+  if (!['online', 'credit', 'transfer'].includes(paymentMethod) && !options.payOnDelivery) return res.status(400).json({ error: 'This store only takes online payment or bank transfer right now' });
 
   const customerId = req.user?.sub || null;
   if (!customerId && !guestName) {
@@ -220,7 +221,7 @@ async function placeOrder(req, res) {
       body: `An order for ${Number(finalOrder.total).toFixed(2)} just came in — tap to view and fulfill it.`,
       data: { type: 'marketplace.order_placed', orderId: order.id },
     });
-    res.status(201).json(finalOrder);
+    res.status(201).json(paymentMethod === 'transfer' ? { ...finalOrder, transfer: options.transfer } : finalOrder);
   } catch (err) {
     await client.query('ROLLBACK');
     console.error(err);

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import { mediaUrl } from '../utils/media.js';
+import FullCamera from './FullCamera.jsx';
 import { lookOf, packLook, rankProducts, isConfident } from '../utils/visualMatch.js';
 
 /**
@@ -10,7 +11,7 @@ import { lookOf, packLook, rankProducts, isConfident } from '../utils/visualMatc
  * Sure matches are added straight away; otherwise the cashier taps one of the
  * best guesses, or searches, and the picture teaches the app for next time.
  */
-export default function VisualScan({ storeId, products, onPick }) {
+export default function VisualScan({ storeId, products, onPick, onClose }) {
   const { t } = useTranslation();
   const videoRef = useRef();
   const [looks, setLooks] = useState([]);
@@ -63,40 +64,39 @@ export default function VisualScan({ storeId, products, onPick }) {
     ? products.filter((p) => p.name.toLowerCase().includes(search.trim().toLowerCase())).slice(0, 6) : [];
 
   return (
-    <div className="mt-1">
-      <div style={{ position: 'relative' }}>
-        <video ref={videoRef} autoPlay playsInline muted onClick={capture}
-          style={{ width: '100%', borderRadius: 8, background: '#000', maxHeight: 260, objectFit: 'cover', cursor: 'pointer' }} />
-        {/* the square the item should fill */}
-        <div style={{ position: 'absolute', inset: '8% 20%', border: '2px dashed rgba(255,255,255,.7)', borderRadius: 8, pointerEvents: 'none' }} />
-      </div>
-      <button className="btn small mt-1" onClick={capture} style={{ width: '100%' }}>📸 {t('visualScan.capture')}</button>
-      <p className="muted small mt-1">{note || t('visualScan.hint')}</p>
-
-      {guesses && (
-        <div className="card mt-1">
-          <strong>{guesses.length ? t('visualScan.isItOneOf') : t('visualScan.notRecognised')}</strong>
-          <div className="flex mt-1" style={{ flexWrap: 'wrap', gap: 8 }}>
-            {guesses.map((g) => {
-              const p = byId.get(g.productId);
-              return p && (
-                <button key={g.productId} className="btn secondary small" onClick={() => pick(g.productId)} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  {p.image_url && <img src={mediaUrl(p.image_url)} alt="" style={{ width: 32, height: 32, objectFit: 'cover', borderRadius: 4 }} />}
-                  {p.name}
-                </button>
-              );
-            })}
-          </div>
-          <div className="form-group mt-1">
-            <label htmlFor="visual-search">{t('visualScan.searchToTeach')}</label>
-            <input id="visual-search" value={search} onChange={(e) => setSearch(e.target.value)} autoComplete="off" />
-          </div>
-          {found.map((p) => (
-            <div key={p.id} style={{ padding: '6px 0', cursor: 'pointer' }} onClick={() => pick(p.id)}>{p.name}</div>
-          ))}
-          <button className="btn secondary small mt-1" onClick={() => { setGuesses(null); setPendingLook(null); }}>{t('common.cancel')}</button>
-        </div>
-      )}
-    </div>
+    <FullCamera onClose={onClose} hint={note || t('visualScan.hint')}
+      footer={(
+        <>
+          {guesses && (
+            <div className="card" style={{ marginBottom: 10 }}>
+              <strong>{guesses.length ? t('visualScan.isItOneOf') : t('visualScan.notRecognised')}</strong>
+              <div className="flex mt-1" style={{ flexWrap: 'wrap', gap: 8 }}>
+                {guesses.map((g) => {
+                  const p = byId.get(g.productId);
+                  return p && (
+                    <button key={g.productId} className="btn secondary small" onClick={() => pick(g.productId)} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      {p.image_url && <img src={mediaUrl(p.image_url)} alt="" style={{ width: 36, height: 36, objectFit: 'cover', borderRadius: 4 }} />}
+                      {p.name}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="form-group mt-1">
+                <label htmlFor="visual-search">{t('visualScan.searchToTeach')}</label>
+                <input id="visual-search" value={search} onChange={(e) => setSearch(e.target.value)} autoComplete="off" />
+              </div>
+              {found.map((p) => (
+                <div key={p.id} style={{ padding: '8px 0', cursor: 'pointer' }} onClick={() => pick(p.id)}>{p.name}</div>
+              ))}
+              <button className="btn secondary small mt-1" onClick={() => { setGuesses(null); setPendingLook(null); }}>{t('common.cancel')}</button>
+            </div>
+          )}
+          {!guesses && <button className="btn" onClick={capture} style={{ width: '100%', padding: '14px', fontSize: 17 }}>📸 {t('visualScan.capture')}</button>}
+        </>
+      )}>
+      <video ref={videoRef} autoPlay playsInline muted onClick={capture} />
+      {/* the square the item should fill */}
+      <div className="camera-guide" />
+    </FullCamera>
   );
 }

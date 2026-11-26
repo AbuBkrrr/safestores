@@ -86,6 +86,15 @@ function createProduct(req, res) {
         `INSERT INTO stock_movements (id, store_id, product_id, type, quantity, note, performed_by)
          VALUES (?,?,?,'arrival',?, 'Initial stock on product creation', ?)`
       ).run(crypto.randomUUID(), storeId, newId, initQty, req.user.sub);
+      // "Put on the shelf now" — see the cloud edition.
+      const toShelf = Math.min(initQty, Math.max(0, Number(req.body.putOnShelf) || 0));
+      if (toShelf > 0) {
+        db.prepare(
+          `INSERT INTO stock_movements (id, store_id, product_id, type, quantity, note, performed_by)
+           VALUES (?,?,?,'transfer_to_shelf',?, 'Put on shelf when the product was added', ?)`
+        ).run(crypto.randomUUID(), storeId, newId, toShelf, req.user.sub);
+      }
+      require('../utils/stockMath').recomputeProductQuantities(db, newId);
     }
   })();
 

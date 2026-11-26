@@ -6,6 +6,7 @@ import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useRealtimeEvents } from '../context/SocketContext.jsx';
 import { Alert } from '../components/ui.jsx';
+import FullCamera from '../components/FullCamera.jsx';
 
 export const slipCode = (id) => String(id).replace(/-/g, '').slice(0, 8).toUpperCase();
 const escHtml = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -69,17 +70,17 @@ export default function Handovers() {
   };
   useEffect(() => {
     if (!camera || !videoRef.current) return undefined;
-    let stream; let done = false;
+    let stream; let done = false; let controls;
     const reader = new BrowserMultiFormatReader();
     navigator.mediaDevices?.getUserMedia({ video: { facingMode: 'environment' } }).then((s) => {
       stream = s; if (!videoRef.current) return;
       videoRef.current.srcObject = s;
-      reader.decodeFromVideoElement(videoRef.current, (result) => {
+      controls = reader.decodeFromVideoElement(videoRef.current, (result) => {
         if (!result || done) return;
         done = true; setCamera(false); findSlip(result.getText());
       }).catch(() => {});
     }).catch(() => { setCamera(false); setMsg({ type: 'error', text: t('handover.cameraError') }); });
-    return () => { try { reader.reset?.(); } catch { /* ignore */ } stream?.getTracks().forEach((tr) => tr.stop()); };
+    return () => { Promise.resolve(controls).then((c) => c?.stop()).catch(() => {}); stream?.getTracks().forEach((tr) => tr.stop()); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [camera]);
   useEffect(() => {
@@ -148,7 +149,7 @@ export default function Handovers() {
               <button className="btn secondary" disabled={!scanCode.trim()}>{t('handover.find')}</button>
             </form>
           </div>
-          {camera && <video ref={videoRef} autoPlay playsInline muted style={{ width: '100%', marginTop: 10, borderRadius: 8, background: '#000', maxHeight: 260, objectFit: 'cover' }} />}
+          {camera && <FullCamera onClose={() => setCamera(false)}><video ref={videoRef} autoPlay playsInline muted /><div className="camera-guide" /></FullCamera>}
         </div>
       )}
 

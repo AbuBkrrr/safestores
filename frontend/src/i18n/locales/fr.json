@@ -257,7 +257,8 @@
     "pricePer": "{{price}} par {{unit}}",
     "enterAmount": "Combien ? ({{unit}}) — lisez-le sur la balance",
     "lineTotal": "Prix",
-    "addToOrder": "Ajouter à la commande"
+    "addToOrder": "Ajouter à la commande",
+    "inStoreRoom": "{{qty}} en réserve — à mettre en rayon d'abord"
   },
   "products": {
     "title": "Gestion des produits",
@@ -319,7 +320,7 @@
     "markupHelp": "Marge : {{pct}} % sur le coût",
     "enterCostFirst": "Saisissez d'abord le prix de revient",
     "soldBy": "Vendu au",
-    "soldBy_unit": "À l'unité (articles entiers)",
+    "soldBy_unit": "Pièces / à l'unité (articles entiers)",
     "soldBy_weight": "Au poids (kg, g)",
     "soldBy_volume": "Au volume (litre, ml)",
     "soldBy_length": "À la longueur (yard, mètre)",
@@ -564,7 +565,8 @@
     "bulkCreationFailed": "Échec de la création groupée",
     "allPendingCopied": "Tous les codes en attente copiés dans le presse-papiers",
     "inviteMessageCopied": "Message d'invitation copié",
-    "miniNote": "Boutique Mini : vous tenez la boutique avec jusqu'à 2 aides (un gérant, un caissier ou un vendeur). Passez à Midi pour ajouter des magasiniers, des responsables de rayon, la sécurité et un gestionnaire de boutique en ligne."
+    "miniNote": "Boutique Mini : vous tenez la boutique avec jusqu'à 2 aides (un gérant, un caissier ou un vendeur). Passez à Midi pour ajouter des magasiniers, des responsables de rayon, la sécurité et un gestionnaire de boutique en ligne.",
+    "needsMidi": "Midi / Mega"
   },
   "usersPage": {
     "title": "Gestion des utilisateurs",
@@ -1118,7 +1120,9 @@
     "courierSet": "Livreur mis à jour",
     "courierPicked": "Le livreur l'a récupérée",
     "cashCollected": "Espèces encaissées",
-    "paidByGuarantor": "Réglé par le garant"
+    "paidByGuarantor": "Réglé par le garant",
+    "paidByTransfer": "Payé par virement",
+    "checkTransfer": "Virement — vérifiez votre compte"
   },
   "storefrontPage": {
     "title": "🛍️ Boutique",
@@ -1195,7 +1199,11 @@
     "creditAwaiting": "Votre demande de crédit attend l'approbation.",
     "creditApplyBelow": "Faites une demande de crédit ci-dessous pour utiliser ceci.",
     "creditOff": "Cette boutique ne propose pas encore de crédit.",
-    "payOnCredit": "Acheter à crédit"
+    "payOnCredit": "Acheter à crédit",
+    "payByTransfer": "Payer par virement",
+    "transferTitle": "Virez {{amount}} à :",
+    "transferRef": "Indiquez {{ref}} en motif du virement.",
+    "copy": "Copier"
   },
   "marketplaceHomePage": {
     "title": "🏪 Marché SAFE Stores",
@@ -1819,7 +1827,15 @@
     "privacy": "Nous transmettons le numéro de compte à Paystack et ne conservons que ses 4 derniers chiffres.",
     "linked": "Compte bancaire lié — paiements en ligne activés",
     "acceptOnline": "Accepter les paiements en ligne sur ma boutique",
-    "acceptOnDelivery": "Accepter le paiement au retrait / à la livraison"
+    "acceptOnDelivery": "Accepter le paiement au retrait / à la livraison",
+    "transferTitle": "Virement bancaire",
+    "transferHelp": "Les clients peuvent payer directement sur votre compte. Ils voient ces informations après la commande ; vous confirmez à réception de l'argent.",
+    "transferAccountName": "Nom du compte",
+    "transferNote": "Note pour les clients (facultatif)",
+    "transferNotePh": "ex. Envoyez la preuve sur WhatsApp 0803…",
+    "transferSave": "Enregistrer",
+    "transferSaved": "Coordonnées bancaires enregistrées",
+    "acceptTransfer": "Accepter les virements sur ma boutique"
   },
   "settlementsPage": {
     "title": "Règlements",
@@ -2577,5 +2593,25 @@
     "a_waste": "Noter une perte",
     "a_newJob": "Nouveau travail",
     "a_jobs": "Liste des travaux"
+  },
+  "quickAdd": {
+    "button": "Ajout rapide",
+    "title": "Ajouter un produit rapidement",
+    "help": "Nom, prix et quantité — il va directement en rayon, prêt à vendre. Ajoutez une photo pour que les caissiers le repèrent (et que la caméra le reconnaisse).",
+    "name": "Nom du produit",
+    "photo": "Photo (facultatif)",
+    "cost": "Prix d'achat",
+    "price": "Prix de vente",
+    "profit": "Marge : {{pct}} %",
+    "qty": "Quantité",
+    "category": "Catégorie",
+    "barcode": "Code-barres (facultatif)",
+    "onShelf": "Tout mettre en rayon maintenant (vendable tout de suite)",
+    "saveNext": "Enregistrer et suivant",
+    "saveClose": "Enregistrer et fermer",
+    "saving": "Enregistrement…",
+    "added": "Ajouté : {{name}}",
+    "needName": "Saisissez le nom du produit",
+    "needPrice": "Saisissez le prix de vente"
   }
 }

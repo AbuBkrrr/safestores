@@ -5,8 +5,8 @@
 #   cd /opt/safestores && bash deploy/vps/deploy.sh
 set -euo pipefail
 DIR=/opt/safestores
-DOMAIN=safestores.name.ng
-APP_DOMAIN=app.safestores.name.ng
+DOMAIN=safestore.com.ng
+APP_DOMAIN=app.safestore.com.ng
 cd "$DIR"
 
 echo "== 1. Moving the old hand-made landing-page files out of the way"
@@ -48,6 +48,15 @@ ENV
   echo "   Created .env. Super Admin password (write it down, then change it after first login): $SA_PASS"
 else
   echo "   Keeping the existing .env"
+  # Moving to a new domain: the app accepts both addresses, links use the new one.
+  if ! grep -q "^FRONTEND_URL=.*$APP_DOMAIN" .env; then
+    OLD=$(grep '^FRONTEND_URL=' .env | cut -d= -f2-)
+    sed -i '/^FRONTEND_URL=/d' .env
+    echo "FRONTEND_URL=https://$APP_DOMAIN${OLD:+,$OLD}" >> .env
+    echo "   Added https://$APP_DOMAIN to FRONTEND_URL (kept: ${OLD:-none})"
+  fi
+  grep -q '^PUBLIC_APP_URL=' .env || echo "PUBLIC_APP_URL=https://$APP_DOMAIN" >> .env
+  grep -q '^MARKETING_LANDING_URL=' .env || echo "MARKETING_LANDING_URL=https://$DOMAIN" >> .env
 fi
 
 # Our app port: keep it unless another program has taken it.

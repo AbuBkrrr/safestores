@@ -257,7 +257,8 @@
     "pricePer": "{{price}} fún {{unit}} kọ̀ọ̀kan",
     "enterAmount": "Mélòó? ({{unit}}) — kà á lórí òṣùwọ̀n",
     "lineTotal": "Iye owó",
-    "addToOrder": "Fi kún àṣẹ"
+    "addToOrder": "Fi kún àṣẹ",
+    "inStoreRoom": "{{qty}} nínú ilé ìpamọ́ — kọ́kọ́ gbé e sórí pẹpẹ"
   },
   "products": {
     "title": "Ìṣàkóso Ọjà",
@@ -319,7 +320,7 @@
     "markupHelp": "Èrè: {{pct}}% lórí iye rírà",
     "enterCostFirst": "Kọ́kọ́ tẹ iye rírà",
     "soldBy": "À ń tà á ní",
-    "soldBy_unit": "Ẹyọ kọ̀ọ̀kan (odindi)",
+    "soldBy_unit": "Ẹyọ / ọ̀kọ̀ọ̀kan (ọjà odidi)",
     "soldBy_weight": "Ìwúwo (kg, g)",
     "soldBy_volume": "Ìwọ̀n omi (lítà, ml)",
     "soldBy_length": "Gígùn (yáàdì, mítà)",
@@ -564,7 +565,8 @@
     "bulkCreationFailed": "Ìṣẹ̀dá ọ̀pọ̀lọpọ̀ kùnà",
     "allPendingCopied": "Gbogbo kóòdù tí ń dúró ni a dà",
     "inviteMessageCopied": "Ìránṣẹ́ ìpè ti dà",
-    "miniNote": "Ṣọ́ọ̀bù kékeré: ìwọ ló ń ṣe ṣọ́ọ̀bù, pẹ̀lú olùrànlọ́wọ́ tó tó 2 (alákòóso, olùgbowó tàbí olùrànlọ́wọ́). Gòkè sí Midi láti fi alákòóso ilé ìpamọ́, alákòóso pẹpẹ, ẹ̀ṣọ́ àti alákòóso ọjà orí ayélujára kún un."
+    "miniNote": "Ṣọ́ọ̀bù kékeré: ìwọ ló ń ṣe ṣọ́ọ̀bù, pẹ̀lú olùrànlọ́wọ́ tó tó 2 (alákòóso, olùgbowó tàbí olùrànlọ́wọ́). Gòkè sí Midi láti fi alákòóso ilé ìpamọ́, alákòóso pẹpẹ, ẹ̀ṣọ́ àti alákòóso ọjà orí ayélujára kún un.",
+    "needsMidi": "Midi / Mega"
   },
   "usersPage": {
     "title": "Ìṣàkóso Olùmùlò",
@@ -1118,7 +1120,9 @@
     "courierSet": "A ti ṣe àtúnṣe olùfijíṣẹ́",
     "courierPicked": "Olùfijíṣẹ́ ti gbé e",
     "cashCollected": "A ti gba owó lọ́wọ́",
-    "paidByGuarantor": "Onídùúró ti san án"
+    "paidByGuarantor": "Onídùúró ti san án",
+    "paidByTransfer": "A san án nípa báńkì",
+    "checkTransfer": "Ìsanwó báńkì — wo àkáùntì rẹ"
   },
   "storefrontPage": {
     "title": "🛍️ Ilé Ìtajà",
@@ -1195,7 +1199,11 @@
     "creditAwaiting": "Ìbéèrè gbèsè rẹ ń dúró de ìfọwọ́sí.",
     "creditApplyBelow": "Béèrè fún gbèsè nísàlẹ̀ láti lo èyí.",
     "creditOff": "Ṣọ́ọ̀bù yìí kò tíì pèsè gbèsè.",
-    "payOnCredit": "Ra lórí gbèsè"
+    "payOnCredit": "Ra lórí gbèsè",
+    "payByTransfer": "San nípa gbígbé owó sí báńkì",
+    "transferTitle": "Gbé {{amount}} sí:",
+    "transferRef": "Kọ {{ref}} gẹ́gẹ́ bí àlàyé ìsanwó kí ṣọ́ọ̀bù mọ̀ pé ìwọ ni.",
+    "copy": "Dà kọ"
   },
   "marketplaceHomePage": {
     "title": "🏪 Ọjà SAFE Stores",
@@ -1819,7 +1827,15 @@
     "privacy": "A ń fi nọ́ńbà àkọọ́lẹ̀ fún Paystack, a sì ń tọ́jú nọ́ńbà 4 tó kẹ́yìn nìkan.",
     "linked": "A ti so àkọọ́lẹ̀ báǹkì pọ̀ — ìsanwó ayélujára ti tàn",
     "acceptOnline": "Gba ìsanwó ayélujára ní ṣọ́ọ̀bù mi",
-    "acceptOnDelivery": "Gba ìsanwó nígbà ìgbà / ìkódé"
+    "acceptOnDelivery": "Gba ìsanwó nígbà ìgbà / ìkódé",
+    "transferTitle": "Gbígbé owó sí báńkì",
+    "transferHelp": "Àwọn oníbàárà lè san owó tààrà sí àkáùntì rẹ. Wọn yóò rí àwọn àlàyé wọ̀nyí lẹ́yìn àṣẹ; ìwọ yóò jẹ́rìí nígbà tí owó bá dé.",
+    "transferAccountName": "Orúkọ àkáùntì",
+    "transferNote": "Àkíyèsí fún oníbàárà (kò pọndandan)",
+    "transferNotePh": "àpẹẹrẹ Fi ẹ̀rí ìsanwó ránṣẹ́ lórí WhatsApp 0803…",
+    "transferSave": "Fi àlàyé báńkì pamọ́",
+    "transferSaved": "A ti fi àlàyé báńkì pamọ́",
+    "acceptTransfer": "Gba ìsanwó báńkì lórí ṣọ́ọ̀bù ayélujára mi"
   },
   "settlementsPage": {
     "title": "Ìsanwó Ìṣirò",
@@ -2577,5 +2593,25 @@
     "a_waste": "Kọ àdánù sílẹ̀",
     "a_newJob": "Iṣẹ́ tuntun",
     "a_jobs": "Àkójọ iṣẹ́"
+  },
+  "quickAdd": {
+    "button": "Fi kún kíákíá",
+    "title": "Fi ọjà kún kíákíá",
+    "help": "Orúkọ, iye owó àti iye mélòó — yóò lọ tààrà sórí pẹpẹ, ṣetán láti tà. Fi àwòrán kún kí àwọn olùgbowó lè dá a mọ̀ (kí kámẹ́rà náà lè dá a mọ̀).",
+    "name": "Orúkọ ọjà",
+    "photo": "Àwòrán (kò pọndandan)",
+    "cost": "Iye tí o rà á",
+    "price": "Iye títà",
+    "profit": "Èrè: {{pct}}%",
+    "qty": "Mélòó",
+    "category": "Ẹ̀ka",
+    "barcode": "Barcode (kò pọndandan)",
+    "onShelf": "Gbé gbogbo rẹ̀ sórí pẹpẹ báyìí (a lè tà á lẹ́sẹ̀kẹsẹ̀)",
+    "saveNext": "Fi pamọ́ kí o fi òmíràn kún",
+    "saveClose": "Fi pamọ́ kí o padé",
+    "saving": "Ń fi pamọ́…",
+    "added": "A ti fi kún: {{name}}",
+    "needName": "Kọ orúkọ ọjà",
+    "needPrice": "Kọ iye títà"
   }
 }
