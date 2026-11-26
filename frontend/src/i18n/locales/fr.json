@@ -2706,5 +2706,13 @@
     "replyPh": "Répondre au client",
     "send": "Répondre",
     "close": "Terminer"
+  },
+  "installMarket": {
+    "title": "Installez le Marché SAFE Stores",
+    "why": "Promos, comparaison des prix et vos commandes — à un toucher de l'écran d'accueil. Léger et gratuit.",
+    "ios": "Touchez Partager ⬆️, puis « Sur l’écran d’accueil ».",
+    "install": "Installer",
+    "notNow": "Plus tard",
+    "done": "Installé — retrouvez-le sur l'écran d'accueil"
   }
 }

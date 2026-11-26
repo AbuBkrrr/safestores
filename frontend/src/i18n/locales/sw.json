@@ -2706,5 +2706,13 @@
     "replyPh": "Mjibu mnunuzi",
     "send": "Jibu",
     "close": "Imekamilika"
+  },
+  "installMarket": {
+    "title": "Pata Soko la SAFE Stores kwenye simu yako",
+    "why": "Ofa, ulinganisho wa bei na oda zako — mguso mmoja kutoka skrini ya nyumbani. Ndogo na bure.",
+    "ios": "Gusa kitufe cha Share ⬆️, kisha “Add to Home Screen”.",
+    "install": "Sakinisha",
+    "notNow": "Si sasa",
+    "done": "Imesakinishwa — ipate kwenye skrini ya nyumbani"
   }
 }

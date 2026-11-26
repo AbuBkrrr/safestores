@@ -2706,5 +2706,13 @@
     "replyPh": "Amsa wa mai saye",
     "send": "Amsa",
     "close": "An gama"
+  },
+  "installMarket": {
+    "title": "Saka Kasuwar SAFE Stores a wayarka",
+    "why": "Rangwame, kwatanta farashi da odarka — taɓi ɗaya daga allon gida. Ƙarami kuma kyauta.",
+    "ios": "Taɓa maɓallin Raba ⬆️, sannan “Add to Home Screen”.",
+    "install": "Saka",
+    "notNow": "Ba yanzu ba",
+    "done": "An saka — nemo shi a allon gidanka"
   }
 }

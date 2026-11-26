@@ -2706,5 +2706,13 @@
     "replyPh": "Reply to the shopper",
     "send": "Reply",
     "close": "Mark done"
+  },
+  "installMarket": {
+    "title": "Get SAFE Stores Market on your phone",
+    "why": "Deals, price comparison and your orders — one tap from your home screen. Small and free.",
+    "ios": "Tap the Share button ⬆️, then “Add to Home Screen”.",
+    "install": "Install",
+    "notNow": "Not now",
+    "done": "Installed — find it on your home screen"
   }
 }
