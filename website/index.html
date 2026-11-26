@@ -443,7 +443,7 @@
 
 <script>
   (function () {
-    var EMAIL = 'support@safestores.name.ng';
+    var EMAIL = 'support@safestores.name.ng'; // the mailbox that receives mail today
     var TOPICS = {
       demo: 'Demo request', setup: 'Free setup visit', pricing: 'Pricing question',
       install: 'Help installing the app', other: 'Question',
@@ -479,7 +479,10 @@
     // ---- Visit tracking for marketing links (QR codes / shared links) ----
     // A small random id kept in this browser tells "the same phone came back"
     // apart from "the link was passed on to someone else". No personal data.
-    var API = (document.querySelector('meta[name="ss-api"]') || {}).content || '';
+    // The app server for whichever address this page was opened on (old or new).
+    var host = location.hostname.replace(/^www\./, '');
+    var API = /\./.test(host) && !/^(localhost|[\d.]+)$/.test(host) ? 'https://app.' + host
+      : ((document.querySelector('meta[name="ss-api"]') || {}).content || '');
     var params = new URLSearchParams(location.search);
     function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } return v; }
     var deviceId = store('ss_device');

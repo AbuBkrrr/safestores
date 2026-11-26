@@ -37,6 +37,13 @@ describe('Marketing tracking', () => {
     expect(lead.status).toBe(201);
     const leads = (await request().get('/api/super/marketing/leads').set(sa)).body;
     expect(leads.find((l) => l.id === lead.body.id).device_opens).toBe(3);
+    // …and it is in the Super Admin support inbox, with the sender's details.
+    const tickets = (await request().get('/api/super/support/tickets').set(sa)).body;
+    const tk = tickets.find((x) => x.lead_id === lead.body.id);
+    expect(tk).toMatchObject({ store_id: null, source: 'website', contact_name: 'Ada', contact_phone: '+2348000000000', store_name: 'Website visitor' });
+    const reply = await request().post(`/api/super/support/tickets/${tk.id}/reply`).set(sa).send({ message: 'Hello Ada' });
+    expect(reply.status).toBe(201);
+    expect((await request().patch(`/api/super/support/tickets/${tk.id}`).set(sa).send({ status: 'resolved' })).status).toBe(200);
 
     // Sign-up credited to the link.
     const su = await request().post('/api/auth/store/signup').send({ storeName: 'Ada Shop', adminName: 'Ada', adminEmail: `ada${Date.now()}@ex.com`, password: 'Str0ng!Passw0rd', refCode: link.code, refDevice: 'aaaaaaaa-1111' });
