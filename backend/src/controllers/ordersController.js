@@ -157,7 +157,7 @@ async function addItem(req, res) {
   const qtyIn = pq.value;
   if (product.shelf_qty < qtyIn) return res.status(400).json({ error: `Only ${product.shelf_qty} ${product.unit || ''} on the shelf — not enough stock for this quantity` });
 
-  const unitPrice = Number(product.cost_price) * Number(product.price_multiplier);
+  const unitPrice = require('../utils/price').effectivePrice(product); // sale price while a promotion runs
   const lineTotal = Math.round(unitPrice * qtyIn * 100) / 100;
   const movementId = crypto.randomUUID();
   const itemId = id || crypto.randomUUID();

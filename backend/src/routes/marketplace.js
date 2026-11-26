@@ -14,6 +14,13 @@ router.param('storeId', require('../utils/shopSlug').shopParam);
 // Public — a shopper can browse without an account
 router.get('/stores', ctrl.listStores);
 router.get('/search-products', ctrl.searchProducts);
+// Shopper app: deals, newest stock, popular, cheapest store, ask a shop / request an item.
+const shopper = require('../controllers/shopperController');
+router.get('/discover', shopper.discover);
+router.get('/compare', shopper.compare);
+router.get('/inquiries/:token', shopper.getInquiry);
+router.post('/inquiries/:token/reply', shopper.shopperReply);
+router.post('/:storeId/inquiries', shopper.createInquiry);
 router.get('/:storeId/products', ctrl.browseProducts);
 router.post('/:storeId/signup', ctrl.customerSignup);
 router.post('/:storeId/login', ctrl.customerLogin);

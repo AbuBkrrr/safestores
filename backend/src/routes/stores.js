@@ -213,6 +213,9 @@ router.post('/transfers/:transferId/receive', requireRole('admin', 'manager', 's
 router.post('/transfers/:transferId/cancel', requireRole('admin', 'manager'), stockToolsCtrl.cancelTransfer);
 router.post('/products', requireRole('admin', 'manager', 'store_manager'), productsCtrl.createProduct);
 router.post('/products/to-shelf', requireRole('admin', 'manager', 'store_manager', 'shelf_manager'), productsCtrl.moveToShelf);
+router.get('/inquiries', requireRole('admin', 'manager', 'marketplace_manager', 'cashier'), require('../controllers/shopperController').listForStore);
+router.post('/inquiries/:id/reply', requireRole('admin', 'manager', 'marketplace_manager', 'cashier'), require('../controllers/shopperController').storeReply);
+router.put('/products/:productId/promo', requireRole('admin', 'manager'), productsCtrl.setPromo);
 router.post('/products/markup', requireRole('admin', 'manager'), productsCtrl.bulkMarkup);
 router.put('/products/:productId', requireRole('admin', 'manager'), productsCtrl.updateProduct);
 // Item photos: owner, managers and the store-room / shelf managers.

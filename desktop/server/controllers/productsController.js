@@ -7,7 +7,7 @@ const { emitToStore } = require('../realtime');
 function listProducts(req, res) {
   const { storeId } = req.params;
   const rows = db.prepare(
-    `SELECT p.*, (p.cost_price * p.price_multiplier) AS selling_price,
+    `SELECT p.*, ${require('../utils/price').priceSql('p')} AS selling_price, ${require('../utils/price').regularSql('p')} AS regular_price, ${require('../utils/price').onSaleSql('p')} AS on_sale,
             (p.backroom_qty + p.shelf_qty) AS total_qty,
             ((p.backroom_qty + p.shelf_qty) * p.cost_price) AS stock_value,
             la.created_at AS last_arrival_at, la.quantity AS last_arrival_qty,
@@ -233,4 +233,19 @@ function moveToShelf(req, res) {
   res.json({ moved: rows.length, quantity: rows.reduce((n, p) => n + Number(p.backroom_qty), 0) });
 }
 
-module.exports = { moveToShelf, listProducts, createProduct, updateProduct, deleteProduct, restoreProduct, setProductPhoto, removeProductPhoto, bulkMarkup };
+
+// PUT /api/stores/:storeId/products/:productId/promo — see the cloud edition.
+function setPromo(req, res) {
+  const { storeId, productId } = req.params;
+  const price = Number(req.body?.promoPrice);
+  const on = Number.isFinite(price) && price > 0;
+  const ends = on && req.body?.promoEndsAt ? new Date(req.body.promoEndsAt) : null;
+  if (ends && Number.isNaN(ends.getTime())) return res.status(400).json({ error: 'Check the end date' });
+  const label = on ? String(req.body?.promoLabel || '').trim().slice(0, 60) || null : null;
+  const r = db.prepare('UPDATE products SET promo_price = ?, promo_ends_at = ?, promo_label = ? WHERE id = ? AND store_id = ?')
+    .run(on ? price : null, ends ? ends.toISOString() : null, label, productId, storeId);
+  if (!r.changes) return res.status(404).json({ error: 'Product not found' });
+  res.json(db.prepare('SELECT id, promo_price, promo_ends_at, promo_label FROM products WHERE id = ?').get(productId));
+}
+
+module.exports = { setPromo, moveToShelf, listProducts, createProduct, updateProduct, deleteProduct, restoreProduct, setProductPhoto, removeProductPhoto, bulkMarkup };

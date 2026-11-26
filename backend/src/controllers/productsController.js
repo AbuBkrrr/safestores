@@ -19,7 +19,7 @@ async function listProducts(req, res) {
   const { storeId } = req.params;
   const includeArchived = req.query.includeArchived === 'true';
   const { rows } = await db.query(
-    `SELECT p.*, (p.cost_price * p.price_multiplier) AS selling_price,
+    `SELECT p.*, ${require('../utils/price').priceSql('p')} AS selling_price, ${require('../utils/price').regularSql('p')} AS regular_price, ${require('../utils/price').onSaleSql('p')} AS on_sale,
             (p.backroom_qty + p.shelf_qty) AS total_qty,
             ((p.backroom_qty + p.shelf_qty) * p.cost_price) AS stock_value,
             la.created_at AS last_arrival_at, la.quantity AS last_arrival_qty,
@@ -312,4 +312,21 @@ async function moveToShelf(req, res) {
   res.json({ moved: rows.length, quantity: rows.reduce((n, p) => n + Number(p.backroom_qty), 0) });
 }
 
-module.exports = { moveToShelf, listProducts, createProduct, updateProduct, deleteProduct, restoreProduct, setProductPhoto, removeProductPhoto, bulkMarkup };
+
+// PUT /api/stores/:storeId/products/:productId/promo  { promoPrice, promoEndsAt?, promoLabel? }
+// Put an item on sale until a date (or until turned off): promoPrice null/0 ends it.
+async function setPromo(req, res) {
+  const { storeId, productId } = req.params;
+  const price = Number(req.body?.promoPrice);
+  const on = Number.isFinite(price) && price > 0;
+  const ends = on && req.body?.promoEndsAt ? new Date(req.body.promoEndsAt) : null;
+  if (ends && Number.isNaN(ends.getTime())) return res.status(400).json({ error: 'Check the end date' });
+  const label = on ? String(req.body?.promoLabel || '').trim().slice(0, 60) || null : null;
+  const { rows } = await db.query(
+    `UPDATE products SET promo_price = $1, promo_ends_at = $2, promo_label = $3, updated_at = now() WHERE id = $4 AND store_id = $5 RETURNING id, promo_price, promo_ends_at, promo_label`,
+    [on ? price : null, ends, label, productId, storeId]);
+  if (!rows[0]) return res.status(404).json({ error: 'Product not found' });
+  res.json(rows[0]);
+}
+
+module.exports = { setPromo, moveToShelf, listProducts, createProduct, updateProduct, deleteProduct, restoreProduct, setProductPhoto, removeProductPhoto, bulkMarkup };

@@ -9,6 +9,7 @@ import { useCurrency } from '../context/CurrencyContext.jsx';
 import CreditPanel from '../components/CreditPanel.jsx';
 import BrandingPanel from '../components/BrandingPanel.jsx';
 import CouriersPanel from '../components/CouriersPanel.jsx';
+import CustomerMessages from '../components/CustomerMessages.jsx';
 
 const SYNC_EVENTS = ['marketplace:order_placed', 'marketplace:order_updated', 'marketplace:order_fulfilled', 'marketplace:order_cancelled', 'marketplace:order_paid'];
 
@@ -193,6 +194,7 @@ export default function Marketplace() {
         </table>
         {orders.length === 0 && <p className="muted">{t('marketplacePage.noOrdersYet')}</p>}
       </div>
+      {import.meta.env.VITE_EDITION !== 'desktop' && <CustomerMessages />}
       <CreditPanel onToast={showToast} />
       <CouriersPanel couriers={couriers} reload={() => api.get(`/stores/${user.storeId}/couriers`).then((r) => setCouriers(r.data))} onToast={showToast} />
 

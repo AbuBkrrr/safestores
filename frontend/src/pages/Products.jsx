@@ -12,6 +12,7 @@ import { BUSINESS_TYPES, SOLD_BY_UNITS, fmtQty } from '../utils/businessTypes.js
 import { mediaUrl } from '../utils/media.js';
 import { lookOfFile, packLook } from '../utils/visualMatch.js';
 import QuickAddProduct from '../components/QuickAddProduct.jsx';
+import PromoDialog from '../components/PromoDialog.jsx';
 
 const SYNC_EVENTS = ['product:created', 'product:updated', 'product:deleted', 'arrival:created', 'movement:created', 'audit:created'];
 const NEW_ARRIVAL_DAYS = 3;
@@ -59,6 +60,7 @@ export default function Products() {
 
   const [quick, setQuick] = useState(() => new URLSearchParams(window.location.search).get('quick') === '1');
   const [putOnShelf, setPutOnShelf] = useState(true);
+  const [promoFor, setPromoFor] = useState(null);
   // One tap: store-room stock onto the shelf (one product, or all of them).
   const canShelf = ['admin', 'manager', 'store_manager', 'shelf_manager'].includes(user?.role);
   const simple = storeTier === 'mini'; // fewer columns for a one-person shop
@@ -350,7 +352,11 @@ export default function Products() {
                   />
                 </td>}
                 <td>{formatCurrency(p.cost_price)}</td>
-                <td>{formatCurrency(p.selling_price)}</td>
+                <td>
+                  {formatCurrency(p.selling_price)}
+                  {p.on_sale && <div className="small"><span className="badge active">{p.promo_label || t('promo.onSale')}</span> <s className="muted">{formatCurrency(p.regular_price)}</s></div>}
+                  {canPrice && !p.archived_at && <div><button type="button" className="link-btn small" onClick={() => setPromoFor(p)}>🏷️ {p.on_sale ? t('promo.edit') : t('promo.button')}</button></div>}
+                </td>
                 <td>{p.backroom_qty}{canShelf && Number(p.backroom_qty) > 0 && !p.archived_at && (
                   <div><button type="button" className="btn small" style={{ marginTop: 4 }} onClick={() => toShelf([p.id])}>➜ {t('products.toShelf')}</button></div>
                 )}</td>
@@ -367,6 +373,7 @@ export default function Products() {
         </table>
         </div>
       </div>
+      {promoFor && <PromoDialog storeId={user.storeId} product={promoFor} onDone={load} onClose={() => setPromoFor(null)} />}
       <Toast {...(toast || {})} />
     </div>
   );

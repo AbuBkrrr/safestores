@@ -230,6 +230,12 @@ function importChanges(req, res) {
         .run(['unit', 'weight', 'volume', 'length'].includes(p.sold_by) ? p.sold_by : 'unit', p.shelf_life_days || null, p.id, p.updated_at);
     }
 
+    // Promotions travel with products — see the cloud edition.
+    for (const p of products) {
+      if (p.promo_price === undefined) continue;
+      db.prepare('UPDATE products SET promo_price = ?, promo_ends_at = ?, promo_label = ? WHERE id = ? AND store_id = ?')
+        .run(p.promo_price == null ? null : Number(p.promo_price), p.promo_ends_at ? new Date(p.promo_ends_at).toISOString() : null, p.promo_label || null, p.id, storeId);
+    }
     for (const m of movements) {
       db.prepare(
         `INSERT OR IGNORE INTO stock_movements (id, store_id, product_id, type, quantity, note, performed_by, created_at)
