@@ -77,7 +77,7 @@ function createApp() {
   const chat = require('./controllers/liveChatController');
   const chatLimit = require('express-rate-limit')({ windowMs: 10 * 60 * 1000, max: 40, standardHeaders: true, legacyHeaders: false });
   const chatReadLimit = require('express-rate-limit')({ windowMs: 60 * 1000, max: 40, standardHeaders: true, legacyHeaders: false });
-  app.post('/api/m/chat', mkCors, chatLimit, mkJson, chat.send);
+  app.post('/api/m/chat', mkCors, chatLimit, mkJson, require('./middleware/auth').optionalAuth, chat.send);
   app.get('/api/m/chat/:token', mkCors, chatReadLimit, chat.read);
   app.get('/go/:code', mk.go);
   app.use(cors(buildCorsOptions()));
