@@ -335,7 +335,15 @@
     "toShelf": "Rafu",
     "movedToShelf": "Bidhaa {{count}} zimewekwa kwenye rafu",
     "inStoreRoomBanner": "Bidhaa {{count}} bado ziko stoo — haziuzwi bado.",
-    "allToShelf": "Weka zote kwenye rafu"
+    "allToShelf": "Weka zote kwenye rafu",
+    "delete": "Futa",
+    "deleteConfirm": "Futa bidhaa {{count}}? Zisizowahi kuuzwa zitafutwa kabisa. Zenye mauzo zitahifadhiwa kando, ili risiti na ripoti zako zibaki sahihi.",
+    "deletedResult": "{{deleted}} zimefutwa, {{archived}} zimehifadhiwa (zina historia ya mauzo).",
+    "selectedCount": "{{count}} zimechaguliwa",
+    "deleteSelected": "Futa {{count}} zilizochaguliwa",
+    "clearSelection": "Ondoa uchaguzi",
+    "selectAll": "Chagua zote",
+    "selectFor": "Chagua {{name}}"
   },
   "stockArrivalPage": {
     "title": "Uwasili wa Bidhaa",

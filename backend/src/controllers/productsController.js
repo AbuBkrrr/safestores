@@ -329,4 +329,65 @@ async function setPromo(req, res) {
   res.json(rows[0]);
 }
 
-module.exports = { setPromo, moveToShelf, listProducts, createProduct, updateProduct, deleteProduct, restoreProduct, setProductPhoto, removeProductPhoto, bulkMarkup };
+// Tables whose rows only describe the product itself (its pictures, how the
+// camera knows it, its stock moving around): they go with a deleted product.
+// A row in any other table that points at a product (a sale, an order, a
+// recipe, a count…) is history, and such a product is archived instead.
+const OWN_TABLES = new Set(['product_looks', 'product_images', 'stock_movements']);
+let productRefs = null;
+async function productReferences(client) {
+  if (productRefs) return productRefs;
+  const { rows } = await client.query(
+    `SELECT c.conrelid::regclass::text AS tbl, a.attname AS col
+       FROM pg_constraint c JOIN pg_attribute a ON a.attrelid = c.conrelid AND a.attnum = ANY (c.conkey)
+      WHERE c.contype = 'f' AND c.confrelid = 'products'::regclass`
+  );
+  productRefs = rows.filter((r) => !OWN_TABLES.has(r.tbl.replace(/^public\./, '')));
+  return productRefs;
+}
+
+// POST /api/stores/:storeId/products/delete  { productIds: [...] }
+// Deletes products for good when they were never used (e.g. a wrong import);
+// products with sales or other history are archived so receipts and reports
+// stay correct. Answers how many went each way.
+async function bulkDeleteProducts(req, res) {
+  const { storeId } = req.params;
+  const ids = [...new Set((req.body?.productIds || []).filter((x) => typeof x === 'string' && /^[0-9a-f-]{36}$/i.test(x)))];
+  if (!ids.length) return res.status(400).json({ error: 'Choose at least one product' });
+  if (ids.length > 5000) return res.status(400).json({ error: 'Delete at most 5000 products at a time' });
+  const client = await db.pool.connect();
+  try {
+    await client.query('BEGIN');
+    const { rows: mine } = await client.query('SELECT id FROM products WHERE store_id = $1 AND id = ANY($2::uuid[])', [storeId, ids]);
+    const own = mine.map((r) => r.id);
+    const used = new Set();
+    for (const { tbl, col } of await productReferences(client)) {
+      const { rows } = await client.query(`SELECT DISTINCT ${col}::text AS id FROM ${tbl} WHERE ${col} = ANY($1::uuid[])`, [own]);
+      rows.forEach((r) => used.add(r.id));
+    }
+    let toDelete = own.filter((id) => !used.has(id));
+    let toArchive = own.filter((id) => used.has(id));
+    if (toDelete.length) {
+      // Anything still tying them down (history found through their stock
+      // movements): keep them, archived, rather than fail.
+      await client.query('SAVEPOINT del');
+      try {
+        await client.query('DELETE FROM products WHERE store_id = $1 AND id = ANY($2::uuid[])', [storeId, toDelete]);
+      } catch (err) {
+        if (err.code !== '23503') throw err;
+        await client.query('ROLLBACK TO SAVEPOINT del');
+        toArchive = own; toDelete = [];
+      }
+    }
+    if (toArchive.length) await client.query('UPDATE products SET archived_at = COALESCE(archived_at, now()) WHERE store_id = $1 AND id = ANY($2::uuid[])', [storeId, toArchive]);
+    await client.query('COMMIT');
+    logActivity(req, { storeId, action: 'product.bulk_deleted', entityType: 'store', entityId: storeId, details: { deleted: toDelete.length, archived: toArchive.length } });
+    try { emitToStore(storeId, 'product:bulk', {}); } catch { /* best-effort */ }
+    res.json({ deleted: toDelete.length, archived: toArchive.length, notFound: ids.length - own.length });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally { client.release(); }
+}
+
+module.exports = { setPromo, moveToShelf, listProducts, createProduct, updateProduct, deleteProduct, restoreProduct, setProductPhoto, removeProductPhoto, bulkMarkup, bulkDeleteProducts };

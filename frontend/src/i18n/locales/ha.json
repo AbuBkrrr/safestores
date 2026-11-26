@@ -335,7 +335,15 @@
     "toShelf": "Shiryayye",
     "movedToShelf": "An saka kaya {{count}} a kan shiryayye",
     "inStoreRoomBanner": "Kaya {{count}} har yanzu suna ɗakin ajiya — ba a iya sayar da su ba tukuna.",
-    "allToShelf": "Saka duka a kan shiryayye"
+    "allToShelf": "Saka duka a kan shiryayye",
+    "delete": "Goge",
+    "deleteConfirm": "A goge kaya {{count}}? Kayan da ba a taɓa sayarwa ba za a goge su gaba ɗaya. Waɗanda aka sayar za a ajiye su a gefe, don rasit da rahotanni su kasance daidai.",
+    "deletedResult": "An goge {{deleted}}, an ajiye {{archived}} a gefe (suna da tarihin sayarwa).",
+    "selectedCount": "An zaɓi {{count}}",
+    "deleteSelected": "Goge {{count}} da aka zaɓa",
+    "clearSelection": "Share zaɓi",
+    "selectAll": "Zaɓi duka",
+    "selectFor": "Zaɓi {{name}}"
   },
   "stockArrivalPage": {
     "title": "Isowar Kaya",

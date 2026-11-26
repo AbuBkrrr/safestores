@@ -335,7 +335,15 @@
     "toShelf": "上架",
     "movedToShelf": "已上架 {{count}} 件商品",
     "inStoreRoomBanner": "{{count}} 件商品仍在库房 — 还不能卖。",
-    "allToShelf": "全部上架"
+    "allToShelf": "全部上架",
+    "delete": "删除",
+    "deleteConfirm": "删除 {{count}} 个产品？从未售出的产品将被永久删除；有销售记录的将被归档，以保证收据和报表准确。",
+    "deletedResult": "已删除 {{deleted}} 个，已归档 {{archived}} 个（有销售记录）。",
+    "selectedCount": "已选 {{count}} 个",
+    "deleteSelected": "删除所选 {{count}} 个",
+    "clearSelection": "清除选择",
+    "selectAll": "全选",
+    "selectFor": "选择 {{name}}"
   },
   "stockArrivalPage": {
     "title": "到货入库",
