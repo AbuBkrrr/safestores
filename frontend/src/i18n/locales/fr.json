@@ -2832,5 +2832,10 @@
     "shelf_manager": "rayons : confirmer le stock reçu, étiquettes",
     "marketplace_manager": "commandes en ligne et messages clients",
     "security": "contrôler les reçus à la sortie"
+  },
+  "orderAlert": {
+    "title": "Nouvelle commande en ligne !",
+    "body": "Une commande de {{total}} vient d'arriver.",
+    "view": "Voir la commande"
   }
 }
