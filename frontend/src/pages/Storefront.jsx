@@ -318,6 +318,12 @@ export default function Storefront() {
               {message}{' '}
               {trackingPath && <Link to={trackingPath}>{t('storefrontPage.trackOrder')}</Link>}
               {placed.transfer && <TransferDetails transfer={placed.transfer} amount={formatCurrency(placed.total)} reference={String(placed.id || '').slice(0, 8).toUpperCase()} />}
+              {placed.transfer && placed.tracking_token && (placed.transfer_sent_at
+                ? <div className="alert success">✅ {t('trackPage.paymentSentDone')}</div>
+                : <button type="button" className="btn" style={{ width: '100%', marginTop: 8 }}
+                    onClick={() => client.post(`/public/marketplace-orders/${placed.tracking_token}/payment-sent`)
+                      .then((r) => setPlaced((cur) => ({ ...cur, transfer_sent_at: r.data.transfer_sent_at || new Date().toISOString() }))).catch(() => {})}>
+                    💸 {t('trackPage.paymentSentButton')}</button>)}
             </div>
           )}
           {!placed && message && <div className="alert info">{message}</div>}

@@ -131,6 +131,7 @@ function createApp() {
   app.get('/api/public/receipts/:token', require('./controllers/ordersController').publicReceipt);
   const publicCtrl = require('./controllers/publicController');
   app.get('/api/public/marketplace-orders/:token', publicCtrl.trackOrder);
+  app.post('/api/public/marketplace-orders/:token/payment-sent', require('express-rate-limit')({ windowMs: 10 * 60 * 1000, max: 10, standardHeaders: true, legacyHeaders: false }), publicCtrl.paymentSent);
   const { shopParam } = require('./utils/shopSlug');
   app.get('/api/public/stores/:storeId', (req, res, next) => shopParam(req, res, next, req.params.storeId), publicCtrl.storeInfo);
   app.get('/share/shop/:storeId', publicCtrl.shareShop);

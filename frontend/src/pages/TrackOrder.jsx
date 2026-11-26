@@ -18,6 +18,14 @@ export default function TrackOrder() {
   const [params] = useSearchParams();
   const [payMsg, setPayMsg] = useState('');
   const [busy, setBusy] = useState(false);
+  const [sentBusy, setSentBusy] = useState(false);
+  const paymentSent = async () => {
+    setSentBusy(true);
+    try {
+      const { data } = await api.post(`/public/marketplace-orders/${encodeURIComponent(token)}/payment-sent`);
+      setO((cur) => ({ ...cur, transfer_sent_at: data.transfer_sent_at || new Date().toISOString() }));
+    } catch (err) { setError(err.response?.data?.error || t('common.errorGeneric')); } finally { setSentBusy(false); }
+  };
   const [o, setO] = useState(null);
   const [error, setError] = useState('');
 
@@ -79,6 +87,11 @@ export default function TrackOrder() {
                 : <span className="badge pending">{o.payment_method === 'online' || o.payment_method === 'transfer' ? t('trackPage.awaitingPayment') : t('trackPage.payOnDelivery')}</span>}
             </p>
             {o.payment_status !== 'paid' && o.status !== 'cancelled' && o.transfer && <TransferDetails transfer={o.transfer} amount={o.total} reference={o.reference} />}
+            {o.payment_status !== 'paid' && o.status !== 'cancelled' && o.payment_method === 'transfer' && (
+              o.transfer_sent_at
+                ? <div className="alert success">✅ {t('trackPage.paymentSentDone')}</div>
+                : <button className="btn" style={{ width: '100%', marginTop: 8 }} disabled={sentBusy} onClick={paymentSent}>💸 {t('trackPage.paymentSentButton')}</button>
+            )}
             {o.payment_status !== 'paid' && o.status !== 'cancelled' && o.can_pay_online && (
               <button className="btn" disabled={busy} onClick={payNow}>{t('trackPage.payNow')}</button>
             )}

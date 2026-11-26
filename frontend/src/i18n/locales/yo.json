@@ -1137,7 +1137,10 @@
     "cashCollected": "A ti gba owó lọ́wọ́",
     "paidByGuarantor": "Onídùúró ti san án",
     "paidByTransfer": "A san án nípa báńkì",
-    "checkTransfer": "Ìsanwó báńkì — wo àkáùntì rẹ"
+    "checkTransfer": "Ìsanwó báńkì — wo àkáùntì rẹ",
+    "customerSaysPaid": "Oníbàárà sọ pé òun ti sanwó — ṣàyẹ̀wò báǹkì rẹ",
+    "moneyReceived": "Owó ti dé",
+    "confirmTransferReceived": "Ṣé {{total}} ti dé àkáǹtì báǹkì rẹ? Èyí yóò sàmì sí àṣẹ náà pé a ti sanwó."
   },
   "storefrontPage": {
     "title": "🛍️ Ilé Ìtajà",
@@ -1712,7 +1715,9 @@
     "emailPrompt": "Ímeèlì rẹ fún rìsíìtì ìsanwó:",
     "refundPending": "O sanwó lórí ayélujára, nítorí náà ṣọ́ọ̀bù yóò dá owó rẹ padà. Kàn sí ṣọ́ọ̀bù tí o kò bá rí i gbà láàrin ọjọ́ díẹ̀.",
     "refundDone": "Ṣọ́ọ̀bù ti sàmì sí pé a ti fi ìdápadà rẹ ránṣẹ́.",
-    "storeNote": "Ifiranṣẹ lati ṣọọbu"
+    "storeNote": "Ifiranṣẹ lati ṣọọbu",
+    "paymentSentButton": "Mo ti fi owó ránṣẹ́",
+    "paymentSentDone": "O ṣeun! A ti sọ fún ṣọ́ọ̀bù náà. Wọn yóò jẹ́rìí sí i ní kété tí owó bá dé."
   },
   "onboarding": {
     "title": "Ṣètò ṣọ́ọ̀bù rẹ",
@@ -2836,6 +2841,8 @@
   "orderAlert": {
     "title": "Àṣẹ ọjà tuntun lórí ayélujára!",
     "body": "Àṣẹ ọjà {{total}} ṣẹ̀ṣẹ̀ dé.",
-    "view": "Wo àṣẹ náà"
+    "view": "Wo àṣẹ náà",
+    "paidTitle": "Oníbàárà sọ pé òun ti sanwó",
+    "paidBody": "Owó {{total}} fún àṣẹ {{ref}}. Ṣàyẹ̀wò báǹkì rẹ, lẹ́yìn náà tẹ Owó ti dé."
   }
 }

@@ -443,7 +443,22 @@ async function markRefunded(req, res) {
   res.json({ message: 'Marked as refunded' });
 }
 
-module.exports = {
+// PATCH /api/stores/:storeId/marketplace/orders/:orderId/transfer-received
+// The shop has seen the transfer in its bank account.
+async function transferReceived(req, res) {
+  const { storeId, orderId } = req.params;
+  const { rows } = await db.query(
+    `UPDATE marketplace_orders SET payment_status = 'paid', paid_at = COALESCE(paid_at, now())
+      WHERE id = $1 AND store_id = $2 AND payment_method = 'transfer' AND payment_status IN ('unpaid', 'pending', 'failed')
+        AND status <> 'cancelled' RETURNING *`,
+    [orderId, storeId]
+  );
+  if (!rows[0]) return res.status(404).json({ error: 'No unpaid transfer order with that id' });
+  emitToStore(storeId, 'marketplace:order_paid', { id: orderId });
+  res.json(rows[0]);
+}
+
+module.exports = { transferReceived,
   confirmOrder, dispatchOrder,
   cancelOrder, markRefunded,
   browseProducts, listStores, searchProducts, customerSignup, customerLogin, placeOrder, listMyOrders,

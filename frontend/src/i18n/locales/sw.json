@@ -1137,7 +1137,10 @@
     "cashCollected": "Pesa imekusanywa",
     "paidByGuarantor": "Mdhamini amelipa",
     "paidByTransfer": "Imelipwa kwa benki",
-    "checkTransfer": "Uhamisho — angalia akaunti yako"
+    "checkTransfer": "Uhamisho — angalia akaunti yako",
+    "customerSaysPaid": "Mteja anasema amelipa — angalia benki yako",
+    "moneyReceived": "Pesa imepokelewa",
+    "confirmTransferReceived": "Je, {{total}} imeingia kwenye akaunti yako? Hii itaweka oda kuwa imelipwa."
   },
   "storefrontPage": {
     "title": "🛍️ Duka",
@@ -1712,7 +1715,9 @@
     "emailPrompt": "Barua pepe yako kwa risiti ya malipo:",
     "refundPending": "Ulilipa mtandaoni, kwa hiyo duka litakurudishia pesa. Wasiliana na duka ikiwa hujazipokea ndani ya siku chache.",
     "refundDone": "Duka limeweka alama kuwa marejesho yako yametumwa.",
-    "storeNote": "Ujumbe kutoka dukani"
+    "storeNote": "Ujumbe kutoka dukani",
+    "paymentSentButton": "Nimetuma malipo",
+    "paymentSentDone": "Asante! Tumeiarifu duka. Watathibitisha mara pesa ikifika."
   },
   "onboarding": {
     "title": "Andaa duka lako",
@@ -2836,6 +2841,8 @@
   "orderAlert": {
     "title": "Oda mpya mtandaoni!",
     "body": "Oda ya {{total}} imeingia sasa hivi.",
-    "view": "Tazama oda"
+    "view": "Tazama oda",
+    "paidTitle": "Mteja anasema amelipa",
+    "paidBody": "Uhamisho wa {{total}} kwa oda {{ref}}. Angalia benki yako, kisha bonyeza Pesa imepokelewa."
   }
 }

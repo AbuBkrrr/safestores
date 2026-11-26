@@ -1137,7 +1137,10 @@
     "cashCollected": "An karɓi kuɗi hannu",
     "paidByGuarantor": "Mai lamuni ya biya",
     "paidByTransfer": "An biya ta banki",
-    "checkTransfer": "Tura kuɗi — duba asusunka"
+    "checkTransfer": "Tura kuɗi — duba asusunka",
+    "customerSaysPaid": "Abokin ciniki ya ce ya biya — duba bankinka",
+    "moneyReceived": "An karɓi kuɗi",
+    "confirmTransferReceived": "Shin {{total}} ya shiga asusun bankinka? Wannan zai nuna oda an biya."
   },
   "storefrontPage": {
     "title": "🛍️ Shago",
@@ -1712,7 +1715,9 @@
     "emailPrompt": "Adireshin imel ɗinka don rasit ɗin biya:",
     "refundPending": "Ka biya ta yanar gizo, don haka shagon zai mayar maka da kuɗi. Tuntuɓi shagon idan ba ka karɓa ba cikin 'yan kwanaki.",
     "refundDone": "Shagon ya yi alamar cewa an aika mayarwarka.",
-    "storeNote": "Saƙo daga shago"
+    "storeNote": "Saƙo daga shago",
+    "paymentSentButton": "Na tura kuɗin",
+    "paymentSentDone": "Na gode! Mun sanar da shagon. Za su tabbatar da zarar kuɗin ya iso."
   },
   "onboarding": {
     "title": "Shirya shagonka",
@@ -2836,6 +2841,8 @@
   "orderAlert": {
     "title": "Sabon oda ta yanar gizo!",
     "body": "Oda ta {{total}} ta shigo yanzu.",
-    "view": "Duba oda"
+    "view": "Duba oda",
+    "paidTitle": "Abokin ciniki ya ce ya biya",
+    "paidBody": "An tura {{total}} don oda {{ref}}. Duba bankinka, sannan ka danna An karɓi kuɗi."
   }
 }

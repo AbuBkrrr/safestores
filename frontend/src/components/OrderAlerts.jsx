@@ -78,8 +78,20 @@ export default function OrderAlerts() {
       document.title = `🔔 ${t('orderAlert.title')}`;
       setTimeout(() => { document.title = old; }, 15000);
     };
+    const onPaid = (o) => {
+      const total = formatCurrency(Number(o?.total) || 0);
+      setAlerts((a) => [{ id: `paid-${o?.id}-${Date.now()}`, total, who: '', paid: true, ref: o?.reference }, ...a].slice(0, 3));
+      playOrderChime();
+      try {
+        if ('Notification' in window && Notification.permission === 'granted' && document.visibilityState !== 'visible') {
+          const n = new Notification(t('orderAlert.paidTitle'), { body: t('orderAlert.paidBody', { total, ref: o?.reference || '' }), tag: `paid-${o?.id}`, requireInteraction: true });
+          n.onclick = () => { window.focus(); navigate('/marketplace'); n.close(); };
+        }
+      } catch { /* */ }
+    };
     socket.on('marketplace:order_placed', onOrder);
-    return () => socket.off('marketplace:order_placed', onOrder);
+    socket.on('marketplace:payment_sent', onPaid);
+    return () => { socket.off('marketplace:order_placed', onOrder); socket.off('marketplace:payment_sent', onPaid); };
   }, [socket]); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!user?.storeId || !alerts.length) return null;
@@ -88,8 +100,8 @@ export default function OrderAlerts() {
       {alerts.map((a) => (
         <div key={a.id} className="order-alert">
           <div>
-            <strong>🔔 {t('orderAlert.title')}</strong>
-            <div>{t('orderAlert.body', { total: a.total })}{a.who ? ` — ${a.who}` : ''}</div>
+            <strong>{a.paid ? `💸 ${t('orderAlert.paidTitle')}` : `🔔 ${t('orderAlert.title')}`}</strong>
+            <div>{a.paid ? t('orderAlert.paidBody', { total: a.total, ref: a.ref || '' }) : t('orderAlert.body', { total: a.total })}{a.who ? ` — ${a.who}` : ''}</div>
           </div>
           <div className="order-alert-actions">
             <button type="button" className="btn small" onClick={() => { setAlerts((l) => l.filter((x) => x.id !== a.id)); navigate('/marketplace'); }}>{t('orderAlert.view')}</button>

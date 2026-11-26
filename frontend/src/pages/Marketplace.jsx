@@ -11,7 +11,7 @@ import BrandingPanel from '../components/BrandingPanel.jsx';
 import CouriersPanel from '../components/CouriersPanel.jsx';
 import CustomerMessages from '../components/CustomerMessages.jsx';
 
-const SYNC_EVENTS = ['marketplace:order_placed', 'marketplace:order_updated', 'marketplace:order_fulfilled', 'marketplace:order_cancelled', 'marketplace:order_paid'];
+const SYNC_EVENTS = ['marketplace:payment_sent', 'marketplace:order_placed', 'marketplace:order_updated', 'marketplace:order_fulfilled', 'marketplace:order_cancelled', 'marketplace:order_paid'];
 
 export default function Marketplace() {
   const { t } = useTranslation();
@@ -101,6 +101,15 @@ export default function Marketplace() {
     }
   };
 
+  // Bank transfer: the shop checks its account, then confirms the money arrived.
+  const transferReceived = async (o) => {
+    if (!window.confirm(t('marketplacePage.confirmTransferReceived', { total: formatCurrency(o.total) }))) return;
+    try {
+      await api.patch(`/stores/${user.storeId}/marketplace/orders/${o.id}/transfer-received`);
+      load();
+    } catch (err) { setError(err.response?.data?.error || t('common.errorGeneric')); }
+  };
+
   const markRefunded = async (o) => {
     if (!window.confirm(t('marketplacePage.confirmRefunded'))) return;
     try {
@@ -187,6 +196,10 @@ export default function Marketplace() {
                   <button className={`btn small${o.status === 'placed' ? '' : ' secondary'}`} onClick={() => openOrder(o)}>{o.status === 'placed' ? t('marketplacePage.review') : t('marketplacePage.view')}</button>{' '}
                   {['placed', 'confirmed', 'ready_for_pickup', 'out_for_delivery'].includes(o.status) && <button className="btn small secondary" onClick={() => cancel(o)}>{t('marketplacePage.cancel')}</button>}
                   {o.payment_status === 'refund_due' && <button className="btn small" onClick={() => markRefunded(o)}>{t('marketplacePage.markRefunded')}</button>}
+                  {o.payment_method === 'transfer' && ['unpaid', 'pending', 'failed'].includes(o.payment_status) && o.status !== 'cancelled' && (
+                    <>{o.transfer_sent_at && <div className="badge pending" style={{ marginTop: 4 }}>💸 {t('marketplacePage.customerSaysPaid')}</div>}
+                      <button className="btn small" style={{ marginTop: 4 }} onClick={() => transferReceived(o)}>✅ {t('marketplacePage.moneyReceived')}</button></>
+                  )}
                 </td>
               </tr>
             ))}

@@ -1137,7 +1137,10 @@
     "cashCollected": "E nwetara ego",
     "paidByGuarantor": "Onye nkwado akwụọla",
     "paidByTransfer": "Akwụọla site na nyefe",
-    "checkTransfer": "Nyefe ego — lelee akaụntụ gị"
+    "checkTransfer": "Nyefe ego — lelee akaụntụ gị",
+    "customerSaysPaid": "Onye ahịa kwuru na ọ kwụrụla — lelee ụlọ akụ gị",
+    "moneyReceived": "Ego abatala",
+    "confirmTransferReceived": "{{total}} ọ batala n'akaụntụ gị? Nke a ga-egosi na a kwụrụ ụgwọ ọda ahụ."
   },
   "storefrontPage": {
     "title": "🛍️ Ụlọ Ahịa",
@@ -1712,7 +1715,9 @@
     "emailPrompt": "Adreesị email gị maka rasiti ịkwụ ụgwọ:",
     "refundPending": "Ị kwụrụ n'ịntanetị, ya mere ụlọ ahịa ga-akwụghachi gị. Kpọtụrụ ụlọ ahịa ma ọ bụrụ na ị natabeghị ya n'ime ụbọchị ole na ole.",
     "refundDone": "Ụlọ ahịa akaala akara na e zigara nkwụghachi gị.",
-    "storeNote": "Ozi sitere n'ụlọ ahịa"
+    "storeNote": "Ozi sitere n'ụlọ ahịa",
+    "paymentSentButton": "Ezigala m ego ahụ",
+    "paymentSentDone": "Daalụ! Anyị agwala ụlọ ahịa ahụ. Ha ga-akwado ozugbo ego ahụ batara."
   },
   "onboarding": {
     "title": "Kwadebe ụlọ ahịa gị",
@@ -2836,6 +2841,8 @@
   "orderAlert": {
     "title": "Ọda ọhụrụ n'ịntanetị!",
     "body": "Ọda {{total}} batara ugbu a.",
-    "view": "Lee ọda"
+    "view": "Lee ọda",
+    "paidTitle": "Onye ahịa kwuru na ọ kwụrụla ụgwọ",
+    "paidBody": "E zigara {{total}} maka ọda {{ref}}. Lelee ụlọ akụ gị, wee pịa Ego abatala."
   }
 }

@@ -71,5 +71,6 @@ function proxyPatch(action) {
 }
 const cancelOrder = proxyPatch('cancel');
 const markRefunded = proxyPatch('refunded');
+const transferReceived = proxyPatch('transfer-received');
 
-module.exports = { listStoreOrders, getStoreOrder, fulfillOrder, cancelOrder, markRefunded };
+module.exports = { listStoreOrders, getStoreOrder, fulfillOrder, cancelOrder, markRefunded, transferReceived };
