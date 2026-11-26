@@ -15,11 +15,13 @@ function createStore(overrides = {}) {
     storeTier = 'mini',
     subscriptionStatus = 'active',
     locked = false,
+    // Off unless a test asks: tests exercise the store-room → shelf steps (null = by store size).
+    autoShelf = 0,
   } = overrides;
   const id = crypto.randomUUID();
   db.prepare(
-    `INSERT INTO stores (id, name, store_tier, subscription_status, locked, sync_key) VALUES (?,?,?,?,?,?)`
-  ).run(id, name, storeTier, subscriptionStatus, locked ? 1 : 0, crypto.randomUUID());
+    `INSERT INTO stores (id, name, store_tier, subscription_status, locked, sync_key, auto_shelf) VALUES (?,?,?,?,?,?,?)`
+  ).run(id, name, storeTier, subscriptionStatus, locked ? 1 : 0, crypto.randomUUID(), autoShelf);
   return db.prepare('SELECT * FROM stores WHERE id = ?').get(id);
 }
 

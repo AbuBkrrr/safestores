@@ -57,7 +57,7 @@ export default function Products() {
   const [showArchived, setShowArchived] = useState(false);
   const [query, setQuery] = useState('');
 
-  const [quick, setQuick] = useState(false);
+  const [quick, setQuick] = useState(() => new URLSearchParams(window.location.search).get('quick') === '1');
   const [putOnShelf, setPutOnShelf] = useState(true);
   const load = () => api.get(`/stores/${user.storeId}/products${showArchived ? '?includeArchived=true' : ''}`).then((r) => setProducts(r.data));
   useEffect(() => { load(); }, [user.storeId, showArchived]);

@@ -54,6 +54,8 @@ function createArrival(req, res) {
       `INSERT OR IGNORE INTO stock_movements (id, store_id, product_id, type, quantity, note, performed_by)
        VALUES (?,?,?,'arrival',?,?,?)`
     ).run(movementId || crypto.randomUUID(), storeId, productId, quantity, `Invoice ${invoiceNumber || 'N/A'}`, req.user.sub);
+    require('../utils/stockMath').recomputeProductQuantities(db, productId);
+    require('../utils/autoShelf').autoShelf(db, storeId, productId, quantity, req.user.sub);
 
     // Expiry & Batch Tracking: only arrivals with an expiry date create a
     // trackable batch. The UNIQUE(arrival_id) constraint is the second

@@ -116,7 +116,8 @@ async function createProduct(req, res) {
         [storeId, product.id, initQty, req.user.sub]
       );
       // "Put on the shelf now": the new stock can be sold at checkout straight away.
-      const toShelf = Math.min(initQty, Math.max(0, Number(req.body.putOnShelf) || 0));
+      const wanted = req.body.putOnShelf === undefined && await require('../utils/autoShelf').shelfDirect(client, storeId) ? initQty : Number(req.body.putOnShelf) || 0;
+      const toShelf = Math.min(initQty, Math.max(0, wanted));
       if (toShelf > 0) {
         await client.query(
           `INSERT INTO stock_movements (store_id, product_id, type, quantity, note, performed_by)

@@ -565,7 +565,7 @@
     "bulkCreationFailed": "Ìṣẹ̀dá ọ̀pọ̀lọpọ̀ kùnà",
     "allPendingCopied": "Gbogbo kóòdù tí ń dúró ni a dà",
     "inviteMessageCopied": "Ìránṣẹ́ ìpè ti dà",
-    "miniNote": "Ṣọ́ọ̀bù kékeré: ìwọ ló ń ṣe ṣọ́ọ̀bù, pẹ̀lú olùrànlọ́wọ́ tó tó 2 (alákòóso, olùgbowó tàbí olùrànlọ́wọ́). Gòkè sí Midi láti fi alákòóso ilé ìpamọ́, alákòóso pẹpẹ, ẹ̀ṣọ́ àti alákòóso ọjà orí ayélujára kún un.",
+    "miniNote": "Ṣọ́ọ̀bù kékeré: ṣe é fúnra rẹ, tàbí pẹ̀lú olùrànlọ́wọ́ tó tó 4 (ènìyàn 5 lápapọ̀) bí alákòóso, olùgbowó tàbí olùrànlọ́wọ́. O lè ṣe gbogbo iṣẹ́ fúnra rẹ. Gbé e sókè sí Midi fún alákòóso ṣọ́ọ̀bù àti pẹpẹ, ààbò àti alákòóso ọjà ayélujára.",
     "needsMidi": "Midi / Mega"
   },
   "usersPage": {
@@ -2592,7 +2592,9 @@
     "a_produce": "Ṣe ìpele kan",
     "a_waste": "Kọ àdánù sílẹ̀",
     "a_newJob": "Iṣẹ́ tuntun",
-    "a_jobs": "Àkójọ iṣẹ́"
+    "a_jobs": "Àkójọ iṣẹ́",
+    "a_quickAdd": "Fi ọjà kún kíákíá",
+    "a_today": "Àkópọ̀ òní"
   },
   "quickAdd": {
     "button": "Fi kún kíákíá",

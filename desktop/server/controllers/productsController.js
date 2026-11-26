@@ -87,7 +87,8 @@ function createProduct(req, res) {
          VALUES (?,?,?,'arrival',?, 'Initial stock on product creation', ?)`
       ).run(crypto.randomUUID(), storeId, newId, initQty, req.user.sub);
       // "Put on the shelf now" — see the cloud edition.
-      const toShelf = Math.min(initQty, Math.max(0, Number(req.body.putOnShelf) || 0));
+      const wanted = req.body.putOnShelf === undefined && require('../utils/autoShelf').shelfDirect(db, storeId) ? initQty : Number(req.body.putOnShelf) || 0;
+      const toShelf = Math.min(initQty, Math.max(0, wanted));
       if (toShelf > 0) {
         db.prepare(
           `INSERT INTO stock_movements (id, store_id, product_id, type, quantity, note, performed_by)

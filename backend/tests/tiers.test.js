@@ -60,8 +60,8 @@ describe.each(['midi', 'mega'])('%s store: all features', (tier) => {
   });
 });
 
-describe('Mini store: the owner with up to 2 helpers', () => {
-  it('only helper roles, at most 3 people, stock goes straight to the shelf, returns straight back', async () => {
+describe('Mini store: the owner alone or with up to 4 helpers', () => {
+  it('only helper roles, at most 5 people, stock goes straight to the shelf, returns straight back', async () => {
     const { store, token } = await createActiveStoreWithAdmin(); // new stores are Mini
     const A = `Bearer ${token}`;
     for (const role of ['store_manager', 'shelf_manager', 'security', 'marketplace_manager', 'checkout']) {
@@ -70,10 +70,12 @@ describe('Mini store: the owner with up to 2 helpers', () => {
     }
     expect((await request().post(`/api/stores/${store.id}/invites`).set('Authorization', A).send({ name: 'Shop boy', role: 'staff' })).status).toBe(201);
     expect((await request().post(`/api/stores/${store.id}/invites`).set('Authorization', A).send({ name: 'Sister', role: 'cashier' })).status).toBe(201);
-    const third = await request().post(`/api/stores/${store.id}/invites`).set('Authorization', A).send({ name: 'One more', role: 'cashier' });
-    expect(third.status).toBe(400);
-    expect(third.body.error).toMatch(/allows 3 people/);
-    expect((await request().post(`/api/stores/${store.id}/invites/bulk`).set('Authorization', A).send({ names: 'X, Y', role: 'staff' })).status).toBe(400);
+    expect((await request().post(`/api/stores/${store.id}/invites/bulk`).set('Authorization', A).send({ names: 'X, Y, Z', role: 'staff' })).status).toBe(400); // would be 6
+    expect((await request().post(`/api/stores/${store.id}/invites`).set('Authorization', A).send({ name: 'Brother', role: 'manager' })).status).toBe(201);
+    expect((await request().post(`/api/stores/${store.id}/invites`).set('Authorization', A).send({ name: 'Cousin', role: 'staff' })).status).toBe(201);
+    const sixth = await request().post(`/api/stores/${store.id}/invites`).set('Authorization', A).send({ name: 'One more', role: 'cashier' });
+    expect(sixth.status).toBe(400);
+    expect(sixth.body.error).toMatch(/allows 5 people/);
 
     // Owner scans an invoice: stock is sellable straight away.
     const rec = (await pool.query(`INSERT INTO receipts (store_id, raw_ocr_text, parsed_items, status) VALUES ($1,'INV',$2,'pending') RETURNING id`,

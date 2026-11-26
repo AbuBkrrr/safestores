@@ -14,11 +14,14 @@ async function createStore(overrides = {}) {
     planId = 'premium',
     subscriptionStatus = 'active',
     locked = false,
+    // Tests exercise the store-room → shelf steps, so "straight to the shelf"
+    // (the Mini default) is off unless a test asks for it (autoShelf: null = by size).
+    autoShelf = false,
   } = overrides;
   const { rows } = await pool.query(
-    `INSERT INTO stores (name, plan_id, subscription_status, locked)
-     VALUES ($1, $2, $3, $4) RETURNING *`,
-    [name, planId, subscriptionStatus, locked]
+    `INSERT INTO stores (name, plan_id, subscription_status, locked, auto_shelf)
+     VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+    [name, planId, subscriptionStatus, locked, autoShelf]
   );
   return rows[0];
 }

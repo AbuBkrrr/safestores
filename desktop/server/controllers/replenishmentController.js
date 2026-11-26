@@ -204,6 +204,7 @@ function receivePurchaseOrder(req, res) {
            VALUES (?,?,?,'arrival',?,?,?)`
         ).run(crypto.randomUUID(), storeId, item.product_id, receivedQty, `Received from purchase order ${po.id.slice(0, 8)}`, req.user.sub);
         recomputeProductQuantities(db, item.product_id);
+        require('../utils/autoShelf').autoShelf(db, storeId, item.product_id, receivedQty, req.user.sub);
         db.prepare('UPDATE purchase_order_items SET received_quantity = ? WHERE id = ?').run(receivedQty, item.id);
       }
 

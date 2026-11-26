@@ -565,7 +565,7 @@
     "bulkCreationFailed": "Uundaji wa wingi umeshindwa",
     "allPendingCopied": "Misimbo yote inayosubiri imenakiliwa",
     "inviteMessageCopied": "Ujumbe wa mwaliko umenakiliwa",
-    "miniNote": "Duka dogo (Mini): wewe ndiye unaendesha duka, pamoja na wasaidizi hadi 2 (meneja, keshia au msaidizi). Panda hadi Midi ili kuongeza msimamizi wa ghala, msimamizi wa rafu, mlinzi na meneja wa soko la mtandaoni.",
+    "miniNote": "Duka dogo: liendeshe peke yako, au na wasaidizi hadi 4 (watu 5 kwa jumla) kama meneja, mhudumu wa malipo au msaidizi. Unaweza kufanya kila kazi mwenyewe. Pandisha hadi Midi kwa mameneja wa duka na rafu, ulinzi na meneja wa soko la mtandaoni.",
     "needsMidi": "Midi / Mega"
   },
   "usersPage": {
@@ -2592,7 +2592,9 @@
     "a_produce": "Tengeneza bechi",
     "a_waste": "Andika hasara",
     "a_newJob": "Kazi mpya",
-    "a_jobs": "Orodha ya kazi"
+    "a_jobs": "Orodha ya kazi",
+    "a_quickAdd": "Ongeza bidhaa haraka",
+    "a_today": "Muhtasari wa leo"
   },
   "quickAdd": {
     "button": "Ongeza haraka",

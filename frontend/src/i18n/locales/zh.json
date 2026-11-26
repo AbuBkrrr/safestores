@@ -565,7 +565,7 @@
     "bulkCreationFailed": "批量创建失败",
     "allPendingCopied": "所有待处理代码已复制到剪贴板",
     "inviteMessageCopied": "邀请消息已复制",
-    "miniNote": "Mini 店铺：由你经营店铺，最多再加 2 名帮手（经理、收银员或助手）。升级到 Midi 可添加仓库管理员、货架管理员、保安和线上商城经理。",
+    "miniNote": "小型店铺：可以一个人经营，也可以有最多 4 名帮手（共 5 人），担任经理、收银员或店员。所有工作你都可以自己完成。升级到中型可增加店铺经理、货架经理、保安和网店经理。",
     "needsMidi": "中型 / 大型"
   },
   "usersPage": {
@@ -2592,7 +2592,9 @@
     "a_produce": "生产一批",
     "a_waste": "记录损耗",
     "a_newJob": "新工单",
-    "a_jobs": "工单列表"
+    "a_jobs": "工单列表",
+    "a_quickAdd": "快速添加商品",
+    "a_today": "今日汇总"
   },
   "quickAdd": {
     "button": "快速添加",

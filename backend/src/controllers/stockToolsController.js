@@ -63,6 +63,8 @@ async function importProducts(req, res) {
           `INSERT INTO stock_movements (store_id, product_id, type, quantity, note, performed_by) VALUES ($1,$2,'arrival',$3,'Opening stock (import)',$4)`,
           [storeId, id, v.openingStock, req.user.sub]
         );
+        await require('../utils/stockMath').recomputeProductQuantities(client, id);
+        await require('../utils/autoShelf').autoShelf(client, storeId, id, v.openingStock, req.user.sub);
         await recomputeProductQuantities(client, id);
       }
     }

@@ -95,6 +95,7 @@ async function createArrival(req, res) {
     }
 
     await recomputeProductQuantities(client, productId);
+    await require('../utils/autoShelf').autoShelf(client, storeId, productId, quantity, req.user.sub);
     await client.query('COMMIT');
 
     res.status(201).json(arrival);

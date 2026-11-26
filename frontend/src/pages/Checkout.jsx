@@ -12,6 +12,7 @@ import ReceiptView from '../components/ReceiptView.jsx';
 import PasswordInput from '../components/PasswordInput.jsx';
 import { mediaUrl } from '../utils/media.js';
 import VisualScan from '../components/VisualScan.jsx';
+import { useStoreTier } from '../utils/useStoreTier.js';
 import FullCamera from '../components/FullCamera.jsx';
 
 const SYNC_EVENTS = ['order:updated', 'order:paid', 'order:cancelled'];
@@ -25,6 +26,7 @@ export default function Checkout() {
   const { formatCurrency } = useCurrency();
   const canPay = CAN_TAKE_PAYMENT.includes(user.role);
   const usesShifts = TILL_ROLES.includes(user.role);
+  const storeTier = useStoreTier();
   const [pending, setPending] = useState([]);
   const [order, setOrder] = useState(null);
   const [products, setProducts] = useState([]);
@@ -281,7 +283,8 @@ export default function Checkout() {
     .sort((a, b) => Number(b.sold_qty || 0) - Number(a.sold_qty || 0))
     .slice(0, 12), [products]);
 
-  const shiftBar = usesShifts && (
+  // A Mini store (often one person) does not use shifts unless one is open.
+  const shiftBar = usesShifts && (storeTier !== 'mini' || shift) && (
     <div className="card flex-between shift-bar" style={{ padding: '10px 16px' }}>
       {shift ? (
         <>
