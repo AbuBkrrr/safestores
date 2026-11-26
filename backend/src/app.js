@@ -72,6 +72,11 @@ function createApp() {
   app.post('/api/m/open', mkCors, mkLimit, mkJson, mk.recordOpen);
   app.post('/api/m/lead', mkCors, mkLimit, mkJson, mk.recordLead);
   app.get('/api/m/unsubscribe/:token', mk.unsubscribe);
+  const chat = require('./controllers/liveChatController');
+  const chatLimit = require('express-rate-limit')({ windowMs: 10 * 60 * 1000, max: 40, standardHeaders: true, legacyHeaders: false });
+  const chatReadLimit = require('express-rate-limit')({ windowMs: 60 * 1000, max: 40, standardHeaders: true, legacyHeaders: false });
+  app.post('/api/m/chat', mkCors, chatLimit, mkJson, chat.send);
+  app.get('/api/m/chat/:token', mkCors, chatReadLimit, chat.read);
   app.get('/go/:code', mk.go);
   app.use(cors(buildCorsOptions()));
   // The `verify` callback stashes the exact raw bytes on req.rawBody

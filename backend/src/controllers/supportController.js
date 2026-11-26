@@ -180,6 +180,9 @@ async function addReplySuper(req, res) {
 
   const t = ticketRows[0];
   if (!t.store_id) {
+    // A live chat shows the reply in the chat bubble; email only if they left.
+    const watching = t.source === 'chat' && t.visitor_seen_at && Date.now() - new Date(t.visitor_seen_at) < 2 * 60 * 1000;
+    if (watching) return res.status(201).json(rows[0]);
     // A website visitor: no store app to notify, so the reply goes by email.
     if (t.contact_email) sendMail({ to: t.contact_email, subject: `Re: ${t.subject.replace(/^Website: /, '')}`, text: `${message}\n\n— SAFE Stores support` });
     return res.status(201).json(rows[0]);

@@ -29,6 +29,7 @@ const Privacy = lazy(() => import('./pages/Legal.jsx').then((m) => ({ default: m
 const Licenses = lazy(() => import('./pages/Legal.jsx').then((m) => ({ default: m.Licenses })));
 import Layout from './components/Layout.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
+import LiveChat from './components/LiveChat.jsx';
 import { useAuth } from './context/AuthContext.jsx';
 
 const Dashboard = lazy(() => import('./pages/Dashboard.jsx'));
@@ -306,6 +307,7 @@ export default function App() {
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    {EDITION !== 'desktop' && <LiveChat />}
     </Suspense>
   );
 }

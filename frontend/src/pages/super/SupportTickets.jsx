@@ -11,7 +11,14 @@ export default function SupportTickets() {
   const [toast, showToast] = useToast();
 
   const load = () => api.get('/super/support/tickets', { params: filter ? { status: filter } : {} }).then((r) => setTickets(r.data));
-  useEffect(() => { load(); }, [filter]);
+  useEffect(() => { load(); const id = setInterval(load, 10000); return () => clearInterval(id); }, [filter]);
+  // Live chats: keep the open conversation fresh so visitor messages appear by themselves.
+  useEffect(() => {
+    if (!selected) return undefined;
+    const id = setInterval(() => api.get(`/super/support/tickets/${selected.id}`).then((r) => setSelected((cur) => (cur?.id === r.data.id ? r.data : cur))).catch(() => {}), 4000);
+    return () => clearInterval(id);
+  }, [selected?.id]);
+  const online = (t) => t.source === 'chat' && t.visitor_seen_at && Date.now() - new Date(t.visitor_seen_at) < 60000;
 
   const openTicket = async (id) => {
     const { data } = await api.get(`/super/support/tickets/${id}`);
@@ -56,7 +63,7 @@ export default function SupportTickets() {
             <tbody>
               {tickets.map((t) => (
                 <tr key={t.id}>
-                  <td>{t.store_id ? t.store_name : <>🌐 {t.contact_name || 'Website visitor'}</>}</td>
+                  <td>{t.store_id ? t.store_name : <>{t.source === 'chat' ? '💬' : '🌐'} {t.contact_name || 'Website visitor'}{online(t) && <span title="In the chat now" style={{ color: '#12a150', marginLeft: 6 }}>● online</span>}</>}</td>
                   <td>{t.subject}</td>
                   <td>{t.priority}</td>
                   <td><Badge status={t.status} /></td>
@@ -80,11 +87,11 @@ export default function SupportTickets() {
           </div>
           {!selected.store_id && (
             <div className="card mt-1" style={{ background: 'var(--bg-soft, #f6f7f9)' }}>
-              <strong>🌐 From the website:</strong> {selected.contact_name}
+              <strong>{selected.source === 'chat' ? '💬 Live chat' : '🌐 From the website'}:</strong> {selected.contact_name}
               {selected.contact_phone && <> · <a href={`tel:${selected.contact_phone}`}>{selected.contact_phone}</a>
                 {' '}· <a href={`https://wa.me/${selected.contact_phone.replace(/\D/g, '')}`} target="_blank" rel="noreferrer">WhatsApp</a></>}
               {selected.contact_email && <> · <a href={`mailto:${selected.contact_email}`}>{selected.contact_email}</a></>}
-              <div className="muted">{selected.contact_email ? 'Your reply below is emailed to them.' : 'No email given — reply by phone or WhatsApp.'}</div>
+              <div className="muted">{selected.source === 'chat' ? (online(selected) ? '● They are in the chat now — your reply appears on their screen.' : 'Your reply appears in their chat bubble' + (selected.contact_email ? ' and is emailed to them.' : '.')) : selected.contact_email ? 'Your reply below is emailed to them.' : 'No email given — reply by phone or WhatsApp.'}</div>
             </div>
           )}
           <p className="mt-1">{selected.message}</p>
@@ -92,7 +99,7 @@ export default function SupportTickets() {
           <div className="mt-1" style={{ borderTop: '1px solid var(--line)', paddingTop: 10 }}>
             {selected.replies.map((r) => (
               <div key={r.id} className="mt-1">
-                <strong>{r.author_type === 'super_admin' ? `${r.author_name} (Support)` : r.author_name}</strong>
+                <strong>{r.author_type === 'super_admin' ? `${r.author_name} (Support)` : r.author_name}{r.author_type === 'visitor' ? ' (visitor)' : ''}</strong>
                 <span className="muted" style={{ marginLeft: 8 }}>{new Date(r.created_at).toLocaleString()}</span>
                 <p>{r.message}</p>
               </div>
@@ -100,7 +107,8 @@ export default function SupportTickets() {
           </div>
 
           <div className="mt-1">
-            <textarea rows={3} placeholder={selected.store_id ? "Reply to the store..." : "Reply (emailed to them)..."} value={replyText} onChange={(e) => setReplyText(e.target.value)} />
+            <textarea rows={3} placeholder={selected.store_id ? "Reply to the store..." : selected.source === 'chat' ? "Reply in the chat..." : "Reply (emailed to them)..."}
+              onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && selected.source === 'chat') { e.preventDefault(); sendReply(); } }} value={replyText} onChange={(e) => setReplyText(e.target.value)} />
             <div className="flex mt-1">
               <button className="btn" onClick={sendReply}>Send Reply</button>
               <button className="btn small secondary" onClick={() => setStatus(selected.id, 'resolved')}>Mark Resolved</button>
