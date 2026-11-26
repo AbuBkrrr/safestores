@@ -3,6 +3,7 @@ import { BrowserMultiFormatReader } from '@zxing/browser';
 import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
+import FullCamera from './FullCamera.jsx';
 
 // Camera barcode/QR scan (or a USB scanner typing into the box) that picks a
 // product from `products`. Calls onFound(product) on a match.
@@ -32,21 +33,21 @@ export default function ScanProductButton({ products, onFound, onNotFound }) {
 
   useEffect(() => {
     if (!open || !videoRef.current) return undefined;
-    let stream;
+    let stream; let controls;
     let busy = false;
     const reader = new BrowserMultiFormatReader();
     navigator.mediaDevices?.getUserMedia({ video: { facingMode: 'environment' } }).then((s) => {
       stream = s;
       if (!videoRef.current) return;
       videoRef.current.srcObject = s;
-      reader.decodeFromVideoElement(videoRef.current, async (result) => {
+      controls = reader.decodeFromVideoElement(videoRef.current, async (result) => {
         if (!result || busy) return;
         busy = true;
         await match(result.getText());
         busy = false;
       }).catch(() => {});
     }).catch(() => setMsg(t('scanProduct.cameraError')));
-    return () => { try { reader.reset?.(); } catch { /* ignore */ } stream?.getTracks().forEach((tr) => tr.stop()); };
+    return () => { Promise.resolve(controls).then((c) => c?.stop()).catch(() => {}); stream?.getTracks().forEach((tr) => tr.stop()); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
@@ -65,7 +66,7 @@ export default function ScanProductButton({ products, onFound, onNotFound }) {
           style={{ flex: 1, minWidth: 160 }}
         />
       </div>
-      {open && <video ref={videoRef} autoPlay playsInline muted style={{ width: '100%', marginTop: 8, borderRadius: 8, background: '#000', maxHeight: 220, objectFit: 'cover' }} />}
+      {open && <FullCamera onClose={() => setOpen(false)}><video ref={videoRef} autoPlay playsInline muted /><div className="camera-guide" /></FullCamera>}
       {msg && <p className="muted" style={{ fontSize: 12, marginTop: 4 }} role="status">{msg}</p>}
     </div>
   );

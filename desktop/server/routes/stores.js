@@ -77,7 +77,7 @@ router.post('/invites/bulk', requireRole('admin', 'manager'), usersCtrl.createBu
 router.patch('/invites/:inviteId/revoke', requireRole('admin', 'manager'), usersCtrl.revokeInvite);
 
 router.get('/products', productsCtrl.listProducts);
-router.post('/products', requireRole('admin', 'manager'), productsCtrl.createProduct);
+router.post('/products', requireRole('admin', 'manager', 'store_manager'), productsCtrl.createProduct);
 router.post('/products/markup', requireRole('admin', 'manager'), productsCtrl.bulkMarkup);
 router.put('/products/:productId', requireRole('admin', 'manager'), productsCtrl.updateProduct);
 router.post('/products/:productId/photo', requireRole('admin', 'manager', 'store_manager', 'shelf_manager'), upload.single('photo'), productsCtrl.setProductPhoto);

@@ -11,6 +11,7 @@ import { useStoreProfile } from '../utils/useStoreTier.js';
 import { BUSINESS_TYPES, SOLD_BY_UNITS, fmtQty } from '../utils/businessTypes.js';
 import { mediaUrl } from '../utils/media.js';
 import { lookOfFile, packLook } from '../utils/visualMatch.js';
+import QuickAddProduct from '../components/QuickAddProduct.jsx';
 
 const SYNC_EVENTS = ['product:created', 'product:updated', 'product:deleted', 'arrival:created', 'movement:created', 'audit:created'];
 const NEW_ARRIVAL_DAYS = 3;
@@ -56,6 +57,8 @@ export default function Products() {
   const [showArchived, setShowArchived] = useState(false);
   const [query, setQuery] = useState('');
 
+  const [quick, setQuick] = useState(false);
+  const [putOnShelf, setPutOnShelf] = useState(true);
   const load = () => api.get(`/stores/${user.storeId}/products${showArchived ? '?includeArchived=true' : ''}`).then((r) => setProducts(r.data));
   useEffect(() => { load(); }, [user.storeId, showArchived]);
   // Arriving from a scan (Import Products → Scan): open the new-product form with the barcode filled in.
@@ -134,7 +137,7 @@ export default function Products() {
     e.preventDefault();
     setError('');
     try {
-      await api.post(`/stores/${user.storeId}/products`, form);
+      await api.post(`/stores/${user.storeId}/products`, { ...form, putOnShelf: putOnShelf ? form.initialBackroomQty : 0 });
       setForm({ ...empty, ...typeDefaults }); setShowForm(false);
       showToast(t('products.productCreatedToast'), 'success');
       load();
@@ -164,8 +167,15 @@ export default function Products() {
         </label>
         {['admin', 'manager'].includes(user.role) && <Link className="btn secondary small" to="/products/import">⬆️ {t('products.import')}</Link>}
         <Link className="btn secondary small" to="/labels">🏷️ {t('products.labels')}</Link>
-        <button className="btn" onClick={() => setShowForm((s) => !s)}>{showForm ? t('products.cancel') : t('products.newProduct')}</button>
+        {['admin', 'manager', 'store_manager'].includes(user.role) && <button className="btn" onClick={() => { setQuick((q) => !q); setShowForm(false); }}>⚡ {t('quickAdd.button')}</button>}
+        <button className="btn secondary" onClick={() => { setShowForm((s) => !s); setQuick(false); }}>{showForm ? t('products.cancel') : t('products.newProduct')}</button>
       </div>
+
+      {quick && (
+        <QuickAddProduct storeId={user.storeId} defaultUnit={bt.unit === 'unit' ? 'piece' : bt.unit}
+          categories={[...new Set([...(bt.categories || []), ...products.map((x) => x.category).filter(Boolean)])]}
+          onAdded={(p) => setProducts((list) => [p, ...list])} onClose={() => setQuick(false)} />
+      )}
 
       {showForm && (
         <div className="card">
@@ -219,7 +229,8 @@ export default function Products() {
                 <span className="help-text">{Number(form.costPrice) > 0 ? t('products.markupHelp', { pct: Math.round((Number(form.priceMultiplier) - 1) * 1000) / 10 }) : t('products.enterCostFirst')}</span>
               </div>
               <div className="form-group"><label>{t('products.reorderLevel')}</label><input type="number" value={form.reorderLevel} onChange={update('reorderLevel')} /></div>
-              <div className="form-group"><label>{t('products.initialBackroomQty')}</label><input type="number" value={form.initialBackroomQty} onChange={update('initialBackroomQty')} /></div>
+              <div className="form-group"><label>{t('products.initialBackroomQty')}</label><input type="number" value={form.initialBackroomQty} onChange={update('initialBackroomQty')} />
+                <label className="flex small" style={{ alignItems: 'center', gap: 6, marginTop: 6 }}><input type="checkbox" checked={putOnShelf} onChange={(e) => setPutOnShelf(e.target.checked)} /> {t('quickAdd.onShelf')}</label></div>
               <div className="form-group"><label>{t('products.leadTimeDays')}</label><input type="number" value={form.leadTimeDays} onChange={update('leadTimeDays')} /></div>
               <div className="form-group"><label>{t('products.minOrderQty')}</label><input type="number" value={form.minOrderQty} onChange={update('minOrderQty')} /></div>
               <div className="form-group">

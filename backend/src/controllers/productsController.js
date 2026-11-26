@@ -115,6 +115,17 @@ async function createProduct(req, res) {
          VALUES ($1, $2, 'arrival', $3, 'Initial stock on product creation', $4)`,
         [storeId, product.id, initQty, req.user.sub]
       );
+      // "Put on the shelf now": the new stock can be sold at checkout straight away.
+      const toShelf = Math.min(initQty, Math.max(0, Number(req.body.putOnShelf) || 0));
+      if (toShelf > 0) {
+        await client.query(
+          `INSERT INTO stock_movements (store_id, product_id, type, quantity, note, performed_by)
+           VALUES ($1, $2, 'transfer_to_shelf', $3, 'Put on shelf when the product was added', $4)`,
+          [storeId, product.id, toShelf, req.user.sub]
+        );
+        await require('../utils/stockMath').recomputeProductQuantities(client, product.id);
+        product = (await client.query('SELECT * FROM products WHERE id = $1', [product.id])).rows[0];
+      }
     }
 
     await client.query('COMMIT');

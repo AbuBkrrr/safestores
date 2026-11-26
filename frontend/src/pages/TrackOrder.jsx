@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import { formatCurrency } from '../utils/currency.js';
 import { BrandFooter } from '../components/ui.jsx';
+import TransferDetails from '../components/TransferDetails.jsx';
 
 // Steps follow the store's choice of pickup or delivery once it has reviewed the order.
 const stepsFor = (method) => (method === 'delivery'
@@ -75,8 +76,9 @@ export default function TrackOrder() {
             <p>
               {o.payment_status === 'paid'
                 ? <span className="badge active">✅ {t('trackPage.paid')}</span>
-                : <span className="badge pending">{o.payment_method === 'online' ? t('trackPage.awaitingPayment') : t('trackPage.payOnDelivery')}</span>}
+                : <span className="badge pending">{o.payment_method === 'online' || o.payment_method === 'transfer' ? t('trackPage.awaitingPayment') : t('trackPage.payOnDelivery')}</span>}
             </p>
+            {o.payment_status !== 'paid' && o.status !== 'cancelled' && o.transfer && <TransferDetails transfer={o.transfer} amount={o.total} reference={o.reference} />}
             {o.payment_status !== 'paid' && o.status !== 'cancelled' && o.can_pay_online && (
               <button className="btn" disabled={busy} onClick={payNow}>{t('trackPage.payNow')}</button>
             )}

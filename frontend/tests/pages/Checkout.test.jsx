@@ -63,7 +63,7 @@ describe('Checkout: starting and building an order', () => {
     });
 
     await userEvent.type(screen.getByPlaceholderText(/start typing/i), 'Rice');
-    await userEvent.click(await screen.findByText(/Rice 5kg \(RICE-5\)/));
+    await userEvent.click(await screen.findByTestId("pick-p1"));
 
     expect(api.post).toHaveBeenCalledWith('/stores/store1/orders/o1/items', { productId: 'p1', quantity: 1, addedVia: 'manual_search' });
     await waitFor(() => expect(screen.getAllByText('₦20').length).toBeGreaterThan(0));
@@ -76,7 +76,7 @@ describe('Checkout: starting and building an order', () => {
 
     api.post.mockRejectedValueOnce({ response: { data: { error: 'Not enough stock on shelf' } } });
     await userEvent.type(screen.getByPlaceholderText(/start typing/i), 'Rice');
-    await userEvent.click(await screen.findByText(/Rice 5kg \(RICE-5\)/));
+    await userEvent.click(await screen.findByTestId("pick-p1"));
 
     expect(await screen.findByText('Not enough stock on shelf')).toBeInTheDocument();
   });
@@ -100,7 +100,7 @@ describe('Checkout: role-gated payment', () => {
       return Promise.resolve({ data: [] });
     });
     await userEvent.type(screen.getByPlaceholderText(/start typing/i), 'Rice');
-    await userEvent.click(await screen.findByText(/Rice 5kg \(RICE-5\)/));
+    await userEvent.click(await screen.findByTestId("pick-p1"));
 
     await userEvent.selectOptions(await screen.findByLabelText(/payment method/i), 'credit');
     expect(screen.getByLabelText(/customer/i)).toBeInTheDocument();
@@ -133,7 +133,7 @@ describe('Checkout: role-gated payment', () => {
       return Promise.resolve({ data: [] });
     });
     await userEvent.type(screen.getByPlaceholderText(/start typing/i), 'Rice');
-    await userEvent.click(await screen.findByText(/Rice 5kg \(RICE-5\)/));
+    await userEvent.click(await screen.findByTestId("pick-p1"));
 
     await userEvent.selectOptions(await screen.findByLabelText(/payment method/i), 'credit');
     await userEvent.selectOptions(await screen.findByLabelText(/customer/i), 'c1');
@@ -171,7 +171,7 @@ describe('Checkout: role-gated payment', () => {
       return Promise.resolve({ data: [] });
     });
     await userEvent.type(screen.getByPlaceholderText(/start typing/i), 'Rice');
-    await userEvent.click(await screen.findByText(/Rice 5kg \(RICE-5\)/));
+    await userEvent.click(await screen.findByTestId("pick-p1"));
 
     expect(await screen.findByRole('button', { name: /confirm payment/i })).toBeEnabled();
 

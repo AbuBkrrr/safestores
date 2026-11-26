@@ -1,18 +1,21 @@
 #!/usr/bin/env bash
 # Points an existing Caddy reverse proxy (running in Docker) at this deploy:
-#   safestores.name.ng, www  -> safestores-website (landing page)
-#   app.safestores.name.ng   -> safestores-frontend-1 (the app)
+#   safestore.com.ng, www  -> safestores-website (landing page)
+#   app.safestore.com.ng   -> safestores-frontend-1 (the app)
 # Backs up the Caddyfile, validates the new one, and restores it on error.
 set -euo pipefail
 CADDY=${1:?caddy container name}
-DOMAIN=${2:-safestores.name.ng}
+DOMAIN=${2:-safestore.com.ng}
+# Older addresses that keep working (space separated).
+EXTRA_DOMAINS=${EXTRA_DOMAINS:-safestores.name.ng}
 FILE=$(docker inspect -f '{{range .Mounts}}{{if eq .Destination "/etc/caddy/Caddyfile"}}{{.Source}}{{end}}{{end}}' "$CADDY")
 [ -n "$FILE" ] || { echo "   could not find the Caddyfile of $CADDY"; exit 1; }
 NET=$(docker inspect -f '{{range $k,$v := .NetworkSettings.Networks}}{{$k}} {{end}}' safestores-frontend-1 | awk '{print $1}')
 docker network connect "$NET" "$CADDY" 2>/dev/null || true
 BACKUP="$FILE.before-safestores-$(date +%Y%m%d%H%M%S)"
 cp "$FILE" "$BACKUP"
-python3 - "$FILE" "$DOMAIN" <<'PY'
+for D in $DOMAIN $EXTRA_DOMAINS; do
+python3 - "$FILE" "$D" <<'PY'
 import re, sys
 path, dom = sys.argv[1], sys.argv[2]
 text = open(path).read()
@@ -48,9 +51,10 @@ app.{dom} {{
 '''
 open(path, 'w').write(body)
 PY
+done
 if docker exec "$CADDY" caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile >/dev/null 2>&1; then
   docker exec "$CADDY" caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile
-  echo "   Caddy now routes $DOMAIN and app.$DOMAIN to this deploy (backup: $BACKUP)"
+  echo "   Caddy now routes $DOMAIN, app.$DOMAIN (and $EXTRA_DOMAINS) to this deploy (backup: $BACKUP)"
 else
   cp "$BACKUP" "$FILE"
   echo "   new Caddy config was invalid; restored the original"; docker exec "$CADDY" caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile || true

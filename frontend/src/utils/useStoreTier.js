@@ -38,6 +38,10 @@ export function useStoreTier() {
 }
 
 /** Pages a Mini store (owner + 1–2 helpers) doesn't need. */
-export const MINI_HIDDEN = ['/handovers', '/exit-check', '/transfers', '/integrations', '/cycle-counting', '/shrinkage-report'];
+// A Mini store (owner + up to 2 helpers) gets a short menu: sell, stock,
+// customers, online shop and settings. The rest is for Midi / Mega stores.
+export const MINI_HIDDEN = ['/handovers', '/exit-check', '/transfers', '/integrations', '/cycle-counting', '/shrinkage-report',
+  '/insights', '/movements', '/replenishment', '/suppliers', '/shelf-audit', '/audit-report', '/shifts', '/camera',
+  '/export', '/activity', '/reports', '/auditor-tab', '/settlements', '/lending-partners'];
 /** Roles a Mini store can invite. */
 export const MINI_ROLES = ['manager', 'cashier', 'staff'];

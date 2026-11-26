@@ -17,10 +17,10 @@ async function urls() {
     cache = (await db.query("SELECT link_base, landing_url, signup_url FROM marketing_settings WHERE id = 'default'").catch(() => ({ rows: [] }))).rows[0] || {};
     cacheAt = Date.now();
   }
-  const app = trimUrl(process.env.PUBLIC_APP_URL || process.env.FRONTEND_URL?.split(',')[0] || 'https://app.safestores.name.ng');
+  const app = trimUrl(process.env.PUBLIC_APP_URL || process.env.FRONTEND_URL?.split(',')[0] || 'https://app.safestore.com.ng');
   return {
     base: trimUrl(cache.link_base) || app,
-    landing: `${trimUrl(cache.landing_url || process.env.MARKETING_LANDING_URL || 'https://safestores.name.ng')}/`,
+    landing: `${trimUrl(cache.landing_url || process.env.MARKETING_LANDING_URL || 'https://safestore.com.ng')}/`,
     signup: trimUrl(cache.signup_url) || `${trimUrl(cache.link_base) || app}/signup`,
   };
 }

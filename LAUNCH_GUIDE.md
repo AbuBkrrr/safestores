@@ -13,9 +13,9 @@ order; later steps assume earlier ones.
 
 | Address | What runs there | Where it's hosted |
 |---|---|---|
-| `safestores.name.ng` | Landing page (`website/`) | GitHub Pages (already wired: `.github/workflows/pages.yml`) |
-| `app.safestores.name.ng` | The web app (`frontend/`) | Any static host (Render static site, Netlify, Cloudflare Pages) or the nginx container |
-| `api.safestores.name.ng` | API + realtime + jobs (`backend/`) | Render / Railway / Fly, or a VPS with Docker |
+| `safestore.com.ng` | Landing page (`website/`) | GitHub Pages (already wired: `.github/workflows/pages.yml`) |
+| `app.safestore.com.ng` | The web app (`frontend/`) | Any static host (Render static site, Netlify, Cloudflare Pages) or the nginx container |
+| `api.safestore.com.ng` | API + realtime + jobs (`backend/`) | Render / Railway / Fly, or a VPS with Docker |
 | Postgres | Database | Managed Postgres (Render, Neon, Supabase, RDS) |
 | Object storage | Product photos, receipt scans | S3-compatible bucket (Cloudflare R2, AWS S3, Backblaze B2) |
 | Email | Password reset, verification, daily summary | Any SMTP provider (Resend, Postmark, SendGrid, Amazon SES, Brevo) |
@@ -51,10 +51,10 @@ None of these are software licences; the code itself needs none (see
 2. GitHub → **Actions**: the Backend, Frontend and Desktop CI workflows run
    on every push to `main`. All three must be green before you deploy.
 3. GitHub → **Settings → Pages**: Source = **GitHub Actions**; Custom domain
-   = `safestores.name.ng`; tick **Enforce HTTPS** once the certificate is
+   = `safestore.com.ng`; tick **Enforce HTTPS** once the certificate is
    issued. The workflow only publishes `website/`.
 
-**Check:** `https://safestores.name.ng` shows the landing page.
+**Check:** `https://safestore.com.ng` shows the landing page.
 
 ---
 
@@ -103,7 +103,7 @@ environment:
 | `DATABASE_SSL` | `require` |
 | `JWT_SECRET` | `node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"` |
 | `JWT_EXPIRES_IN` | `7d` |
-| `FRONTEND_URL` | `https://app.safestores.name.ng` (comma-separate extra origins) |
+| `FRONTEND_URL` | `https://app.safestore.com.ng` (comma-separate extra origins) |
 | `BOOTSTRAP_SUPER_ADMIN_EMAIL` | your email |
 | `BOOTSTRAP_SUPER_ADMIN_PASSWORD` | a strong, unique password |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASS` / `SMTP_FROM` | from your email provider (Step 6) |
@@ -120,15 +120,15 @@ cp .env.staging.example .env      # fill POSTGRES_PASSWORD, JWT_SECRET, FRONTEND
 docker compose up --build -d
 ```
 
-Put Caddy in front for automatic HTTPS (`app.safestores.name.ng` and, if you
-use it, `api.safestores.name.ng` → `localhost:8080`; the frontend's nginx
+Put Caddy in front for automatic HTTPS (`app.safestore.com.ng` and, if you
+use it, `api.safestore.com.ng` → `localhost:8080`; the frontend's nginx
 load-balances `/api`, `/socket.io`, `/share`, `/uploads` and `/sitemap.xml`
 across the backend copies). Add the
 SMTP and S3 variables to the `backend` service in `docker-compose.yml`.
 Schedule a nightly `pg_dump` off the server.
 
-**Check:** `curl https://api.safestores.name.ng/api/health` returns
-`{"status":"ok",…}`, and `https://api.safestores.name.ng/sitemap.xml` returns XML.
+**Check:** `curl https://api.safestore.com.ng/api/health` returns
+`{"status":"ok",…}`, and `https://api.safestore.com.ng/sitemap.xml` returns XML.
 
 ---
 
@@ -138,7 +138,7 @@ Build-time variables (set them on the static site in your host):
 
 | Variable | Value |
 |---|---|
-| `VITE_API_URL` | `https://api.safestores.name.ng/api` |
+| `VITE_API_URL` | `https://api.safestore.com.ng/api` |
 | `VITE_SENTRY_DSN` | Sentry (frontend project) |
 | `VITE_LEGAL_ENTITY` | your registered business name |
 | `VITE_LEGAL_CONTACT` | e.g. `support@safestores.name.ng` |
@@ -151,7 +151,7 @@ has one.
 Make sure `/sw.js` and `/index.html` are served with `Cache-Control: no-cache`
 (Render and Netlify do this by default; `frontend/nginx.conf` sets it).
 
-**Check:** `https://app.safestores.name.ng/login` loads; DevTools → Application
+**Check:** `https://app.safestore.com.ng/login` loads; DevTools → Application
 shows the service worker active.
 
 ---
@@ -185,9 +185,9 @@ limited to that bucket, and set `S3_*` on the backend.
 
 | Record | Points to |
 |---|---|
-| `safestores.name.ng` | GitHub Pages (A/AAAA records from GitHub's docs) |
-| `app.safestores.name.ng` | your static host (CNAME) |
-| `api.safestores.name.ng` | your backend host (CNAME) |
+| `safestore.com.ng` | GitHub Pages (A/AAAA records from GitHub's docs) |
+| `app.safestore.com.ng` | your static host (CNAME) |
+| `api.safestore.com.ng` | your backend host (CNAME) |
 
 Add each custom domain in the hosting dashboard so it issues a TLS
 certificate. Then update `FRONTEND_URL` (backend) and `VITE_API_URL`
@@ -199,7 +199,7 @@ certificate. Then update `FRONTEND_URL` (backend) and `VITE_API_URL`
 
 ## Step 9 — First sign-in as Super Admin (20 minutes)
 
-1. Go to `https://app.safestores.name.ng/super-login` and sign in with the
+1. Go to `https://app.safestore.com.ng/super-login` and sign in with the
    bootstrap email and password.
 2. **My Account → Two-factor sign-in**: scan the QR code with an authenticator
    app. Do this before anything else.
@@ -236,7 +236,7 @@ Setup:
      A Paystack account is tied to one country; stores in other currencies
      keep pay on delivery.
 3. Paystack dashboard → Settings → API Keys & Webhooks: set the webhook URL to
-   `https://api.safestores.name.ng/api/webhooks/paystack`. It confirms both
+   `https://api.safestore.com.ng/api/webhooks/paystack`. It confirms both
    subscription charges and storefront payments.
 4. Super Admin → Payment settings: enable the gateway for subscription charges
    (see `docs/PAYMENT_GATEWAY_SETUP.md`).
@@ -308,7 +308,7 @@ Follow `mobile/README.md`:
 2. Build pointing at production:
    ```bash
    cd mobile && npm ci
-   SAFE_STORES_API_URL=https://api.safestores.name.ng/api node scripts/build-www.js
+   SAFE_STORES_API_URL=https://api.safestore.com.ng/api node scripts/build-www.js
    npx cap sync android
    ```
 3. Create your signing key **on your own machine** and back it up in two
@@ -341,7 +341,7 @@ button at the release.
 
 - Sentry: alert email for new issues on both projects.
 - Uptime check (UptimeRobot, Better Stack or similar, free tier) on
-  `https://api.safestores.name.ng/api/health` every minute.
+  `https://api.safestore.com.ng/api/health` every minute.
 - Database: confirm daily backups exist, then **test a restore** into a
   scratch database once before launch.
 - Keep `npm audit` clean: backend CI fails on moderate+ production advisories.
@@ -414,7 +414,7 @@ Server setup (once), in the Caddyfile:
    ```
 3. Reload Caddy. Certificates are only issued for domains a listed, active store has saved, so nobody can point random domains at the server.
 
-The store adds a DNS `CNAME` for its domain to `app.safestores.name.ng` (an apex domain needs an `A` record to the server IP instead). Set `CUSTOM_DOMAIN_TARGET` if the CNAME target should differ from the `FRONTEND_URL` host.
+The store adds a DNS `CNAME` for its domain to `app.safestore.com.ng` (an apex domain needs an `A` record to the server IP instead). Set `CUSTOM_DOMAIN_TARGET` if the CNAME target should differ from the `FRONTEND_URL` host.
 
 
 ## Scaling: load balancing the API

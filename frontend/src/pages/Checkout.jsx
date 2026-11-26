@@ -12,6 +12,7 @@ import ReceiptView from '../components/ReceiptView.jsx';
 import PasswordInput from '../components/PasswordInput.jsx';
 import { mediaUrl } from '../utils/media.js';
 import VisualScan from '../components/VisualScan.jsx';
+import FullCamera from '../components/FullCamera.jsx';
 
 const SYNC_EVENTS = ['order:updated', 'order:paid', 'order:cancelled'];
 const CAN_TAKE_PAYMENT = ['admin', 'manager', 'cashier'];
@@ -251,13 +252,13 @@ export default function Checkout() {
   // Live barcode scanning, same approach as the Camera page
   useEffect(() => {
     if (!scanning || !videoRef.current) return undefined;
-    let stream;
+    let stream; let controls;
     const codeReader = new BrowserMultiFormatReader();
     readerRef.current = codeReader;
     navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then((s) => {
       stream = s;
       videoRef.current.srcObject = s;
-      codeReader.decodeFromVideoElement(videoRef.current, async (result) => {
+      controls = codeReader.decodeFromVideoElement(videoRef.current, async (result) => {
         if (!result) return;
         const code = result.getText();
         try {
@@ -266,7 +267,8 @@ export default function Checkout() {
         } catch { /* no match — ignore this frame */ }
       });
     }).catch(() => setError(t('checkout.cameraError')));
-    return () => { codeReader.reset(); stream?.getTracks().forEach((tr) => tr.stop()); };
+    // @zxing/browser: decoding is stopped through the controls it returns (there is no reader.reset()).
+    return () => { Promise.resolve(controls).then((c) => c?.stop()).catch(() => {}); stream?.getTracks().forEach((tr) => tr.stop()); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scanning]);
 
@@ -373,8 +375,14 @@ export default function Checkout() {
               {lookScan ? t('visualScan.stop') : `📷 ${t('visualScan.start')}`}
             </button>
           </div>
-          {lookScan && <VisualScan storeId={user.storeId} products={products} onPick={(id) => addProduct(id, 'photo')} />}
-          {scanning && <video ref={videoRef} autoPlay playsInline style={{ width: '100%', marginTop: 8, borderRadius: 8, background: '#000', maxHeight: 200, objectFit: 'cover' }} />}
+          {lookScan && <VisualScan storeId={user.storeId} products={products} onPick={(id) => addProduct(id, 'photo')} onClose={() => setLookScan(false)} />}
+          {scanning && (
+            <FullCamera onClose={() => setScanning(false)} hint={t('checkout.scanBarcode')}
+              footer={order?.items?.length ? <div><strong>{order.items.length} · {formatCurrency(order.total)}</strong><div className="small">{order.items[order.items.length - 1]?.product_name}</div></div> : null}>
+              <video ref={videoRef} autoPlay playsInline muted />
+              <div className="camera-guide" />
+            </FullCamera>
+          )}
 
           <div className="form-group mt-1">
             <label htmlFor="checkout-search">{t('checkout.searchLabel')}</label>
@@ -383,9 +391,14 @@ export default function Checkout() {
           {filteredProducts.length > 0 && (
             <div className="card" style={{ maxHeight: 200, overflowY: 'auto' }}>
               {filteredProducts.map((p) => (
-                <div key={p.id} className="flex" style={{ justifyContent: 'space-between', padding: '6px 0', cursor: 'pointer' }} onClick={() => addProduct(p.id, 'manual_search')}>
-                  <span className="flex" style={{ alignItems: 'center', gap: 8 }}>{p.image_url && <img className="prod-thumb" src={mediaUrl(p.image_url)} alt="" loading="lazy" />}{p.name} ({p.sku})</span>
-                  <span className="muted">{t('checkout.shelf', { qty: p.shelf_qty })}</span>
+                <div key={p.id} data-testid={`pick-${p.id}`} className="flex" style={{ justifyContent: 'space-between', alignItems: 'center', gap: 8, flexWrap: 'nowrap', padding: '6px 0', cursor: 'pointer' }} onClick={() => addProduct(p.id, 'manual_search')}>
+                  <span className="flex" style={{ alignItems: 'center', gap: 8, minWidth: 0 }}>{p.image_url && <img className="prod-thumb" src={mediaUrl(p.image_url)} alt="" loading="lazy" />}<span style={{ minWidth: 0, overflowWrap: 'anywhere' }}>{p.name}{p.sku ? <span className="muted small"> · {p.sku}</span> : null}</span></span>
+                  <span style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                    <strong>{formatCurrency(Number(p.selling_price ?? Number(p.cost_price) * Number(p.price_multiplier)))}</strong>
+                    <div className={`small ${Number(p.shelf_qty) > 0 ? 'muted' : ''}`} style={Number(p.shelf_qty) > 0 ? undefined : { color: '#b3261e' }}>
+                      {t('checkout.shelf', { qty: p.shelf_qty })}{Number(p.shelf_qty) <= 0 && Number(p.backroom_qty) > 0 ? ` · ${t('checkout.inStoreRoom', { qty: p.backroom_qty })}` : ''}
+                    </div>
+                  </span>
                 </div>
               ))}
             </div>

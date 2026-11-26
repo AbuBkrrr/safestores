@@ -10,11 +10,11 @@ describe('Marketing tracking', () => {
     const link = (await request().post('/api/super/marketing/links').set(sa).send({ label: 'Flyer Kano', channel: 'flyer' })).body;
     expect(link.code).toBeTruthy();
 
-    const open = (ua, deviceId, tz) => request().post('/api/m/open').set('User-Agent', ua).set('Origin', 'https://safestores.name.ng')
+    const open = (ua, deviceId, tz) => request().post('/api/m/open').set('User-Agent', ua).set('Origin', 'https://safestore.com.ng')
       .set('Content-Type', 'text/plain').send(JSON.stringify({ ref: link.code, deviceId, tz, lang: 'en-NG' }));
     const a1 = await open(IPHONE, 'aaaaaaaa-1111', 'Africa/Lagos');
     expect(a1.body).toMatchObject({ deviceNo: 1, openNo: 1, newDevice: true });
-    expect(a1.headers['access-control-allow-origin']).toBe('https://safestores.name.ng');
+    expect(a1.headers['access-control-allow-origin']).toBe('https://safestore.com.ng');
     await open(IPHONE, 'aaaaaaaa-1111', 'Africa/Lagos');
     const a3 = await open(IPHONE, 'aaaaaaaa-1111', 'Africa/Lagos');
     expect(a3.body).toMatchObject({ deviceNo: 1, openNo: 3, newDevice: false });

@@ -257,7 +257,8 @@
     "pricePer": "{{price}} kwa {{unit}}",
     "enterAmount": "Ole? ({{unit}}) — gụọ ya n'ihe ọtụtụ",
     "lineTotal": "Ọnụahịa",
-    "addToOrder": "Tinye n'iwu"
+    "addToOrder": "Tinye n'iwu",
+    "inStoreRoom": "{{qty}} n'ụlọ nchekwa — buru ụzọ tinye ya na shelf"
   },
   "products": {
     "title": "Njikwa Ngwaahịa",
@@ -319,7 +320,7 @@
     "markupHelp": "Uru: {{pct}}% karịa ọnụ ịzụ",
     "enterCostFirst": "Buru ụzọ tinye ọnụ ịzụ",
     "soldBy": "Anyị na-ere ya site na",
-    "soldBy_unit": "Otu otu (ọnụ ọgụgụ zuru ezu)",
+    "soldBy_unit": "Iberibe / otu otu (ihe zuru oke)",
     "soldBy_weight": "Ịdị arọ (kg, g)",
     "soldBy_volume": "Olu mmiri (lita, ml)",
     "soldBy_length": "Ogologo (yaadị, mita)",
@@ -564,7 +565,8 @@
     "bulkCreationFailed": "Ịmepụta ọtụtụ dara",
     "allPendingCopied": "Edetuola koodu niile na-eche",
     "inviteMessageCopied": "Edetuola ozi ọkpụkpọ",
-    "miniNote": "Ụlọ ahịa Mini: ị na-agba ụlọ ahịa ahụ, ya na ndị inyeaka ruru 2 (onye njikwa, onye na-anata ego ma ọ bụ onye inyeaka). Kwalite gaa Midi iji tinye onye njikwa ụlọ nkwakọba, onye njikwa shelf, onye nche na onye njikwa ahịa ịntanetị."
+    "miniNote": "Ụlọ ahịa Mini: ị na-agba ụlọ ahịa ahụ, ya na ndị inyeaka ruru 2 (onye njikwa, onye na-anata ego ma ọ bụ onye inyeaka). Kwalite gaa Midi iji tinye onye njikwa ụlọ nkwakọba, onye njikwa shelf, onye nche na onye njikwa ahịa ịntanetị.",
+    "needsMidi": "Midi / Mega"
   },
   "usersPage": {
     "title": "Njikwa Ndị Ọrụ",
@@ -1118,7 +1120,9 @@
     "courierSet": "E melitere onye nnyefe",
     "courierPicked": "Onye nnyefe ewerela ya",
     "cashCollected": "E nwetara ego",
-    "paidByGuarantor": "Onye nkwado akwụọla"
+    "paidByGuarantor": "Onye nkwado akwụọla",
+    "paidByTransfer": "Akwụọla site na nyefe",
+    "checkTransfer": "Nyefe ego — lelee akaụntụ gị"
   },
   "storefrontPage": {
     "title": "🛍️ Ụlọ Ahịa",
@@ -1195,7 +1199,11 @@
     "creditAwaiting": "Arịrịọ kredit gị na-eche nkwado.",
     "creditApplyBelow": "Rịọ maka kredit n'okpuru iji jiri nke a.",
     "creditOff": "Ụlọ ahịa a enyebeghị kredit.",
-    "payOnCredit": "Zụta na kredit"
+    "payOnCredit": "Zụta na kredit",
+    "payByTransfer": "Kwụọ ụgwọ site na nyefe ego",
+    "transferTitle": "Nyefee {{amount}} na:",
+    "transferRef": "Dee {{ref}} dịka nkọwa nyefe ka ụlọ ahịa mara na ọ bụ gị.",
+    "copy": "Detuo"
   },
   "marketplaceHomePage": {
     "title": "🏪 Ahịa SAFE Stores",
@@ -1819,7 +1827,15 @@
     "privacy": "Anyị na-enye Paystack nọmba akaụntụ ma debe naanị ọnụọgụ 4 ikpeazụ ya.",
     "linked": "Ejikọrọ akaụntụ akụ — ịkwụ ụgwọ ịntanetị dị na nkwụ",
     "acceptOnline": "Nabata ịkwụ ụgwọ ịntanetị n'ụlọ ahịa m",
-    "acceptOnDelivery": "Nabata ịkwụ mgbe a natara / e bubatara"
+    "acceptOnDelivery": "Nabata ịkwụ mgbe a natara / e bubatara",
+    "transferTitle": "Nyefe ego n'ụlọ akụ",
+    "transferHelp": "Ndị ahịa nwere ike ịkwụ ụgwọ ozugbo na akaụntụ gị. Ha ga-ahụ ihe ndị a mgbe ha nyechara iwu; ị ga-akwado mgbe ego ahụ bịarutere.",
+    "transferAccountName": "Aha akaụntụ",
+    "transferNote": "Ozi maka ndị ahịa (ọ bụghị iwu)",
+    "transferNotePh": "dịka Zipu ihe akaebe na WhatsApp 0803…",
+    "transferSave": "Chekwaa nkọwa ụlọ akụ",
+    "transferSaved": "Echekwala nkọwa ụlọ akụ",
+    "acceptTransfer": "Nara nyefe ego n'ụlọ ahịa ịntanetị m"
   },
   "settlementsPage": {
     "title": "Mmezi Ego",
@@ -2577,5 +2593,25 @@
     "a_waste": "Dee ihe mebiri",
     "a_newJob": "Ọrụ ọhụrụ",
     "a_jobs": "Ndepụta ọrụ"
+  },
+  "quickAdd": {
+    "button": "Tinye ngwa ngwa",
+    "title": "Tinye ngwaahịa ngwa ngwa",
+    "help": "Aha, ọnụahịa na ole — ọ na-aga ozugbo na shelf, dị njikere ire. Tinye foto ka ndị na-anara ego mata ya (na igwefoto mata ya).",
+    "name": "Aha ngwaahịa",
+    "photo": "Foto (ọ bụghị iwu)",
+    "cost": "Ọnụahịa ịzụta",
+    "price": "Ọnụahịa ire",
+    "profit": "Uru: {{pct}}%",
+    "qty": "Ole",
+    "category": "Ụdị",
+    "barcode": "Barcode (ọ bụghị iwu)",
+    "onShelf": "Tinye ha niile na shelf ugbu a (enwere ike ire ozugbo)",
+    "saveNext": "Chekwaa ma tinye ọzọ",
+    "saveClose": "Chekwaa ma mechie",
+    "saving": "Na-echekwa…",
+    "added": "Etinyere: {{name}}",
+    "needName": "Tinye aha ngwaahịa",
+    "needPrice": "Tinye ọnụahịa ire"
   }
 }

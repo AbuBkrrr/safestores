@@ -257,7 +257,8 @@
     "pricePer": "每{{unit}} {{price}}",
     "enterAmount": "多少？（{{unit}}）— 看秤上读数",
     "lineTotal": "价格",
-    "addToOrder": "加入订单"
+    "addToOrder": "加入订单",
+    "inStoreRoom": "库房有 {{qty}} — 请先上架"
   },
   "products": {
     "title": "产品管理",
@@ -319,7 +320,7 @@
     "markupHelp": "加价：成本之上 {{pct}}%",
     "enterCostFirst": "请先输入成本价",
     "soldBy": "销售单位",
-    "soldBy_unit": "按件（整数）",
+    "soldBy_unit": "件 / 按个（整件商品）",
     "soldBy_weight": "重量（千克、克）",
     "soldBy_volume": "体积（升、毫升）",
     "soldBy_length": "长度（码、米）",
@@ -564,7 +565,8 @@
     "bulkCreationFailed": "批量创建失败",
     "allPendingCopied": "所有待处理代码已复制到剪贴板",
     "inviteMessageCopied": "邀请消息已复制",
-    "miniNote": "Mini 店铺：由你经营店铺，最多再加 2 名帮手（经理、收银员或助手）。升级到 Midi 可添加仓库管理员、货架管理员、保安和线上商城经理。"
+    "miniNote": "Mini 店铺：由你经营店铺，最多再加 2 名帮手（经理、收银员或助手）。升级到 Midi 可添加仓库管理员、货架管理员、保安和线上商城经理。",
+    "needsMidi": "中型 / 大型"
   },
   "usersPage": {
     "title": "用户管理",
@@ -1118,7 +1120,9 @@
     "courierSet": "配送员已更新",
     "courierPicked": "配送员已取货",
     "cashCollected": "已收款",
-    "paidByGuarantor": "担保方已付款"
+    "paidByGuarantor": "担保方已付款",
+    "paidByTransfer": "已通过银行转账支付",
+    "checkTransfer": "银行转账 — 请查看你的账户"
   },
   "storefrontPage": {
     "title": "🛍️ 商店",
@@ -1195,7 +1199,11 @@
     "creditAwaiting": "你的赊账申请正在等待批准。",
     "creditApplyBelow": "在下方申请赊账即可使用。",
     "creditOff": "该店铺暂不提供赊账。",
-    "payOnCredit": "赊账购买"
+    "payOnCredit": "赊账购买",
+    "payByTransfer": "银行转账付款",
+    "transferTitle": "请转账 {{amount}} 到：",
+    "transferRef": "转账备注请写 {{ref}}，方便店家确认。",
+    "copy": "复制"
   },
   "marketplaceHomePage": {
     "title": "🏪 SAFE Stores 市场",
@@ -1819,7 +1827,15 @@
     "privacy": "我们会将账号传给 Paystack，只保留后 4 位。",
     "linked": "银行账户已绑定——在线支付已开启",
     "acceptOnline": "在我的网店接受在线支付",
-    "acceptOnDelivery": "接受自提 / 货到付款"
+    "acceptOnDelivery": "接受自提 / 货到付款",
+    "transferTitle": "银行转账",
+    "transferHelp": "顾客可直接转账到你的银行账户。下单后他们会看到这些信息；钱到账后由你确认订单。",
+    "transferAccountName": "账户名",
+    "transferNote": "给顾客的说明（可选）",
+    "transferNotePh": "例如：请在 WhatsApp 0803… 发送付款凭证",
+    "transferSave": "保存转账信息",
+    "transferSaved": "转账信息已保存",
+    "acceptTransfer": "在我的网店接受银行转账"
   },
   "settlementsPage": {
     "title": "结算",
@@ -2577,5 +2593,25 @@
     "a_waste": "记录损耗",
     "a_newJob": "新工单",
     "a_jobs": "工单列表"
+  },
+  "quickAdd": {
+    "button": "快速添加",
+    "title": "快速添加商品",
+    "help": "名称、价格和数量 — 直接上架，马上可卖。加张照片方便收银员找到（相机也能识别）。",
+    "name": "商品名称",
+    "photo": "照片（可选）",
+    "cost": "进价",
+    "price": "售价",
+    "profit": "利润：{{pct}}%",
+    "qty": "数量",
+    "category": "分类",
+    "barcode": "条形码（可选）",
+    "onShelf": "现在全部上架（立即可卖）",
+    "saveNext": "保存并继续添加",
+    "saveClose": "保存并关闭",
+    "saving": "保存中…",
+    "added": "已添加：{{name}}",
+    "needName": "请输入商品名称",
+    "needPrice": "请输入售价"
   }
 }

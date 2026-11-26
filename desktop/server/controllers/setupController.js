@@ -23,7 +23,7 @@ async function connect(req, res) {
   }
   const { email, password, otp, storeId } = req.body || {};
   if (!email || !password) return res.status(400).json({ error: 'Enter your email and password' });
-  const base = String(req.body?.serverUrl || process.env.STORE_CLOUD_URL || 'https://app.safestores.name.ng')
+  const base = String(req.body?.serverUrl || process.env.STORE_CLOUD_URL || 'https://app.safestore.com.ng')
     .trim().replace(/\/+$/, '').replace(/\/api$/, '');
   if (!/^https?:\/\/[^\s/]+/i.test(base)) return res.status(400).json({ error: 'Check the server address' });
 

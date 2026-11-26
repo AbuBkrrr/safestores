@@ -43,7 +43,8 @@ function gatewayUnavailable(res, currency) {
 async function getPayouts(req, res) {
   const { rows } = await db.query(
     `SELECT payout_provider, payout_subaccount_code IS NOT NULL AS connected, payout_bank_name, payout_account_last4, payout_account_name,
-            payout_connected_at, online_payments_enabled, pay_on_delivery_enabled FROM stores WHERE id = $1`,
+            payout_connected_at, online_payments_enabled, pay_on_delivery_enabled,
+            transfer_enabled, transfer_bank_name, transfer_account_number, transfer_account_name, transfer_note FROM stores WHERE id = $1`,
     [req.params.storeId]
   );
   const currency = await storeCurrency(req.params.storeId);
@@ -130,15 +131,27 @@ async function connectPayouts(req, res) {
 // PATCH /api/stores/:storeId/payouts { onlinePaymentsEnabled?, payOnDeliveryEnabled? }
 async function updatePaymentOptions(req, res) {
   const { storeId } = req.params;
-  const { onlinePaymentsEnabled, payOnDeliveryEnabled } = req.body || {};
-  const { rows } = await db.query('SELECT payout_subaccount_code, online_payments_enabled, pay_on_delivery_enabled FROM stores WHERE id = $1', [storeId]);
+  const { onlinePaymentsEnabled, payOnDeliveryEnabled, transferEnabled, transfer } = req.body || {};
+  const { rows } = await db.query(`SELECT payout_subaccount_code, online_payments_enabled, pay_on_delivery_enabled, transfer_enabled,
+    transfer_bank_name, transfer_account_number, transfer_account_name, transfer_note FROM stores WHERE id = $1`, [storeId]);
   const cur = rows[0];
   const online = onlinePaymentsEnabled === undefined ? cur.online_payments_enabled : !!onlinePaymentsEnabled;
   const pod = payOnDeliveryEnabled === undefined ? cur.pay_on_delivery_enabled : !!payOnDeliveryEnabled;
+  const tr = transferEnabled === undefined ? cur.transfer_enabled : !!transferEnabled;
+  // Bank-transfer details the shopper will see (the store's own account).
+  const clip = (v, n) => (v === undefined ? undefined : (String(v || '').trim().slice(0, n) || null));
+  const t = transfer || {};
+  const bank = clip(t.bankName, 120) ?? cur.transfer_bank_name;
+  const acct = (t.accountNumber === undefined ? cur.transfer_account_number : String(t.accountNumber || '').replace(/[^0-9A-Za-z-]/g, '').slice(0, 40)) || null;
+  const acctName = clip(t.accountName, 160) ?? cur.transfer_account_name;
+  const note = t.note === undefined ? cur.transfer_note : clip(t.note, 300);
   if (online && !cur.payout_subaccount_code) return res.status(400).json({ error: 'Link a bank account before turning on online payments' });
-  if (!online && !pod) return res.status(400).json({ error: 'Keep at least one way for customers to pay' });
-  await db.query('UPDATE stores SET online_payments_enabled = $1, pay_on_delivery_enabled = $2 WHERE id = $3', [online, pod, storeId]);
-  logActivity(req, { storeId, action: 'store.payment_options_changed', entityType: 'store', entityId: storeId, details: { online, payOnDelivery: pod } });
+  if (tr && !(bank && acct && acctName)) return res.status(400).json({ error: 'Enter the bank, account number and account name for transfers' });
+  if (!online && !pod && !tr) return res.status(400).json({ error: 'Keep at least one way for customers to pay' });
+  await db.query(`UPDATE stores SET online_payments_enabled = $1, pay_on_delivery_enabled = $2, transfer_enabled = $3,
+    transfer_bank_name = $4, transfer_account_number = $5, transfer_account_name = $6, transfer_note = $7 WHERE id = $8`,
+  [online, pod, tr, bank, acct, acctName, note, storeId]);
+  logActivity(req, { storeId, action: 'store.payment_options_changed', entityType: 'store', entityId: storeId, details: { online, payOnDelivery: pod, transfer: tr } });
   return getPayouts(req, res);
 }
 
@@ -147,7 +160,8 @@ async function updatePaymentOptions(req, res) {
 /** What a storefront may offer: used by the public store info endpoint. */
 async function paymentOptionsFor(storeId) {
   const { rows } = await db.query(
-    'SELECT payout_subaccount_code, online_payments_enabled, pay_on_delivery_enabled FROM stores WHERE id = $1', [storeId]
+    `SELECT payout_subaccount_code, online_payments_enabled, pay_on_delivery_enabled, transfer_enabled,
+            transfer_bank_name, transfer_account_number, transfer_account_name, transfer_note FROM stores WHERE id = $1`, [storeId]
   );
   const s = rows[0] || {};
   const currency = await storeCurrency(storeId);
@@ -155,8 +169,10 @@ async function paymentOptionsFor(storeId) {
   // Over the platform's balance limit → pay-on-delivery pauses until the
   // store settles (Bolt-style). Online keeps working and nets the debt.
   const blocked = await settlements.cashBlocked(db, storeId);
-  const payOnDelivery = !blocked && (s.pay_on_delivery_enabled !== false || !online);
-  return { online, payOnDelivery, cashPausedForBalance: blocked };
+  const transfer = s.transfer_enabled && s.transfer_account_number
+    ? { bankName: s.transfer_bank_name, accountNumber: s.transfer_account_number, accountName: s.transfer_account_name, note: s.transfer_note } : null;
+  const payOnDelivery = !blocked && (s.pay_on_delivery_enabled !== false || (!online && !transfer));
+  return { online, payOnDelivery, transfer, cashPausedForBalance: blocked };
 }
 
 // POST /api/marketplace/orders/:token/pay  { email? } → { authorizationUrl }

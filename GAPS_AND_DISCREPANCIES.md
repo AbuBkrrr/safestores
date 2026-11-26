@@ -60,7 +60,7 @@ a small number of genuine, addressable gaps. All are now fixed:
 - **No public download page.** This was the walkthrough deck's own
   explicitly flagged gap ("the missing first step of this whole
   walkthrough"). `website/index.html` is a real, complete, responsive
-  landing page for `safestores.name.ng` — see `website/README.md` for
+  landing page for `safestore.com.ng` — see `website/README.md` for
   the three placeholder links that need pointing at real hosted
   artifacts once they exist.
 - **Vague Android signing instructions.** `mobile/README.md` now has
@@ -69,7 +69,7 @@ a small number of genuine, addressable gaps. All are now fixed:
   keystore myself and hand it to you — a signing key that's passed
   through any third party, including me, is no longer trustworthy as
   private. This is one to generate yourselves, on your own machine.)
-- **Domain not reflected anywhere.** `safestores.name.ng` (noted as
+- **Domain not reflected anywhere.** `safestore.com.ng` (noted as
   subject to change) is now the example value in `.env.example`,
   `.env.staging.example`, and the new landing page. Nothing in the
   actual application hardcodes it — `FRONTEND_URL` was already a proper

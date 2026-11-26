@@ -4,7 +4,7 @@ import api from '../api/client.js';
 import { Alert, AuthBrand } from '../components/ui.jsx';
 import PasswordInput from '../components/PasswordInput.jsx';
 
-const DEFAULT_SERVER = import.meta.env.VITE_CLOUD_URL || 'https://app.safestores.name.ng';
+const DEFAULT_SERVER = import.meta.env.VITE_CLOUD_URL || 'https://app.safestore.com.ng';
 
 /**
  * First run of a shop-computer app: the owner or a manager signs in once with

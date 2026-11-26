@@ -53,7 +53,6 @@ export default function Camera() {
   };
 
   const stopCamera = () => {
-    readerRef.current?.reset();
     streamRef.current?.getTracks().forEach((t) => t.stop());
     setCameraOn(false);
     setScanning(false);
@@ -70,7 +69,7 @@ export default function Camera() {
     readerRef.current = codeReader;
     setScanning(true);
 
-    codeReader.decodeFromVideoElement(videoRef.current, (result) => {
+    const controls = codeReader.decodeFromVideoElement(videoRef.current, (result) => {
       if (!result) return; // fires continuously with null while nothing is found — that's normal
       const code = result.getText();
       const now = Date.now();
@@ -84,7 +83,7 @@ export default function Camera() {
       // (e.g. camera stopped); nothing to do, cleanup below handles it.
     });
 
-    return () => { codeReader.reset(); setScanning(false); };
+    return () => { Promise.resolve(controls).then((c) => c?.stop()).catch(() => {}); setScanning(false); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cameraOn, liveScan]);
 
@@ -185,7 +184,7 @@ export default function Camera() {
       <div className="grid grid-2">
         <div className="card">
           <h3 style={{ marginBottom: 12 }}>{t('cameraPage.liveCamera')} {scanning && liveScan && <span className="muted" style={{ fontWeight: 400, fontSize: 13 }}>· {t('cameraPage.scanning')}</span>}</h3>
-          <video ref={videoRef} autoPlay playsInline style={{ width: '100%', background: '#000', borderRadius: 8, maxHeight: 260, objectFit: 'cover' }} />
+          <video ref={videoRef} autoPlay playsInline style={{ width: '100%', background: '#000', borderRadius: 8, height: '70vh', objectFit: 'cover' }} />
           <canvas ref={canvasRef} style={{ display: 'none' }} />
           <div className="flex mt-1">
             {!cameraOn ? (
