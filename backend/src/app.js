@@ -131,6 +131,13 @@ function createApp() {
   app.get('/api/public/receipts/:token', require('./controllers/ordersController').publicReceipt);
   const publicCtrl = require('./controllers/publicController');
   app.get('/api/public/marketplace-orders/:token', publicCtrl.trackOrder);
+  // ICE servers for support calls: free public STUN, plus your own TURN
+  // server when set (needed when either side is behind a strict mobile network).
+  app.get('/api/rtc/ice', require('./middleware/auth').requireAuth, (req, res) => {
+    const ice = [{ urls: ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'] }];
+    if (process.env.TURN_URL) ice.push({ urls: process.env.TURN_URL.split(',').map((u) => u.trim()), username: process.env.TURN_USERNAME || '', credential: process.env.TURN_PASSWORD || '' });
+    res.json({ iceServers: ice });
+  });
   const orderChatLimit = require('express-rate-limit')({ windowMs: 10 * 60 * 1000, max: 30, standardHeaders: true, legacyHeaders: false });
   app.get('/api/public/marketplace-orders/:token/chat', publicCtrl.orderChat);
   app.post('/api/public/marketplace-orders/:token/chat', orderChatLimit, require('./utils/storage').upload.single('photo'), publicCtrl.orderChatSend);

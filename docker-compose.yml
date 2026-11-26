@@ -58,6 +58,10 @@ services:
       TRUST_PROXY: ${TRUST_PROXY:-2}
       SUPPORT_PHONE: ${SUPPORT_PHONE:-}
       SUPPORT_WHATSAPP: ${SUPPORT_WHATSAPP:-}
+      # Optional TURN server for support calls on strict mobile networks (e.g. turn:turn.example.com:3478).
+      TURN_URL: ${TURN_URL:-}
+      TURN_USERNAME: ${TURN_USERNAME:-}
+      TURN_PASSWORD: ${TURN_PASSWORD:-}
       MARKETING_LANDING_URL: ${MARKETING_LANDING_URL:-}
       PUBLIC_APP_URL: ${PUBLIC_APP_URL:-}
       # Each store's own Windows/Android apps (templates/store-app). Optional.

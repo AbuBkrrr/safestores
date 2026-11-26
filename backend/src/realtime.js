@@ -63,6 +63,38 @@ function init(httpServer) {
       socket.to(`store:${storeId}`).emit('presence:joined', { userId: sub, role });
     }
 
+    // ---- Support calls (voice + screen share + guided control) ----
+    // Each person has a private room; super admins also share a 'support'
+    // room. A store user can only reach a super admin (admin:<id> rooms only
+    // super admins join) and a super admin can only reach one user, so call
+    // signals never leak to anyone else. The server just relays; the audio and
+    // video go directly between the two browsers (WebRTC).
+    const isSupport = role === 'super_admin';
+    socket.join(isSupport ? `admin:${sub}` : `user:${sub}`);
+    if (isSupport) socket.join('support');
+    const name = String(socket.handshake.auth?.name || '').slice(0, 80);
+    const routeTo = (to) => (typeof to === 'string' && /^[0-9a-f-]{36}$/i.test(to) ? (isSupport ? `user:${to}` : `admin:${to}`) : null);
+    if (!isSupport && storeId) {
+      // A store user asks for help: ring every support person online.
+      socket.on('call:request', (p = {}) => {
+        io.to('support').emit('call:incoming', { from: sub, storeId, role, name: String(p.name || name).slice(0, 80), storeName: String(p.storeName || '').slice(0, 120), at: Date.now() });
+      });
+      socket.on('call:cancel', () => io.to('support').emit('call:cancelled', { from: sub }));
+    }
+    if (isSupport) {
+      // Support rings a store user (from a ticket), or accepts their request.
+      socket.on('call:ring', (p = {}) => { const r = routeTo(p.to); if (r) io.to(r).emit('call:ringing', { from: sub, name: String(p.name || name || 'SAFE Stores support').slice(0, 80) }); });
+      socket.on('call:accept', (p = {}) => {
+        const r = routeTo(p.to); if (!r) return;
+        io.to(r).emit('call:accepted', { from: sub, name: String(p.name || name || 'SAFE Stores support').slice(0, 80) });
+        socket.to('support').emit('call:taken', { from: p.to }); // other support staff stop ringing
+      });
+    } else {
+      socket.on('call:answer', (p = {}) => { const r = routeTo(p.to); if (r) io.to(r).emit('call:answered', { from: sub, storeId, name }); });
+    }
+    socket.on('call:signal', (p = {}) => { const r = routeTo(p.to); if (r && p.data && JSON.stringify(p.data).length < 100000) io.to(r).emit('call:signal', { from: sub, data: p.data }); });
+    socket.on('call:end', (p = {}) => { const r = routeTo(p.to); if (r) io.to(r).emit('call:ended', { from: sub }); });
+
     socket.on('disconnect', () => {
       if (storeId) {
         socket.to(`store:${storeId}`).emit('presence:left', { userId: sub, role });

@@ -44,7 +44,10 @@ export default function Support() {
 
   return (
     <div>
-      <div className="topbar"><h1>{t('supportPage.title')}</h1></div>
+      <div className="topbar"><h1>{t('supportPage.title')}</h1>
+        {import.meta.env.VITE_EDITION !== 'desktop' && <button type="button" className="btn" onClick={() => window.dispatchEvent(new Event('ss:call-support'))}>📞 {t('supportCall.button')}</button>}
+      </div>
+      {import.meta.env.VITE_EDITION !== 'desktop' && <p className="help-text">{t('supportCall.pageHelp')}</p>}
 
       <div className="grid grid-2">
         <div className="card">
