@@ -5,7 +5,9 @@ const db = require('../config/db');
 const { priceSql, regularSql, onSaleSql } = require('../utils/price');
 const { emitToStore } = require('../realtime');
 
-const LIVE = `s.subscription_status = 'active' AND s.marketplace_enabled = true AND p.archived_at IS NULL`;
+// A product shows to shoppers only when its shop is listed and it has a real
+// price (a ₦0 item is one the shop hasn't priced yet).
+const LIVE = `s.subscription_status = 'active' AND s.marketplace_enabled = true AND p.archived_at IS NULL AND ${priceSql('p')} > 0`;
 const FIELDS = `p.id, p.name, p.brand, p.category, p.unit, p.sold_by, p.image_url,
   ${priceSql('p')} AS price, ${regularSql('p')} AS regular_price, ${onSaleSql('p')} AS on_sale, p.promo_label, p.promo_ends_at,
   (p.shelf_qty + p.backroom_qty) > 0 AS in_stock, s.id AS store_id, s.name AS store_name, s.city AS store_city, s.shop_slug`;
