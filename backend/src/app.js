@@ -72,6 +72,8 @@ function createApp() {
   app.post('/api/m/open', mkCors, mkLimit, mkJson, mk.recordOpen);
   app.post('/api/m/lead', mkCors, mkLimit, mkJson, mk.recordLead);
   app.get('/api/m/unsubscribe/:token', mk.unsubscribe);
+  // The website checks which app address is live before pointing its links at it.
+  app.get('/api/m/ping', mkCors, (req, res) => res.json({ ok: true }));
   const chat = require('./controllers/liveChatController');
   const chatLimit = require('express-rate-limit')({ windowMs: 10 * 60 * 1000, max: 40, standardHeaders: true, legacyHeaders: false });
   const chatReadLimit = require('express-rate-limit')({ windowMs: 60 * 1000, max: 40, standardHeaders: true, legacyHeaders: false });

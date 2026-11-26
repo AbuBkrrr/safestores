@@ -41,3 +41,11 @@ describe('Live support chat', () => {
     expect(r.body.token).not.toBe('b'.repeat(48));
   });
 });
+
+describe('Website ping', () => {
+  it('answers any site, so the website can find the live app address', async () => {
+    const r = await request().get('/api/m/ping').set('Origin', 'https://safestore.com.ng');
+    expect(r.status).toBe(200);
+    expect(r.headers['access-control-allow-origin']).toBe('https://safestore.com.ng');
+  });
+});
