@@ -94,6 +94,9 @@ export default function OrderAlerts() {
     return () => { socket.off('marketplace:order_placed', onOrder); socket.off('marketplace:payment_sent', onPaid); };
   }, [socket]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Staff who can't open the orders page (cashiers…) still hear and see the
+  // alert, so they can tell the owner or manager.
+  const canOpenOrders = ['admin', 'manager', 'marketplace_manager'].includes(user?.role);
   if (!user?.storeId || !alerts.length) return null;
   return (
     <div className="order-alerts" role="alert" aria-live="assertive">
@@ -104,7 +107,7 @@ export default function OrderAlerts() {
             <div>{a.paid ? t('orderAlert.paidBody', { total: a.total, ref: a.ref || '' }) : t('orderAlert.body', { total: a.total })}{a.who ? ` — ${a.who}` : ''}</div>
           </div>
           <div className="order-alert-actions">
-            <button type="button" className="btn small" onClick={() => { setAlerts((l) => l.filter((x) => x.id !== a.id)); navigate('/marketplace'); }}>{t('orderAlert.view')}</button>
+            {canOpenOrders && <button type="button" className="btn small" onClick={() => { setAlerts((l) => l.filter((x) => x.id !== a.id)); navigate('/marketplace'); }}>{t('orderAlert.view')}</button>}
             <button type="button" className="btn small secondary" onClick={() => setAlerts((l) => l.filter((x) => x.id !== a.id))} aria-label={t('common.close')}>✕</button>
           </div>
         </div>
