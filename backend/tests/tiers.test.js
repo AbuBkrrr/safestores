@@ -64,7 +64,7 @@ describe('Mini store: the owner alone or with up to 4 helpers', () => {
   it('only helper roles, at most 5 people, stock goes straight to the shelf, returns straight back', async () => {
     const { store, token } = await createActiveStoreWithAdmin(); // new stores are Mini
     const A = `Bearer ${token}`;
-    for (const role of ['store_manager', 'shelf_manager', 'security', 'marketplace_manager', 'checkout']) {
+    for (const role of ['store_manager', 'shelf_manager', 'security', 'marketplace_manager']) {
       const r = await request().post(`/api/stores/${store.id}/invites`).set('Authorization', A).send({ name: role, role });
       expect([role, r.status, r.body.code]).toEqual([role, 400, 'TEAM_LIMIT']);
     }

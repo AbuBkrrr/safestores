@@ -158,7 +158,7 @@ async function adminLogin(req, res) {
   res.json({
     token,
     user: {
-      id: user.id, name: user.name, email: user.email, role: user.role,
+      id: user.id, name: user.name, email: user.email, role: user.role, jobTitle: user.job_title || null,
       storeId: user.store_id, storeName: user.store_name, storeTier: user.store_tier, businessType: user.business_type, subscriptionStatus: user.subscription_status,
       // Only owner/manager get the store's device key (it can read and change all store data).
       syncKey: ['admin', 'manager'].includes(user.role) ? user.sync_key : undefined, locked: !!user.locked,
@@ -207,9 +207,9 @@ async function inviteLogin(req, res) {
     if (invite.status === 'pending') {
       // First use: create the user now and mark invite claimed.
       const userResult = await client.query(
-        `INSERT INTO users (store_id, name, email, password_hash, role, audit_engagement_id)
-         VALUES ($1, $2, $3, NULL, $4, $5) RETURNING id`,
-        [invite.store_id, invite.name, invite.email || `${invite.code.toLowerCase()}@invite.local`, invite.role, invite.audit_engagement_id || null]
+        `INSERT INTO users (store_id, name, email, password_hash, role, audit_engagement_id, job_title)
+         VALUES ($1, $2, $3, NULL, $4, $5, $6) RETURNING id`,
+        [invite.store_id, invite.name, invite.email || `${invite.code.toLowerCase()}@invite.local`, invite.role, invite.audit_engagement_id || null, invite.job_title || null]
       );
       userId = userResult.rows[0].id;
       await client.query(
@@ -233,7 +233,7 @@ async function inviteLogin(req, res) {
     await client.query('COMMIT');
 
     const token = signToken({ sub: userId, role: invite.role, storeId: invite.store_id, tv: tokenVersion });
-    res.json({ token, user: { id: userId, name: invite.name, role: invite.role, storeId: invite.store_id, syncKey: ['admin', 'manager'].includes(invite.role) ? invite.sync_key : undefined } });
+    res.json({ token, user: { id: userId, name: invite.name, role: invite.role, storeId: invite.store_id, jobTitle: invite.job_title || null, syncKey: ['admin', 'manager'].includes(invite.role) ? invite.sync_key : undefined } });
   } catch (err) {
     await client.query('ROLLBACK');
     console.error(err);

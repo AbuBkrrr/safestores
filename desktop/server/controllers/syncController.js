@@ -230,6 +230,9 @@ function importChanges(req, res) {
         .run(['unit', 'weight', 'volume', 'length'].includes(p.sold_by) ? p.sold_by : 'unit', p.shelf_life_days || null, p.id, p.updated_at);
     }
 
+    for (const u of users) {
+      if (u.job_title !== undefined) db.prepare('UPDATE users SET job_title = ? WHERE id = ? AND store_id = ?').run(u.job_title || null, u.id, storeId);
+    }
     // Promotions travel with products — see the cloud edition.
     for (const p of products) {
       if (p.promo_price === undefined) continue;

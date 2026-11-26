@@ -118,7 +118,7 @@ async function adminLogin(req, res) {
   res.json({
     token,
     user: {
-      id: user.id, name: user.name, email: user.email, role: user.role,
+      id: user.id, name: user.name, email: user.email, role: user.role, jobTitle: user.job_title || null,
       storeId: user.store_id, storeName: user.store_name, subscriptionStatus: user.subscription_status,
       locked: !!user.locked, storeTier: user.store_tier, businessType: user.business_type || 'general',
     },
@@ -146,8 +146,8 @@ async function inviteLogin(req, res) {
       if (invite.status === 'pending') {
         userId = crypto.randomUUID();
         db.prepare(
-          `INSERT INTO users (id, store_id, name, email, password_hash, role) VALUES (?,?,?,?,NULL,?)`
-        ).run(userId, invite.store_id, invite.name, invite.email || `${invite.code.toLowerCase()}@invite.local`, invite.role);
+          `INSERT INTO users (id, store_id, name, email, password_hash, role, job_title) VALUES (?,?,?,?,NULL,?,?)`
+        ).run(userId, invite.store_id, invite.name, invite.email || `${invite.code.toLowerCase()}@invite.local`, invite.role, invite.job_title || null);
         db.prepare(`UPDATE invites SET status = 'claimed', claimed_by_user = ? WHERE id = ?`).run(userId, invite.id);
       } else {
         // Repeat use: the invite code doubles as this person's ongoing
@@ -162,13 +162,13 @@ async function inviteLogin(req, res) {
       }
 
       const tv = db.prepare('SELECT token_version FROM users WHERE id = ?').get(userId)?.token_version || 0;
-      return { userId, role: invite.role, storeId: invite.store_id, name: invite.name, tv };
+      return { userId, role: invite.role, storeId: invite.store_id, name: invite.name, tv, jobTitle: invite.job_title || null };
     })();
 
     if (result.error) return res.status(result.error[0]).json({ error: result.error[1] });
 
     const token = signToken({ sub: result.userId, role: result.role, storeId: result.storeId, tv: result.tv });
-    res.json({ token, user: { id: result.userId, name: result.name, role: result.role, storeId: result.storeId } });
+    res.json({ token, user: { id: result.userId, name: result.name, role: result.role, storeId: result.storeId, jobTitle: result.jobTitle } });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Invite login failed' });

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { titleDef, HOME_LINKS } from '../utils/jobTitles.js';
+import { useStoreProfile } from '../utils/useStoreTier.js';
 import { useTranslation } from 'react-i18next';
 import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -21,7 +23,17 @@ export default function RoleDashboard() {
 
   const when = (x) => (x ? new Date(x).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—');
   const role = user.role === 'auditor' ? 'stock_taker' : user.role;
-  const actions = {
+  // The person's job title in this business (Chef, Technician, Front desk…) decides their shortcuts.
+  const { businessType, tools } = useStoreProfile();
+  const title = titleDef(businessType, user.jobTitle);
+  const [jobs, setJobs] = useState(null);
+  useEffect(() => {
+    if (tools.includes('jobs') && ['staff', 'cashier', 'checkout'].includes(role)) {
+      api.get(`/stores/${user.storeId}/jobs`).then((r) => setJobs(Array.isArray(r.data) ? r.data : [])).catch(() => {});
+    }
+  }, [user.storeId, tools.join(','), role]); // eslint-disable-line react-hooks/exhaustive-deps
+  const titleActions = title?.home?.length ? title.home.map((k) => [HOME_LINKS[k][1], `${HOME_LINKS[k][0]} ${t(`jobHome.${k}`)}`]) : null;
+  const roleActions = {
     cashier: [['/checkout', `🛒 ${t('roleDash.startSale')}`], ['/sales', `🧮 ${t('roleDash.salesRefunds')}`], ['/shifts', `⏰ ${t('roleDash.myShift')}`]],
     checkout: [['/checkout', `🛒 ${t('roleDash.startSale')}`], ['/sales', `🧮 ${t('roleDash.salesRefunds')}`], ['/shifts', `⏰ ${t('roleDash.myShift')}`]],
     staff: [['/stock-arrival', `🚚 ${t('roleDash.receiveStock')}`], ['/movements', `🔁 ${t('roleDash.restockShelf')}`], ['/cycle-counting', `⏱️ ${t('roleDash.cycleCount')}`]],
@@ -31,18 +43,32 @@ export default function RoleDashboard() {
     store_manager: [['/receipts', `🧾 ${t('roleDash.scanInvoice')}`], ['/stock-arrival', `🚚 ${t('roleDash.receiveSupply')}`], ['/handovers', `🔀 ${t('roleDash.sendToShelf')}`]],
     shelf_manager: [['/handovers', `🔀 ${t('roleDash.confirmHandover')}`], ['/labels', `🏷️ ${t('roleDash.labels')}`]],
   }[role] || [];
+  const actions = titleActions || roleActions;
+  const openJobs = (jobs || []).filter((j) => !['collected', 'cancelled'].includes(j.status));
+  const mine = openJobs.filter((j) => j.assigned_to_name && j.assigned_to_name === user.name);
 
   return (
     <div>
       <div className="topbar">
         <div className="page-title">
-          <h1>{t(`roleDash.title_${role}`, { defaultValue: t('dashboard.title') })}</h1>
+          <h1>{title ? `${t(`jobTitles.${title.key}`)}` : t(`roleDash.title_${role}`, { defaultValue: t('dashboard.title') })}</h1>
           <div className="sub">{t('dashboard.welcomeBack', { name: user.name })}</div>
         </div>
       </div>
       <div className="flex" style={{ gap: 10, flexWrap: 'wrap', marginBottom: 16 }}>
         {actions.map(([to, label], i) => <Link key={to} to={to} className={`btn ${i ? 'secondary' : ''}`}>{label}</Link>)}
       </div>
+      {jobs && (
+        <div className="card">
+          <h3>📋 {t('jobHome.myJobs')} <span className="muted small">({mine.length || openJobs.length})</span></h3>
+          {(mine.length ? mine : openJobs).length === 0 ? <p className="muted">{t('roleDash.noneYet')}</p> : (
+            <table><tbody>{(mine.length ? mine : openJobs).slice(0, 10).map((j) => (
+              <tr key={j.id}><td>{j.ref || j.tag_code}</td><td>{j.title || j.customer_name}</td><td><span className="badge pending">{t(`jobs.s_${j.status}`, { defaultValue: j.status })}</span></td>
+                <td>{j.due_date ? new Date(j.due_date).toLocaleDateString() : ''}</td><td><Link to="/jobs" className="btn small">{t('jobHome.open')}</Link></td></tr>
+            ))}</tbody></table>
+          )}
+        </div>
+      )}
       {!d ? <p className="muted">…</p> : (
         <>
           {['cashier', 'checkout'].includes(role) && (
@@ -60,7 +86,7 @@ export default function RoleDashboard() {
               </div>
             </>
           )}
-          {role === 'staff' && (
+          {role === 'staff' && (!title || title.home.some((k) => ['shelf', 'receive', 'count'].includes(k))) && (
             <>
               <div className="grid grid-2">
                 <Metric value={d.shelfToRefill.length} label={t('roleDash.shelvesToRefill')} />

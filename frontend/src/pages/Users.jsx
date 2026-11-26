@@ -4,6 +4,8 @@ import api from '../api/client.js';
 import { useAuth } from '../context/AuthContext.jsx';
 import { Badge, Toast } from '../components/ui.jsx';
 import { useToast } from '../components/useToast.js';
+import { useStoreProfile } from '../utils/useStoreTier.js';
+import { jobTitlesFor } from '../utils/jobTitles.js';
 
 export default function Users() {
   const { t } = useTranslation();
@@ -12,6 +14,14 @@ export default function Users() {
   const [toast, showToast] = useToast();
 
   const load = () => api.get(`/stores/${user.storeId}/users`).then((r) => setUsers(r.data));
+  const { businessType } = useStoreProfile();
+  const canTitle = ['admin', 'manager'].includes(user.role);
+  // Titles that keep the person's permissions (same role), so a title change never widens access.
+  const titlesFor = (role) => jobTitlesFor(businessType).filter((x) => x.role === role);
+  const setTitle = async (u, jobTitle) => {
+    await api.patch(`/stores/${user.storeId}/users/${u.id}/title`, { jobTitle });
+    setUsers((list) => list.map((x) => (x.id === u.id ? { ...x, job_title: jobTitle } : x)));
+  };
   useEffect(() => { load(); }, [user.storeId]);
 
   const toggleStatus = async (u) => {
@@ -47,7 +57,16 @@ export default function Users() {
           <tbody>
             {users.map((u) => (
               <tr key={u.id}>
-                <td>{u.name}</td><td>{u.email}</td><td><span className="role-tag">{t(`roles.${u.role}`, { defaultValue: u.role })}</span></td>
+                <td>{u.name}</td><td>{u.email}</td><td>
+                  {canTitle && titlesFor(u.role).length > 1
+                    ? (
+                      <select value={u.job_title || ''} onChange={(e) => setTitle(u, e.target.value)} aria-label={t('invitesPage.jobTitle')} style={{ width: 'auto' }}>
+                        <option value="">{t(`roles.${u.role}`, { defaultValue: u.role })}</option>
+                        {titlesFor(u.role).map((x) => <option key={x.key} value={x.key}>{t(`jobTitles.${x.key}`)}</option>)}
+                      </select>
+                    )
+                    : <span className="role-tag">{u.job_title ? t(`jobTitles.${u.job_title}`, { defaultValue: u.job_title }) : t(`roles.${u.role}`, { defaultValue: u.role })}</span>}
+                </td>
                 <td><Badge status={u.status === 'active' ? 'active' : 'suspended'} /></td>
                 <td>{new Date(u.created_at).toLocaleDateString()}</td>
                 <td className="flex">
