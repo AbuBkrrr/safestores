@@ -139,8 +139,10 @@ export default function ShopperApp() {
               </div>
             </section>
           )}
-          <Row title={`🆕 ${t('shopper.newest')}`} items={data?.newest} money={money} onAsk={askAbout} />
-          <Row title={`📈 ${t('shopper.popular')}`} items={data?.popular} money={money} onAsk={askAbout} />
+          {/* An item shows once on the home page: Just arrived leaves out what is
+              already in Deals, Popular leaves out both (Buy again is the shopper's own list). */}
+          <Row title={`🆕 ${t('shopper.newest')}`} items={(data?.newest || []).filter((p) => !(data?.deals || []).some((d) => d.id === p.id))} money={money} onAsk={askAbout} />
+          <Row title={`📈 ${t('shopper.popular')}`} items={(data?.popular || []).filter((p) => ![...(data?.deals || []), ...(data?.newest || [])].some((d) => d.id === p.id))} money={money} onAsk={askAbout} />
           {data && !data.deals.length && !data.newest.length && !data.popular.length && <p className="muted mt-1">{t('shopper.nothingYet')}</p>}
         </>
       )}
