@@ -1,5 +1,6 @@
 import TransferDetails from '../components/TransferDetails.jsx';
 import AskShopDialog from '../components/AskShopDialog.jsx';
+import InstallMarketBanner from '../components/InstallMarketBanner.jsx';
 import { shopper } from '../utils/shopperLocal.js';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
@@ -273,6 +274,7 @@ export default function Storefront() {
           )}
           {products.length > 0 && visible.length === 0 && <p className="muted sf-empty">{t('storefrontPage.noMatches')}</p>}
           {store && <p className="small"><button type="button" className="link-btn" onClick={() => setAsk({ kind: 'request' })}>🙋 {t('shopper.cantFind')}</button></p>}
+          <InstallMarketBanner />
           {ask && store && <AskShopDialog store={store} product={ask.product} kind={ask.kind} onClose={() => setAsk(null)} />}
           <div className="product-grid">
             {visible.map((p) => (

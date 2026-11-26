@@ -2706,5 +2706,13 @@
     "replyPh": "Zaa onye ahịa",
     "send": "Zaa",
     "close": "Emechaala"
+  },
+  "installMarket": {
+    "title": "Nweta Ahịa SAFE Stores na ekwentị gị",
+    "why": "Mbelata, ntụnyere ọnụahịa na iwu gị — otu mpịa site na ihuenyo ụlọ. Obere ma n'efu.",
+    "ios": "Pịa bọtịnụ Share ⬆️, wee pịa “Add to Home Screen”.",
+    "install": "Wụnye",
+    "notNow": "Ọ bụghị ugbu a",
+    "done": "Etinyela ya — chọta ya na ihuenyo ụlọ gị"
   }
 }

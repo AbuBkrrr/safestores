@@ -5,6 +5,7 @@ import client from '../api/client.js';
 import { formatCurrency as format } from '../utils/currency.js';
 import { shopper } from '../utils/shopperLocal.js';
 import AskShopDialog from '../components/AskShopDialog.jsx';
+import InstallMarketBanner from '../components/InstallMarketBanner.jsx';
 
 // The shopper app: every shop on SAFE Stores in one place — deals, newest
 // stock, what's popular, the cheapest shop for an item, favourites, a
@@ -66,7 +67,7 @@ function Row({ title, items, money, onAsk, empty }) {
 export default function ShopperApp() {
   const { t } = useTranslation();
   const s = useShopperData();
-  const [tab, setTab] = useState('home');
+  const [tab, setTab] = useState(() => { const x = new URLSearchParams(window.location.search).get('tab'); return TABS.includes(x) ? x : 'home'; });
   const [city, setCity] = useState(() => s.profile().city || '');
   const [data, setData] = useState(null);
   const [q, setQ] = useState('');
@@ -277,6 +278,7 @@ export default function ShopperApp() {
         </section>
       )}
 
+      <InstallMarketBanner />
       {ask && ask.store?.id && <AskShopDialog store={ask.store} product={ask.product} kind={ask.kind} onClose={() => setAsk(null)} />}
     </div>
   );

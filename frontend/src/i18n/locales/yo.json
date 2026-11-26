@@ -2706,5 +2706,13 @@
     "replyPh": "Dá oníbàárà lóhùn",
     "send": "Dáhùn",
     "close": "Ti parí"
+  },
+  "installMarket": {
+    "title": "Gba Ọjà SAFE Stores sórí fóònù rẹ",
+    "why": "Ẹ̀dínwó, ìfiwéra iye owó àti àṣẹ rẹ — ìtẹ̀ kan láti ojú-ìwé ilé. Kékeré àti ọ̀fẹ́.",
+    "ios": "Tẹ bọ́tìnnì Share ⬆️, lẹ́yìn náà “Add to Home Screen”.",
+    "install": "Fi sórí ẹ̀rọ",
+    "notNow": "Kì í ṣe báyìí",
+    "done": "A ti fi sí i — wá a lórí ojú-ìwé ilé rẹ"
   }
 }

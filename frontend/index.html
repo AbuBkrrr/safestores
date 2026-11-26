@@ -4,7 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>%VITE_APP_TITLE%</title>
-  <link rel="manifest" href="/manifest.json" />
+  <link rel="manifest" id="app-manifest" href="/manifest.json" />
+  <script>
+    // Shoppers (marketplace and shop pages) install "SAFE Stores Market", not the store app.
+    (function () {
+      var shopper = /^\/(market|marketplace-home|shop\/|track\/)/.test(location.pathname);
+      if (!shopper) return;
+      document.getElementById('app-manifest').href = '/market.webmanifest';
+      // Keep the install offer (it can fire before the app has loaded); our own banner shows it.
+      window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); window.__ssInstall = e; window.dispatchEvent(new Event('ss-install-ready')); });
+    })();
+  </script>
   <link rel="icon" type="image/png" href="/icon-192.png" />
   <link rel="apple-touch-icon" href="/icon-192.png" />
   <meta name="theme-color" content="#0f7180" />
