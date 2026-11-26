@@ -84,7 +84,7 @@ JWT_SECRET=<generate, see Step 1>
 JWT_EXPIRES_IN=7d
 FRONTEND_URL=https://safestore.com.ng
 S3_BUCKET=<see note below>
-BOOTSTRAP_SUPER_ADMIN_EMAIL=super@safestores.name.ng
+BOOTSTRAP_SUPER_ADMIN_EMAIL=super@safestore.com.ng
 BOOTSTRAP_SUPER_ADMIN_PASSWORD=<a real password, not the .env.example default>
 SENTRY_DSN=<from Step 4>
 ```

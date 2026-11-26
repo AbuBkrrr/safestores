@@ -67,6 +67,15 @@ if port_busy "$PORT" && ! docker compose ps --status running frontend 2>/dev/nul
   echo "   port in use by another program; the app will use port $PORT"
 fi
 
+echo "== DNS check: every address must point at this server ($(curl -fsS -4 ifconfig.me 2>/dev/null || echo '?'))"
+MYIP=$(curl -fsS -4 ifconfig.me 2>/dev/null || true)
+for d in "$DOMAIN" "www.$DOMAIN" "$APP_DOMAIN"; do
+  IP=$(getent ahostsv4 "$d" | awk '{print $1; exit}')
+  if [ -z "$IP" ]; then echo "   !! $d has no DNS record. At your domain registrar add: A record for $d ->  ${MYIP:-the server IP}"
+  elif [ "$d" != "$APP_DOMAIN" ] && [[ "$IP" == 185.199.1[01][0-9].* ]]; then echo "   ok  $d (landing page on GitHub Pages)"
+  elif [ -n "$MYIP" ] && [ "$IP" != "$MYIP" ]; then echo "   !! $d points at $IP, not this server ($MYIP). Change its A record to $MYIP"
+  else echo "   ok  $d"; fi
+done
 echo "== 4. Building and starting (database migrations run automatically)"
 docker compose up -d --build --remove-orphans
 for i in $(seq 1 30); do

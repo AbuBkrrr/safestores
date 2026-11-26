@@ -25,7 +25,7 @@ Every button goes somewhere real:
 - **Request the installer, Tell me when it's out, Book a free setup
   visit, Ask for your rate** jump to the contact form and pick its topic.
 - The **contact form** has no server: it opens the visitor's email app
-  with a message to `support@safestores.name.ng`, filled in and ready to
+  with a message to `support@safestore.com.ng`, filled in and ready to
   send. Swap that for a form service later if you want submissions
   stored.
 

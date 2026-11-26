@@ -141,7 +141,7 @@ Build-time variables (set them on the static site in your host):
 | `VITE_API_URL` | `https://api.safestore.com.ng/api` |
 | `VITE_SENTRY_DSN` | Sentry (frontend project) |
 | `VITE_LEGAL_ENTITY` | your registered business name |
-| `VITE_LEGAL_CONTACT` | e.g. `support@safestores.name.ng` |
+| `VITE_LEGAL_CONTACT` | e.g. `support@safestore.com.ng` |
 | `VITE_LEGAL_COUNTRY` | governing law, e.g. `the Federal Republic of Nigeria` |
 
 Build command: `cd frontend && npm ci && npm run build`; publish `frontend/dist`.
