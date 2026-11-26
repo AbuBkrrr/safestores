@@ -45,3 +45,17 @@ describe('Shopper app', () => {
     expect((await request().get(`/api/stores/${b.store.id}/inquiries`).set(A)).status).toBe(403);
   });
 });
+
+describe('Market only shows priced items', () => {
+  it('leaves out a product the shop has not priced yet (₦0)', async () => {
+    const { createActiveStoreWithAdmin, createProduct } = require('./helpers/factories');
+    const { pool } = require('../src/config/db');
+    const s = await createActiveStoreWithAdmin();
+    await pool.query('UPDATE stores SET marketplace_enabled = true WHERE id = $1', [s.store.id]);
+    const priced = await createProduct(s.store.id, { sku: 'P-OK', costPrice: 100, priceMultiplier: 1.2, shelfQty: 5 });
+    const zero = await createProduct(s.store.id, { sku: 'P-ZERO', costPrice: 100, priceMultiplier: 0, shelfQty: 5 });
+    const ids = (await request().get('/api/marketplace/discover')).body.newest.map((p) => p.id);
+    expect(ids).toContain(priced.id);
+    expect(ids).not.toContain(zero.id);
+  });
+});
