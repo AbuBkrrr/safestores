@@ -1565,7 +1565,7 @@
   "importPage": {
     "title": "导入商品",
     "subtitle": "从电子表格（CSV 或 Excel）导入全部商品清单。",
-    "step1": "下载模板，或使用您自己的表格——常见列名（名称、SKU、条码、成本、价格、库存等）会被自动识别。",
+    "step1": "下载简单模板（只需名称和价格），或使用您自己的表格——我们能识别如“产品名称”“成本”“售价”“库存”等列名。",
     "step2": "在下方选择文件。保存前我们会逐行检查。",
     "step3": "查看检查结果后导入。已有 SKU 会被更新（库存不会被覆盖）；新商品按期初库存创建。",
     "template": "下载模板",
@@ -1578,14 +1578,35 @@
     "skipped": "{{count}} 行有问题（已跳过）",
     "row": "行",
     "problem": "问题",
-    "preview": "预览（前 20 行）",
+    "preview": "您的产品将这样导入（前 5 个）",
     "importNow": "导入 {{count}} 个商品",
     "done": "完成：新增 {{created}} 个，更新 {{updated}} 个。",
     "viewProducts": "查看商品",
     "scanTitle": "逐个扫描商品",
     "scanHelp": "用摄像头或USB扫描枪扫描商品条码。新条码会打开已填好的商品表单；已有商品则转到入库。",
     "scanExisting": "{{name}} 已在您的商品中。",
-    "receiveStock": "入库 →"
+    "receiveStock": "入库 →",
+    "byHandTitle": "手动添加产品",
+    "byHandHelp": "输入名称和价格，可加一张照片，即可开始销售。适合少量商品。",
+    "byHandButton": "添加产品",
+    "sheetTitle": "从表格批量添加产品",
+    "readAs": "我们这样读取您的列：",
+    "ignored": "未使用：",
+    "field": {
+      "name": "名称",
+      "costPrice": "成本",
+      "sellingPrice": "售价",
+      "openingStock": "库存",
+      "sku": "SKU",
+      "barcode": "条形码",
+      "category": "类别",
+      "brand": "品牌",
+      "supplier": "供应商",
+      "unit": "单位",
+      "reorderLevel": "补货点",
+      "packSize": "每箱数量",
+      "location": "位置"
+    }
   },
   "labelsPage": {
     "title": "标签与条码 / 二维码",
@@ -1844,7 +1865,8 @@
     "transferNotePh": "例如：请在 WhatsApp 0803… 发送付款凭证",
     "transferSave": "保存转账信息",
     "transferSaved": "转账信息已保存",
-    "acceptTransfer": "在我的网店接受银行转账"
+    "acceptTransfer": "在我的网店接受银行转账",
+    "noConnection": "无法连接服务器。请检查网络后重试。"
   },
   "settlementsPage": {
     "title": "结算",
@@ -2625,7 +2647,11 @@
     "needName": "请输入商品名称",
     "needPrice": "请输入售价",
     "more": "更多信息（进价、分类、条形码 / 二维码）",
-    "helpShort": "名称、价格和数量。加张照片方便找到。"
+    "helpShort": "名称、价格和数量。加张照片方便找到。",
+    "photoTake": "给产品拍照",
+    "photoRetake": "重新拍照",
+    "photoHelp": "摄像头会记住它的样子，收银员无需条形码即可扫描。",
+    "looksLike": "这看起来像 {{name}}，已在您的产品中。如果是同一商品，请为它入库，而不是再次添加。"
   },
   "shopper": {
     "title": "SAFE Stores 商城",

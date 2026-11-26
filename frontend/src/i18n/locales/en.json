@@ -1565,7 +1565,7 @@
   "importPage": {
     "title": "Import Products",
     "subtitle": "Bring your whole product list in from a spreadsheet (CSV or Excel).",
-    "step1": "Download the template, or use your own sheet — common column names (Name, SKU, Barcode, Cost, Price, Stock…) are recognised automatically.",
+    "step1": "Download the simple template (only Name and Price are needed), or use your own sheet — we recognise column names like Product Name, Cost, Selling Price, Stock.",
     "step2": "Choose the file below. We check every row before anything is saved.",
     "step3": "Review the check, then import. Existing SKUs are updated (stock is never overwritten); new ones are created with their opening stock.",
     "template": "Download template",
@@ -1578,14 +1578,35 @@
     "skipped": "{{count}} rows with problems (skipped)",
     "row": "Row",
     "problem": "Problem",
-    "preview": "Preview (first 20 rows)",
+    "preview": "How your products will come in (first 5)",
     "importNow": "Import {{count}} products",
     "done": "Done: {{created}} created, {{updated}} updated.",
     "viewProducts": "View products",
     "scanTitle": "Scan products in one at a time",
     "scanHelp": "Scan a product's barcode with the camera or a USB scanner. A new barcode opens a product form with it filled in; one you already sell takes you to receive stock.",
     "scanExisting": "{{name}} is already in your products.",
-    "receiveStock": "Receive stock →"
+    "receiveStock": "Receive stock →",
+    "byHandTitle": "Add a product by hand",
+    "byHandHelp": "Type the name and price, add a photo if you like, and it is ready to sell. Best for a few items.",
+    "byHandButton": "Add a product",
+    "sheetTitle": "Add many products from a spreadsheet",
+    "readAs": "We read your columns as:",
+    "ignored": "Not used:",
+    "field": {
+      "name": "Name",
+      "costPrice": "Cost",
+      "sellingPrice": "Selling price",
+      "openingStock": "Stock",
+      "sku": "SKU",
+      "barcode": "Barcode",
+      "category": "Category",
+      "brand": "Brand",
+      "supplier": "Supplier",
+      "unit": "Unit",
+      "reorderLevel": "Reorder level",
+      "packSize": "Units per carton",
+      "location": "Location"
+    }
   },
   "labelsPage": {
     "title": "Labels & Barcodes / QR",
@@ -1844,7 +1865,8 @@
     "transferNotePh": "e.g. Send proof of payment on WhatsApp 0803…",
     "transferSave": "Save transfer details",
     "transferSaved": "Bank transfer details saved",
-    "acceptTransfer": "Accept bank transfer on my storefront"
+    "acceptTransfer": "Accept bank transfer on my storefront",
+    "noConnection": "Could not reach the server. Check your internet and try again."
   },
   "settlementsPage": {
     "title": "Settlements",
@@ -2625,7 +2647,11 @@
     "needName": "Enter the product name",
     "needPrice": "Enter the selling price",
     "more": "More details (buying price, category, barcode / QR)",
-    "helpShort": "Name, price and how many. Add a photo so it is easy to find."
+    "helpShort": "Name, price and how many. Add a photo so it is easy to find.",
+    "photoTake": "Take a photo of the product",
+    "photoRetake": "Take another photo",
+    "photoHelp": "The camera learns what it looks like, so the cashier can scan it without a barcode.",
+    "looksLike": "This looks like {{name}}, which is already in your products. If it is the same item, receive stock for it instead of adding it again."
   },
   "shopper": {
     "title": "SAFE Stores Market",

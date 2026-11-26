@@ -1565,7 +1565,7 @@
   "importPage": {
     "title": "Ingiza Bidhaa",
     "subtitle": "Leta orodha yako yote ya bidhaa kutoka lahajedwali (CSV au Excel).",
-    "step1": "Pakua kiolezo, au tumia jedwali lako — majina ya kawaida ya safu (Jina, SKU, Msimbopau, Gharama, Bei, Stoo…) hutambuliwa yenyewe.",
+    "step1": "Pakua kiolezo rahisi (Jina na Bei tu vinahitajika), au tumia jedwali lako — tunatambua majina ya safu kama Jina la bidhaa, Gharama, Bei ya kuuza, Hisa.",
     "step2": "Chagua faili hapa chini. Tunakagua kila safu kabla ya kuhifadhi chochote.",
     "step3": "Pitia ukaguzi, kisha ingiza. SKU zilizopo husasishwa (stoo haiandikwi juu kamwe); mpya huundwa na stoo yake ya kuanzia.",
     "template": "Pakua kiolezo",
@@ -1578,14 +1578,35 @@
     "skipped": "Safu {{count}} zenye matatizo (zimerukwa)",
     "row": "Safu",
     "problem": "Tatizo",
-    "preview": "Hakiki (safu 20 za kwanza)",
+    "preview": "Jinsi bidhaa zako zitakavyoingia (5 za kwanza)",
     "importNow": "Ingiza bidhaa {{count}}",
     "done": "Imekamilika: {{created}} zimeundwa, {{updated}} zimesasishwa.",
     "viewProducts": "Tazama bidhaa",
     "scanTitle": "Changanua bidhaa moja moja",
     "scanHelp": "Changanua msimbopau kwa kamera au skana ya USB. Msimbo mpya hufungua fomu ya bidhaa; uliopo hukupeleka kupokea mzigo.",
     "scanExisting": "{{name}} tayari iko kwenye bidhaa zako.",
-    "receiveStock": "Pokea mzigo →"
+    "receiveStock": "Pokea mzigo →",
+    "byHandTitle": "Ongeza bidhaa kwa mkono",
+    "byHandHelp": "Andika jina na bei, ongeza picha ukipenda, na iko tayari kuuzwa. Bora kwa bidhaa chache.",
+    "byHandButton": "Ongeza bidhaa",
+    "sheetTitle": "Ongeza bidhaa nyingi kutoka jedwali",
+    "readAs": "Tumesoma safu zako hivi:",
+    "ignored": "Hazitumiki:",
+    "field": {
+      "name": "Jina",
+      "costPrice": "Gharama",
+      "sellingPrice": "Bei ya kuuza",
+      "openingStock": "Hisa",
+      "sku": "SKU",
+      "barcode": "Msimbopau",
+      "category": "Aina",
+      "brand": "Chapa",
+      "supplier": "Msambazaji",
+      "unit": "Kipimo",
+      "reorderLevel": "Kiwango cha kuagiza upya",
+      "packSize": "Vipande kwa katoni",
+      "location": "Mahali"
+    }
   },
   "labelsPage": {
     "title": "Lebo na Misimbopau / QR",
@@ -1844,7 +1865,8 @@
     "transferNotePh": "mf. Tuma uthibitisho wa malipo WhatsApp 0803…",
     "transferSave": "Hifadhi maelezo ya benki",
     "transferSaved": "Maelezo ya benki yamehifadhiwa",
-    "acceptTransfer": "Pokea uhamisho wa benki kwenye duka langu la mtandaoni"
+    "acceptTransfer": "Pokea uhamisho wa benki kwenye duka langu la mtandaoni",
+    "noConnection": "Imeshindwa kufikia seva. Angalia intaneti yako ujaribu tena."
   },
   "settlementsPage": {
     "title": "Malipo ya Hesabu",
@@ -2625,7 +2647,11 @@
     "needName": "Weka jina la bidhaa",
     "needPrice": "Weka bei ya kuuza",
     "more": "Maelezo zaidi (bei ya kununua, aina, barcode / QR)",
-    "helpShort": "Jina, bei na idadi. Ongeza picha ili iwe rahisi kuipata."
+    "helpShort": "Jina, bei na idadi. Ongeza picha ili iwe rahisi kuipata.",
+    "photoTake": "Piga picha ya bidhaa",
+    "photoRetake": "Piga picha nyingine",
+    "photoHelp": "Kamera hujifunza inavyoonekana, ili keshia aweze kuiscan bila msimbopau.",
+    "looksLike": "Hii inafanana na {{name}}, ambayo tayari iko kwenye bidhaa zako. Kama ni ile ile, pokea hisa badala ya kuiongeza tena."
   },
   "shopper": {
     "title": "Soko la SAFE Stores",

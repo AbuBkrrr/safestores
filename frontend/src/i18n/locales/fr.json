@@ -1565,7 +1565,7 @@
   "importPage": {
     "title": "Importer des produits",
     "subtitle": "Importez toute votre liste de produits depuis un tableur (CSV ou Excel).",
-    "step1": "Téléchargez le modèle ou utilisez votre propre feuille — les noms de colonnes courants (Nom, SKU, Code-barres, Coût, Prix, Stock…) sont reconnus automatiquement.",
+    "step1": "Téléchargez le modèle simple (seuls le Nom et le Prix sont requis), ou utilisez votre propre feuille — nous reconnaissons les colonnes comme Nom du produit, Coût, Prix de vente, Stock.",
     "step2": "Choisissez le fichier ci-dessous. Nous vérifions chaque ligne avant tout enregistrement.",
     "step3": "Vérifiez le contrôle, puis importez. Les SKU existants sont mis à jour (le stock n'est jamais écrasé) ; les nouveaux sont créés avec leur stock initial.",
     "template": "Télécharger le modèle",
@@ -1578,14 +1578,35 @@
     "skipped": "{{count}} lignes avec des problèmes (ignorées)",
     "row": "Ligne",
     "problem": "Problème",
-    "preview": "Aperçu (20 premières lignes)",
+    "preview": "Comment vos produits seront importés (5 premiers)",
     "importNow": "Importer {{count}} produits",
     "done": "Terminé : {{created}} créés, {{updated}} mis à jour.",
     "viewProducts": "Voir les produits",
     "scanTitle": "Scanner les produits un par un",
     "scanHelp": "Scannez le code-barres avec la caméra ou un lecteur USB. Un nouveau code ouvre un formulaire pré-rempli ; un produit existant vous mène à la réception de stock.",
     "scanExisting": "{{name}} est déjà dans vos produits.",
-    "receiveStock": "Recevoir du stock →"
+    "receiveStock": "Recevoir du stock →",
+    "byHandTitle": "Ajouter un produit à la main",
+    "byHandHelp": "Saisissez le nom et le prix, ajoutez une photo si vous voulez, et il est prêt à vendre. Idéal pour quelques articles.",
+    "byHandButton": "Ajouter un produit",
+    "sheetTitle": "Ajouter beaucoup de produits depuis un tableur",
+    "readAs": "Nous lisons vos colonnes ainsi :",
+    "ignored": "Non utilisées :",
+    "field": {
+      "name": "Nom",
+      "costPrice": "Coût",
+      "sellingPrice": "Prix de vente",
+      "openingStock": "Stock",
+      "sku": "SKU",
+      "barcode": "Code-barres",
+      "category": "Catégorie",
+      "brand": "Marque",
+      "supplier": "Fournisseur",
+      "unit": "Unité",
+      "reorderLevel": "Seuil de réapprovisionnement",
+      "packSize": "Unités par carton",
+      "location": "Emplacement"
+    }
   },
   "labelsPage": {
     "title": "Étiquettes et codes-barres / QR",
@@ -1844,7 +1865,8 @@
     "transferNotePh": "ex. Envoyez la preuve sur WhatsApp 0803…",
     "transferSave": "Enregistrer",
     "transferSaved": "Coordonnées bancaires enregistrées",
-    "acceptTransfer": "Accepter les virements sur ma boutique"
+    "acceptTransfer": "Accepter les virements sur ma boutique",
+    "noConnection": "Impossible de joindre le serveur. Vérifiez votre connexion et réessayez."
   },
   "settlementsPage": {
     "title": "Règlements",
@@ -2625,7 +2647,11 @@
     "needName": "Saisissez le nom du produit",
     "needPrice": "Saisissez le prix de vente",
     "more": "Plus de détails (prix d'achat, catégorie, code-barres / QR)",
-    "helpShort": "Nom, prix et quantité. Ajoutez une photo pour le retrouver facilement."
+    "helpShort": "Nom, prix et quantité. Ajoutez une photo pour le retrouver facilement.",
+    "photoTake": "Prendre une photo du produit",
+    "photoRetake": "Reprendre une photo",
+    "photoHelp": "La caméra apprend son apparence pour que le caissier puisse le scanner sans code-barres.",
+    "looksLike": "Cela ressemble à {{name}}, déjà dans vos produits. Si c'est le même article, enregistrez une réception de stock au lieu de l'ajouter à nouveau."
   },
   "shopper": {
     "title": "Marché SAFE Stores",

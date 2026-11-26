@@ -291,6 +291,15 @@
   .lc-form button{padding:10px 14px;border:0;border-radius:8px;background:#0f7180;color:#fff;font-weight:700;cursor:pointer}
   .lc-form button:disabled{opacity:.5}
   .lc-err{color:#d92d20;font-size:12px}
+  /* Marketplace: large and obvious for shoppers */
+  .shop-strip { background: var(--amber); border-bottom: 2px solid var(--amber-deep); }
+  .shop-strip .wrap { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding-top: 14px; padding-bottom: 14px; flex-wrap: wrap; }
+  .shop-strip p { margin: 0; font-weight: 700; font-size: 18px; color: var(--teal-deep); }
+  .shop-strip p small { display: block; font-weight: 500; font-size: 14px; opacity: .85; }
+  .btn-shop { background: var(--teal-deep); color: #fff; font-size: 20px; font-weight: 800; padding: 16px 28px; letter-spacing: .2px; box-shadow: 0 3px 0 #062f36; }
+  .btn-shop:hover { transform: translateY(-1px); box-shadow: 0 5px 0 #062f36; }
+  .nav-links a.nav-market { font-weight: 800; color: var(--teal-deep); background: var(--amber); padding: 6px 12px; border-radius: 999px; }
+  @media (max-width: 600px) { .shop-strip .wrap { justify-content: center; text-align: center; } .btn-shop { width: 100%; } }
 </style>
 <meta name="ss-api" content="https://app.safestore.com.ng">
 </head>
@@ -302,6 +311,7 @@
     <nav aria-label="Main">
       <a class="brand" href="#top"><span class="brand-mark">SS</span> SAFE Stores</a>
       <div class="nav-links" id="nav-links">
+        <a class="nav-market" href="https://app.safestore.com.ng/market">🛍️ Marketplace</a>
         <a href="#flow">How it works</a>
         <a href="#features">Features</a>
         <a href="#download">Download</a>
@@ -317,6 +327,12 @@
 </header>
 
 <main id="main">
+<section class="shop-strip" aria-label="Marketplace">
+  <div class="wrap">
+    <p>🛍️ Looking to buy? <small>Shop from stores near you — deals, new stock and the best prices in one place.</small></p>
+    <a class="btn btn-shop" href="https://app.safestore.com.ng/market">START SHOPPING →</a>
+  </div>
+</section>
 <section class="wrap hero hero-solo" aria-labelledby="hero-title">
   <div>
     <div class="eyebrow">Inventory · POS · Online shop</div>
