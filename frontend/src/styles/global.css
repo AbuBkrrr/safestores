@@ -678,3 +678,8 @@ img, video, canvas, iframe { max-width: 100%; }
 .camera-full .camera-footer { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 12px 12px max(16px, env(safe-area-inset-bottom)); background: linear-gradient(transparent, rgba(0,0,0,.75)); color: #fff; max-height: 60vh; overflow-y: auto; }
 .camera-full .camera-footer .card { color: var(--ink, #1f2937); }
 .camera-full .camera-guide { position: absolute; inset: 22% 12%; border: 3px dashed rgba(255,255,255,.8); border-radius: 14px; z-index: 1; pointer-events: none; }
+@media (max-width: 640px) {
+  /* Tick boxes stay beside their text. */
+  label.flex { flex-wrap: nowrap; align-items: flex-start; gap: 8px; }
+  label.flex > input[type="checkbox"], label.flex > input[type="radio"] { flex: 0 0 auto; width: auto; margin-top: 3px; }
+}

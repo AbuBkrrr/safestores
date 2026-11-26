@@ -156,7 +156,7 @@ const FIELDS = {
   currencyCode: 'currency_code', currencySymbol: 'currency_symbol', timezone: 'timezone',
   taxRatePct: 'tax_rate_pct', taxInclusive: 'tax_inclusive', taxLabel: 'tax_label', taxNumber: 'tax_number',
   phone: 'phone', address: 'address', city: 'city', receiptHeader: 'receipt_header', receiptFooter: 'receipt_footer',
-  maxCashierDiscountPct: 'max_cashier_discount_pct', requireShift: 'require_shift', name: 'name',
+  maxCashierDiscountPct: 'max_cashier_discount_pct', requireShift: 'require_shift', name: 'name', autoShelf: 'auto_shelf',
   pointsPer100: 'points_per_100', pointValue: 'point_value', pointsExpiryMonths: 'points_expiry_months',
   dailySummaryEnabled: 'daily_summary_enabled', businessType: 'business_type',
 };
@@ -165,6 +165,7 @@ function readSettings(storeId) {
   const r = db.prepare(
     `SELECT s.id, s.name, s.store_tier, s.business_type, s.daily_summary_enabled, s.timezone, s.tax_rate_pct, s.tax_inclusive, s.tax_label, s.tax_number, s.phone, s.address, s.city,
             s.receipt_header, s.receipt_footer, s.max_cashier_discount_pct, s.require_shift,
+            COALESCE(s.auto_shelf, s.store_tier = 'mini') AS auto_shelf,
             s.points_per_100, s.point_value, s.points_expiry_months,
             s.currency_code AS store_currency_code, s.currency_symbol AS store_currency_symbol,
             COALESCE(s.currency_code, c.code) AS currency_code, COALESCE(s.currency_symbol, c.symbol) AS currency_symbol
@@ -172,7 +173,7 @@ function readSettings(storeId) {
   ).get(storeId);
   if (!r) return null;
   return {
-    ...r, tax_inclusive: !!r.tax_inclusive, require_shift: !!r.require_shift, daily_summary_enabled: !!r.daily_summary_enabled,
+    ...r, tax_inclusive: !!r.tax_inclusive, require_shift: !!r.require_shift, auto_shelf: !!r.auto_shelf, daily_summary_enabled: !!r.daily_summary_enabled,
     tools: require('../utils/businessTypes').toolsFor(r.business_type),
   };
 }
@@ -217,7 +218,7 @@ function updateSettings(req, res) {
   for (const [k, col] of Object.entries(FIELDS)) {
     if (body[k] === undefined) continue;
     let v = body[k];
-    if (['taxInclusive', 'requireShift', 'dailySummaryEnabled'].includes(k)) v = v ? 1 : 0;
+    if (['taxInclusive', 'requireShift', 'dailySummaryEnabled', 'autoShelf'].includes(k)) v = v ? 1 : 0;
     else if (typeof v === 'string') v = v.trim().slice(0, k.startsWith('receipt') ? 500 : 160) || null;
     sets.push(`${col} = ?`); values.push(v);
   }

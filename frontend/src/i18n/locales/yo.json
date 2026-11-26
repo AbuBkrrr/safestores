@@ -109,7 +109,7 @@
     "dailyReport": "Ìparí Ọjọ́",
     "settings": "Ètò Ṣọ́ọ̀bù",
     "insights": "Ìtúpalẹ̀",
-    "labels": "Àmì àti Barcode",
+    "labels": "Àmì àti Barcode / QR",
     "transfers": "Gbígbé Ọjà láàrin Ẹ̀ka",
     "help": "Ìrànlọ́wọ́",
     "terms": "Àwọn Òfin",
@@ -196,7 +196,7 @@
     "someone": "ẹnìkan",
     "open": "Ṣí",
     "addItems": "Fi Ọjà Kún",
-    "scanBarcode": "📷 Yẹ Bákóòdù",
+    "scanBarcode": "📷 Yẹ Bákóòdù / QR",
     "stopScanning": "Dá Yíyẹ Dúró",
     "searchLabel": "Tàbí wá pẹ̀lú orúkọ / nọ́mbà ọjà",
     "searchPlaceholder": "Bẹ̀rẹ̀ ìkọwé…",
@@ -266,7 +266,7 @@
     "cancel": "Fagilé",
     "newProduct": "+ Ọjà Tuntun",
     "name": "Orúkọ",
-    "skuOrBarcode": "Nọ́mbà Ọjà / Bákóòdù",
+    "skuOrBarcode": "Nọ́mbà Ọjà / Bákóòdù / QR",
     "category": "Ẹ̀ka",
     "supplier": "Olùpèsè",
     "unit": "Ìwọ̀n",
@@ -304,7 +304,7 @@
     "archiveConfirm": "Fi ọjà yìí pamọ́ sínú àkọsílẹ̀? Ìtàn rẹ̀ yóò dúró síbẹ̀, a sì lè dá a padà nígbà mìíràn.",
     "import": "Kó wọlé",
     "labels": "Àmì",
-    "barcode": "Barcode",
+    "barcode": "Barcode / QR",
     "barcodePlaceholder": "Ṣàyẹ̀wò tàbí tẹ̀ ẹ́ (àṣàyàn)",
     "variantOf": "Oríṣi ti",
     "notAVariant": "— Kì í ṣe oríṣi —",
@@ -331,7 +331,11 @@
     "changePhoto": "Yí i padà",
     "removePhotoFor": "Yọ fọ́tò {{name}} kúrò",
     "photoSaved": "A ti fi fọ́tò pamọ́",
-    "photoFailed": "A kò lè fi fọ́tò pamọ́"
+    "photoFailed": "A kò lè fi fọ́tò pamọ́",
+    "toShelf": "Pẹpẹ",
+    "movedToShelf": "A ti gbé ọjà {{count}} sórí pẹpẹ",
+    "inStoreRoomBanner": "Ọjà {{count}} ṣì wà nínú ilé ìpamọ́ — a kò lè tà wọ́n síbẹ̀.",
+    "allToShelf": "Gbé gbogbo rẹ̀ sórí pẹpẹ"
   },
   "stockArrivalPage": {
     "title": "Ìdé Ọjà",
@@ -565,7 +569,7 @@
     "bulkCreationFailed": "Ìṣẹ̀dá ọ̀pọ̀lọpọ̀ kùnà",
     "allPendingCopied": "Gbogbo kóòdù tí ń dúró ni a dà",
     "inviteMessageCopied": "Ìránṣẹ́ ìpè ti dà",
-    "miniNote": "Ṣọ́ọ̀bù kékeré: ṣe é fúnra rẹ, tàbí pẹ̀lú olùrànlọ́wọ́ tó tó 4 (ènìyàn 5 lápapọ̀) bí alákòóso, olùgbowó tàbí olùrànlọ́wọ́. O lè ṣe gbogbo iṣẹ́ fúnra rẹ. Gbé e sókè sí Midi fún alákòóso ṣọ́ọ̀bù àti pẹpẹ, ààbò àti alákòóso ọjà ayélujára.",
+    "miniNote": "Ṣọ́ọ̀bù kékeré: ṣe é fúnra rẹ, tàbí pẹ̀lú olùrànlọ́wọ́ tó tó 4 (ènìyàn 5 lápapọ̀) bí alákòóso, olùgbowó tàbí olùrànlọ́wọ́. O lè ṣe gbogbo iṣẹ́ fúnra rẹ.",
     "needsMidi": "Midi / Mega"
   },
   "usersPage": {
@@ -1551,7 +1555,9 @@
     "pointsExpiry": "Pọ́ìǹtì ń parí lẹ́yìn (oṣù)",
     "pointsExpiryHelp": "0 = kì í parí.",
     "loyaltyExample": "Àpẹẹrẹ: níná {{spend}} ń mú pọ́ìǹtì {{points}} wá, iye rẹ̀ {{worth}}.",
-    "dailySummary": "Fi àkópọ̀ títà ọjọ́ ránṣẹ́ sí àwọn alábòójútó ní agogo 9 alẹ́"
+    "dailySummary": "Fi àkópọ̀ títà ọjọ́ ránṣẹ́ sí àwọn alábòójútó ní agogo 9 alẹ́",
+    "autoShelf": "Tààrà sórí pẹpẹ: ọjà tí a gbà ṣetán láti tà lẹ́sẹ̀kẹsẹ̀",
+    "autoShelfHelp": "A gbà á nímọ̀ràn fún ṣọ́ọ̀bù kékeré. Pa á nìkan bí ẹnìkan bá ń ṣàyẹ̀wò ọjà nínú ilé ìpamọ́ kí wọ́n tó lọ sórí pẹpẹ."
   },
   "importPage": {
     "title": "Kó Ọjà Wọlé",
@@ -1579,7 +1585,7 @@
     "receiveStock": "Gba ọja →"
   },
   "labelsPage": {
-    "title": "Àmì àti Barcode",
+    "title": "Àmì àti Barcode / QR",
     "subtitle": "Tẹ àmì iye orí pẹpẹ àti sítíkà barcode lórí ẹ̀rọ ìtẹ̀wé èyíkéyìí.",
     "missing": "Ọjà {{count}} kò tíì ní barcode.",
     "generate": "Ṣẹ̀dá barcode ṣọ́ọ̀bù fún wọn",
@@ -1872,7 +1878,7 @@
     }
   },
   "scanProduct": {
-    "scan": "Ṣe ayẹwo koodu",
+    "scan": "Ṣe ayẹwo koodu / QR",
     "stop": "Pa kamẹra",
     "typeCode": "…tabi tẹ / ṣayẹwo koodu tabi SKU",
     "found": "A ti yan: {{name}}",
@@ -2607,13 +2613,15 @@
     "profit": "Èrè: {{pct}}%",
     "qty": "Mélòó",
     "category": "Ẹ̀ka",
-    "barcode": "Barcode (kò pọndandan)",
+    "barcode": "Barcode (kò pọndandan) / QR",
     "onShelf": "Gbé gbogbo rẹ̀ sórí pẹpẹ báyìí (a lè tà á lẹ́sẹ̀kẹsẹ̀)",
     "saveNext": "Fi pamọ́ kí o fi òmíràn kún",
     "saveClose": "Fi pamọ́ kí o padé",
     "saving": "Ń fi pamọ́…",
     "added": "A ti fi kún: {{name}}",
     "needName": "Kọ orúkọ ọjà",
-    "needPrice": "Kọ iye títà"
+    "needPrice": "Kọ iye títà",
+    "more": "Àlàyé síi (iye tí o rà á, ẹ̀ka, barcode / QR)",
+    "helpShort": "Orúkọ, iye owó àti iye mélòó. Fi àwòrán kún kí ó rọrùn láti rí."
   }
 }

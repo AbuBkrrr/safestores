@@ -10,11 +10,12 @@ import { lookOfFile, packLook } from '../utils/visualMatch.js';
  * else (SKU, unit, reorder level…) gets a sensible default and can be edited
  * later. "Save & next" keeps the category so a whole delivery goes in quickly.
  */
-export default function QuickAddProduct({ storeId, categories = [], defaultUnit = 'piece', onAdded, onClose }) {
+export default function QuickAddProduct({ storeId, categories = [], defaultUnit = 'piece', autoShelf = false, onAdded, onClose }) {
   const { t } = useTranslation();
   const empty = { name: '', cost: '', price: '', qty: '', category: '', barcode: '', onShelf: true };
   const [f, setF] = useState(empty);
   const [photo, setPhoto] = useState(null);
+  const [more, setMore] = useState(false); // buying price, category, barcode/QR: only if wanted
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [done, setDone] = useState('');
@@ -35,7 +36,7 @@ export default function QuickAddProduct({ storeId, categories = [], defaultUnit 
       const sku = (f.barcode || `${f.name.trim().replace(/[^A-Za-z0-9]/g, '').slice(0, 6).toUpperCase() || 'ITEM'}-${Date.now().toString(36).slice(-5).toUpperCase()}`);
       const { data: p } = await api.post(`/stores/${storeId}/products`, {
         name: f.name.trim(), sku, category: f.category.trim() || null, unit: defaultUnit, soldBy: 'unit',
-        costPrice, priceMultiplier: price / costPrice, initialBackroomQty: qty, putOnShelf: f.onShelf ? qty : 0,
+        costPrice, priceMultiplier: price / costPrice, initialBackroomQty: qty, putOnShelf: autoShelf || f.onShelf ? qty : 0,
         barcode: f.barcode || undefined,
       });
       if (photo) {
@@ -57,16 +58,11 @@ export default function QuickAddProduct({ storeId, categories = [], defaultUnit 
   return (
     <form className="card" onSubmit={(e) => save(e, true)}>
       <h3>⚡ {t('quickAdd.title')}</h3>
-      <p className="help-text">{t('quickAdd.help')}</p>
+      <p className="help-text">{t('quickAdd.helpShort')}</p>
       <Alert type="error">{error}</Alert>
       <Alert type="success">{done}</Alert>
       <div className="grid grid-2">
         <div className="form-group"><label htmlFor="qa-name">{t('quickAdd.name')}</label><input id="qa-name" ref={nameRef} value={f.name} onChange={set('name')} autoFocus autoComplete="off" /></div>
-        <div className="form-group">
-          <label htmlFor="qa-photo">{t('quickAdd.photo')}</label>
-          <input id="qa-photo" type="file" accept="image/*" capture="environment" onChange={(e) => setPhoto(e.target.files?.[0] || null)} />
-        </div>
-        <div className="form-group"><label htmlFor="qa-cost">{t('quickAdd.cost')}</label><input id="qa-cost" type="number" inputMode="decimal" min="0" step="0.01" value={f.cost} onChange={set('cost')} /></div>
         <div className="form-group">
           <label htmlFor="qa-price">{t('quickAdd.price')}</label>
           <input id="qa-price" type="number" inputMode="decimal" min="0" step="0.01" value={f.price} onChange={set('price')} />
@@ -74,13 +70,23 @@ export default function QuickAddProduct({ storeId, categories = [], defaultUnit 
         </div>
         <div className="form-group"><label htmlFor="qa-qty">{t('quickAdd.qty')}</label><input id="qa-qty" type="number" inputMode="numeric" min="0" step="1" value={f.qty} onChange={set('qty')} /></div>
         <div className="form-group">
-          <label htmlFor="qa-cat">{t('quickAdd.category')}</label>
-          <input id="qa-cat" list="qa-cats" value={f.category} onChange={set('category')} autoComplete="off" />
-          <datalist id="qa-cats">{categories.map((c) => <option key={c} value={c} />)}</datalist>
+          <label htmlFor="qa-photo">📷 {t('quickAdd.photo')}</label>
+          <input id="qa-photo" type="file" accept="image/*" capture="environment" onChange={(e) => setPhoto(e.target.files?.[0] || null)} />
         </div>
-        <div className="form-group"><label htmlFor="qa-bar">{t('quickAdd.barcode')}</label><input id="qa-bar" value={f.barcode} onChange={set('barcode')} inputMode="numeric" autoComplete="off" /></div>
-        <label className="flex" style={{ alignItems: 'center', gap: 8 }}><input type="checkbox" checked={f.onShelf} onChange={set('onShelf')} /> {t('quickAdd.onShelf')}</label>
       </div>
+      {!more && <button type="button" className="link-btn" onClick={() => setMore(true)}>➕ {t('quickAdd.more')}</button>}
+      {more && (
+        <div className="grid grid-2">
+          <div className="form-group"><label htmlFor="qa-cost">{t('quickAdd.cost')}</label><input id="qa-cost" type="number" inputMode="decimal" min="0" step="0.01" value={f.cost} onChange={set('cost')} /></div>
+          <div className="form-group">
+            <label htmlFor="qa-cat">{t('quickAdd.category')}</label>
+            <input id="qa-cat" list="qa-cats" value={f.category} onChange={set('category')} autoComplete="off" />
+            <datalist id="qa-cats">{categories.map((c) => <option key={c} value={c} />)}</datalist>
+          </div>
+          <div className="form-group"><label htmlFor="qa-bar">{t('quickAdd.barcode')}</label><input id="qa-bar" value={f.barcode} onChange={set('barcode')} autoComplete="off" /></div>
+          {!autoShelf && <label className="flex" style={{ alignItems: 'center', gap: 8 }}><input type="checkbox" checked={f.onShelf} onChange={set('onShelf')} /> {t('quickAdd.onShelf')}</label>}
+        </div>
+      )}
       <div className="flex mt-1" style={{ gap: 8 }}>
         <button className="btn" disabled={busy}>{busy ? t('quickAdd.saving') : t('quickAdd.saveNext')}</button>
         <button type="button" className="btn secondary" disabled={busy} onClick={(e) => save(e, false)}>{t('quickAdd.saveClose')}</button>

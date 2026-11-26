@@ -109,7 +109,7 @@
     "dailyReport": "Mwisho wa Siku",
     "settings": "Mipangilio ya Duka",
     "insights": "Uchambuzi",
-    "labels": "Lebo na Misimbopau",
+    "labels": "Lebo na Misimbopau / QR",
     "transfers": "Uhamisho kati ya Matawi",
     "help": "Msaada",
     "terms": "Masharti",
@@ -196,7 +196,7 @@
     "someone": "mtu",
     "open": "Fungua",
     "addItems": "Ongeza Bidhaa",
-    "scanBarcode": "📷 Changanua Bakodi",
+    "scanBarcode": "📷 Changanua Bakodi / QR",
     "stopScanning": "Simamisha Uchanganuzi",
     "searchLabel": "Au tafuta kwa jina / nambari ya bidhaa",
     "searchPlaceholder": "Anza kuandika…",
@@ -266,7 +266,7 @@
     "cancel": "Ghairi",
     "newProduct": "+ Bidhaa Mpya",
     "name": "Jina",
-    "skuOrBarcode": "Nambari ya Bidhaa / Bakodi",
+    "skuOrBarcode": "Nambari ya Bidhaa / Bakodi / QR",
     "category": "Aina",
     "supplier": "Msambazaji",
     "unit": "Kipimo",
@@ -304,7 +304,7 @@
     "archiveConfirm": "Hifadhi bidhaa hii kumbukumbu? Historia yake itabaki salama na inaweza kurejeshwa baadaye.",
     "import": "Ingiza",
     "labels": "Lebo",
-    "barcode": "Msimbopau",
+    "barcode": "Msimbopau / QR",
     "barcodePlaceholder": "Changanua au andika (si lazima)",
     "variantOf": "Aina ndogo ya",
     "notAVariant": "— Si aina ndogo —",
@@ -331,7 +331,11 @@
     "changePhoto": "Badilisha",
     "removePhotoFor": "Ondoa picha ya {{name}}",
     "photoSaved": "Picha imehifadhiwa",
-    "photoFailed": "Imeshindwa kuhifadhi picha"
+    "photoFailed": "Imeshindwa kuhifadhi picha",
+    "toShelf": "Rafu",
+    "movedToShelf": "Bidhaa {{count}} zimewekwa kwenye rafu",
+    "inStoreRoomBanner": "Bidhaa {{count}} bado ziko stoo — haziuzwi bado.",
+    "allToShelf": "Weka zote kwenye rafu"
   },
   "stockArrivalPage": {
     "title": "Uwasili wa Bidhaa",
@@ -565,7 +569,7 @@
     "bulkCreationFailed": "Uundaji wa wingi umeshindwa",
     "allPendingCopied": "Misimbo yote inayosubiri imenakiliwa",
     "inviteMessageCopied": "Ujumbe wa mwaliko umenakiliwa",
-    "miniNote": "Duka dogo: liendeshe peke yako, au na wasaidizi hadi 4 (watu 5 kwa jumla) kama meneja, mhudumu wa malipo au msaidizi. Unaweza kufanya kila kazi mwenyewe. Pandisha hadi Midi kwa mameneja wa duka na rafu, ulinzi na meneja wa soko la mtandaoni.",
+    "miniNote": "Duka dogo: liendeshe peke yako, au na wasaidizi hadi 4 (watu 5 kwa jumla) kama meneja, mhudumu wa malipo au msaidizi. Unaweza kufanya kila kazi mwenyewe.",
     "needsMidi": "Midi / Mega"
   },
   "usersPage": {
@@ -1551,7 +1555,9 @@
     "pointsExpiry": "Pointi huisha muda baada ya (miezi)",
     "pointsExpiryHelp": "0 = haziishi muda.",
     "loyaltyExample": "Mfano: kutumia {{spend}} kunaleta pointi {{points}}, zenye thamani ya {{worth}}.",
-    "dailySummary": "Tuma kwa wasimamizi muhtasari wa mauzo ya siku saa 3 usiku"
+    "dailySummary": "Tuma kwa wasimamizi muhtasari wa mauzo ya siku saa 3 usiku",
+    "autoShelf": "Moja kwa moja kwenye rafu: bidhaa zilizopokelewa zinauzwa mara moja",
+    "autoShelfHelp": "Inapendekezwa kwa maduka madogo. Zima tu kama kuna mtu anayekagua bidhaa stoo kabla ya kuziweka kwenye rafu."
   },
   "importPage": {
     "title": "Ingiza Bidhaa",
@@ -1579,7 +1585,7 @@
     "receiveStock": "Pokea mzigo →"
   },
   "labelsPage": {
-    "title": "Lebo na Misimbopau",
+    "title": "Lebo na Misimbopau / QR",
     "subtitle": "Chapisha lebo za bei za rafuni na stika za msimbopau kwenye printa yoyote.",
     "missing": "Bidhaa {{count}} bado hazina msimbopau.",
     "generate": "Unda misimbopau ya dukani kwa ajili yake",
@@ -1872,7 +1878,7 @@
     }
   },
   "scanProduct": {
-    "scan": "Changanua msimbopau",
+    "scan": "Changanua msimbopau / QR",
     "stop": "Zima kamera",
     "typeCode": "…au andika / changanua msimbopau au SKU",
     "found": "Imechaguliwa: {{name}}",
@@ -2607,13 +2613,15 @@
     "profit": "Faida: {{pct}}%",
     "qty": "Idadi",
     "category": "Aina",
-    "barcode": "Barcode (si lazima)",
+    "barcode": "Barcode (si lazima) / QR",
     "onShelf": "Weka zote kwenye rafu sasa (zinauzwa mara moja)",
     "saveNext": "Hifadhi na ongeza nyingine",
     "saveClose": "Hifadhi na funga",
     "saving": "Inahifadhi…",
     "added": "Imeongezwa: {{name}}",
     "needName": "Weka jina la bidhaa",
-    "needPrice": "Weka bei ya kuuza"
+    "needPrice": "Weka bei ya kuuza",
+    "more": "Maelezo zaidi (bei ya kununua, aina, barcode / QR)",
+    "helpShort": "Jina, bei na idadi. Ongeza picha ili iwe rahisi kuipata."
   }
 }

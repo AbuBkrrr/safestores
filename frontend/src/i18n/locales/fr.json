@@ -109,7 +109,7 @@
     "dailyReport": "Clôture de journée",
     "settings": "Paramètres du magasin",
     "insights": "Analyses",
-    "labels": "Étiquettes et codes-barres",
+    "labels": "Étiquettes et codes-barres / QR",
     "transfers": "Transferts entre succursales",
     "help": "Aide",
     "terms": "Conditions",
@@ -196,7 +196,7 @@
     "someone": "quelqu'un",
     "open": "Ouvrir",
     "addItems": "Ajouter des articles",
-    "scanBarcode": "📷 Scanner le code-barres",
+    "scanBarcode": "📷 Scanner le code-barres / QR",
     "stopScanning": "Arrêter le scan",
     "searchLabel": "Ou rechercher par nom / référence",
     "searchPlaceholder": "Commencez à taper…",
@@ -266,7 +266,7 @@
     "cancel": "Annuler",
     "newProduct": "+ Nouveau produit",
     "name": "Nom",
-    "skuOrBarcode": "Référence / Code-barres",
+    "skuOrBarcode": "Référence / Code-barres / QR",
     "category": "Catégorie",
     "supplier": "Fournisseur",
     "unit": "Unité",
@@ -304,7 +304,7 @@
     "archiveConfirm": "Archiver ce produit ? Son historique est conservé et il pourra être restauré plus tard.",
     "import": "Importer",
     "labels": "Étiquettes",
-    "barcode": "Code-barres",
+    "barcode": "Code-barres / QR",
     "barcodePlaceholder": "Scanner ou saisir (facultatif)",
     "variantOf": "Variante de",
     "notAVariant": "— Pas une variante —",
@@ -331,7 +331,11 @@
     "changePhoto": "Changer",
     "removePhotoFor": "Retirer la photo de {{name}}",
     "photoSaved": "Photo enregistrée",
-    "photoFailed": "Impossible d'enregistrer la photo"
+    "photoFailed": "Impossible d'enregistrer la photo",
+    "toShelf": "Rayon",
+    "movedToShelf": "{{count}} produit(s) mis en rayon",
+    "inStoreRoomBanner": "{{count}} produit(s) encore en réserve — pas encore vendables.",
+    "allToShelf": "Tout mettre en rayon"
   },
   "stockArrivalPage": {
     "title": "Réception de stock",
@@ -565,7 +569,7 @@
     "bulkCreationFailed": "Échec de la création groupée",
     "allPendingCopied": "Tous les codes en attente copiés dans le presse-papiers",
     "inviteMessageCopied": "Message d'invitation copié",
-    "miniNote": "Petite boutique : gérez-la seul ou avec jusqu'à 4 aides (5 personnes en tout) comme gérant, caissier ou vendeur. Vous pouvez tout faire vous-même. Passez à Midi pour les responsables de magasin et de rayon, la sécurité et un gestionnaire de boutique en ligne.",
+    "miniNote": "Petite boutique : gérez-la seul ou avec jusqu'à 4 aides (5 personnes en tout) comme gérant, caissier ou vendeur. Vous pouvez tout faire vous-même.",
     "needsMidi": "Midi / Mega"
   },
   "usersPage": {
@@ -1551,7 +1555,9 @@
     "pointsExpiry": "Les points expirent après (mois)",
     "pointsExpiryHelp": "0 = n'expirent jamais.",
     "loyaltyExample": "Exemple : dépenser {{spend}} rapporte {{points}} points, d'une valeur de {{worth}}.",
-    "dailySummary": "Envoyer aux administrateurs un résumé des ventes du jour à 21 h"
+    "dailySummary": "Envoyer aux administrateurs un résumé des ventes du jour à 21 h",
+    "autoShelf": "Directement en rayon : le stock reçu est vendable tout de suite",
+    "autoShelfHelp": "Conseillé pour les petites boutiques. Désactivez seulement si quelqu'un contrôle la marchandise en réserve avant la mise en rayon."
   },
   "importPage": {
     "title": "Importer des produits",
@@ -1579,7 +1585,7 @@
     "receiveStock": "Recevoir du stock →"
   },
   "labelsPage": {
-    "title": "Étiquettes et codes-barres",
+    "title": "Étiquettes et codes-barres / QR",
     "subtitle": "Imprimez des étiquettes de prix et des autocollants code-barres sur n'importe quelle imprimante.",
     "missing": "{{count}} produits n'ont pas encore de code-barres.",
     "generate": "Créer des codes-barres internes pour eux",
@@ -1872,7 +1878,7 @@
     }
   },
   "scanProduct": {
-    "scan": "Scanner le code-barres",
+    "scan": "Scanner le code-barres / QR",
     "stop": "Arrêter la caméra",
     "typeCode": "…ou saisissez / scannez un code-barres ou SKU",
     "found": "Sélectionné : {{name}}",
@@ -2607,13 +2613,15 @@
     "profit": "Marge : {{pct}} %",
     "qty": "Quantité",
     "category": "Catégorie",
-    "barcode": "Code-barres (facultatif)",
+    "barcode": "Code-barres (facultatif) / QR",
     "onShelf": "Tout mettre en rayon maintenant (vendable tout de suite)",
     "saveNext": "Enregistrer et suivant",
     "saveClose": "Enregistrer et fermer",
     "saving": "Enregistrement…",
     "added": "Ajouté : {{name}}",
     "needName": "Saisissez le nom du produit",
-    "needPrice": "Saisissez le prix de vente"
+    "needPrice": "Saisissez le prix de vente",
+    "more": "Plus de détails (prix d'achat, catégorie, code-barres / QR)",
+    "helpShort": "Nom, prix et quantité. Ajoutez une photo pour le retrouver facilement."
   }
 }

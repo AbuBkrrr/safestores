@@ -44,7 +44,7 @@ export default function Products() {
   const { user } = useAuth();
   const { formatCurrency } = useCurrency();
   const [products, setProducts] = useState([]);
-  const { businessType, tools } = useStoreProfile();
+  const { businessType, tools, tier: storeTier } = useStoreProfile();
   const bt = BUSINESS_TYPES[businessType] || BUSINESS_TYPES.general;
   const typeDefaults = { soldBy: bt.soldBy, unit: bt.unit, shelfLifeDays: bt.shelfLifeDays ? String(bt.shelfLifeDays) : '' };
   const [form, setForm] = useState(empty);
@@ -59,6 +59,16 @@ export default function Products() {
 
   const [quick, setQuick] = useState(() => new URLSearchParams(window.location.search).get('quick') === '1');
   const [putOnShelf, setPutOnShelf] = useState(true);
+  // One tap: store-room stock onto the shelf (one product, or all of them).
+  const canShelf = ['admin', 'manager', 'store_manager', 'shelf_manager'].includes(user?.role);
+  const simple = storeTier === 'mini'; // fewer columns for a one-person shop
+  const toShelf = async (ids) => {
+    try {
+      const r = await api.post(`/stores/${user.storeId}/products/to-shelf`, ids ? { productIds: ids } : {});
+      showToast(t('products.movedToShelf', { count: r.data.moved }), 'success');
+      load();
+    } catch (err) { showToast(err.response?.data?.error || t('common.errorGeneric'), 'error'); }
+  };
   const load = () => api.get(`/stores/${user.storeId}/products${showArchived ? '?includeArchived=true' : ''}`).then((r) => setProducts(r.data));
   useEffect(() => { load(); }, [user.storeId, showArchived]);
   // Arriving from a scan (Import Products → Scan): open the new-product form with the barcode filled in.
@@ -161,18 +171,27 @@ export default function Products() {
     <div>
       <div className="topbar">
         <h1>{t('products.title')}</h1>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, marginRight: 12 }}>
-          <input type="checkbox" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />
-          {t('products.showArchived')}
-        </label>
-        {['admin', 'manager'].includes(user.role) && <Link className="btn secondary small" to="/products/import">⬆️ {t('products.import')}</Link>}
+        {!simple && (
+          <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, marginRight: 12 }}>
+            <input type="checkbox" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />
+            {t('products.showArchived')}
+          </label>
+        )}
+        {!simple && ['admin', 'manager'].includes(user.role) && <Link className="btn secondary small" to="/products/import">⬆️ {t('products.import')}</Link>}
         <Link className="btn secondary small" to="/labels">🏷️ {t('products.labels')}</Link>
         {['admin', 'manager', 'store_manager'].includes(user.role) && <button className="btn" onClick={() => { setQuick((q) => !q); setShowForm(false); }}>⚡ {t('quickAdd.button')}</button>}
         <button className="btn secondary" onClick={() => { setShowForm((s) => !s); setQuick(false); }}>{showForm ? t('products.cancel') : t('products.newProduct')}</button>
       </div>
 
+      {canShelf && products.some((x) => Number(x.backroom_qty) > 0 && !x.archived_at) && (
+        <div className="alert info flex" style={{ justifyContent: 'space-between', alignItems: 'center', gap: 8 }}>
+          <span>📦 {t('products.inStoreRoomBanner', { count: products.filter((x) => Number(x.backroom_qty) > 0 && !x.archived_at).length })}</span>
+          <button type="button" className="btn small" onClick={() => toShelf(null)}>➜ {t('products.allToShelf')}</button>
+        </div>
+      )}
+
       {quick && (
-        <QuickAddProduct storeId={user.storeId} defaultUnit={bt.unit === 'unit' ? 'piece' : bt.unit}
+        <QuickAddProduct storeId={user.storeId} autoShelf={storeTier === 'mini'} defaultUnit={bt.unit === 'unit' ? 'piece' : bt.unit}
           categories={[...new Set([...(bt.categories || []), ...products.map((x) => x.category).filter(Boolean)])]}
           onAdded={(p) => setProducts((list) => [p, ...list])} onClose={() => setQuick(false)} />
       )}
@@ -276,8 +295,8 @@ export default function Products() {
         <table>
           <thead>
             <tr>
-              <th>{t('products.name')}</th><th>{t('products.sku')}</th><th>{t('products.category')}</th><th>{t('products.location_')}</th><th>{t('products.cost')}</th><th>{t('products.sellPrice')}</th>
-              <th>{t('products.backroom')}</th><th>{t('products.shelf')}</th><th>{t('products.stockValue')}</th><th></th>
+              <th>{t('products.name')}</th>{!simple && <th>{t('products.sku')}</th>}<th>{t('products.category')}</th>{!simple && <th>{t('products.location_')}</th>}<th>{t('products.cost')}</th><th>{t('products.sellPrice')}</th>
+              <th>{t('products.backroom')}</th><th>{t('products.shelf')}</th>{!simple && <th>{t('products.stockValue')}</th>}<th></th>
             </tr>
           </thead>
           <tbody>
@@ -319,9 +338,9 @@ export default function Products() {
                     </div>
                   )}
                 </td>
-                <td><span className="code-chip">{p.sku}</span>{p.barcode && p.barcode !== p.sku && <div className="muted" style={{ fontSize: 11 }}>{p.barcode}</div>}</td>
+                {!simple && <td><span className="code-chip">{p.sku}</span>{p.barcode && p.barcode !== p.sku && <div className="muted" style={{ fontSize: 11 }}>{p.barcode}</div>}</td>}
                 <td>{p.category || '—'}</td>
-                <td>
+                {!simple && <td>
                   <input
                     placeholder={t('products.notSet')}
                     value={locationValue(p)}
@@ -329,12 +348,14 @@ export default function Products() {
                     onBlur={() => saveLocation(p)}
                     style={{ minWidth: 140, fontSize: 13 }}
                   />
-                </td>
+                </td>}
                 <td>{formatCurrency(p.cost_price)}</td>
                 <td>{formatCurrency(p.selling_price)}</td>
-                <td>{p.backroom_qty}</td>
+                <td>{p.backroom_qty}{canShelf && Number(p.backroom_qty) > 0 && !p.archived_at && (
+                  <div><button type="button" className="btn small" style={{ marginTop: 4 }} onClick={() => toShelf([p.id])}>➜ {t('products.toShelf')}</button></div>
+                )}</td>
                 <td>{p.shelf_qty}</td>
-                <td>{formatCurrency(p.stock_value)}</td>
+                {!simple && <td>{formatCurrency(p.stock_value)}</td>}
                 <td>
                   {p.archived_at
                     ? <button className="btn small" onClick={() => handleRestore(p.id)}>{t('products.restore')}</button>

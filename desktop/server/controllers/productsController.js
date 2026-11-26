@@ -217,4 +217,20 @@ function bulkMarkup(req, res) {
   res.json({ updated: r.changes, percent });
 }
 
-module.exports = { listProducts, createProduct, updateProduct, deleteProduct, restoreProduct, setProductPhoto, removeProductPhoto, bulkMarkup };
+// POST /api/stores/:storeId/products/to-shelf — see the cloud edition.
+function moveToShelf(req, res) {
+  const { storeId } = req.params;
+  const ids = Array.isArray(req.body?.productIds) ? req.body.productIds.map(String).slice(0, 2000) : null;
+  const rows = db.prepare(`SELECT id, backroom_qty FROM products WHERE store_id = ? AND archived_at IS NULL AND backroom_qty > 0
+    ${ids ? `AND id IN (${ids.map(() => '?').join(',')})` : ''}`).all(storeId, ...(ids || []));
+  db.transaction(() => {
+    for (const p of rows) {
+      db.prepare(`INSERT INTO stock_movements (id, store_id, product_id, type, quantity, note, performed_by)
+        VALUES (?,?,?,'transfer_to_shelf',?,'Put on shelf (one tap)',?)`).run(crypto.randomUUID(), storeId, p.id, p.backroom_qty, req.user.sub);
+      require('../utils/stockMath').recomputeProductQuantities(db, p.id);
+    }
+  })();
+  res.json({ moved: rows.length, quantity: rows.reduce((n, p) => n + Number(p.backroom_qty), 0) });
+}
+
+module.exports = { moveToShelf, listProducts, createProduct, updateProduct, deleteProduct, restoreProduct, setProductPhoto, removeProductPhoto, bulkMarkup };

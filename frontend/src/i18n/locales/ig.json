@@ -109,7 +109,7 @@
     "dailyReport": "Njedebe Ụbọchị",
     "settings": "Ntọala Ụlọ Ahịa",
     "insights": "Nyocha",
-    "labels": "Akara na Barcode",
+    "labels": "Akara na Barcode / QR",
     "transfers": "Mbufe n'etiti Alaka",
     "help": "Enyemaka",
     "terms": "Usoro",
@@ -196,7 +196,7 @@
     "someone": "onye",
     "open": "Mepee",
     "addItems": "Tinye Ngwaahịa",
-    "scanBarcode": "📷 Nyochaa Bakọd",
+    "scanBarcode": "📷 Nyochaa Bakọd / QR",
     "stopScanning": "Kwụsị Nyocha",
     "searchLabel": "Ma ọ bụ chọọ site n'aha / nọmba ngwaahịa",
     "searchPlaceholder": "Malite ide…",
@@ -266,7 +266,7 @@
     "cancel": "Kagbuo",
     "newProduct": "+ Ngwaahịa Ọhụrụ",
     "name": "Aha",
-    "skuOrBarcode": "Nọmba Ngwaahịa / Bakọd",
+    "skuOrBarcode": "Nọmba Ngwaahịa / Bakọd / QR",
     "category": "Ụdị",
     "supplier": "Onye Na-enye Ngwaahịa",
     "unit": "Ihe Ọtụtụ",
@@ -304,7 +304,7 @@
     "archiveConfirm": "Chekwaa ngwaahịa a n'ebe nchekwa? Akụkọ ihe mere eme ya ga-adịgide, a pụkwara iweghachi ya mgbe e mesịrị.",
     "import": "Bubata",
     "labels": "Akara",
-    "barcode": "Barcode",
+    "barcode": "Barcode / QR",
     "barcodePlaceholder": "Nyochaa ma ọ bụ dee (nhọrọ)",
     "variantOf": "Ụdị nke",
     "notAVariant": "— Ọ bụghị ụdị —",
@@ -331,7 +331,11 @@
     "changePhoto": "Gbanwee",
     "removePhotoFor": "Wepụ foto {{name}}",
     "photoSaved": "Echekwala foto",
-    "photoFailed": "Enweghị ike ịchekwa foto"
+    "photoFailed": "Enweghị ike ịchekwa foto",
+    "toShelf": "Shelf",
+    "movedToShelf": "Etinyere ngwaahịa {{count}} na shelf",
+    "inStoreRoomBanner": "Ngwaahịa {{count}} ka nọ n'ụlọ nchekwa — enweghị ike ire ha ugbu a.",
+    "allToShelf": "Tinye ha niile na shelf"
   },
   "stockArrivalPage": {
     "title": "Ngwaahịa Bịara",
@@ -565,7 +569,7 @@
     "bulkCreationFailed": "Ịmepụta ọtụtụ dara",
     "allPendingCopied": "Edetuola koodu niile na-eche",
     "inviteMessageCopied": "Edetuola ozi ọkpụkpọ",
-    "miniNote": "Obere ụlọ ahịa: jiri naanị gị jikwaa ya, ma ọ bụ ya na ndị inyeaka ruru 4 (mmadụ 5 niile) dịka onye njikwa, onye na-anara ego ma ọ bụ onye inyeaka. Ị nwere ike ịrụ ọrụ niile n'onwe gị. Kwalite gaa Midi maka ndị njikwa ụlọ ahịa na shelf, nchekwa na onye njikwa ahịa ịntanetị.",
+    "miniNote": "Obere ụlọ ahịa: jiri naanị gị jikwaa ya, ma ọ bụ ya na ndị inyeaka ruru 4 (mmadụ 5 niile) dịka onye njikwa, onye na-anara ego ma ọ bụ onye inyeaka. Ị nwere ike ịrụ ọrụ niile n'onwe gị.",
     "needsMidi": "Midi / Mega"
   },
   "usersPage": {
@@ -1551,7 +1555,9 @@
     "pointsExpiry": "Akara na-agwụ mgbe (ọnwa)",
     "pointsExpiryHelp": "0 = anaghị agwụ.",
     "loyaltyExample": "Ọmụmaatụ: imefu {{spend}} na-enweta akara {{points}}, uru ya {{worth}}.",
-    "dailySummary": "Ziga ndị nchịkwa nchịkọta ire ụbọchị n'email n'elekere 9 nke abalị"
+    "dailySummary": "Ziga ndị nchịkwa nchịkọta ire ụbọchị n'email n'elekere 9 nke abalị",
+    "autoShelf": "Ozugbo na shelf: ngwaahịa a natara dị njikere ire ozugbo",
+    "autoShelfHelp": "Atụrụ aro maka obere ụlọ ahịa. Gbanyụọ naanị ma ọ bụrụ na onye na-enyocha ngwaahịa n'ụlọ nchekwa tupu ha agaa na shelf."
   },
   "importPage": {
     "title": "Bubata Ngwa Ahịa",
@@ -1579,7 +1585,7 @@
     "receiveStock": "Nata ngwa ahịa →"
   },
   "labelsPage": {
-    "title": "Akara na Barcode",
+    "title": "Akara na Barcode / QR",
     "subtitle": "Bipụta akara ọnụahịa shelf na stika barcode n'igwe mbipụta ọ bụla.",
     "missing": "Ngwa ahịa {{count}} enweghị barcode ugbu a.",
     "generate": "Mepụta barcode ụlọ ahịa maka ha",
@@ -1872,7 +1878,7 @@
     }
   },
   "scanProduct": {
-    "scan": "Nyochaa koodu",
+    "scan": "Nyochaa koodu / QR",
     "stop": "Gbanyụọ igwefoto",
     "typeCode": "…ma ọ bụ dee / nyochaa koodu ma ọ bụ SKU",
     "found": "Ahọrọla: {{name}}",
@@ -2607,13 +2613,15 @@
     "profit": "Uru: {{pct}}%",
     "qty": "Ole",
     "category": "Ụdị",
-    "barcode": "Barcode (ọ bụghị iwu)",
+    "barcode": "Barcode (ọ bụghị iwu) / QR",
     "onShelf": "Tinye ha niile na shelf ugbu a (enwere ike ire ozugbo)",
     "saveNext": "Chekwaa ma tinye ọzọ",
     "saveClose": "Chekwaa ma mechie",
     "saving": "Na-echekwa…",
     "added": "Etinyere: {{name}}",
     "needName": "Tinye aha ngwaahịa",
-    "needPrice": "Tinye ọnụahịa ire"
+    "needPrice": "Tinye ọnụahịa ire",
+    "more": "Nkọwa ndị ọzọ (ọnụahịa ịzụta, ụdị, barcode / QR)",
+    "helpShort": "Aha, ọnụahịa na ole. Tinye foto ka ọ dị mfe ịchọta."
   }
 }
