@@ -80,7 +80,9 @@ export default function ShopperApp() {
 
   useEffect(() => { client.get('/settings/currency').then((r) => setCurrency(r.data)).catch(() => {}); }, []);
   useEffect(() => {
-    client.get('/marketplace/discover', { params: city ? { city } : {} }).then((r) => setData(r.data)).catch(() => setData({ deals: [], newest: [], popular: [], stores: [] }));
+    client.get('/marketplace/discover', { params: city ? { city } : {} })
+      .then((r) => { const d = r.data && typeof r.data === 'object' ? r.data : {}; const arr = (x) => (Array.isArray(x) ? x : []); setData({ deals: arr(d.deals), newest: arr(d.newest), popular: arr(d.popular), stores: arr(d.stores) }); })
+      .catch(() => setData({ deals: [], newest: [], popular: [], stores: [] }));
   }, [city]);
   useEffect(() => {
     if (tab !== 'messages') return;
