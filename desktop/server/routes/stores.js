@@ -90,6 +90,7 @@ const looksCtrl = require('../controllers/productLooksController');
 router.get('/product-looks', looksCtrl.listLooks);
 router.post('/products/:productId/looks', requireRole('admin', 'manager', 'cashier', 'checkout', 'store_manager', 'shelf_manager'), looksCtrl.addLook);
 router.delete('/products/:productId/looks', requireRole('admin', 'manager', 'store_manager', 'shelf_manager'), looksCtrl.clearLooks);
+router.post('/products/delete', requireRole('admin', 'manager'), productsCtrl.bulkDeleteProducts);
 router.delete('/products/:productId', requireRole('admin'), productsCtrl.deleteProduct);
 router.patch('/products/:productId/restore', requireRole('admin'), productsCtrl.restoreProduct);
 

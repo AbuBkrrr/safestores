@@ -335,7 +335,15 @@
     "toShelf": "Shelf",
     "movedToShelf": "Etinyere ngwaahịa {{count}} na shelf",
     "inStoreRoomBanner": "Ngwaahịa {{count}} ka nọ n'ụlọ nchekwa — enweghị ike ire ha ugbu a.",
-    "allToShelf": "Tinye ha niile na shelf"
+    "allToShelf": "Tinye ha niile na shelf",
+    "delete": "Hichapụ",
+    "deleteConfirm": "Hichapụ ngwaahịa {{count}}? A ga-ehichapụ kpamkpam ndị a na-erebeghị. A ga-edowe ndị e rere n'akụkụ, ka akwụkwọ nnata na akụkọ gị bụrụ eziokwu.",
+    "deletedResult": "E hichapụrụ {{deleted}}, e dowere {{archived}} (ha nwere akụkọ ire).",
+    "selectedCount": "Ahọpụtara {{count}}",
+    "deleteSelected": "Hichapụ {{count}} ahọpụtara",
+    "clearSelection": "Kpochapụ",
+    "selectAll": "Họrọ ha niile",
+    "selectFor": "Họrọ {{name}}"
   },
   "stockArrivalPage": {
     "title": "Ngwaahịa Bịara",

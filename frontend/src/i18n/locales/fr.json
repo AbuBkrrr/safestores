@@ -335,7 +335,15 @@
     "toShelf": "Rayon",
     "movedToShelf": "{{count}} produit(s) mis en rayon",
     "inStoreRoomBanner": "{{count}} produit(s) encore en réserve — pas encore vendables.",
-    "allToShelf": "Tout mettre en rayon"
+    "allToShelf": "Tout mettre en rayon",
+    "delete": "Supprimer",
+    "deleteConfirm": "Supprimer {{count}} produit(s) ? Ceux jamais vendus sont supprimés définitivement. Ceux avec des ventes sont archivés, pour garder vos reçus et rapports exacts.",
+    "deletedResult": "{{deleted}} supprimé(s), {{archived}} archivé(s) (ils ont des ventes).",
+    "selectedCount": "{{count}} sélectionné(s)",
+    "deleteSelected": "Supprimer {{count}} sélectionné(s)",
+    "clearSelection": "Effacer",
+    "selectAll": "Tout sélectionner",
+    "selectFor": "Sélectionner {{name}}"
   },
   "stockArrivalPage": {
     "title": "Réception de stock",

@@ -335,7 +335,15 @@
     "toShelf": "Shelf",
     "movedToShelf": "{{count}} product(s) put on the shelf",
     "inStoreRoomBanner": "{{count}} product(s) still in the store room — not sellable yet.",
-    "allToShelf": "Put all on shelf"
+    "allToShelf": "Put all on shelf",
+    "delete": "Delete",
+    "deleteConfirm": "Delete {{count}} product(s)? Products that were never sold are removed for good. Ones with sales are archived, so your receipts and reports stay correct.",
+    "deletedResult": "{{deleted}} deleted, {{archived}} archived (they have sales history).",
+    "selectedCount": "{{count}} selected",
+    "deleteSelected": "Delete {{count}} selected",
+    "clearSelection": "Clear",
+    "selectAll": "Select all",
+    "selectFor": "Select {{name}}"
   },
   "stockArrivalPage": {
     "title": "Stock Arrival",

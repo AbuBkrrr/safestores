@@ -158,16 +158,32 @@ export default function Products() {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm(t('products.archiveConfirm'))) return;
-    await api.delete(`/stores/${user.storeId}/products/${id}`);
-    load();
+  // Delete one or many. Products never sold are removed for good; ones with
+  // sales or other history are archived so receipts and reports stay right.
+  const canDelete = ['admin', 'manager'].includes(user?.role);
+  const [sel, setSel] = useState(() => new Set());
+  const toggleSel = (id) => setSel((s) => { const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n; });
+  const deleteProducts = async (ids) => {
+    if (!ids.length || !confirm(t('products.deleteConfirm', { count: ids.length }))) return;
+    try {
+      const { data } = await api.post(`/stores/${user.storeId}/products/delete`, { productIds: ids });
+      showToast(t('products.deletedResult', { deleted: data.deleted, archived: data.archived }), 'success');
+      setSel(new Set());
+      load();
+    } catch (err) { showToast(err.response?.data?.error || t('common.errorGeneric'), 'error'); }
   };
+  const handleDelete = (id) => deleteProducts([id]);
 
   const handleRestore = async (id) => {
     await api.patch(`/stores/${user.storeId}/products/${id}/restore`);
     load();
   };
+
+  const visible = products.filter((p) => {
+    const q = query.trim().toLowerCase();
+    return !q || [p.name, p.sku, p.barcode, p.category, p.variant_label].some((v) => v && String(v).toLowerCase().includes(q));
+  });
+  const allTicked = visible.length > 0 && visible.every((p) => sel.has(p.id));
 
   return (
     <div>
@@ -294,20 +310,27 @@ export default function Products() {
             <p className="help-text">{markup.scope === 'products' ? t('markup.tickHelp') : t('markup.help')}</p>
           </div>
         )}
+        {canDelete && sel.size > 0 && (
+          <div className="flex" style={{ gap: 8, alignItems: 'center', flexWrap: 'wrap', padding: '10px 12px', margin: '8px 0', background: 'var(--primary-light)', borderRadius: 8 }}>
+            <strong>{t('products.selectedCount', { count: sel.size })}</strong>
+            <button type="button" className="btn danger small" onClick={() => deleteProducts([...sel])}>🗑️ {t('products.deleteSelected', { count: sel.size })}</button>
+            <button type="button" className="btn secondary small" onClick={() => setSel(new Set())}>{t('products.clearSelection')}</button>
+          </div>
+        )}
         <table>
           <thead>
             <tr>
+              {canDelete && <th style={{ width: 32 }}><input type="checkbox" checked={allTicked} aria-label={t('products.selectAll')} title={t('products.selectAll')}
+                onChange={() => setSel((s) => { const n = new Set(s); if (allTicked) visible.forEach((p) => n.delete(p.id)); else visible.forEach((p) => n.add(p.id)); return n; })} /></th>}
               <th>{t('products.name')}</th>{!simple && <th>{t('products.sku')}</th>}<th>{t('products.category')}</th>{!simple && <th>{t('products.location_')}</th>}<th>{t('products.cost')}</th><th>{t('products.sellPrice')}</th>
               <th>{t('products.backroom')}</th><th>{t('products.shelf')}</th>{!simple && <th>{t('products.stockValue')}</th>}<th></th>
             </tr>
           </thead>
           <tbody>
             {canPhoto && <tr hidden><td><input ref={photoInput} type="file" accept="image/*" capture="environment" onChange={uploadPhoto} aria-label={t('products.addPhoto')} /></td></tr>}
-            {products.filter((p) => {
-              const q = query.trim().toLowerCase();
-              return !q || [p.name, p.sku, p.barcode, p.category, p.variant_label].some((v) => v && String(v).toLowerCase().includes(q));
-            }).map((p) => (
-              <tr key={p.id}>
+            {visible.map((p) => (
+              <tr key={p.id} style={sel.has(p.id) ? { background: 'var(--primary-light)' } : undefined}>
+                {canDelete && <td><input type="checkbox" checked={sel.has(p.id)} onChange={() => toggleSel(p.id)} aria-label={t('products.selectFor', { name: p.name })} /></td>}
                 <td>
                   {markup?.scope === 'products' && <input type="checkbox" checked={ticked.has(p.id)} onChange={() => toggleTick(p.id)} aria-label={t('markup.tickFor', { name: p.name })} style={{ marginRight: 8 }} />}
                   <span className="prod-thumb-wrap">
@@ -363,9 +386,8 @@ export default function Products() {
                 <td>{p.shelf_qty}</td>
                 {!simple && <td>{formatCurrency(p.stock_value)}</td>}
                 <td>
-                  {p.archived_at
-                    ? <button className="btn small" onClick={() => handleRestore(p.id)}>{t('products.restore')}</button>
-                    : <button className="btn danger small" onClick={() => handleDelete(p.id)}>{t('products.archive')}</button>}
+                  {p.archived_at && <button className="btn small" onClick={() => handleRestore(p.id)}>{t('products.restore')}</button>}
+                  {canDelete && <button className="btn danger small" style={{ whiteSpace: 'nowrap', ...(p.archived_at ? { marginLeft: 6 } : {}) }} onClick={() => handleDelete(p.id)}>🗑️ {t('products.delete')}</button>}
                 </td>
               </tr>
             ))}

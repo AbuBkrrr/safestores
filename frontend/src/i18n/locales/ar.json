@@ -335,7 +335,15 @@
     "toShelf": "الرف",
     "movedToShelf": "تم وضع {{count}} منتج على الرف",
     "inStoreRoomBanner": "{{count}} منتج ما زال في المخزن — غير قابل للبيع بعد.",
-    "allToShelf": "ضع الكل على الرف"
+    "allToShelf": "ضع الكل على الرف",
+    "delete": "حذف",
+    "deleteConfirm": "حذف {{count}} منتج؟ المنتجات التي لم تُبع تُحذف نهائيًا. والتي لها مبيعات تُؤرشف، لتبقى إيصالاتك وتقاريرك صحيحة.",
+    "deletedResult": "حُذف {{deleted}}، وأُرشف {{archived}} (لها سجل مبيعات).",
+    "selectedCount": "تم تحديد {{count}}",
+    "deleteSelected": "حذف {{count}} المحددة",
+    "clearSelection": "مسح التحديد",
+    "selectAll": "تحديد الكل",
+    "selectFor": "تحديد {{name}}"
   },
   "stockArrivalPage": {
     "title": "وصول المخزون",

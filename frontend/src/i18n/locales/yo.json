@@ -335,7 +335,15 @@
     "toShelf": "Pẹpẹ",
     "movedToShelf": "A ti gbé ọjà {{count}} sórí pẹpẹ",
     "inStoreRoomBanner": "Ọjà {{count}} ṣì wà nínú ilé ìpamọ́ — a kò lè tà wọ́n síbẹ̀.",
-    "allToShelf": "Gbé gbogbo rẹ̀ sórí pẹpẹ"
+    "allToShelf": "Gbé gbogbo rẹ̀ sórí pẹpẹ",
+    "delete": "Paarẹ́",
+    "deleteConfirm": "Pa ọjà {{count}} rẹ́? A ó pa àwọn tí a kò tà rí rẹ́ pátápátá. A ó fi àwọn tí a ti tà pamọ́, kí ìwé-ẹ̀rí àti ìròyìn rẹ lè péye.",
+    "deletedResult": "A pa {{deleted}} rẹ́, a fi {{archived}} pamọ́ (wọ́n ní ìtàn títà).",
+    "selectedCount": "A yan {{count}}",
+    "deleteSelected": "Pa {{count}} tí a yàn rẹ́",
+    "clearSelection": "Pa yíyàn rẹ́",
+    "selectAll": "Yan gbogbo",
+    "selectFor": "Yan {{name}}"
   },
   "stockArrivalPage": {
     "title": "Ìdé Ọjà",

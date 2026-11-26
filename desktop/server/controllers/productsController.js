@@ -248,4 +248,17 @@ function setPromo(req, res) {
   res.json(db.prepare('SELECT id, promo_price, promo_ends_at, promo_label FROM products WHERE id = ?').get(productId));
 }
 
-module.exports = { setPromo, moveToShelf, listProducts, createProduct, updateProduct, deleteProduct, restoreProduct, setProductPhoto, removeProductPhoto, bulkMarkup };
+// POST /api/stores/:storeId/products/delete  { productIds }
+// On the shop computer products are archived (see deleteProduct above).
+function bulkDeleteProducts(req, res) {
+  const { storeId } = req.params;
+  const ids = [...new Set((req.body?.productIds || []).filter((x) => typeof x === 'string'))].slice(0, 5000);
+  if (!ids.length) return res.status(400).json({ error: 'Choose at least one product' });
+  const stmt = db.prepare(`UPDATE products SET archived_at = COALESCE(archived_at, strftime('%Y-%m-%dT%H:%M:%fZ','now')) WHERE id = ? AND store_id = ?`);
+  let archived = 0;
+  db.transaction(() => { for (const id of ids) archived += stmt.run(id, storeId).changes; })();
+  emitToStore(storeId, 'product:bulk', {});
+  res.json({ deleted: 0, archived, notFound: ids.length - archived });
+}
+
+module.exports = { bulkDeleteProducts, setPromo, moveToShelf, listProducts, createProduct, updateProduct, deleteProduct, restoreProduct, setProductPhoto, removeProductPhoto, bulkMarkup };
