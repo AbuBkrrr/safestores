@@ -38,7 +38,7 @@ function barcodeLookup(req, res) {
     'SELECT * FROM products WHERE store_id = ? AND (sku = ? OR barcode = ?) AND archived_at IS NULL ORDER BY (barcode = ?) DESC LIMIT 1'
   ).get(storeId, code, code, code);
   if (!product) return res.status(404).json({ error: 'No product found for this code' });
-  res.json(product);
+  res.json(require('../utils/costVisibility').forViewer(req, product))
 }
 
 module.exports = { listImages, uploadImage, deleteImage, barcodeLookup };

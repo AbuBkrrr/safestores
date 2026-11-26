@@ -322,8 +322,8 @@ export default function Products() {
             <tr>
               {canDelete && <th style={{ width: 32 }}><input type="checkbox" checked={allTicked} aria-label={t('products.selectAll')} title={t('products.selectAll')}
                 onChange={() => setSel((s) => { const n = new Set(s); if (allTicked) visible.forEach((p) => n.delete(p.id)); else visible.forEach((p) => n.add(p.id)); return n; })} /></th>}
-              <th>{t('products.name')}</th>{!simple && <th>{t('products.sku')}</th>}<th>{t('products.category')}</th>{!simple && <th>{t('products.location_')}</th>}<th>{t('products.cost')}</th><th>{t('products.sellPrice')}</th>
-              <th>{t('products.backroom')}</th><th>{t('products.shelf')}</th>{!simple && <th>{t('products.stockValue')}</th>}<th></th>
+              <th>{t('products.name')}</th>{!simple && <th>{t('products.sku')}</th>}<th>{t('products.category')}</th>{!simple && <th>{t('products.location_')}</th>}{canPrice && <th>{t('products.cost')}</th>}<th>{t('products.sellPrice')}</th>
+              <th>{t('products.backroom')}</th><th>{t('products.shelf')}</th>{!simple && canPrice && <th>{t('products.stockValue')}</th>}<th></th>
             </tr>
           </thead>
           <tbody>
@@ -374,7 +374,7 @@ export default function Products() {
                     style={{ minWidth: 140, fontSize: 13 }}
                   />
                 </td>}
-                <td>{formatCurrency(p.cost_price)}</td>
+                {canPrice && <td>{formatCurrency(p.cost_price)}</td>}
                 <td>
                   {formatCurrency(p.selling_price)}
                   {p.on_sale && <div className="small"><span className="badge active">{p.promo_label || t('promo.onSale')}</span> <s className="muted">{formatCurrency(p.regular_price)}</s></div>}
@@ -384,7 +384,7 @@ export default function Products() {
                   <div><button type="button" className="btn small" style={{ marginTop: 4 }} onClick={() => toShelf([p.id])}>➜ {t('products.toShelf')}</button></div>
                 )}</td>
                 <td>{p.shelf_qty}</td>
-                {!simple && <td>{formatCurrency(p.stock_value)}</td>}
+                {!simple && canPrice && <td>{formatCurrency(p.stock_value)}</td>}
                 <td>
                   {p.archived_at && <button className="btn small" onClick={() => handleRestore(p.id)}>{t('products.restore')}</button>}
                   {canDelete && <button className="btn danger small" style={{ whiteSpace: 'nowrap', ...(p.archived_at ? { marginLeft: 6 } : {}) }} onClick={() => handleDelete(p.id)}>🗑️ {t('products.delete')}</button>}

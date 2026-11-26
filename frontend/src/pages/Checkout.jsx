@@ -414,7 +414,7 @@ export default function Checkout() {
                   <button key={p.id} type="button" className="quick-pick" onClick={() => addProduct(p.id, 'manual_search')} title={p.sku}>
                     {p.image_url && <img className="qp-img" src={mediaUrl(p.image_url)} alt="" loading="lazy" />}
                     <span className="qp-name">{p.name}</span>
-                    <span className="qp-price">{formatCurrency(Number(p.cost_price) * Number(p.price_multiplier))}</span>
+                    <span className="qp-price">{formatCurrency(Number(p.selling_price ?? Number(p.cost_price) * Number(p.price_multiplier)))}</span>
                   </button>
                 ))}
               </div>
@@ -576,10 +576,10 @@ export default function Checkout() {
         <div className="modal-overlay" onMouseDown={(e) => { if (e.target === e.currentTarget) setWeigh(null); }}>
           <form className="modal-card" onSubmit={(e) => { e.preventDefault(); const q = Number(weigh.qty); if (q > 0) { addProduct(weigh.product.id, weigh.addedVia, q); setWeigh(null); } }}>
             <h3>⚖️ {weigh.product.name}</h3>
-            <p className="muted">{t('checkout.pricePer', { price: formatCurrency(Number(weigh.product.cost_price) * Number(weigh.product.price_multiplier)), unit: weigh.product.unit })}</p>
+            <p className="muted">{t('checkout.pricePer', { price: formatCurrency(Number(weigh.product.selling_price ?? Number(weigh.product.cost_price) * Number(weigh.product.price_multiplier))), unit: weigh.product.unit })}</p>
             <div className="form-group"><label htmlFor="weigh-qty">{t('checkout.enterAmount', { unit: weigh.product.unit })}</label>
               <input id="weigh-qty" autoFocus type="number" step="0.001" min="0.001" value={weigh.qty} onChange={(e) => setWeigh({ ...weigh, qty: e.target.value })} /></div>
-            <p><strong>{t('checkout.lineTotal')}: {formatCurrency((Number(weigh.qty) || 0) * Number(weigh.product.cost_price) * Number(weigh.product.price_multiplier))}</strong></p>
+            <p><strong>{t('checkout.lineTotal')}: {formatCurrency((Number(weigh.qty) || 0) * Number(weigh.product.selling_price ?? Number(weigh.product.cost_price) * Number(weigh.product.price_multiplier)))}</strong></p>
             <div className="modal-actions"><button className="btn" type="submit" disabled={!(Number(weigh.qty) > 0)}>{t('checkout.addToOrder')}</button><button type="button" className="btn secondary" onClick={() => setWeigh(null)}>{t('common.cancel', { defaultValue: 'Cancel' })}</button></div>
           </form>
         </div>
