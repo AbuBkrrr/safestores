@@ -70,7 +70,7 @@ fi
 echo "== DNS check: every address must point at this server ($(curl -fsS -4 ifconfig.me 2>/dev/null || echo '?'))"
 MYIP=$(curl -fsS -4 ifconfig.me 2>/dev/null || true)
 for d in "$DOMAIN" "www.$DOMAIN" "$APP_DOMAIN"; do
-  IP=$(getent ahostsv4 "$d" | awk '{print $1; exit}')
+  IP=$( (getent ahostsv4 "$d" || true) | awk '{print $1; exit}')
   if [ -z "$IP" ]; then echo "   !! $d has no DNS record. At your domain registrar add: A record for $d ->  ${MYIP:-the server IP}"
   elif [ "$d" != "$APP_DOMAIN" ] && [[ "$IP" == 185.199.1[01][0-9].* ]]; then echo "   ok  $d (landing page on GitHub Pages)"
   elif [ -n "$MYIP" ] && [ "$IP" != "$MYIP" ]; then echo "   !! $d points at $IP, not this server ($MYIP). Change its A record to $MYIP"
@@ -107,7 +107,7 @@ else
   echo "== 6. HTTPS certificates"
   command -v certbot >/dev/null || apt-get install -y certbot python3-certbot-nginx
   DOMAINS="-d $DOMAIN"
-  for d in "www.$DOMAIN" "$APP_DOMAIN"; do getent hosts "$d" >/dev/null && DOMAINS="$DOMAINS -d $d"; done
+  for d in "www.$DOMAIN" "$APP_DOMAIN"; do if getent hosts "$d" >/dev/null; then DOMAINS="$DOMAINS -d $d"; fi; done
   certbot --nginx --non-interactive --agree-tos --redirect --expand -m "support@$DOMAIN" $DOMAINS || echo "   certbot failed; see the message above"
   if ! getent hosts "$APP_DOMAIN" >/dev/null; then
     echo "   !! $APP_DOMAIN has no DNS record yet. Add an A record: app -> $(curl -fsS -4 ifconfig.me 2>/dev/null || echo the server IP)"
