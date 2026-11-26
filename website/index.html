@@ -483,7 +483,11 @@
     var host = location.hostname.replace(/^www\./, '');
     var META_API = (document.querySelector('meta[name="ss-api"]') || {}).content || '';
     var APIS = (/\./.test(host) && !/^(localhost|[\d.]+)$/.test(host) ? ['https://app.' + host] : []);
-    if (META_API && APIS.indexOf(META_API) < 0) APIS.push(META_API);
+    // Every address the app server answers on, so one address not being set up
+    // yet (or down) never stops a message.
+    [META_API, 'https://app.safestore.com.ng', 'https://app.safestores.name.ng'].forEach(function (u) {
+      if (u && APIS.indexOf(u) < 0) APIS.push(u);
+    });
     var API = APIS[0] || '';
     var params = new URLSearchParams(location.search);
     function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } return v; }
@@ -500,10 +504,13 @@
     function send(path, data, i) {
       i = i || 0;
       if (!APIS[i]) return Promise.reject(new Error('offline'));
-      return fetch(APIS[i] + path, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(data), keepalive: true })
+      var ctl = window.AbortController ? new AbortController() : null;
+      var timer = ctl && setTimeout(function () { ctl.abort(); }, 10000);
+      return fetch(APIS[i] + path, { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(data), keepalive: true, signal: ctl ? ctl.signal : undefined })
+        .then(function (r) { clearTimeout(timer); return r; }, function (e) { clearTimeout(timer); throw e; })
         .then(function (r) {
           if (r.ok) return r.json();
-          if (r.status >= 400 && r.status < 500) return r.json().then(function (j) { var e = new Error(j.error || 'Failed'); e.final = true; throw e; });
+          if (r.status === 400) return r.json().then(function (j) { var e = new Error(j.error || 'Failed'); e.final = true; throw e; });
           throw new Error('server');
         })
         .catch(function (e) { if (e.final) throw e; return send(path, data, i + 1); });
