@@ -19,7 +19,7 @@ const INVITE_ROLES = ['admin', 'manager', 'cashier', 'checkout', 'staff', 'store
 async function listUsers(req, res) {
   const { storeId } = req.params;
   const { rows } = await db.query(
-    `SELECT id, name, email, role, status, created_at FROM users WHERE store_id = $1 ORDER BY created_at DESC`,
+    `SELECT id, name, email, role, job_title, status, created_at FROM users WHERE store_id = $1 ORDER BY created_at DESC`,
     [storeId]
   );
   res.json(rows);
@@ -67,7 +67,7 @@ async function setUserPassword(req, res) {
 
 // Mini stores are small shops: the owner plus a couple of helpers. Only these
 // helper roles fit; the chain-of-custody roles come with Midi and Mega.
-const MINI_ROLES = ['manager', 'cashier', 'staff'];
+const MINI_ROLES = ['manager', 'cashier', 'staff', 'checkout']; // owner + up to 4: e.g. a waiter or sales clerk
 
 /** Checks the store's size rules before adding `adding` people with `role`. Returns an error message or null. */
 async function teamProblem(storeId, role, adding = 1) {
@@ -109,8 +109,8 @@ async function createInvite(req, res) {
 
   const code = generateInviteCode();
   const { rows } = await db.query(
-    `INSERT INTO invites (store_id, code, name, email, role) VALUES ($1,$2,$3,$4,$5) RETURNING *`,
-    [storeId, code, name, email || null, role]
+    `INSERT INTO invites (store_id, code, name, email, role, job_title) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
+    [storeId, code, name, email || null, role, String(req.body.jobTitle || '').trim().slice(0, 60) || null]
   );
   res.status(201).json(rows[0]);
 }
@@ -151,8 +151,8 @@ async function createBulkInvites(req, res) {
         usedEmails.add(email);
       }
       const { rows } = await client.query(
-        `INSERT INTO invites (store_id, code, name, email, role) VALUES ($1,$2,$3,$4,$5) RETURNING *`,
-        [storeId, code, name, email, role]
+        `INSERT INTO invites (store_id, code, name, email, role, job_title) VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
+        [storeId, code, name, email, role, String(req.body.jobTitle || '').trim().slice(0, 60) || null]
       );
       created.push(rows[0]);
     }
@@ -178,7 +178,16 @@ async function revokeInvite(req, res) {
   res.json(rows[0]);
 }
 
-module.exports = {
+
+// PATCH /api/stores/:storeId/users/:userId/title  { jobTitle }
+async function setJobTitle(req, res) {
+  const t = String(req.body?.jobTitle || '').trim().slice(0, 60) || null;
+  const { rows } = await db.query('UPDATE users SET job_title = $1 WHERE id = $2 AND store_id = $3 RETURNING id, job_title', [t, req.params.userId, req.params.storeId]);
+  if (!rows[0]) return res.status(404).json({ error: 'User not found' });
+  res.json(rows[0]);
+}
+
+module.exports = { setJobTitle,
   setUserPassword,
   listUsers, removeUser, updateUserStatus,
   listInvites, createInvite, createBulkInvites, revokeInvite,

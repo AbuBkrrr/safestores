@@ -322,6 +322,10 @@ function applyShopFloorUpgrades(db) {
       WHEN NEW.updated_at IS OLD.updated_at
       BEGIN UPDATE ${t} SET updated_at = ${NOW} WHERE id = NEW.id; END`);
   }
+  // 074 — job titles that fit the business.
+  ensureColumn(db, 'users', 'job_title', 'TEXT');
+  ensureColumn(db, 'invites', 'job_title', 'TEXT');
+
   // 073 — items on sale (promotion price until a date).
   ensureColumn(db, 'products', 'promo_price', 'REAL');
   ensureColumn(db, 'products', 'promo_ends_at', 'TEXT');

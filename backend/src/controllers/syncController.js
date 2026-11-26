@@ -253,6 +253,9 @@ async function importChanges(req, res) {
     // Movements first among these three (arrivals/audits reference product
     // ids but movements are the actual quantity ledger — order among just
     // these three doesn't otherwise matter, they're independent tables).
+    for (const u of users) {
+      if (u.job_title !== undefined) await client.query('UPDATE users SET job_title = $1 WHERE id = $2 AND store_id = $3', [u.job_title || null, u.id, storeId]);
+    }
     // Promotions travel with products (the insert/update above keep their own column lists).
     for (const p of products) {
       if (p.promo_price === undefined) continue;

@@ -10,7 +10,7 @@ const INVITE_ROLES = ['admin', 'manager', 'cashier', 'checkout', 'staff', 'store
 
 // Mini stores are small shops: the owner plus a couple of helpers. Only these
 // helper roles fit; the chain-of-custody roles come with Midi and Mega.
-const MINI_ROLES = ['manager', 'cashier', 'staff'];
+const MINI_ROLES = ['manager', 'cashier', 'staff', 'checkout'];
 
 /** Checks the store's size rules before adding `adding` people with `role`. Returns an error message or null. */
 function teamProblem(storeId, role, adding = 1) {
@@ -33,7 +33,7 @@ function teamProblem(storeId, role, adding = 1) {
 function listUsers(req, res) {
   const { storeId } = req.params;
   res.json(db.prepare(
-    `SELECT id, name, email, role, status, created_at FROM users WHERE store_id = ? ORDER BY created_at DESC`
+    `SELECT id, name, email, role, job_title, status, created_at FROM users WHERE store_id = ? ORDER BY created_at DESC`
   ).all(storeId));
 }
 
@@ -90,8 +90,8 @@ function createInvite(req, res) {
   const id = crypto.randomUUID();
   const code = generateInviteCode();
   db.prepare(
-    `INSERT INTO invites (id, store_id, code, name, email, role) VALUES (?,?,?,?,?,?)`
-  ).run(id, storeId, code, name, email || null, role);
+    `INSERT INTO invites (id, store_id, code, name, email, role, job_title) VALUES (?,?,?,?,?,?,?)`
+  ).run(id, storeId, code, name, email || null, role, String(req.body.jobTitle || '').trim().slice(0, 60) || null);
 
   res.status(201).json(db.prepare('SELECT * FROM invites WHERE id = ?').get(id));
 }
@@ -128,8 +128,8 @@ function createBulkInvites(req, res) {
           usedEmails.add(email);
         }
         db.prepare(
-          `INSERT INTO invites (id, store_id, code, name, email, role) VALUES (?,?,?,?,?,?)`
-        ).run(id, storeId, code, name, email, role);
+          `INSERT INTO invites (id, store_id, code, name, email, role, job_title) VALUES (?,?,?,?,?,?,?)`
+        ).run(id, storeId, code, name, email, role, String(req.body.jobTitle || '').trim().slice(0, 60) || null);
         rows.push(db.prepare('SELECT * FROM invites WHERE id = ?').get(id));
       }
       return rows;
@@ -152,7 +152,16 @@ function revokeInvite(req, res) {
   res.json(invite);
 }
 
-module.exports = {
+
+// PATCH /api/stores/:storeId/users/:userId/title  { jobTitle }
+function setJobTitle(req, res) {
+  const t = String(req.body?.jobTitle || '').trim().slice(0, 60) || null;
+  const r = db.prepare('UPDATE users SET job_title = ? WHERE id = ? AND store_id = ?').run(t, req.params.userId, req.params.storeId);
+  if (!r.changes) return res.status(404).json({ error: 'User not found' });
+  res.json({ id: req.params.userId, job_title: t });
+}
+
+module.exports = { setJobTitle,
   setUserPassword,
   listUsers, removeUser, updateUserStatus,
   listInvites, createInvite, createBulkInvites, revokeInvite,

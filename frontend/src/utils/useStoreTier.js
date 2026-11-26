@@ -44,4 +44,4 @@ export const MINI_HIDDEN = ['/handovers', '/exit-check', '/transfers', '/integra
   '/insights', '/movements', '/replenishment', '/suppliers', '/shelf-audit', '/audit-report', '/shifts', '/camera',
   '/export', '/activity', '/reports', '/auditor-tab', '/settlements', '/lending-partners'];
 /** Roles a Mini store can invite. */
-export const MINI_ROLES = ['manager', 'cashier', 'staff'];
+export const MINI_ROLES = ['manager', 'cashier', 'staff', 'checkout'];

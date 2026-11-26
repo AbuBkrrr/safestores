@@ -5,7 +5,8 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { Alert, Badge, Toast } from '../components/ui.jsx';
 import { useToast } from '../components/useToast.js';
 import InviteShareModal from '../components/InviteShareModal.jsx';
-import { useStoreTier, MINI_ROLES } from '../utils/useStoreTier.js';
+import { useStoreProfile, MINI_ROLES } from '../utils/useStoreTier.js';
+import { jobTitlesFor, titleDef } from '../utils/jobTitles.js';
 import { BRAND } from '../utils/brand.js';
 
 const APP_BASE_URL = window.location.origin;
@@ -22,13 +23,18 @@ export default function Invites() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [invites, setInvites] = useState([]);
-  const [single, setSingle] = useState({ name: '', email: '', role: 'staff' });
-  const [bulk, setBulk] = useState({ names: '', emailDomain: '', role: 'staff' });
+  // People are invited by a job title that fits the business (Chef, Waiter,
+  // Technician, Front desk…); the title brings its permission role with it.
+  const { tier: storeTier, businessType } = useStoreProfile();
+  const roleOptions = storeTier === 'mini' ? INVITE_ROLES.filter((r) => MINI_ROLES.includes(r)) : INVITE_ROLES;
+  const titles = jobTitlesFor(businessType).filter((x) => roleOptions.includes(x.role));
+  const first = titles[0]?.key || '';
+  const [single, setSingle] = useState({ name: '', email: '', title: '' });
+  const [bulk, setBulk] = useState({ names: '', emailDomain: '', title: '' });
+  const withRole = (f) => { const d = titleDef(businessType, f.title || first); return { ...f, role: d?.role || 'staff', jobTitle: d?.key || null }; };
   const [error, setError] = useState('');
   const [toast, showToast] = useToast();
 
-  const storeTier = useStoreTier();
-  const roleOptions = storeTier === 'mini' ? INVITE_ROLES.filter((r) => MINI_ROLES.includes(r)) : INVITE_ROLES;
   const [sharing, setSharing] = useState(null); // invite whose share card is open
   const load = () => api.get(`/stores/${user.storeId}/invites`).then((r) => setInvites(r.data));
   useEffect(() => { load(); }, [user.storeId]);
@@ -36,8 +42,8 @@ export default function Invites() {
   const createSingle = async (e) => {
     e.preventDefault(); setError('');
     try {
-      const { data } = await api.post(`/stores/${user.storeId}/invites`, single);
-      setSingle({ name: '', email: '', role: 'staff' });
+      const { data } = await api.post(`/stores/${user.storeId}/invites`, withRole(single));
+      setSingle({ name: '', email: '', title: single.title });
       showToast(t('invitesPage.inviteCreated'), 'success');
       if (data?.code) setSharing(data); // straight to QR / WhatsApp / email / download
       load();
@@ -47,8 +53,8 @@ export default function Invites() {
   const createBulk = async (e) => {
     e.preventDefault(); setError('');
     try {
-      const { data } = await api.post(`/stores/${user.storeId}/invites/bulk`, bulk);
-      setBulk({ names: '', emailDomain: '', role: 'staff' });
+      const { data } = await api.post(`/stores/${user.storeId}/invites/bulk`, withRole(bulk));
+      setBulk({ names: '', emailDomain: '', title: bulk.title });
       showToast(t('invitesPage.bulkCreated', { count: data.length }), 'success');
       load();
     } catch (err) { setError(err.response?.data?.error || t('invitesPage.bulkCreationFailed')); }
@@ -99,10 +105,11 @@ export default function Invites() {
             <div className="form-group"><label>{t('invitesPage.name')}</label><input value={single.name} onChange={(e) => setSingle({ ...single, name: e.target.value })} required /></div>
             <div className="form-group"><label>{t('invitesPage.emailOptional')}</label><input type="email" value={single.email} onChange={(e) => setSingle({ ...single, email: e.target.value })} /></div>
             <div className="form-group">
-              <label>{t('invitesPage.role')}</label>
-              <select value={single.role} onChange={(e) => setSingle({ ...single, role: e.target.value })}>
-                {roleOptions.map((r) => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}
+              <label>{t('invitesPage.jobTitle')}</label>
+              <select value={single.title || first} onChange={(e) => setSingle({ ...single, title: e.target.value })}>
+                {titles.map((x) => <option key={x.key} value={x.key}>{t(`jobTitles.${x.key}`)}</option>)}
               </select>
+              <span className="help-text">{t('invitesPage.canDo', { what: t(`roleCan.${titleDef(businessType, single.title || first)?.role || 'staff'}`) })}</span>
             </div>
             <button className="btn">{t('invitesPage.createInvite')}</button>
           </form>
@@ -120,9 +127,9 @@ export default function Invites() {
               <input value={bulk.emailDomain} onChange={(e) => setBulk({ ...bulk, emailDomain: e.target.value })} />
             </div>
             <div className="form-group">
-              <label>{t('invitesPage.roleAppliedToAll')}</label>
-              <select value={bulk.role} onChange={(e) => setBulk({ ...bulk, role: e.target.value })}>
-                {roleOptions.map((r) => <option key={r} value={r}>{t(`roles.${r}`)}</option>)}
+              <label>{t('invitesPage.jobTitleAll')}</label>
+              <select value={bulk.title || first} onChange={(e) => setBulk({ ...bulk, title: e.target.value })}>
+                {titles.map((x) => <option key={x.key} value={x.key}>{t(`jobTitles.${x.key}`)}</option>)}
               </select>
             </div>
             <button className="btn">{t('invitesPage.createBulkInvites')}</button>
@@ -140,7 +147,7 @@ export default function Invites() {
           <tbody>
             {invites.map((i) => (
               <tr key={i.id}>
-                <td>{i.name}</td><td>{i.email || '—'}</td><td><span className="role-tag">{t(`roles.${i.role}`, { defaultValue: i.role })}</span></td>
+                <td>{i.name}</td><td>{i.email || '—'}</td><td><span className="role-tag">{i.job_title ? t(`jobTitles.${i.job_title}`, { defaultValue: i.job_title }) : t(`roles.${i.role}`, { defaultValue: i.role })}</span></td>
                 <td><span className="code-chip">{i.code}</span></td>
                 <td><Badge status={i.status} /></td>
                 <td>

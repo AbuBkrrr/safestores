@@ -232,7 +232,7 @@ export default function Layout() {
           <div className="user-info">
             <div className="name">{user?.name}</div>
             <div className="role">
-              <span className={`badge ${isSuperAdmin ? 'super-admin' : 'admin'}`}>{user?.role}</span>
+              <span className={`badge ${isSuperAdmin ? 'super-admin' : 'admin'}`}>{user?.jobTitle ? t(`jobTitles.${user.jobTitle}`, { defaultValue: user.jobTitle }) : user?.role}</span>
             </div>
           </div>
 

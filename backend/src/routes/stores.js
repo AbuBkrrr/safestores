@@ -195,6 +195,7 @@ router.get('/users', usersCtrl.listUsers);
 router.delete('/users/:userId', requireRole('admin'), usersCtrl.removeUser);
 router.patch('/users/:userId', requireRole('admin'), usersCtrl.updateUserStatus);
 router.patch('/users/:userId/password', requireRole('admin'), usersCtrl.setUserPassword);
+router.patch('/users/:userId/title', requireRole('admin', 'manager'), usersCtrl.setJobTitle);
 router.get('/invites', usersCtrl.listInvites);
 router.post('/invites', requireRole('admin', 'manager'), usersCtrl.createInvite);
 router.post('/invites/bulk', requireRole('admin', 'manager'), usersCtrl.createBulkInvites);
