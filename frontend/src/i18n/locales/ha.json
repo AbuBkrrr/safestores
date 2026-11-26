@@ -109,7 +109,7 @@
     "dailyReport": "Rufe Rana",
     "settings": "Saitunan Shago",
     "insights": "Bincike",
-    "labels": "Lambobi da Barcode",
+    "labels": "Lambobi da Barcode / QR",
     "transfers": "Canja Kaya tsakanin Rassa",
     "help": "Taimako",
     "terms": "Sharuɗɗa",
@@ -196,7 +196,7 @@
     "someone": "wani",
     "open": "Buɗe",
     "addItems": "Ƙara Kayayyaki",
-    "scanBarcode": "📷 Duba Lambar Kaya",
+    "scanBarcode": "📷 Duba Lambar Kaya / QR",
     "stopScanning": "Dakatar da Duba",
     "searchLabel": "Ko bincika ta suna / lambar kaya",
     "searchPlaceholder": "Fara rubutu…",
@@ -266,7 +266,7 @@
     "cancel": "Soke",
     "newProduct": "+ Sabon Kaya",
     "name": "Suna",
-    "skuOrBarcode": "Lambar Kaya / Bakodi",
+    "skuOrBarcode": "Lambar Kaya / Bakodi / QR",
     "category": "Iri",
     "supplier": "Mai Kawo Kaya",
     "unit": "Ma'auni",
@@ -304,7 +304,7 @@
     "archiveConfirm": "Ajiye wannan kaya a fayil? Tarihinsa zai kasance kuma za a iya mayar da shi daga baya.",
     "import": "Shigo da",
     "labels": "Lambobi",
-    "barcode": "Barcode",
+    "barcode": "Barcode / QR",
     "barcodePlaceholder": "Duba ko rubuta (zaɓi)",
     "variantOf": "Nau'in",
     "notAVariant": "— Ba nau'i ba ne —",
@@ -331,7 +331,11 @@
     "changePhoto": "Canza",
     "removePhotoFor": "Cire hoton {{name}}",
     "photoSaved": "An adana hoto",
-    "photoFailed": "Ba a iya adana hoton ba"
+    "photoFailed": "Ba a iya adana hoton ba",
+    "toShelf": "Shiryayye",
+    "movedToShelf": "An saka kaya {{count}} a kan shiryayye",
+    "inStoreRoomBanner": "Kaya {{count}} har yanzu suna ɗakin ajiya — ba a iya sayar da su ba tukuna.",
+    "allToShelf": "Saka duka a kan shiryayye"
   },
   "stockArrivalPage": {
     "title": "Isowar Kaya",
@@ -565,7 +569,7 @@
     "bulkCreationFailed": "Ƙirƙirar da yawa ta kasa",
     "allPendingCopied": "An kwafi duk lambobin da ke jira",
     "inviteMessageCopied": "An kwafi saƙon gayyata",
-    "miniNote": "Ƙaramin shago: gudanar da shi kai kaɗai, ko tare da mataimaka har 4 (mutane 5 gaba ɗaya) a matsayin manaja, mai karɓar kuɗi ko mai taimako. Kana iya yin kowane aiki da kanka. Haɓaka zuwa Midi don manajan shago da na shiryayye, tsaro da manajan kasuwar intanet.",
+    "miniNote": "Ƙaramin shago: gudanar da shi kai kaɗai, ko tare da mataimaka har 4 (mutane 5 gaba ɗaya) a matsayin manaja, mai karɓar kuɗi ko mai taimako. Kana iya yin kowane aiki da kanka.",
     "needsMidi": "Midi / Mega"
   },
   "usersPage": {
@@ -1551,7 +1555,9 @@
     "pointsExpiry": "Maki suna ƙarewa bayan (watanni)",
     "pointsExpiryHelp": "0 = ba sa ƙarewa.",
     "loyaltyExample": "Misali: kashe {{spend}} yana samar da maki {{points}}, darajarsu {{worth}}.",
-    "dailySummary": "Aika wa masu gudanarwa taƙaitaccen tallace-tallacen rana ta imel da ƙarfe 9 na dare"
+    "dailySummary": "Aika wa masu gudanarwa taƙaitaccen tallace-tallacen rana ta imel da ƙarfe 9 na dare",
+    "autoShelf": "Kai tsaye kan shiryayye: kayan da aka karɓa a shirye suke don sayarwa nan take",
+    "autoShelfHelp": "An ba da shawara ga ƙananan shaguna. Kashe kawai idan wani yana duba kaya a ɗakin ajiya kafin a kai su kan shiryayye."
   },
   "importPage": {
     "title": "Shigo da Kaya",
@@ -1579,7 +1585,7 @@
     "receiveStock": "Karɓi kaya →"
   },
   "labelsPage": {
-    "title": "Lambobi da Barcode",
+    "title": "Lambobi da Barcode / QR",
     "subtitle": "Buga lambobin farashin shiryayye da sitika na barcode a kowace firinta.",
     "missing": "Kaya {{count}} ba su da barcode tukuna.",
     "generate": "Ƙirƙiri barcode na shago gare su",
@@ -1872,7 +1878,7 @@
     }
   },
   "scanProduct": {
-    "scan": "Duba lambar kaya",
+    "scan": "Duba lambar kaya / QR",
     "stop": "Kashe kyamara",
     "typeCode": "…ko rubuta / duba lambar kaya ko SKU",
     "found": "An zaɓa: {{name}}",
@@ -2607,13 +2613,15 @@
     "profit": "Riba: {{pct}}%",
     "qty": "Yawa",
     "category": "Rukuni",
-    "barcode": "Barcode (ba dole ba)",
+    "barcode": "Barcode (ba dole ba) / QR",
     "onShelf": "Saka duka a kan shiryayye yanzu (ana iya sayarwa nan take)",
     "saveNext": "Ajiye ka ƙara wani",
     "saveClose": "Ajiye ka rufe",
     "saving": "Ana ajiyewa…",
     "added": "An ƙara: {{name}}",
     "needName": "Shigar da sunan kaya",
-    "needPrice": "Shigar da farashin sayarwa"
+    "needPrice": "Shigar da farashin sayarwa",
+    "more": "Ƙarin bayani (farashin saye, rukuni, barcode / QR)",
+    "helpShort": "Suna, farashi da yawa. Ƙara hoto domin a gane shi da sauƙi."
   }
 }

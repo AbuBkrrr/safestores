@@ -49,7 +49,7 @@ export default function StoreSettings() {
         taxRatePct: Number(s.tax_rate_pct) || 0, taxInclusive: !!s.tax_inclusive, taxLabel: s.tax_label, taxNumber: s.tax_number || '',
         phone: s.phone || '', address: s.address || '', city: s.city || '',
         receiptHeader: s.receipt_header || '', receiptFooter: s.receipt_footer || '',
-        maxCashierDiscountPct: Number(s.max_cashier_discount_pct) || 0, requireShift: !!s.require_shift, businessType: s.business_type || 'general',
+        maxCashierDiscountPct: Number(s.max_cashier_discount_pct) || 0, requireShift: !!s.require_shift, autoShelf: !!s.auto_shelf, businessType: s.business_type || 'general',
         ...(s.daily_summary_enabled !== undefined ? { dailySummaryEnabled: s.daily_summary_enabled !== false } : {}),
         pointsPer100: Number(s.points_per_100) || 0, pointValue: Number(s.point_value) || 0, pointsExpiryMonths: Number(s.points_expiry_months) || 0,
       });
@@ -117,7 +117,9 @@ export default function StoreSettings() {
         <div className="card">
           <h3>🛒 {t('settingsPage.till')}</h3>
           <div className="form-group"><label htmlFor="st-disc">{t('settingsPage.maxDiscount')}</label><input id="st-disc" type="number" min="0" max="100" step="0.5" value={s.max_cashier_discount_pct} onChange={set('max_cashier_discount_pct')} /><span className="help-text">{t('settingsPage.maxDiscountHelp')}</span></div>
-          <label className="flex"><input type="checkbox" checked={!!s.require_shift} onChange={set('require_shift')} /> {t('settingsPage.requireShift')}</label>
+          <label className="flex" style={{ fontWeight: 600 }}><input type="checkbox" checked={!!s.auto_shelf} onChange={set('auto_shelf')} /> 📦 {t('settingsPage.autoShelf')}</label>
+          <span className="help-text">{t('settingsPage.autoShelfHelp')}</span>
+          <label className="flex mt-1"><input type="checkbox" checked={!!s.require_shift} onChange={set('require_shift')} /> {t('settingsPage.requireShift')}</label>
           {import.meta.env.VITE_EDITION !== 'desktop' && (
             <label className="flex mt-1"><input type="checkbox" checked={s.daily_summary_enabled !== false} onChange={set('daily_summary_enabled')} /> {t('settingsPage.dailySummary')}</label>
           )}

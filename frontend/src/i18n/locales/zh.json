@@ -109,7 +109,7 @@
     "dailyReport": "日结",
     "settings": "门店设置",
     "insights": "数据分析",
-    "labels": "标签与条码",
+    "labels": "标签与条码 / 二维码",
     "transfers": "分店调拨",
     "help": "帮助",
     "terms": "条款",
@@ -196,7 +196,7 @@
     "someone": "某人",
     "open": "打开",
     "addItems": "添加商品",
-    "scanBarcode": "📷 扫描条形码",
+    "scanBarcode": "📷 扫描条形码 / 二维码",
     "stopScanning": "停止扫描",
     "searchLabel": "或按名称/货号搜索",
     "searchPlaceholder": "开始输入…",
@@ -266,7 +266,7 @@
     "cancel": "取消",
     "newProduct": "+ 新产品",
     "name": "名称",
-    "skuOrBarcode": "货号 / 条形码",
+    "skuOrBarcode": "货号 / 条形码 / 二维码",
     "category": "类别",
     "supplier": "供应商",
     "unit": "单位",
@@ -304,7 +304,7 @@
     "archiveConfirm": "要归档此产品吗？其历史记录将保留，之后可以恢复。",
     "import": "导入",
     "labels": "标签",
-    "barcode": "条码",
+    "barcode": "条码 / 二维码",
     "barcodePlaceholder": "扫描或输入（可选）",
     "variantOf": "规格所属商品",
     "notAVariant": "— 非规格商品 —",
@@ -331,7 +331,11 @@
     "changePhoto": "更换",
     "removePhotoFor": "删除 {{name}} 的照片",
     "photoSaved": "照片已保存",
-    "photoFailed": "无法保存照片"
+    "photoFailed": "无法保存照片",
+    "toShelf": "上架",
+    "movedToShelf": "已上架 {{count}} 件商品",
+    "inStoreRoomBanner": "{{count}} 件商品仍在库房 — 还不能卖。",
+    "allToShelf": "全部上架"
   },
   "stockArrivalPage": {
     "title": "到货入库",
@@ -565,7 +569,7 @@
     "bulkCreationFailed": "批量创建失败",
     "allPendingCopied": "所有待处理代码已复制到剪贴板",
     "inviteMessageCopied": "邀请消息已复制",
-    "miniNote": "小型店铺：可以一个人经营，也可以有最多 4 名帮手（共 5 人），担任经理、收银员或店员。所有工作你都可以自己完成。升级到中型可增加店铺经理、货架经理、保安和网店经理。",
+    "miniNote": "小型店铺：可以一个人经营，也可以有最多 4 名帮手（共 5 人），担任经理、收银员或店员。所有工作你都可以自己完成。",
     "needsMidi": "中型 / 大型"
   },
   "usersPage": {
@@ -1551,7 +1555,9 @@
     "pointsExpiry": "积分有效期（月）",
     "pointsExpiryHelp": "0 = 永不过期。",
     "loyaltyExample": "示例：消费 {{spend}} 获得 {{points}} 积分，价值 {{worth}}。",
-    "dailySummary": "每晚 9 点向管理员发送当日销售汇总邮件"
+    "dailySummary": "每晚 9 点向管理员发送当日销售汇总邮件",
+    "autoShelf": "直接上架：收到的货立即可卖",
+    "autoShelfHelp": "推荐小店使用。只有在有人先在库房验货再上架时才关闭。"
   },
   "importPage": {
     "title": "导入商品",
@@ -1579,7 +1585,7 @@
     "receiveStock": "入库 →"
   },
   "labelsPage": {
-    "title": "标签与条码",
+    "title": "标签与条码 / 二维码",
     "subtitle": "用任意打印机打印货架价签和条码贴纸。",
     "missing": "{{count}} 个商品还没有条码。",
     "generate": "为它们生成店内条码",
@@ -1872,7 +1878,7 @@
     }
   },
   "scanProduct": {
-    "scan": "扫描条码",
+    "scan": "扫描条码 / 二维码",
     "stop": "关闭摄像头",
     "typeCode": "…或输入/扫描条码或SKU",
     "found": "已选择：{{name}}",
@@ -2607,13 +2613,15 @@
     "profit": "利润：{{pct}}%",
     "qty": "数量",
     "category": "分类",
-    "barcode": "条形码（可选）",
+    "barcode": "条形码（可选） / 二维码",
     "onShelf": "现在全部上架（立即可卖）",
     "saveNext": "保存并继续添加",
     "saveClose": "保存并关闭",
     "saving": "保存中…",
     "added": "已添加：{{name}}",
     "needName": "请输入商品名称",
-    "needPrice": "请输入售价"
+    "needPrice": "请输入售价",
+    "more": "更多信息（进价、分类、条形码 / 二维码）",
+    "helpShort": "名称、价格和数量。加张照片方便找到。"
   }
 }

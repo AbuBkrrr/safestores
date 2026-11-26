@@ -34,13 +34,14 @@ const FIELDS = {
   phone: 'phone', address: 'address', city: 'city', receiptHeader: 'receipt_header', receiptFooter: 'receipt_footer',
   maxCashierDiscountPct: 'max_cashier_discount_pct', requireShift: 'require_shift', name: 'name',
   pointsPer100: 'points_per_100', pointValue: 'point_value', pointsExpiryMonths: 'points_expiry_months',
-  dailySummaryEnabled: 'daily_summary_enabled', businessType: 'business_type',
+  dailySummaryEnabled: 'daily_summary_enabled', businessType: 'business_type', autoShelf: 'auto_shelf',
 };
 
 async function readSettings(storeId) {
   const { rows } = await db.query(
     `SELECT s.id, s.name, s.store_tier, s.business_type, s.shop_logo_url, s.timezone, s.tax_rate_pct, s.tax_inclusive, s.tax_label, s.tax_number, s.phone, s.address, s.city,
             s.receipt_header, s.receipt_footer, s.max_cashier_discount_pct, s.require_shift,
+            COALESCE(s.auto_shelf, s.store_tier = 'mini') AS auto_shelf,
             s.points_per_100, s.point_value, s.points_expiry_months, s.daily_summary_enabled,
             s.currency_code AS store_currency_code, s.currency_symbol AS store_currency_symbol,
             COALESCE(s.currency_code, c.code) AS currency_code, COALESCE(s.currency_symbol, c.symbol) AS currency_symbol
@@ -103,7 +104,7 @@ async function updateSettings(req, res) {
   for (const [k, col] of Object.entries(FIELDS)) {
     if (body[k] === undefined) continue;
     let v = body[k];
-    if (['taxInclusive', 'requireShift', 'dailySummaryEnabled'].includes(k)) v = !!v;
+    if (['taxInclusive', 'requireShift', 'dailySummaryEnabled', 'autoShelf'].includes(k)) v = !!v;
     else if (typeof v === 'string') v = v.trim().slice(0, k.startsWith('receipt') ? 500 : 160) || null;
     values.push(v); sets.push(`${col} = $${values.length}`);
   }

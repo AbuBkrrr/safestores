@@ -291,4 +291,25 @@ async function bulkMarkup(req, res) {
   res.json({ updated: rowCount, percent });
 }
 
-module.exports = { listProducts, createProduct, updateProduct, deleteProduct, restoreProduct, setProductPhoto, removeProductPhoto, bulkMarkup };
+// POST /api/stores/:storeId/products/to-shelf  { productIds? }  — one tap: everything
+// in the store room goes onto the shelf (all products, or just the ones given).
+async function moveToShelf(req, res) {
+  const { storeId } = req.params;
+  const ids = Array.isArray(req.body?.productIds) ? req.body.productIds.map(String).slice(0, 2000) : null;
+  const { rows } = await db.query(
+    `SELECT id, backroom_qty FROM products WHERE store_id = $1 AND archived_at IS NULL AND backroom_qty > 0 ${ids ? 'AND id::text = ANY($2)' : ''}`,
+    ids ? [storeId, ids] : [storeId]);
+  const client = await db.pool.connect();
+  try {
+    await client.query('BEGIN');
+    for (const p of rows) {
+      await client.query(`INSERT INTO stock_movements (store_id, product_id, type, quantity, note, performed_by)
+        VALUES ($1,$2,'transfer_to_shelf',$3,'Put on shelf (one tap)',$4)`, [storeId, p.id, p.backroom_qty, req.user.sub]);
+      await require('../utils/stockMath').recomputeProductQuantities(client, p.id);
+    }
+    await client.query('COMMIT');
+  } catch (err) { await client.query('ROLLBACK'); throw err; } finally { client.release(); }
+  res.json({ moved: rows.length, quantity: rows.reduce((n, p) => n + Number(p.backroom_qty), 0) });
+}
+
+module.exports = { moveToShelf, listProducts, createProduct, updateProduct, deleteProduct, restoreProduct, setProductPhoto, removeProductPhoto, bulkMarkup };

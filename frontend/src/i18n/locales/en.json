@@ -109,7 +109,7 @@
     "dailyReport": "End of Day",
     "settings": "Store Settings",
     "insights": "Insights",
-    "labels": "Labels & Barcodes",
+    "labels": "Labels & Barcodes / QR",
     "transfers": "Branch Transfers",
     "help": "Help",
     "terms": "Terms",
@@ -196,7 +196,7 @@
     "someone": "someone",
     "open": "Open",
     "addItems": "Add Items",
-    "scanBarcode": "📷 Scan Barcode",
+    "scanBarcode": "📷 Scan barcode / QR",
     "stopScanning": "Stop Scanning",
     "searchLabel": "Or search by name / SKU",
     "searchPlaceholder": "Start typing…",
@@ -266,7 +266,7 @@
     "cancel": "Cancel",
     "newProduct": "+ New Product",
     "name": "Name",
-    "skuOrBarcode": "SKU / Barcode",
+    "skuOrBarcode": "SKU / Barcode / QR",
     "category": "Category",
     "supplier": "Supplier",
     "unit": "Unit",
@@ -304,7 +304,7 @@
     "archiveConfirm": "Archive this product? Its history stays intact and it can be restored later.",
     "import": "Import",
     "labels": "Labels",
-    "barcode": "Barcode",
+    "barcode": "Barcode / QR",
     "barcodePlaceholder": "Scan or type (optional)",
     "variantOf": "Variant of",
     "notAVariant": "— Not a variant —",
@@ -331,7 +331,11 @@
     "changePhoto": "Change",
     "removePhotoFor": "Remove the photo of {{name}}",
     "photoSaved": "Photo saved",
-    "photoFailed": "Could not save the photo"
+    "photoFailed": "Could not save the photo",
+    "toShelf": "Shelf",
+    "movedToShelf": "{{count}} product(s) put on the shelf",
+    "inStoreRoomBanner": "{{count}} product(s) still in the store room — not sellable yet.",
+    "allToShelf": "Put all on shelf"
   },
   "stockArrivalPage": {
     "title": "Stock Arrival",
@@ -565,7 +569,7 @@
     "bulkCreationFailed": "Bulk creation failed",
     "allPendingCopied": "All pending codes copied to clipboard",
     "inviteMessageCopied": "Invite message copied",
-    "miniNote": "Mini store: run it on your own, or with up to 4 helpers (5 people in all) as manager, cashier or shop assistant. You can do every task yourself. Upgrade to Midi for store and shelf managers, security and an online market manager.",
+    "miniNote": "Mini store: run it on your own, or with up to 4 helpers (5 people in all) as manager, cashier or shop assistant. You can do every task yourself.",
     "needsMidi": "Midi / Mega"
   },
   "usersPage": {
@@ -1551,7 +1555,9 @@
     "pointsExpiry": "Points expire after (months)",
     "pointsExpiryHelp": "0 = never expire.",
     "loyaltyExample": "Example: spending {{spend}} earns {{points}} points, worth {{worth}}.",
-    "dailySummary": "Email admins a summary of the day's sales at 9 pm"
+    "dailySummary": "Email admins a summary of the day's sales at 9 pm",
+    "autoShelf": "Straight to shelf: received stock is ready to sell at once",
+    "autoShelfHelp": "Recommended for small shops. Turn off only if someone checks goods in the store room before they go on the shelf."
   },
   "importPage": {
     "title": "Import Products",
@@ -1579,7 +1585,7 @@
     "receiveStock": "Receive stock →"
   },
   "labelsPage": {
-    "title": "Labels & Barcodes",
+    "title": "Labels & Barcodes / QR",
     "subtitle": "Print shelf-edge price labels and barcode stickers on any printer.",
     "missing": "{{count}} products have no barcode yet.",
     "generate": "Create in-store barcodes for them",
@@ -1872,9 +1878,9 @@
     }
   },
   "scanProduct": {
-    "scan": "Scan barcode",
+    "scan": "Scan barcode / QR",
     "stop": "Stop camera",
-    "typeCode": "…or type / scan a barcode or SKU",
+    "typeCode": "…or type / scan a barcode, QR code or SKU",
     "found": "Selected: {{name}}",
     "notFound": "No product matches {{code}}",
     "cameraError": "Couldn't open the camera — allow camera access, or type the code instead."
@@ -2607,13 +2613,15 @@
     "profit": "Profit: {{pct}}%",
     "qty": "How many",
     "category": "Category",
-    "barcode": "Barcode (optional)",
+    "barcode": "Barcode / QR code",
     "onShelf": "Put it all on the shelf now (sellable at once)",
     "saveNext": "Save & add next",
     "saveClose": "Save & close",
     "saving": "Saving…",
     "added": "Added: {{name}}",
     "needName": "Enter the product name",
-    "needPrice": "Enter the selling price"
+    "needPrice": "Enter the selling price",
+    "more": "More details (buying price, category, barcode / QR)",
+    "helpShort": "Name, price and how many. Add a photo so it is easy to find."
   }
 }
