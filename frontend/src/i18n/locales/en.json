@@ -2832,5 +2832,10 @@
     "shelf_manager": "shelves: confirm stock handed over, price labels",
     "marketplace_manager": "online orders and customer messages",
     "security": "check receipts at the exit"
+  },
+  "orderAlert": {
+    "title": "New online order!",
+    "body": "An order for {{total}} just came in.",
+    "view": "View order"
   }
 }

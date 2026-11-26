@@ -2832,5 +2832,10 @@
     "shelf_manager": "shiryayye: tabbatar da kaya, alamun farashi",
     "marketplace_manager": "odar intanet da saƙonnin abokan ciniki",
     "security": "duba rasit a ƙofa"
+  },
+  "orderAlert": {
+    "title": "Sabon oda ta yanar gizo!",
+    "body": "Oda ta {{total}} ta shigo yanzu.",
+    "view": "Duba oda"
   }
 }

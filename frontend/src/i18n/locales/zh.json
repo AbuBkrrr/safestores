@@ -2832,5 +2832,10 @@
     "shelf_manager": "货架：确认交接的库存、价签",
     "marketplace_manager": "网店订单和顾客消息",
     "security": "出口核对小票"
+  },
+  "orderAlert": {
+    "title": "新的线上订单！",
+    "body": "刚收到一笔 {{total}} 的订单。",
+    "view": "查看订单"
   }
 }

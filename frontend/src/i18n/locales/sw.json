@@ -2832,5 +2832,10 @@
     "shelf_manager": "rafu: kuthibitisha bidhaa, lebo za bei",
     "marketplace_manager": "oda za mtandaoni na ujumbe wa wateja",
     "security": "kukagua risiti mlangoni"
+  },
+  "orderAlert": {
+    "title": "Oda mpya mtandaoni!",
+    "body": "Oda ya {{total}} imeingia sasa hivi.",
+    "view": "Tazama oda"
   }
 }

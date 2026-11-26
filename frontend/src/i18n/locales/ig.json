@@ -2832,5 +2832,10 @@
     "shelf_manager": "shelf: kwado ngwaahịa, akara ọnụahịa",
     "marketplace_manager": "iwu ịntanetị na ozi ndị ahịa",
     "security": "lelee nnata n'ọnụ ụzọ"
+  },
+  "orderAlert": {
+    "title": "Ọda ọhụrụ n'ịntanetị!",
+    "body": "Ọda {{total}} batara ugbu a.",
+    "view": "Lee ọda"
   }
 }

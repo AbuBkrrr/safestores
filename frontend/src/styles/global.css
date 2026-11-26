@@ -723,3 +723,11 @@ img, video, canvas, iframe { max-width: 100%; }
   .livechat-panel { bottom: calc(136px + env(safe-area-inset-bottom, 0px)); height: min(480px, calc(100vh - 170px)); }
 }
 @media print { .livechat-bubble, .livechat-panel { display: none; } }
+
+/* ---- New online order alert ---- */
+.order-alerts { position: fixed; top: 12px; left: 50%; transform: translateX(-50%); z-index: 1000; width: min(520px, calc(100vw - 24px)); display: flex; flex-direction: column; gap: 8px; }
+.order-alert { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 12px;
+  background: #fff7e0; color: #3a2a00; border: 2px solid #e8a33d; box-shadow: 0 10px 30px rgba(0,0,0,.25); animation: order-pop .35s ease-out; }
+.order-alert-actions { display: flex; gap: 6px; flex-shrink: 0; }
+@keyframes order-pop { from { transform: translateY(-20px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media print { .order-alerts { display: none; } }

@@ -30,6 +30,7 @@ const Licenses = lazy(() => import('./pages/Legal.jsx').then((m) => ({ default: 
 import Layout from './components/Layout.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import LiveChat from './components/LiveChat.jsx';
+import OrderAlerts from './components/OrderAlerts.jsx';
 import { useAuth } from './context/AuthContext.jsx';
 
 const Dashboard = lazy(() => import('./pages/Dashboard.jsx'));
@@ -308,6 +309,7 @@ export default function App() {
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
     {EDITION !== 'desktop' && <LiveChat />}
+    <OrderAlerts />
     </Suspense>
   );
 }

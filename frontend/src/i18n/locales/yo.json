@@ -2832,5 +2832,10 @@
     "shelf_manager": "pẹpẹ: jẹ́rìí ọjà, àmì iye owó",
     "marketplace_manager": "àṣẹ ayélujára àti ìfiránṣẹ́ oníbàárà",
     "security": "ṣàyẹ̀wò rìsíìtì ní ẹnu ọ̀nà"
+  },
+  "orderAlert": {
+    "title": "Àṣẹ ọjà tuntun lórí ayélujára!",
+    "body": "Àṣẹ ọjà {{total}} ṣẹ̀ṣẹ̀ dé.",
+    "view": "Wo àṣẹ náà"
   }
 }
