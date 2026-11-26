@@ -553,6 +553,26 @@
         utm: { source: params.get('utm_source'), medium: params.get('utm_medium'), campaign: params.get('utm_campaign') },
       }).catch(function () {});
     }
+    // App links (sign up, log in, Market, Terms…) go to whichever app address
+    // answers, so a new address that isn't live yet never gives a dead page.
+    (function pickApp(i) {
+      var u = APIS[i];
+      if (!u) { u = 'https://app.safestores.name.ng'; i = -1; } // none answered: the long-standing address
+      var ctl = window.AbortController ? new AbortController() : null;
+      var t = ctl && setTimeout(function () { ctl.abort(); }, 5000);
+      fetch(u + '/api/m/ping', { signal: ctl ? ctl.signal : undefined }).then(function (r) {
+        clearTimeout(t);
+        if (!r.ok) throw new Error('down');
+        retarget(u);
+      }).catch(function () { clearTimeout(t); if (i < 0) retarget(u); else pickApp(i + 1); });
+      function retarget(u) {
+        var to = new URL(u).host;
+        document.querySelectorAll('a[href^="https://app."]').forEach(function (a) {
+          var h = new URL(a.href); if (h.host !== to) { h.host = to; a.href = h.toString(); }
+        });
+      }
+    })(0);
+
     // Sign-up / sign-in buttons carry the link, so a new store is credited to it.
     document.querySelectorAll('a[href*="/signup"]').forEach(function (a) {
       var u = new URL(a.href);
