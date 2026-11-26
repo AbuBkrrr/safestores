@@ -49,3 +49,19 @@ describe('Website ping', () => {
     expect(r.headers['access-control-allow-origin']).toBe('https://safestore.com.ng');
   });
 });
+
+describe('Live chat from a signed-in store user', () => {
+  it('links the chat to them so support can call', async () => {
+    const { createActiveStoreWithAdmin } = require('./helpers/factories');
+    const s = await createActiveStoreWithAdmin();
+    const sa = { Authorization: `Bearer ${superToken(await createSuperAdmin())}` };
+    const r = await request().post('/api/m/chat').set('Authorization', `Bearer ${s.token}`).send({ name: 'Owner', message: 'Help me set up', page: '/settings' });
+    expect(r.status).toBe(201);
+    const tk = (await request().get('/api/super/support/tickets').set(sa)).body.find((t) => t.message === 'Help me set up');
+    expect(tk.created_by).toBe(s.admin.id);
+    // An anonymous visitor's chat is not linked.
+    await post({ name: 'Anon', message: 'Just browsing' });
+    const anon = (await request().get('/api/super/support/tickets').set(sa)).body.find((t) => t.message === 'Just browsing');
+    expect(anon.created_by).toBeNull();
+  });
+});

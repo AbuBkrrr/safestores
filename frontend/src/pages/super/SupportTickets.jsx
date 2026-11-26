@@ -113,8 +113,9 @@ export default function SupportTickets() {
               <button className="btn" onClick={sendReply}>Send Reply</button>
               <button className="btn small secondary" onClick={() => setStatus(selected.id, 'resolved')}>Mark Resolved</button>
               <button className="btn small secondary" onClick={() => setStatus(selected.id, 'closed')}>Close Ticket</button>
-              {selected.store_id && selected.created_by && (
-                <button className="btn small" onClick={() => window.dispatchEvent(new CustomEvent('ss:support-ring', { detail: { userId: selected.created_by, name: selected.created_by_name, storeName: selected.store_name } }))}>
+              {!selected.created_by && selected.source === 'chat' && <span className="muted small">📞 Calls work with signed-in shop owners: ask them to sign in and tap “Call support” in the chat bubble.</span>}
+              {selected.created_by && (
+                <button className="btn small" onClick={() => window.dispatchEvent(new CustomEvent('ss:support-ring', { detail: { userId: selected.created_by, name: selected.created_by_name || selected.contact_name, storeName: selected.store_id ? selected.store_name : '' } }))}>
                   📞 Call (voice + screen)
                 </button>
               )}

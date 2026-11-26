@@ -30,8 +30,12 @@ async function send(req, res) {
   const b = req.body || {};
   const message = clip(b.message, 2000);
   if (!message) return res.status(400).json({ error: 'Type a message' });
+  // A signed-in store user (chatting from inside the store app) is linked to
+  // the chat, so support can also ring them for a voice/screen-share call.
+  const storeUser = req.user && req.user.storeId && req.user.role !== 'super_admin' ? req.user.sub : null;
   let t = await findChat(b.token);
   if (t) {
+    if (storeUser && !t.created_by) await db.query('UPDATE support_tickets SET created_by = $1 WHERE id = $2', [storeUser, t.id]);
     await db.query("INSERT INTO support_ticket_replies (ticket_id, author_type, author_name, message) VALUES ($1,'visitor',$2,$3)",
       [t.id, t.contact_name || 'Visitor', message]);
     await db.query("UPDATE support_tickets SET status = CASE WHEN status IN ('resolved','closed') THEN 'open' ELSE status END, updated_at = now(), visitor_seen_at = now() WHERE id = $1", [t.id]);
@@ -43,9 +47,9 @@ async function send(req, res) {
   const token = crypto.randomBytes(24).toString('hex');
   const page = clip(b.page, 120);
   await db.query(
-    `INSERT INTO support_tickets (store_id, source, subject, message, priority, contact_name, contact_phone, contact_email, created_by_name, chat_token_hash, visitor_seen_at)
-     VALUES (NULL, 'chat', $1, $2, 'high', $3, $4, $5, $3, $6, now())`,
-    [`Live chat${page ? ` (${page})` : ''}`.slice(0, 200), message, name, clip(b.phone, 40), email ? email.toLowerCase() : null, hash(token)]);
+    `INSERT INTO support_tickets (store_id, source, subject, message, priority, contact_name, contact_phone, contact_email, created_by_name, chat_token_hash, visitor_seen_at, created_by)
+     VALUES (NULL, 'chat', $1, $2, 'high', $3, $4, $5, $3, $6, now(), $7)`,
+    [`Live chat${page ? ` (${page})` : ''}`.slice(0, 200), message, name, clip(b.phone, 40), email ? email.toLowerCase() : null, hash(token), storeUser]);
   if (process.env.SUPPORT_INBOX_EMAIL) {
     sendMail({ to: process.env.SUPPORT_INBOX_EMAIL, subject: `[SAFE Stores] Live chat from ${name}`,
       text: `${message}\n\nAnswer in Super Admin → Support Tickets.` });
