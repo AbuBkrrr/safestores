@@ -343,7 +343,11 @@
     "deleteSelected": "Goge {{count}} da aka zaɓa",
     "clearSelection": "Share zaɓi",
     "selectAll": "Zaɓi duka",
-    "selectFor": "Zaɓi {{name}}"
+    "selectFor": "Zaɓi {{name}}",
+    "addProduct": "Ƙara kaya",
+    "allDetailsForm": "Duk bayanai (dogon fom)",
+    "edit": "Gyara",
+    "saved": "An ajiye"
   },
   "stockArrivalPage": {
     "title": "Isowar Kaya",
@@ -2664,7 +2668,9 @@
     "photoTake": "Ɗauki hoton kayan",
     "photoRetake": "Sake ɗaukar hoto",
     "photoHelp": "Kyamara tana koyon yadda yake, don mai karɓar kuɗi ya iya duba shi ba tare da barcode ba.",
-    "looksLike": "Wannan yana kama da {{name}}, wanda yake cikin kayanka. Idan iri ɗaya ne, karɓi sabon kaya maimakon sake ƙara shi."
+    "looksLike": "Wannan yana kama da {{name}}, wanda yake cikin kayanka. Idan iri ɗaya ne, karɓi sabon kaya maimakon sake ƙara shi.",
+    "expiry": "Ranar ƙarewa (zaɓi)",
+    "expiryHelp": "Don abinci, abin sha, magani… Za a sanar da kai kafin ya ƙare."
   },
   "shopper": {
     "title": "Kasuwar SAFE Stores",
@@ -2884,5 +2890,11 @@
     "notThisTab": "Shawara: zaɓi “Wannan shafin” lokacin nunawa, don tallafi ya iya danna a cikin SAFE Stores.",
     "shareFailed": "An soke nuna allo ko ba a yarda a wannan burauza ba.",
     "phoneNoShare": "Nuna allo yana aiki a kwamfuta (Chrome, Edge, Firefox). A waya za ka iya magana."
+  },
+  "editProduct": {
+    "title": "Gyara {{name}}",
+    "lowStockAt": "Sanar da ni idan adadi ya ragu zuwa",
+    "stockNote": "Ana canza adadi ta karɓar kaya ko ƙidaya, ba a nan ba.",
+    "save": "Ajiye canje-canje"
   }
 }

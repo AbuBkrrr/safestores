@@ -47,3 +47,21 @@ describe('Deleting products', () => {
     expect(r.status).toBe(403);
   });
 });
+
+describe('Simple add and edit', () => {
+  it('saves the expiry typed when adding, and edits name and selling price later', async () => {
+    const { store, token } = await createActiveStoreWithAdmin();
+    const add = await request().post(`/api/stores/${store.id}/products`).set(A(token))
+      .send({ name: 'Yoghurt', sku: `YOG-${Date.now()}`, costPrice: 400, priceMultiplier: 1.25, initialBackroomQty: 12, putOnShelf: 12, expiryDate: '2027-01-15' });
+    expect(add.status).toBe(201);
+    const { rows: b } = await pool.query('SELECT expiry_date::text AS d, quantity_received FROM batches WHERE product_id = $1', [add.body.id]);
+    expect(b[0]).toMatchObject({ d: '2027-01-15', quantity_received: 12 });
+
+    const edit = await request().put(`/api/stores/${store.id}/products/${add.body.id}`).set(A(token))
+      .send({ name: 'Yoghurt 500ml', costPrice: 400, priceMultiplier: 600 / 400, category: 'Dairy' });
+    expect(edit.status).toBe(200);
+    const p = (await request().get(`/api/stores/${store.id}/products`).set(A(token))).body.find((x) => x.id === add.body.id);
+    expect(p).toMatchObject({ name: 'Yoghurt 500ml', category: 'Dairy' });
+    expect(Number(p.selling_price)).toBe(600);
+  });
+});

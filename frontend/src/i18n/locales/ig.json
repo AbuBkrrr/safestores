@@ -343,7 +343,11 @@
     "deleteSelected": "Hichapụ {{count}} ahọpụtara",
     "clearSelection": "Kpochapụ",
     "selectAll": "Họrọ ha niile",
-    "selectFor": "Họrọ {{name}}"
+    "selectFor": "Họrọ {{name}}",
+    "addProduct": "Tinye ngwaahịa",
+    "allDetailsForm": "Nkọwa niile (fọm ogologo)",
+    "edit": "Dezie",
+    "saved": "Echekwala"
   },
   "stockArrivalPage": {
     "title": "Ngwaahịa Bịara",
@@ -2664,7 +2668,9 @@
     "photoTake": "See foto nke ngwaahịa ahụ",
     "photoRetake": "See foto ọzọ",
     "photoHelp": "Igwefoto na-amụta otu o si dị, ka onye na-anata ego nwee ike nyochaa ya na-enweghị barcode.",
-    "looksLike": "Nke a yiri {{name}}, nke dị na ngwaahịa gị. Ọ bụrụ otu ihe ahụ, nabata ngwa ọhụrụ kama ịtinye ya ọzọ."
+    "looksLike": "Nke a yiri {{name}}, nke dị na ngwaahịa gị. Ọ bụrụ otu ihe ahụ, nabata ngwa ọhụrụ kama ịtinye ya ọzọ.",
+    "expiry": "Ụbọchị ọ ga-agwụ (nhọrọ)",
+    "expiryHelp": "Maka nri, ihe ọṅụṅụ, ọgwụ… A ga-adọ gị aka ná ntị tupu ọ gwụ."
   },
   "shopper": {
     "title": "Ahịa SAFE Stores",
@@ -2884,5 +2890,11 @@
     "notThisTab": "Ndụmọdụ: họrọ “Taabụ a” mgbe ị na-egosi, ka nkwado nwee ike ịpị n'ime SAFE Stores.",
     "shareFailed": "Akagbuola igosi ihuenyo ma ọ bụ ekweghị ya na ihe nchọgharị a.",
     "phoneNoShare": "Igosi ihuenyo na-arụ ọrụ na kọmputa (Chrome, Edge, Firefox). Na ekwentị ị nwere ike ikwu okwu."
+  },
+  "editProduct": {
+    "title": "Dezie {{name}}",
+    "lowStockAt": "Gwa m mgbe ngwa fọdụrụ ruo",
+    "stockNote": "A na-agbanwe ngwa site na ịnata ngwa ma ọ bụ ịgụ ngwa, ọ bụghị ebe a.",
+    "save": "Chekwaa mgbanwe"
   }
 }

@@ -343,7 +343,11 @@
     "deleteSelected": "Supprimer {{count}} sélectionné(s)",
     "clearSelection": "Effacer",
     "selectAll": "Tout sélectionner",
-    "selectFor": "Sélectionner {{name}}"
+    "selectFor": "Sélectionner {{name}}",
+    "addProduct": "Ajouter un produit",
+    "allDetailsForm": "Tous les détails (formulaire complet)",
+    "edit": "Modifier",
+    "saved": "Enregistré"
   },
   "stockArrivalPage": {
     "title": "Réception de stock",
@@ -2664,7 +2668,9 @@
     "photoTake": "Prendre une photo du produit",
     "photoRetake": "Reprendre une photo",
     "photoHelp": "La caméra apprend son apparence pour que le caissier puisse le scanner sans code-barres.",
-    "looksLike": "Cela ressemble à {{name}}, déjà dans vos produits. Si c'est le même article, enregistrez une réception de stock au lieu de l'ajouter à nouveau."
+    "looksLike": "Cela ressemble à {{name}}, déjà dans vos produits. Si c'est le même article, enregistrez une réception de stock au lieu de l'ajouter à nouveau.",
+    "expiry": "Date d'expiration (facultatif)",
+    "expiryHelp": "Pour aliments, boissons, médicaments… Vous êtes averti avant l'expiration."
   },
   "shopper": {
     "title": "Marché SAFE Stores",
@@ -2884,5 +2890,11 @@
     "notThisTab": "Astuce : choisissez « Cet onglet » pour que le support puisse cliquer dans SAFE Stores.",
     "shareFailed": "Le partage d'écran a été annulé ou n'est pas autorisé dans ce navigateur.",
     "phoneNoShare": "Le partage d'écran fonctionne sur ordinateur (Chrome, Edge, Firefox). Sur téléphone, vous pouvez parler."
+  },
+  "editProduct": {
+    "title": "Modifier {{name}}",
+    "lowStockAt": "M'avertir quand le stock descend à",
+    "stockNote": "Le stock change par réception ou inventaire, pas ici.",
+    "save": "Enregistrer"
   }
 }

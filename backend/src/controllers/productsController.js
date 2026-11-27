@@ -116,6 +116,12 @@ async function createProduct(req, res) {
          VALUES ($1, $2, 'arrival', $3, 'Initial stock on product creation', $4)`,
         [storeId, product.id, initQty, req.user.sub]
       );
+      // Expiry date typed when adding the product: tracked like a delivery's
+      // batch, so it shows in expiry alerts and is sold first.
+      const exp = String(req.body.expiryDate || '');
+      if (/^\d{4}-\d{2}-\d{2}$/.test(exp)) {
+        await client.query('INSERT INTO batches (store_id, product_id, expiry_date, quantity_received) VALUES ($1, $2, $3, $4)', [storeId, product.id, exp, Math.round(initQty)]);
+      }
       // "Put on the shelf now": the new stock can be sold at checkout straight away.
       const wanted = req.body.putOnShelf === undefined && await require('../utils/autoShelf').shelfDirect(client, storeId) ? initQty : Number(req.body.putOnShelf) || 0;
       const toShelf = Math.min(initQty, Math.max(0, wanted));
@@ -334,7 +340,7 @@ async function setPromo(req, res) {
 // camera knows it, its stock moving around): they go with a deleted product.
 // A row in any other table that points at a product (a sale, an order, a
 // recipe, a count…) is history, and such a product is archived instead.
-const OWN_TABLES = new Set(['product_looks', 'product_images', 'stock_movements']);
+const OWN_TABLES = new Set(['product_looks', 'product_images', 'stock_movements', 'batches']);
 let productRefs = null;
 async function productReferences(client) {
   if (productRefs) return productRefs;
