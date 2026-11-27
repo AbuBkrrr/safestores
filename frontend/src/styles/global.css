@@ -755,3 +755,17 @@ img, video, canvas, iframe { max-width: 100%; }
 .call-screen.controlling { cursor: crosshair; box-shadow: inset 0 0 0 3px #d92d20; }
 .call-screen-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #ccd; font-size: 18px; }
 @media print { .call-panel, .call-stage, .call-pointer, .call-control-banner { display: none; } }
+
+/* ---- Tables on phones (iPhone/Safari especially) ----
+   .card's "break anywhere" safety net must not reach table cells: there it
+   let every column shrink to one letter wide. In tables, text wraps only
+   between words, headings stay on one line, and a table wider than the
+   screen scrolls sideways inside its card. */
+table, th, td { overflow-wrap: normal; word-break: normal; }
+th { white-space: nowrap; }
+td { min-width: 0; }
+@media (max-width: 640px) {
+  .card table:not(.no-scroll) { display: block; max-width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .card td, .card th { padding: 10px 12px; }
+  .card td { min-width: 72px; }
+}
