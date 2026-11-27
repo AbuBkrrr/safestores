@@ -343,7 +343,11 @@
     "deleteSelected": "Futa {{count}} zilizochaguliwa",
     "clearSelection": "Ondoa uchaguzi",
     "selectAll": "Chagua zote",
-    "selectFor": "Chagua {{name}}"
+    "selectFor": "Chagua {{name}}",
+    "addProduct": "Ongeza bidhaa",
+    "allDetailsForm": "Maelezo yote (fomu ndefu)",
+    "edit": "Hariri",
+    "saved": "Imehifadhiwa"
   },
   "stockArrivalPage": {
     "title": "Uwasili wa Bidhaa",
@@ -2664,7 +2668,9 @@
     "photoTake": "Piga picha ya bidhaa",
     "photoRetake": "Piga picha nyingine",
     "photoHelp": "Kamera hujifunza inavyoonekana, ili keshia aweze kuiscan bila msimbopau.",
-    "looksLike": "Hii inafanana na {{name}}, ambayo tayari iko kwenye bidhaa zako. Kama ni ile ile, pokea hisa badala ya kuiongeza tena."
+    "looksLike": "Hii inafanana na {{name}}, ambayo tayari iko kwenye bidhaa zako. Kama ni ile ile, pokea hisa badala ya kuiongeza tena.",
+    "expiry": "Tarehe ya kuisha (hiari)",
+    "expiryHelp": "Kwa vyakula, vinywaji, dawa… Utaonywa kabla haijaisha."
   },
   "shopper": {
     "title": "Soko la SAFE Stores",
@@ -2884,5 +2890,11 @@
     "notThisTab": "Kidokezo: chagua “Kichupo hiki” unaposhiriki, ili msaada uweze kubofya ndani ya SAFE Stores.",
     "shareFailed": "Kushiriki skrini kumeghairiwa au hakuruhusiwi kwenye kivinjari hiki.",
     "phoneNoShare": "Kushiriki skrini hufanya kazi kwenye kompyuta (Chrome, Edge, Firefox). Kwenye simu unaweza kuongea."
+  },
+  "editProduct": {
+    "title": "Hariri {{name}}",
+    "lowStockAt": "Nijulishe hisa ikifika",
+    "stockNote": "Hisa hubadilishwa kwa kupokea bidhaa au kuhesabu, si hapa.",
+    "save": "Hifadhi mabadiliko"
   }
 }

@@ -12,6 +12,7 @@ import { BUSINESS_TYPES, SOLD_BY_UNITS, fmtQty } from '../utils/businessTypes.js
 import { mediaUrl } from '../utils/media.js';
 import { lookOfFile, packLook } from '../utils/visualMatch.js';
 import QuickAddProduct from '../components/QuickAddProduct.jsx';
+import EditProduct from '../components/EditProduct.jsx';
 import PromoDialog from '../components/PromoDialog.jsx';
 
 const SYNC_EVENTS = ['product:created', 'product:updated', 'product:deleted', 'arrival:created', 'movement:created', 'audit:created'];
@@ -53,6 +54,7 @@ export default function Products() {
   const [error, setError] = useState('');
   const [toast, showToast] = useToast();
   const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState(null);
   const [locationDrafts, setLocationDrafts] = useState({});
 
   const [showArchived, setShowArchived] = useState(false);
@@ -197,8 +199,8 @@ export default function Products() {
         )}
         {!simple && ['admin', 'manager'].includes(user.role) && <Link className="btn secondary small" to="/products/import">⬆️ {t('products.import')}</Link>}
         <Link className="btn secondary small" to="/labels">🏷️ {t('products.labels')}</Link>
-        {['admin', 'manager', 'store_manager'].includes(user.role) && <button className="btn" onClick={() => { setQuick((q) => !q); setShowForm(false); }}>⚡ {t('quickAdd.button')}</button>}
-        <button className="btn secondary" onClick={() => { setShowForm((s) => !s); setQuick(false); }}>{showForm ? t('products.cancel') : t('products.newProduct')}</button>
+        {['admin', 'manager', 'store_manager'].includes(user.role) && <button className="btn" onClick={() => { setQuick((q) => !q); setShowForm(false); }}>➕ {t('products.addProduct')}</button>}
+        {['admin', 'manager', 'store_manager'].includes(user.role) && <button type="button" className="link-btn small" onClick={() => { setShowForm((s) => !s); setQuick(false); }}>{showForm ? t('products.cancel') : t('products.allDetailsForm')}</button>}
       </div>
 
       {canShelf && products.some((x) => Number(x.backroom_qty) > 0 && !x.archived_at) && (
@@ -208,6 +210,9 @@ export default function Products() {
         </div>
       )}
 
+      {editing && <EditProduct storeId={user.storeId} product={editing} categories={[...new Set(products.map((x) => x.category).filter(Boolean))]}
+        onSaved={(np) => { setProducts((list) => list.map((x) => (x.id === np.id ? { ...x, ...np } : x))); setEditing(null); load(); showToast(t('products.saved'), 'success'); }}
+        onClose={() => setEditing(null)} />}
       {quick && (
         <QuickAddProduct storeId={user.storeId} autoShelf={storeTier === 'mini'} defaultUnit={bt.unit === 'unit' ? 'piece' : bt.unit}
           categories={[...new Set([...(bt.categories || []), ...products.map((x) => x.category).filter(Boolean)])]}
@@ -386,6 +391,7 @@ export default function Products() {
                 <td>{p.shelf_qty}</td>
                 {!simple && canPrice && <td>{formatCurrency(p.stock_value)}</td>}
                 <td>
+                  {canPrice && !p.archived_at && <button className="btn small secondary" style={{ whiteSpace: 'nowrap', marginRight: 6 }} onClick={() => setEditing(p)}>✏️ {t('products.edit')}</button>}
                   {p.archived_at && <button className="btn small" onClick={() => handleRestore(p.id)}>{t('products.restore')}</button>}
                   {canDelete && <button className="btn danger small" style={{ whiteSpace: 'nowrap', ...(p.archived_at ? { marginLeft: 6 } : {}) }} onClick={() => handleDelete(p.id)}>🗑️ {t('products.delete')}</button>}
                 </td>

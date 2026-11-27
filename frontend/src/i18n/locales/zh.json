@@ -343,7 +343,11 @@
     "deleteSelected": "删除所选 {{count}} 个",
     "clearSelection": "清除选择",
     "selectAll": "全选",
-    "selectFor": "选择 {{name}}"
+    "selectFor": "选择 {{name}}",
+    "addProduct": "添加产品",
+    "allDetailsForm": "全部详情（完整表单）",
+    "edit": "编辑",
+    "saved": "已保存"
   },
   "stockArrivalPage": {
     "title": "到货入库",
@@ -2664,7 +2668,9 @@
     "photoTake": "给产品拍照",
     "photoRetake": "重新拍照",
     "photoHelp": "摄像头会记住它的样子，收银员无需条形码即可扫描。",
-    "looksLike": "这看起来像 {{name}}，已在您的产品中。如果是同一商品，请为它入库，而不是再次添加。"
+    "looksLike": "这看起来像 {{name}}，已在您的产品中。如果是同一商品，请为它入库，而不是再次添加。",
+    "expiry": "到期日期（可选）",
+    "expiryHelp": "适用于食品、饮料、药品等，到期前会提醒您。"
   },
   "shopper": {
     "title": "SAFE Stores 商城",
@@ -2884,5 +2890,11 @@
     "notThisTab": "提示：共享时选择“此标签页”，客服才能在 SAFE Stores 中点击。",
     "shareFailed": "屏幕共享已取消或此浏览器不允许。",
     "phoneNoShare": "屏幕共享适用于电脑（Chrome、Edge、Firefox）。在手机上您仍可通话。"
+  },
+  "editProduct": {
+    "title": "编辑 {{name}}",
+    "lowStockAt": "库存降到多少时提醒我",
+    "stockNote": "库存通过入库或盘点更改，不在此处修改。",
+    "save": "保存更改"
   }
 }

@@ -343,7 +343,11 @@
     "deleteSelected": "Pa {{count}} tí a yàn rẹ́",
     "clearSelection": "Pa yíyàn rẹ́",
     "selectAll": "Yan gbogbo",
-    "selectFor": "Yan {{name}}"
+    "selectFor": "Yan {{name}}",
+    "addProduct": "Fi ọjà kún",
+    "allDetailsForm": "Gbogbo àlàyé (fọ́ọ̀mù gígùn)",
+    "edit": "Ṣàtúnṣe",
+    "saved": "A ti fi pamọ́"
   },
   "stockArrivalPage": {
     "title": "Ìdé Ọjà",
@@ -2664,7 +2668,9 @@
     "photoTake": "Ya fọ́tò ọjà náà",
     "photoRetake": "Tún fọ́tò ya",
     "photoHelp": "Kámẹ́rà ń kọ́ bí ó ṣe rí, kí olùgbowó lè ṣàyẹ̀wò rẹ̀ láìsí barcode.",
-    "looksLike": "Èyí jọ {{name}}, tí ó ti wà nínú àwọn ọjà rẹ. Tí ó bá jẹ́ ọjà kan náà, gba ọjà tuntun dípò kí o tún fi kún."
+    "looksLike": "Èyí jọ {{name}}, tí ó ti wà nínú àwọn ọjà rẹ. Tí ó bá jẹ́ ọjà kan náà, gba ọjà tuntun dípò kí o tún fi kún.",
+    "expiry": "Ọjọ́ ìparí (àṣàyàn)",
+    "expiryHelp": "Fún oúnjẹ, ohun mímu, oògùn… A ó kìlọ̀ fún ọ kí ó tó parí."
   },
   "shopper": {
     "title": "Ọjà SAFE Stores",
@@ -2884,5 +2890,11 @@
     "notThisTab": "Ìmọ̀ràn: yan “Táàbù yìí” nígbà pínpín, kí ìrànlọ́wọ́ lè tẹ̀ nínú SAFE Stores.",
     "shareFailed": "A fagilé pínpín ojú-ìbojú tàbí a kò gbà á lórí aṣàwákiri yìí.",
     "phoneNoShare": "Pínpín ojú-ìbojú ń ṣiṣẹ́ lórí kọ̀ǹpútà (Chrome, Edge, Firefox). Lórí fóònù o lè sọ̀rọ̀."
+  },
+  "editProduct": {
+    "title": "Ṣàtúnṣe {{name}}",
+    "lowStockAt": "Kìlọ̀ fún mi nígbà tí ọjà bá dínkù sí",
+    "stockNote": "A ń yí iye ọjà padà nípa gbígba ọjà tàbí kíka ọjà, kì í ṣe níbí.",
+    "save": "Fi àyípadà pamọ́"
   }
 }

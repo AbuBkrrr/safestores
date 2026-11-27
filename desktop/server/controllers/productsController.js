@@ -87,6 +87,10 @@ function createProduct(req, res) {
         `INSERT INTO stock_movements (id, store_id, product_id, type, quantity, note, performed_by)
          VALUES (?,?,?,'arrival',?, 'Initial stock on product creation', ?)`
       ).run(crypto.randomUUID(), storeId, newId, initQty, req.user.sub);
+      const exp = String(req.body.expiryDate || '');
+      if (/^\d{4}-\d{2}-\d{2}$/.test(exp)) {
+        db.prepare('INSERT INTO batches (id, store_id, product_id, expiry_date, quantity_received) VALUES (?,?,?,?,?)').run(crypto.randomUUID(), storeId, newId, exp, Math.round(initQty));
+      }
       // "Put on the shelf now" — see the cloud edition.
       const wanted = req.body.putOnShelf === undefined && require('../utils/autoShelf').shelfDirect(db, storeId) ? initQty : Number(req.body.putOnShelf) || 0;
       const toShelf = Math.min(initQty, Math.max(0, wanted));

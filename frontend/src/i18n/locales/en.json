@@ -343,7 +343,11 @@
     "deleteSelected": "Delete {{count}} selected",
     "clearSelection": "Clear",
     "selectAll": "Select all",
-    "selectFor": "Select {{name}}"
+    "selectFor": "Select {{name}}",
+    "addProduct": "Add product",
+    "allDetailsForm": "All details (long form)",
+    "edit": "Edit",
+    "saved": "Saved"
   },
   "stockArrivalPage": {
     "title": "Stock Arrival",
@@ -2664,7 +2668,9 @@
     "photoTake": "Take a photo of the product",
     "photoRetake": "Take another photo",
     "photoHelp": "The camera learns what it looks like, so the cashier can scan it without a barcode.",
-    "looksLike": "This looks like {{name}}, which is already in your products. If it is the same item, receive stock for it instead of adding it again."
+    "looksLike": "This looks like {{name}}, which is already in your products. If it is the same item, receive stock for it instead of adding it again.",
+    "expiry": "Expiry date (optional)",
+    "expiryHelp": "For food, drinks, medicine… You get a warning before it expires."
   },
   "shopper": {
     "title": "SAFE Stores Market",
@@ -2884,5 +2890,11 @@
     "notThisTab": "Tip: choose “This tab” when sharing, so support can help you click inside SAFE Stores.",
     "shareFailed": "Screen sharing was cancelled or is not allowed in this browser.",
     "phoneNoShare": "Screen sharing works on a computer (Chrome, Edge or Firefox). On a phone you can still talk."
+  },
+  "editProduct": {
+    "title": "Edit {{name}}",
+    "lowStockAt": "Warn me when stock is down to",
+    "stockNote": "Stock is changed by receiving stock or a stock count, not here.",
+    "save": "Save changes"
   }
 }

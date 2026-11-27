@@ -12,7 +12,7 @@ import { lookOfFile, packLook, rankProducts } from '../utils/visualMatch.js';
  */
 export default function QuickAddProduct({ storeId, categories = [], defaultUnit = 'piece', autoShelf = false, products, onAdded, onClose }) {
   const { t } = useTranslation();
-  const empty = { name: '', cost: '', price: '', qty: '', category: '', barcode: '', onShelf: true };
+  const empty = { name: '', cost: '', price: '', qty: '', expiry: '', category: '', barcode: '', onShelf: true };
   const [f, setF] = useState(empty);
   const [photo, setPhoto] = useState(null);
   const [preview, setPreview] = useState('');
@@ -60,7 +60,7 @@ export default function QuickAddProduct({ storeId, categories = [], defaultUnit 
       const { data: p } = await api.post(`/stores/${storeId}/products`, {
         name: f.name.trim(), sku, category: f.category.trim() || null, unit: defaultUnit, soldBy: 'unit',
         costPrice, priceMultiplier: price / costPrice, initialBackroomQty: qty, putOnShelf: autoShelf || f.onShelf ? qty : 0,
-        barcode: f.barcode || undefined,
+        barcode: f.barcode || undefined, expiryDate: f.expiry || undefined,
       });
       if (photo) {
         const fd = new FormData(); fd.append('photo', photo);
@@ -99,6 +99,7 @@ export default function QuickAddProduct({ storeId, categories = [], defaultUnit 
           {markup !== null && <span className="help-text">{t('quickAdd.profit', { pct: markup })}</span>}
         </div>
         <div className="form-group"><label htmlFor="qa-qty">{t('quickAdd.qty')}</label><input id="qa-qty" type="number" inputMode="numeric" min="0" step="1" value={f.qty} onChange={set('qty')} /></div>
+        <div className="form-group"><label htmlFor="qa-exp">{t('quickAdd.expiry')}</label><input id="qa-exp" type="date" value={f.expiry} onChange={set('expiry')} /><span className="help-text">{t('quickAdd.expiryHelp')}</span></div>
       </div>
       {!more && <button type="button" className="link-btn" onClick={() => setMore(true)}>➕ {t('quickAdd.more')}</button>}
       {more && (
