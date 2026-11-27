@@ -270,6 +270,8 @@
     .types, .steps { grid-template-columns: 1fr; }
     form.lead .row { grid-template-columns: 1fr; }
     .nav-actions .btn-primary { padding: 8px 10px; }
+    .nav-actions .btn-primary .lbl-long { display: none; }
+    .nav-actions .btn-primary .lbl-short { display: inline; white-space: nowrap; }
   }
   /* Live support chat */
   .lc-bubble{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:50;width:56px;height:56px;border-radius:50%;border:0;cursor:pointer;background:#0f7180;color:#fff;font-size:26px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
@@ -300,6 +302,7 @@
   .btn-shop:hover { transform: translateY(-1px); box-shadow: 0 5px 0 #062f36; }
   .nav-links a.nav-market { font-weight: 800; color: var(--teal-deep); background: var(--amber); padding: 6px 12px; border-radius: 999px; }
   @media (max-width: 600px) { .shop-strip .wrap { justify-content: center; text-align: center; } .btn-shop { width: 100%; } }
+  .lbl-short { display: none; }
 </style>
 <meta name="ss-api" content="https://app.safestore.com.ng">
 </head>
@@ -319,7 +322,7 @@
       </div>
       <div class="nav-actions">
         <a class="btn btn-ghost btn-sm" href="https://app.safestore.com.ng/login">Sign in</a>
-        <a class="btn btn-primary btn-sm" href="https://app.safestore.com.ng/signup">Start free</a>
+        <a class="btn btn-primary btn-sm" href="https://app.safestore.com.ng/signup" title="For shop owners: register your shop for free"><span class="lbl-long">Register your shop free</span><span class="lbl-short">Register free</span></a>
         <button class="menu-btn" type="button" aria-controls="nav-links" aria-expanded="false" aria-label="Open menu">☰</button>
       </div>
     </nav>
@@ -339,7 +342,7 @@
     <h1 id="hero-title">Run your shop from<br><em>arrival to sale</em> on your phone.</h1>
     <p class="lede"><strong>Nothing else needed — just your phone.</strong> Stock, checkout, staff and your own online shop, and it keeps working even when the internet doesn't.</p>
     <div class="cta-row">
-      <a href="https://app.safestore.com.ng/signup" class="btn btn-primary">Start free →</a>
+      <a href="https://app.safestore.com.ng/signup" class="btn btn-primary">🏪 Register your shop for free →</a>
       <a href="#flow" class="btn btn-ghost">See how it works</a>
     </div>
     <ul class="trust">
@@ -418,7 +421,7 @@
   </div>
   <div class="eds">
     <div class="ed"><span class="ico" aria-hidden="true">🌐</span><div><b>Web</b><small>Any phone, tablet or computer. No install.</small></div>
-      <div class="ed-btns"><a class="btn btn-primary btn-sm" href="https://app.safestore.com.ng/signup">Start free</a><a class="btn btn-ghost btn-sm" href="https://app.safestore.com.ng/login">Sign in</a></div></div>
+      <div class="ed-btns"><a class="btn btn-primary btn-sm" href="https://app.safestore.com.ng/signup">Register your shop free</a><a class="btn btn-ghost btn-sm" href="https://app.safestore.com.ng/login">Sign in</a></div></div>
     <div class="ed"><span class="ico" aria-hidden="true">💻</span><div><b>Desktop</b><small>Shop computer, fully offline.</small></div>
       <div class="ed-btns"><a class="btn btn-primary btn-sm" href="https://github.com/AbuBkrrr/safestores/releases/latest/download/SAFE-Stores-Windows.exe" download>⬇ Windows</a><a class="btn btn-ghost btn-sm" href="https://github.com/AbuBkrrr/safestores/releases/latest/download/SAFE-Stores-Mac.dmg" download>Mac</a><a class="btn btn-ghost btn-sm" href="https://github.com/AbuBkrrr/safestores/releases/latest/download/SAFE-Stores-Linux.AppImage" download>Linux</a></div></div>
     <div class="ed"><span class="ico" aria-hidden="true">📱</span><div><b>Android</b><small>Camera scanning and order alerts.</small></div>
